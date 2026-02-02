@@ -17,4 +17,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/test-flowbite', function () {
+    return view('test-flowbite');
+})->name('test-flowbite');
+
 require __DIR__.'/auth.php';
