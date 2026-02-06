@@ -9,7 +9,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'redirect.by.role'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -20,5 +20,78 @@ Route::middleware('auth')->group(function () {
 Route::get('/test-flowbite', function () {
     return view('test-flowbite');
 })->name('test-flowbite');
+
+// Test page to check roles and redirect (Admin only - Remove in production)
+Route::get('/test-roles', function () {
+    if (!auth()->check()) {
+        return redirect()->route('login');
+    }
+    
+    // Only admins can access this test page
+    if (!auth()->user()->hasRole('admin')) {
+        abort(403, 'Unauthorized');
+    }
+    
+    $user = auth()->user();
+    $roles = $user->roles->pluck('name')->toArray();
+    
+    return view('test-roles', compact('roles'));
+})->middleware(['auth', 'role:admin'])->name('test-roles');
+
+
+
+
+// Admin routes
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')
+    ->group(function () {
+
+        Route::get('/dashboard', function () {
+            return view('admin.dashboard');
+        })->name('dashboard');
+
+
+    });
+
+// Donor routes
+Route::middleware(['auth', 'role:donor'])->prefix('donor')->name('donor.')
+    ->group(function () {
+        Route::get('/dashboard', function () {
+            return view('donor.dashboard');
+        })->name('dashboard');
+    });
+
+// Recipient routes
+Route::middleware(['auth', 'role:recipient'])->prefix('recipient')->name('recipient.')
+    ->group(function () {
+        Route::get('/dashboard', function () {
+            return view('recipient.dashboard');
+        })->name('dashboard');
+    });
+
+// Provider routes
+Route::middleware(['auth', 'role:provider'])->prefix('provider')->name('provider.')
+    ->group(function () {
+        Route::get('/dashboard', function () {
+            return view('provider.dashboard');
+        })->name('dashboard');
+    });
+
+    // Route مؤقت - لا تحذفه للمشرفين فقط
+Route::get('/make-me-admin', function () {
+    $user = auth()->user();
+    
+    if (!$user) {
+        return 'يجب تسجيل الدخول أولاً';
+    }
+    
+    // التأكد من وجود الدور
+    if (!\Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
+        \Spatie\Permission\Models\Role::create(['name' => 'admin']);
+    }
+    
+    $user->assignRole('admin');
+    
+    return 'تم تعيينك كـ admin بنجاح!';
+})->middleware('auth');
 
 require __DIR__.'/auth.php';

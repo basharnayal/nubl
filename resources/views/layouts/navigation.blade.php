@@ -20,6 +20,22 @@
                 @endauth
             </div>
 
+        <!-- Start of the roles verification -->
+        @auth
+            @if(auth()->user()->hasRole('admin'))
+                <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
+            @endif
+
+            @if(auth()->user()->hasAnyRole(['donor', 'admin']))
+                hi admin
+            @endif
+
+            @role('admin')
+                <p>You are an admin</p>
+            @endrole
+        @endauth
+        <!-- End of the roles verification -->
+
             <!-- Settings Dropdown -->
             @auth
             <div class="hidden sm:flex sm:items-center sm:ms-6">

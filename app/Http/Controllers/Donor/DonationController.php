@@ -16,6 +16,11 @@ class DonationController extends Controller
     
     public function create()
     {
+        // // Additional role check for defense in depth
+        // if (!auth()->user()->hasRole('donor')) {
+        //     abort(403, 'Unauthorized');
+        // }
+        
         return view('donor.donations.create');
     }
     

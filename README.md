@@ -1,59 +1,549 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# NUBL - Neighborhood-Based Digital Food Assistance Platform
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A digital platform for neighborhood-based food assistance (sadaqah) that connects donors, beneficiaries, and providers in a dignified, private, and transparent manner.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🛠️ Technology Stack
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **Backend**: Laravel 12 (PHP 8.2+)
+- **Frontend**: Blade Templates (Server-Side Rendering)
+- **CSS Framework**: Tailwind CSS v4
+- **UI Components**: Flowbite v4
+- **JavaScript**: Alpine.js
+- **Build Tool**: Vite
+- **Authentication**: Laravel Sanctum
+- **Authorization**: Spatie Laravel Permission
+- **Database**: MySQL
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Note**: This project explicitly does NOT use Vue, React, Livewire, or SPA frontend.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+## 📋 Roles
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+This project uses **Spatie Laravel Permission** for role management:
 
-## Laravel Sponsors
+- **admin** - System administrator
+- **donor** - Donor (Gracious Neighbor)
+- **beneficiary** - Beneficiary (Neighbor)
+- **provider** - Provider (Local supermarkets/restaurants)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+---
 
-### Premium Partners
+## 🚀 Quick Setup
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+### Prerequisites
+- PHP 8.2 or higher
+- Composer
+- Node.js 20.19+ or 22.12+
+- MySQL
 
-## Contributing
+### Setup Steps
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+# 1. Install PHP Dependencies
+composer install
 
-## Code of Conduct
+# 2. Install NPM Dependencies
+npm install
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 3. Environment Setup
+copy .env.example .env
+php artisan key:generate
 
-## Security Vulnerabilities
+# Edit .env file with your database credentials and MyFatoorah API keys
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 4. Database Setup
+php artisan migrate
+php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
+php artisan db:seed --class=RoleSeeder
 
-## License
+# 5. Build Assets
+npm run build
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# 6. Create Storage Link
+php artisan storage:link
+
+# 7. Start Development Servers
+# Terminal 1: Laravel Server
+php artisan serve
+
+# Terminal 2: Vite Dev Server (for development only)
+npm run dev
+```
+
+### Assign Role to User
+
+```bash
+php artisan tinker
+```
+
+In Tinker:
+```php
+$user = User::where('email', 'your-email@example.com')->first();
+$user->assignRole('admin');
+```
+
+---
+
+## 🚦 Essential Commands
+
+| Task | Command |
+|------|---------|
+| Model + Migration | `php artisan make:model Name -m` |
+| Model (everything) | `php artisan make:model Name -a` |
+| Controller | `php artisan make:controller Name --resource` |
+| Controller in subfolder | `php artisan make:controller Admin/DashboardController` |
+| Form Request | `php artisan make:request Name` |
+| Seeder | `php artisan make:seeder Name` |
+| Middleware | `php artisan make:middleware Name` |
+| Event | `php artisan make:event Name` |
+| Listener | `php artisan make:listener Name --event=Event` |
+| Migration | `php artisan make:migration create_table_name_table` |
+| Run Migrations | `php artisan migrate` |
+| Run Seeder | `php artisan db:seed --class=Name` |
+| Clear Cache | `php artisan optimize:clear` |
+| Build Assets | `npm run build` |
+| Dev Server | `npm run dev` |
+| List Routes | `php artisan route:list` |
+| Tinker | `php artisan tinker` |
+| Queue Worker | `php artisan queue:work` |
+
+---
+
+## 🏗️ Project Structure
+
+### Folder Structure
+
+```
+nubl/
+├── app/
+│   ├── Enums/                    # Status Enums
+│   ├── Http/
+│   │   ├── Controllers/          # Controllers (organized by role)
+│   │   │   ├── Admin/
+│   │   │   ├── Donor/
+│   │   │   ├── Beneficiary/
+│   │   │   └── Provider/
+│   │   ├── Middleware/           # Custom Middleware
+│   │   ├── Requests/             # Form Requests (Validation)
+│   │   └── Services/             # Business Logic Layer
+│   ├── Models/                   # Eloquent Models
+│   ├── Providers/                # Service Providers
+│   └── View/Components/          # Blade Component Classes
+│
+├── database/
+│   ├── migrations/               # Database Migrations
+│   └── seeders/                  # Database Seeders
+│
+├── resources/
+│   ├── css/
+│   │   └── app.css               # Tailwind CSS
+│   ├── js/
+│   │   ├── app.js                # Main JS file
+│   │   └── bootstrap.js          # Bootstrap JS
+│   └── views/
+│       ├── layouts/              # Layout Templates
+│       ├── components/           # Blade Components
+│       ├── admin/                # Admin Views
+│       ├── donor/                # Donor Views
+│       ├── beneficiary/         # Beneficiary Views
+│       └── provider/             # Provider Views
+│
+└── routes/
+    ├── web.php                   # Web Routes
+    ├── admin.php                 # Admin Routes (to be created)
+    ├── donor.php                 # Donor Routes (to be created)
+    ├── beneficiary.php          # Beneficiary Routes (to be created)
+    └── provider.php             # Provider Routes (to be created)
+```
+
+### Architecture Pattern
+
+- **MVC Pattern**: Model-View-Controller
+- **Service Layer**: Business logic in `app/Http/Services/`
+- **Form Requests**: Validation in `app/Http/Requests/`
+- **Blade Templates**: Server-side rendering (no SPA)
+
+---
+
+## 🎨 Frontend Configuration
+
+### Vite Configuration
+
+**`vite.config.js`**
+```javascript
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
+import tailwindcss from '@tailwindcss/vite';
+
+export default defineConfig({
+    plugins: [
+        laravel({
+            input: [
+                'resources/css/app.css',
+                'resources/js/app.js',
+            ],
+            refresh: true,
+        }),
+        tailwindcss(),
+    ],
+});
+```
+
+### CSS Configuration
+
+**`resources/css/app.css`**
+```css
+@import "tailwindcss";
+@import "flowbite/src/themes/default";
+@plugin "flowbite/plugin";
+@source "../../node_modules/flowbite";
+```
+
+### JavaScript Configuration
+
+**`resources/js/app.js`**
+```javascript
+import './bootstrap';
+import '../css/app.css';
+
+import Alpine from 'alpinejs';
+window.Alpine = Alpine;
+Alpine.start();
+```
+
+### Blade Layout
+
+**`resources/views/layouts/app.blade.php`**
+```blade
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <!-- ... -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body>
+    <!-- ... -->
+    @stack('scripts')
+    
+    <!-- Flowbite Script -->
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
+</body>
+</html>
+```
+
+### Important Notes
+
+- **Tailwind v4** uses CSS-first configuration (no `tailwind.config.js` needed)
+- **Flowbite v4** requires CDN script in layout
+- **Vite** must be running (`npm run dev`) during development
+- Use `npm run build` for production
+
+---
+
+## 📖 Spatie Permission Usage
+
+### In Routes
+
+Protect routes with specific roles:
+```php
+// Single role
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/dashboard', ...);
+});
+
+// Multiple roles (OR)
+Route::middleware(['auth', 'role:donor|admin'])->group(function () {
+    Route::get('/donations', ...);
+});
+```
+
+### In Controllers
+
+Check user roles:
+```php
+// Check single role
+if (auth()->user()->hasRole('admin')) {
+    // Admin code
+}
+
+// Check multiple roles (OR)
+if (auth()->user()->hasAnyRole(['admin', 'donor'])) {
+    // Admin or Donor code
+}
+
+// Check all roles (AND)
+if (auth()->user()->hasAllRoles(['admin', 'donor'])) {
+    // Must have both roles
+}
+```
+
+### In Blade Views
+
+```blade
+{{-- Check single role --}}
+@if(auth()->user()->hasRole('admin'))
+    <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
+@endif
+
+{{-- Use @role directive --}}
+@role('admin')
+    <p>You are an admin</p>
+@endrole
+
+{{-- Check multiple roles --}}
+@if(auth()->user()->hasAnyRole(['donor', 'admin']))
+    <a href="{{ route('donations.create') }}">Make Donation</a>
+@endif
+
+{{-- Always wrap with @auth --}}
+@auth
+    @role('admin')
+        <a href="/admin">Admin Dashboard</a>
+    @endrole
+@endauth
+```
+
+### Common Commands
+
+```php
+// Assign Role
+$user->assignRole('admin');
+$user->assignRole(['admin', 'donor']); // Multiple roles
+
+// Remove Role
+$user->removeRole('admin');
+
+// Replace All Roles
+$user->syncRoles(['donor']); // Removes old roles, assigns new ones
+
+// Check Role
+$user->hasRole('admin'); // Returns true/false
+$user->hasAnyRole(['admin', 'donor']); // Returns true/false
+$user->hasAllRoles(['admin', 'donor']); // Returns true/false
+```
+
+### Important Files
+
+- **Model**: `app/Models/User.php` - Uses `HasRoles` trait
+- **Seeder**: `database/seeders/RoleSeeder.php` - Creates roles
+- **Middleware**: 
+  - `app/Http/Middleware/EnsureRole.php` - Role verification
+  - `app/Http/Middleware/RedirectByRole.php` - Role-based redirection
+- **Config**: `config/permission.php` - Spatie Permission settings
+
+---
+
+## 🏛️ Architecture Best Practices
+
+### Service Layer Pattern
+
+Business logic should be in Services, not Controllers:
+
+```php
+// app/Http/Services/DonationService.php
+class DonationService
+{
+    public function __construct(
+        private MyFatoorahService $myFatoorah,
+        private AuditService $auditService
+    ) {}
+    
+    public function initiateDonation(int $userId, float $amount): array
+    {
+        // Business logic here
+    }
+}
+
+// app/Http/Controllers/Donor/DonationController.php
+class DonationController extends Controller
+{
+    public function __construct(
+        private DonationService $donationService
+    ) {}
+    
+    public function store(StoreDonationRequest $request)
+    {
+        $result = $this->donationService->initiateDonation(
+            auth()->id(),
+            $request->validated()['amount']
+        );
+        
+        return redirect($result['payment_url']);
+    }
+}
+```
+
+### Blade Layout Structure
+
+```blade
+{{-- resources/views/layouts/app.blade.php --}}
+@extends('layouts.app')
+
+@section('title', 'Page Title')
+
+@section('content')
+    <!-- Page content -->
+@endsection
+
+@push('scripts')
+    <!-- Additional scripts -->
+@endpush
+```
+
+### Route Organization
+
+```php
+// routes/web.php
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')
+    ->group(base_path('routes/admin.php'));
+
+Route::middleware(['auth', 'role:donor'])->prefix('donor')->name('donor.')
+    ->group(base_path('routes/donor.php'));
+```
+
+---
+
+## 🎯 Development Workflow
+
+### Creating a New Module (Example: Donation)
+
+1. **Create Model with Migration**
+```bash
+php artisan make:model Donation -m
+```
+
+2. **Edit Migration** (`database/migrations/xxxx_create_donations_table.php`)
+```php
+Schema::create('donations', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('user_id')->constrained();
+    $table->decimal('amount', 10, 2);
+    $table->enum('status', ['pending', 'confirmed', 'failed']);
+    $table->timestamps();
+});
+```
+
+3. **Run Migration**
+```bash
+php artisan migrate
+```
+
+4. **Create Controller**
+```bash
+php artisan make:controller Donor/DonationController --resource
+```
+
+5. **Create Form Request**
+```bash
+php artisan make:request StoreDonationRequest
+```
+
+6. **Create Service** (manually)
+```bash
+# Create: app/Http/Services/DonationService.php
+```
+
+7. **Create Views** (manually)
+```bash
+# Create: resources/views/donor/donations/
+#   - index.blade.php
+#   - create.blade.php
+#   - show.blade.php
+```
+
+8. **Add Routes**
+```php
+// routes/donor.php
+Route::resource('donations', DonationController::class);
+```
+
+9. **Clear Cache**
+```bash
+php artisan optimize:clear
+```
+
+---
+
+## 🔍 Troubleshooting
+
+### Vite Not Working
+```bash
+# Make sure Vite is running
+npm run dev
+
+# Or build for production
+npm run build
+```
+
+### Tailwind Classes Not Working
+```bash
+# Rebuild assets
+npm run build
+
+# Clear Laravel cache
+php artisan optimize:clear
+```
+
+### Routes Not Found
+```bash
+# Clear route cache
+php artisan route:clear
+php artisan optimize:clear
+
+# List all routes
+php artisan route:list
+```
+
+### Permission Issues
+```bash
+# Clear cache after role changes
+php artisan optimize:clear
+
+# Re-run migrations
+php artisan migrate:fresh --seed
+```
+
+---
+
+## ⚠️ Important Notes
+
+1. **Always use `@auth`** in Blade before checking roles
+2. **Run `npm run dev`** during development (keeps Vite running)
+3. **Run `npm run build`** before production deployment
+4. **Clear cache** after config/routes changes: `php artisan optimize:clear`
+5. **Service Layer** for business logic, Controllers for HTTP handling
+6. **Form Requests** for validation, not in Controllers
+7. **Blade-only** - No Vue, React, or Livewire
+8. **Run migrations** before using roles
+9. **Run RoleSeeder** to create basic roles
+
+---
+
+## 📦 Installed Packages
+
+### PHP Packages (Composer)
+- `laravel/framework` ^12.0 - Core Laravel
+- `laravel/sanctum` ^4.3 - API Authentication
+- `spatie/laravel-permission` ^6.24 - Roles & Permissions
+
+### NPM Packages
+- `tailwindcss` ^4.1.18 - CSS Framework
+- `@tailwindcss/vite` ^4.1.18 - Tailwind Vite Plugin
+- `flowbite` ^4.0.1 - UI Components
+- `alpinejs` ^3.4.2 - JavaScript Framework
+- `vite` ^7.0.7 - Build Tool
+
+---
+
+## 📚 Documentation
+
+- [Laravel Documentation](https://laravel.com/docs)
+- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
+- [Flowbite Documentation](https://flowbite.com/docs)
+- [Spatie Laravel Permission](https://spatie.be/docs/laravel-permission)
+- [Alpine.js Documentation](https://alpinejs.dev)
+
+---
