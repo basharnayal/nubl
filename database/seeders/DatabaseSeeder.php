@@ -16,28 +16,37 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Step 1: Create Permissions first
+        $this->call(PermissionSeeder::class);
 
-        // User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
-
-        // إنشاء الأدوار أولاً
+        // Step 2: Create Roles and assign Permissions
         $this->call(RoleSeeder::class);
 
-        // إنشاء مستخدمين تجريبيين
-        $admin = User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@nubl.com',
-        ]);
-        $admin->assignRole('admin');
-
-        $donor = User::factory()->create([
-            'name' => 'Donor User',
-            'email' => 'donor@nubl.com',
-        ]);
-        $donor->assignRole('donor');
+        // Step 3: Create test users (optional)
+        // Uncomment if you want to create test users
         
+        // $admin = User::factory()->create([
+        //     'name' => 'Admin User',
+        //     'email' => 'admin@nubl.com',
+        // ]);
+        // $admin->assignRole('admin');
+
+        // $donor = User::factory()->create([
+        //     'name' => 'Donor User',
+        //     'email' => 'donor@nubl.com',
+        // ]);
+        // $donor->assignRole('donor');
+
+        // $recipient = User::factory()->create([
+        //     'name' => 'Recipient User',
+        //     'email' => 'recipient@nubl.com',
+        // ]);
+        // $recipient->assignRole('recipient');
+
+        // $provider = User::factory()->create([
+        //     'name' => 'Provider User',
+        //     'email' => 'provider@nubl.com',
+        // ]);
+        // $provider->assignRole('provider');
     }
 }
