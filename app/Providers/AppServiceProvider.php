@@ -19,6 +19,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // منع التحميل البطئ للبيانات lazy loading عشان محد يجيب  العيد
+        // Model::preventLazyLoading();
+
     }
 }

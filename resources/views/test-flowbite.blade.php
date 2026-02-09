@@ -1,9 +1,12 @@
-@extends('layouts.app')
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            {{ __('Flowbite Test') }}
+        </h2>
+    </x-slot>
 
-@section('title', 'Flowbite Test')
-
-@section('content')
-<div class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
     <h1 class="text-3xl font-bold text-gray-900 mb-8">Flowbite Components Test</h1>
 
     <!-- Buttons -->
@@ -139,5 +142,4 @@
             </table>
         </div>
     </div>
-</div>
-@endsection
+</x-app-layout>

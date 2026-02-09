@@ -45,6 +45,11 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
+        // Redirect to email verification notice if email is not verified
+        if (!$user->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
+
         return redirect(route('dashboard', absolute: false));
     }
 }

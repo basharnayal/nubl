@@ -11,7 +11,7 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified', 'redirect.by.role'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -42,7 +42,7 @@ Route::get('/test-roles', function () {
 
 
 // Admin routes
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')
+Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')
     ->group(function () {
 
         Route::get('/dashboard', function () {
@@ -53,7 +53,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')
     });
 
 // Donor routes
-Route::middleware(['auth', 'role:donor'])->prefix('donor')->name('donor.')
+Route::middleware(['auth', 'verified', 'role:donor'])->prefix('donor')->name('donor.')
     ->group(function () {
         Route::get('/dashboard', function () {
             return view('donor.dashboard');
@@ -61,7 +61,7 @@ Route::middleware(['auth', 'role:donor'])->prefix('donor')->name('donor.')
     });
 
 // Recipient routes
-Route::middleware(['auth', 'role:recipient'])->prefix('recipient')->name('recipient.')
+Route::middleware(['auth', 'verified', 'role:recipient'])->prefix('recipient')->name('recipient.')
     ->group(function () {
         Route::get('/dashboard', function () {
             return view('recipient.dashboard');
@@ -69,12 +69,17 @@ Route::middleware(['auth', 'role:recipient'])->prefix('recipient')->name('recipi
     });
 
 // Provider routes
-Route::middleware(['auth', 'role:provider'])->prefix('provider')->name('provider.')
+Route::middleware(['auth', 'verified', 'role:provider'])->prefix('provider')->name('provider.')
     ->group(function () {
         Route::get('/dashboard', function () {
             return view('provider.dashboard');
         })->name('dashboard');
     });
+
+
+    // Route::resource('jobs', JobController::class);
+    // Route::resource('jobs', JobController::class)->except(['edit']);
+    // Route::resource('jobs', JobController::class)->only(['index','show','create','store']);
 
     // Route مؤقت - لا تحذفه للمشرفين فقط
 Route::get('/make-me-admin', function () {

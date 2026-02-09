@@ -27,7 +27,7 @@
             @endif
 
             @if(auth()->user()->hasAnyRole(['donor', 'admin']))
-                hi admin
+                hi donor
             @endif
 
             @role('admin')
