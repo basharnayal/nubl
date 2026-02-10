@@ -6,12 +6,12 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles; 
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable,HasRoles;
+    use HasFactory, Notifiable, HasRoles;
 
     /**
      * The attributes that are mass assignable.
@@ -45,5 +45,30 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Check if email verification is required (based on config).
+     *
+     * @return bool
+     */
+    public static function emailVerificationRequired(): bool
+    {
+        return config('app.email_verification_enabled', true);
+    }
+
+    /**
+     * Check if user's email is verified (or if verification is disabled).
+     *
+     * @return bool
+     */
+    public function isEmailVerified(): bool
+    {
+        // If email verification is disabled, consider all users as verified
+        if (!self::emailVerificationRequired()) {
+            return true;
+        }
+
+        return $this->hasVerifiedEmail();
     }
 }

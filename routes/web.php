@@ -7,11 +7,16 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Helper function to get verified middleware based on config
+$verifiedMiddleware = config('app.email_verification_enabled', true) 
+    ? ['auth', 'email.verified'] 
+    : ['auth'];
+
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified', 'redirect.by.role'])->name('dashboard');
+})->middleware(array_merge($verifiedMiddleware, ['redirect.by.role']))->name('dashboard');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware($verifiedMiddleware)->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -38,11 +43,8 @@ Route::get('/test-roles', function () {
     return view('test-roles', compact('roles'));
 })->middleware(['auth', 'role:admin'])->name('test-roles');
 
-
-
-
 // Admin routes
-Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('admin.')
+Route::middleware(array_merge($verifiedMiddleware, ['role:admin']))->prefix('admin')->name('admin.')
     ->group(function () {
 
         Route::get('/dashboard', function () {
@@ -53,7 +55,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->prefix('admin')->name('ad
     });
 
 // Donor routes
-Route::middleware(['auth', 'verified', 'role:donor'])->prefix('donor')->name('donor.')
+Route::middleware(array_merge($verifiedMiddleware, ['role:donor']))->prefix('donor')->name('donor.')
     ->group(function () {
         Route::get('/dashboard', function () {
             return view('donor.dashboard');
@@ -61,7 +63,7 @@ Route::middleware(['auth', 'verified', 'role:donor'])->prefix('donor')->name('do
     });
 
 // Recipient routes
-Route::middleware(['auth', 'verified', 'role:recipient'])->prefix('recipient')->name('recipient.')
+Route::middleware(array_merge($verifiedMiddleware, ['role:recipient']))->prefix('recipient')->name('recipient.')
     ->group(function () {
         Route::get('/dashboard', function () {
             return view('recipient.dashboard');
@@ -69,7 +71,7 @@ Route::middleware(['auth', 'verified', 'role:recipient'])->prefix('recipient')->
     });
 
 // Provider routes
-Route::middleware(['auth', 'verified', 'role:provider'])->prefix('provider')->name('provider.')
+Route::middleware(array_merge($verifiedMiddleware, ['role:provider']))->prefix('provider')->name('provider.')
     ->group(function () {
         Route::get('/dashboard', function () {
             return view('provider.dashboard');

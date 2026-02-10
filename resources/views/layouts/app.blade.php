@@ -15,10 +15,29 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100">
-        @include('layouts.navigation')
+    <div class="min-h-screen bg-gray-100 flex flex-col">
+        {{-- Navigation (Fixed) --}}
+        @include('layouts.partials.navigation-base')
 
-        <!-- Page Heading -->
+        {{-- Flash Messages (Fixed) --}}
+        @if(session('success') || session('error') || session('warning') || session('info'))
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
+                @if(session('success'))
+                    <x-flowbite-alert type="success" dismissible>{{ session('success') }}</x-flowbite-alert>
+                @endif
+                @if(session('error'))
+                    <x-flowbite-alert type="danger" dismissible>{{ session('error') }}</x-flowbite-alert>
+                @endif
+                @if(session('warning'))
+                    <x-flowbite-alert type="warning" dismissible>{{ session('warning') }}</x-flowbite-alert>
+                @endif
+                @if(session('info'))
+                    <x-flowbite-alert type="info" dismissible>{{ session('info') }}</x-flowbite-alert>
+                @endif
+            </div>
+        @endif
+
+        {{-- Page Heading (Fixed) --}}
         @if(isset($header))
             <header class="bg-white shadow">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -27,18 +46,24 @@
             </header>
         @endif
 
-        <!-- Page Content -->
-        <main>
+        {{-- Page Content (Dynamic) --}}
+        <main class="flex-grow">
             {{ $slot ?? '' }}
             @hasSection('content')
                 @yield('content')
             @endif
         </main>
+
+        {{-- Footer (Fixed) --}}
+        <footer class="bg-white border-t border-gray-200 mt-auto">
+            <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+                <div class="text-center text-sm text-gray-500">
+                    <p>&copy; {{ date('Y') }} {{ config('app.name') }}. {{ __('All rights reserved.') }}</p>
+                </div>
+            </div>
+        </footer>
     </div>
     
     @stack('scripts')
-    
-    <!-- Flowbite Script -->
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
 </body>
 </html>

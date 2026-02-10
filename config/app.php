@@ -35,7 +35,7 @@ return [
     |
     | When your application is in debug mode, detailed error messages with
     | stack traces will be shown on every error that occurs within your
-    | application. If disabled, a simple generic error page is shown.
+    | application. If disabled, a simple generic page is shown.
     |
     */
 
@@ -83,6 +83,19 @@ return [
     'fallback_locale' => env('APP_FALLBACK_LOCALE', 'en'),
 
     'faker_locale' => env('APP_FAKER_LOCALE', 'en_US'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Email Verification
+    |--------------------------------------------------------------------------
+    |
+    | Enable or disable email verification requirement for users.
+    | Set EMAIL_VERIFICATION_ENABLED=true in .env to enable.
+    | Set EMAIL_VERIFICATION_ENABLED=false to disable.
+    |
+    */
+
+    'email_verification_enabled' => env('EMAIL_VERIFICATION_ENABLED', true),
 
     /*
     |--------------------------------------------------------------------------

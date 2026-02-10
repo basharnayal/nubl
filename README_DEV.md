@@ -12,6 +12,7 @@
 
 - [Git Commit Conventions](#git-commit-conventions)
 - [Email Configuration](#email-configuration)
+- [Email Verification](#email-verification)
 - [Roles & Permissions](#roles--permissions)
   - [Setup](#setup)
   - [Available Roles](#available-roles)
@@ -20,6 +21,13 @@
   - [Using Roles in Views](#using-roles-in-views)
   - [Managing Roles Programmatically](#managing-roles-programmatically)
   - [Permissions (Future Reference)](#permissions-future-reference)
+- [Flowbite Components](#flowbite-components)
+  - [Available Components](#available-components)
+  - [Flowbite Modal](#flowbite-modal)
+  - [Flowbite Alert](#flowbite-alert)
+  - [Flowbite Card](#flowbite-card)
+  - [Flowbite Button](#flowbite-button)
+  - [Usage Examples](#usage-examples)
 - [Additional Documentation](#additional-documentation)
 
 ---
@@ -175,6 +183,90 @@ Mail::raw('Test email', function ($message) {
 ```
 
 Check your Mailtrap inbox to see the test email.
+
+---
+
+## Email Verification
+
+Email verification can be easily enabled or disabled via the `.env` file. This allows you to toggle email verification requirements without modifying code.
+
+### Configuration
+
+Add the following variable to your `.env` file:
+
+```env
+# Email Verification
+# Set to true to require email verification, false to disable
+EMAIL_VERIFICATION_ENABLED=true
+```
+
+### How It Works
+
+- **When `EMAIL_VERIFICATION_ENABLED=true`** (default):
+  - Users must verify their email before accessing protected routes
+  - After registration/login, unverified users are redirected to the verification notice page
+  - All dashboard and profile routes require email verification
+
+- **When `EMAIL_VERIFICATION_ENABLED=false`**:
+  - Email verification is completely bypassed
+  - Users can access all routes immediately after registration/login
+  - No verification emails are sent
+  - All users are considered verified
+
+### Usage
+
+#### Enable Email Verification
+
+```env
+EMAIL_VERIFICATION_ENABLED=true
+```
+
+#### Disable Email Verification
+
+```env
+EMAIL_VERIFICATION_ENABLED=false
+```
+
+After changing the value, clear the config cache:
+
+```bash
+php artisan config:clear
+```
+
+### Technical Details
+
+- **Middleware**: Custom `EnsureEmailVerified` middleware checks the config before enforcing verification
+- **Routes**: All protected routes automatically adapt based on the config value
+- **Controllers**: Registration and login controllers check the config before redirecting to verification
+- **User Model**: Includes helper methods `emailVerificationRequired()` and `isEmailVerified()`
+
+### Helper Methods
+
+In your code, you can check if email verification is enabled:
+
+```php
+// Check if email verification is required
+if (User::emailVerificationRequired()) {
+    // Email verification is enabled
+}
+
+// Check if user's email is verified (or if verification is disabled)
+if ($user->isEmailVerified()) {
+    // User is verified or verification is disabled
+}
+
+// Or use config directly
+if (config('app.email_verification_enabled', true)) {
+    // Email verification is enabled
+}
+```
+
+### Important Notes
+
+- Changing this setting requires clearing config cache: `php artisan config:clear`
+- When disabled, users can still have `email_verified_at` set, but it won't be checked
+- The `MustVerifyEmail` interface remains in the User model, but verification checks are bypassed when disabled
+- This setting affects all routes that use the `email.verified` middleware
 
 ---
 
@@ -489,6 +581,169 @@ if (!auth()->user()->can('donations.create')) {
 @can('donations.create')
     <button>Create Donation</button>
 @endcan
+```
+
+---
+
+## Flowbite Components
+
+Essential Flowbite Blade components for consistent UI across the application.
+
+### Available Components
+
+- `flowbite-modal` - Modal dialogs
+- `flowbite-alert` - Alert notifications
+- `flowbite-card` - Card components
+- `flowbite-button` - Buttons with Flowbite styles
+
+### Flowbite Modal
+
+```blade
+{{-- Basic Modal --}}
+<x-flowbite-modal id="example-modal" title="Modal Title">
+    <p>Modal content goes here</p>
+</x-flowbite-modal>
+
+{{-- Modal with Footer --}}
+<x-flowbite-modal 
+    id="confirm-modal" 
+    title="Confirm Action"
+    size="md"
+    :footer="'<button>Confirm</button>'"
+>
+    <p>Are you sure you want to proceed?</p>
+</x-flowbite-modal>
+
+{{-- Trigger Button --}}
+<button data-modal-target="example-modal" data-modal-toggle="example-modal">
+    Open Modal
+</button>
+```
+
+**Props:**
+- `id` (required) - Unique modal ID
+- `title` - Modal title
+- `size` - sm, md, lg, xl, 2xl, 3xl, 4xl, 5xl, 6xl, 7xl
+- `showCloseButton` - Show/hide close button (default: true)
+- `footer` - Footer content (HTML string)
+
+### Flowbite Alert
+
+```blade
+{{-- Basic Alert --}}
+<x-flowbite-alert type="info">
+    This is an info alert
+</x-flowbite-alert>
+
+{{-- Dismissible Alert --}}
+<x-flowbite-alert type="success" dismissible>
+    Operation completed successfully!
+</x-flowbite-alert>
+
+{{-- All Types --}}
+<x-flowbite-alert type="info">Info message</x-flowbite-alert>
+<x-flowbite-alert type="success">Success message</x-flowbite-alert>
+<x-flowbite-alert type="warning">Warning message</x-flowbite-alert>
+<x-flowbite-alert type="danger">Error message</x-flowbite-alert>
+```
+
+**Props:**
+- `type` - info, success, warning, danger
+- `dismissible` - Enable dismiss button (default: false)
+- `icon` - Show/hide icon (default: true)
+- `id` - Custom ID (auto-generated if not provided)
+
+### Flowbite Card
+
+```blade
+{{-- Basic Card --}}
+<x-flowbite-card title="Card Title" subtitle="Card subtitle">
+    <p>Card content</p>
+</x-flowbite-card>
+
+{{-- Card with Image --}}
+<x-flowbite-card 
+    title="Product Name"
+    image="/path/to/image.jpg"
+    imageAlt="Product"
+    href="/product/1"
+>
+    <p>Product description</p>
+</x-flowbite-card>
+
+{{-- Card with Footer --}}
+<x-flowbite-card title="Card Title" :footer="'<a href=\"#\">Learn More</a>'">
+    <p>Card content</p>
+</x-flowbite-card>
+```
+
+**Props:**
+- `title` - Card title
+- `subtitle` - Card subtitle
+- `image` - Image URL
+- `imageAlt` - Image alt text
+- `footer` - Footer content (HTML string)
+- `href` - Make card clickable (link)
+- `class` - Additional CSS classes
+
+### Flowbite Button
+
+```blade
+{{-- Primary Button --}}
+<x-flowbite-button variant="primary">Click Me</x-flowbite-button>
+
+{{-- Different Variants --}}
+<x-flowbite-button variant="primary">Primary</x-flowbite-button>
+<x-flowbite-button variant="secondary">Secondary</x-flowbite-button>
+<x-flowbite-button variant="success">Success</x-flowbite-button>
+<x-flowbite-button variant="danger">Danger</x-flowbite-button>
+<x-flowbite-button variant="warning">Warning</x-flowbite-button>
+<x-flowbite-button variant="info">Info</x-flowbite-button>
+
+{{-- Outline Buttons --}}
+<x-flowbite-button variant="primary" outline>Outline Primary</x-flowbite-button>
+
+{{-- Different Sizes --}}
+<x-flowbite-button size="xs">Extra Small</x-flowbite-button>
+<x-flowbite-button size="sm">Small</x-flowbite-button>
+<x-flowbite-button size="md">Medium</x-flowbite-button>
+<x-flowbite-button size="lg">Large</x-flowbite-button>
+<x-flowbite-button size="xl">Extra Large</x-flowbite-button>
+
+{{-- Pill Button --}}
+<x-flowbite-button variant="primary" pill>Pill Button</x-flowbite-button>
+
+{{-- Submit Button --}}
+<x-flowbite-button type="submit" variant="primary">Submit</x-flowbite-button>
+```
+
+**Props:**
+- `type` - button, submit, reset
+- `variant` - primary, secondary, success, danger, warning, info, light, dark
+- `size` - xs, sm, md, lg, xl
+- `pill` - Rounded pill style (default: false)
+- `outline` - Outline style (default: false)
+- `disabled` - Disable button (default: false)
+
+### Usage Examples
+
+```blade
+{{-- Modal with Alert --}}
+<x-flowbite-modal id="success-modal" title="Success">
+    <x-flowbite-alert type="success" dismissible>
+        Your changes have been saved!
+    </x-flowbite-alert>
+</x-flowbite-modal>
+
+{{-- Card with Button --}}
+<x-flowbite-card title="Donation" subtitle="Make a donation">
+    <p>Help support our cause</p>
+    <div class="mt-4">
+        <x-flowbite-button variant="primary" href="/donate">
+            Donate Now
+        </x-flowbite-button>
+    </div>
+</x-flowbite-card>
 ```
 
 ---

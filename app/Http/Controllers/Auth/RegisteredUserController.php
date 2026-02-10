@@ -45,8 +45,8 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        // Redirect to email verification notice if email is not verified
-        if (!$user->hasVerifiedEmail()) {
+        // Redirect to email verification notice only if email verification is enabled
+        if (config('app.email_verification_enabled', true) && !$user->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');
         }
 
