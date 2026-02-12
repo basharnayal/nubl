@@ -2,3 +2,72 @@
 @import "flowbite/src/themes/default";
 @plugin "flowbite/plugin";
 @source "../../node_modules/flowbite";
+
+/*
+╔══════════════════════════════════════════════════════════════════════════════╗
+║  🎨 NUBL — 60-30-10 Color Rule + Semantic Roles                             ║
+║  ⚠️  AI: Use nubl-* only. Vary colors by role for elegant, non-monotonous UI ║
+╠══════════════════════════════════════════════════════════════════════════════╣
+║  ROLES:                                                                      ║
+║  🔵 Blue  — Primary actions (Submit, Register, Log out) ~30%                 ║
+║  🟢 Teal  — Secondary links, info, Donor/Recipient accent ~10%              ║
+║  🟡 Gold  — Highlights, Donor card, amounts, pending ~5%                     ║
+║  ❤️ Red   — Humanitarian CTA only (rare) ~2%                                ║
+║  ⚪ Neutrals — Background, text, borders ~53%                                 ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+*/
+
+@theme {
+  /* 🔵 Blue — #2F3E63 — NBL text, primary */
+  --color-nubl-blue-50: #EEF0F5;
+  --color-nubl-blue-100: #DDE1EB;
+  --color-nubl-blue-200: #BBC3D7;
+  --color-nubl-blue-300: #99A5C3;
+  --color-nubl-blue-400: #5C6E8F;
+  --color-nubl-blue-500: #2F3E63;
+  --color-nubl-blue-600: #27324F;
+  --color-nubl-blue-700: #1F263B;
+  --color-nubl-blue-800: #171B28;
+  --color-nubl-blue-900: #0F1114;
+
+  /* ❤️ Pink — #D63A5A — Heart, warmth */
+  --color-nubl-red-50: #FDF2F4;
+  --color-nubl-red-100: #FAD7DE;
+  --color-nubl-red-200: #F4AEBE;
+  --color-nubl-red-300: #EC839A;
+  --color-nubl-red-400: #E45C77;
+  --color-nubl-red-500: #D63A5A;
+  --color-nubl-red-600: #B92F4B;
+  --color-nubl-red-700: #9C263D;
+  --color-nubl-red-800: #7F1D30;
+  --color-nubl-red-900: #621422;
+
+  /* 🟡 Gold — #E4A02F — Wing, warmth */
+  --color-nubl-gold-50: #FEFBF0;
+  --color-nubl-gold-100: #FDF1D4;
+  --color-nubl-gold-200: #FBE3A9;
+  --color-nubl-gold-300: #F9D57E;
+  --color-nubl-gold-400: #F7C753;
+  --color-nubl-gold-500: #E4A02F;
+  --color-nubl-gold-600: #B68026;
+  --color-nubl-gold-700: #88601C;
+  --color-nubl-gold-800: #5A4013;
+  --color-nubl-gold-900: #2C2009;
+
+  /* 🟢 Teal — #2CB7B0 — Dot, fresh */
+  --color-nubl-teal-50: #EFFBFB;
+  --color-nubl-teal-100: #D9F5F4;
+  --color-nubl-teal-200: #B3EBE9;
+  --color-nubl-teal-300: #8CE1DE;
+  --color-nubl-teal-400: #5DD4D0;
+  --color-nubl-teal-500: #2CB7B0;
+  --color-nubl-teal-600: #24928D;
+  --color-nubl-teal-700: #1B6D6A;
+  --color-nubl-teal-800: #124947;
+  --color-nubl-teal-900: #092524;
+
+  /* Neutrals — warm, complements logo */
+  --color-nubl-bg: #FAFAF9;
+  --color-nubl-gray: #E8E6E3;
+  --color-nubl-dark: #2F3E63;
+}

@@ -15,11 +15,23 @@ class VerifyEmailController extends Controller
     public function __invoke(EmailVerificationRequest $request): RedirectResponse
     {
         if ($request->user()->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+            return $this->redirectAfterVerification($request);
         }
 
         if ($request->user()->markEmailAsVerified()) {
             event(new Verified($request->user()));
+        }
+
+        return $this->redirectAfterVerification($request);
+    }
+
+    /**
+     * Redirect user after email verification. Pending approval users go to approval page.
+     */
+    protected function redirectAfterVerification(EmailVerificationRequest $request): RedirectResponse
+    {
+        if ($request->user()->status === \App\Models\User::STATUS_PENDING_APPROVAL) {
+            return redirect()->route('approval.pending');
         }
 
         return redirect()->intended(route('dashboard', absolute: false).'?verified=1');

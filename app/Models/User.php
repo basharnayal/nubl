@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
@@ -14,6 +15,17 @@ class User extends Authenticatable implements MustVerifyEmail
     use HasFactory, Notifiable, HasRoles;
 
     /**
+     * Membership types. Extensible for future provider type.
+     */
+    public const MEMBERSHIP_DONOR = 'donor';
+    public const MEMBERSHIP_RECIPIENT = 'recipient';
+    public const MEMBERSHIP_PROVIDER = 'provider';
+
+    /** active = full access. pending_approval = recipient awaiting admin approval */
+    public const STATUS_ACTIVE = 'active';
+    public const STATUS_PENDING_APPROVAL = 'pending_approval';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -22,7 +34,54 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'membership_type',
+        'status',
+        'phone_number',
     ];
+
+    /**
+     * Get the recipient profile (for recipient users only).
+     */
+    public function recipientProfile(): HasOne
+    {
+        return $this->hasOne(RecipientProfile::class);
+    }
+
+    /**
+     * Get the recipient KYC details (for recipient users only).
+     */
+    public function recipientKycDetails(): HasOne
+    {
+        return $this->hasOne(RecipientKycDetails::class);
+    }
+
+    public function providerProfile(): HasOne
+    {
+        return $this->hasOne(ProviderProfile::class);
+    }
+
+    public function providerOperatingInfo(): HasOne
+    {
+        return $this->hasOne(ProviderOperatingInfo::class);
+    }
+
+    public function providerFinancialInfo(): HasOne
+    {
+        return $this->hasOne(ProviderFinancialInfo::class);
+    }
+
+    public function providerDocuments(): HasOne
+    {
+        return $this->hasOne(ProviderDocuments::class);
+    }
+
+    /**
+     * Check if the user has full access (not pending approval).
+     */
+    public function hasFullAccess(): bool
+    {
+        return $this->status !== self::STATUS_PENDING_APPROVAL;
+    }
 
     /**
      * The attributes that should be hidden for serialization.

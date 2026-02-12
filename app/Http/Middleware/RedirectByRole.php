@@ -6,6 +6,9 @@ use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Redirects /dashboard to role-specific dashboard (admin, donor, recipient, provider).
+ */
 class RedirectByRole
 {
     public function handle(Request $request, Closure $next): Response
@@ -15,16 +18,12 @@ class RedirectByRole
         }
 
         $user = auth()->user();
-        
-        // If already on a role-specific dashboard, don't redirect
-        if ($request->routeIs('admin.dashboard') || 
-            $request->routeIs('donor.dashboard') || 
-            $request->routeIs('recipient.dashboard') || 
-            $request->routeIs('provider.dashboard')) {
+
+        if ($request->routeIs('*.dashboard')) {
             return $next($request);
         }
 
-        // Redirect based on role
+        // Redirect to role dashboard
         if ($user->hasRole('admin')) {
             return redirect()->route('admin.dashboard');
         } elseif ($user->hasRole('donor')) {

@@ -29,7 +29,22 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'membership_type' => \App\Models\User::MEMBERSHIP_DONOR,
+            'status' => \App\Models\User::STATUS_ACTIVE,
+            'phone_number' => '0501234567',
         ];
+    }
+
+    /**
+     * Indicate that the user is a recipient with pending approval.
+     */
+    public function recipientPending(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'membership_type' => \App\Models\User::MEMBERSHIP_RECIPIENT,
+            'status' => \App\Models\User::STATUS_PENDING_APPROVAL,
+            'phone_number' => null,
+        ]);
     }
 
     /**

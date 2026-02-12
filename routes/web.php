@@ -1,22 +1,30 @@
 <?php
 
+/**
+ * WEB ROUTES
+ *
+ * Middleware chain for protected routes:
+ * auth → (email.verified if enabled) → account.approved → role-specific
+ */
+
+use App\Http\Controllers\Auth\ProviderRegistrationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+
+// Auth middleware: requires email verification if EMAIL_VERIFICATION_ENABLED=true
+$authMiddleware = config('app.email_verification_enabled', true)
+    ? ['auth', 'email.verified']
+    : ['auth'];
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-// Helper function to get verified middleware based on config
-$verifiedMiddleware = config('app.email_verification_enabled', true) 
-    ? ['auth', 'email.verified'] 
-    : ['auth'];
-
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(array_merge($verifiedMiddleware, ['redirect.by.role']))->name('dashboard');
+})->middleware(array_merge($authMiddleware, ['account.approved', 'redirect.by.role']))->name('dashboard');
 
-Route::middleware($verifiedMiddleware)->group(function () {
+Route::middleware(array_merge($authMiddleware, ['account.approved']))->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -26,36 +34,36 @@ Route::get('/test-flowbite', function () {
     return view('test-flowbite');
 })->name('test-flowbite');
 
-// Test page to check roles and redirect (Admin only - Remove in production)
+// Pending approval: recipient or provider (blocked from dashboard by EnsureAccountApproved)
+Route::get('/approval-pending', function () {
+    return view('auth.approval-pending');
+})->middleware('auth')->name('approval.pending');
+
+// Provider registration: GET allows guest + auth (auth with profile sees read-only)
+Route::get('/register/provider', [ProviderRegistrationController::class, 'create'])->name('register.provider');
+
+// Provider application view (read-only, for pending providers)
+Route::get('/provider/application', [ProviderRegistrationController::class, 'showApplication'])
+    ->middleware(['auth', 'role:provider'])
+    ->name('provider.application');
+
+// Test: debug roles (admin only - remove in production)
 Route::get('/test-roles', function () {
-    if (!auth()->check()) {
-        return redirect()->route('login');
-    }
-    
-    // Only admins can access this test page
     if (!auth()->user()->hasRole('admin')) {
-        abort(403, 'Unauthorized');
+        abort(403);
     }
-    
-    $user = auth()->user();
-    $roles = $user->roles->pluck('name')->toArray();
-    
-    return view('test-roles', compact('roles'));
+    return view('test-roles', ['roles' => auth()->user()->roles->pluck('name')->toArray()]);
 })->middleware(['auth', 'role:admin'])->name('test-roles');
 
-// Admin routes
-Route::middleware(array_merge($verifiedMiddleware, ['role:admin']))->prefix('admin')->name('admin.')
+// Role-specific dashboards
+Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin']))->prefix('admin')->name('admin.')
     ->group(function () {
-
         Route::get('/dashboard', function () {
             return view('admin.dashboard');
         })->name('dashboard');
-
-
     });
 
-// Donor routes
-Route::middleware(array_merge($verifiedMiddleware, ['role:donor']))->prefix('donor')->name('donor.')
+Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:donor']))->prefix('donor')->name('donor.')
     ->group(function () {
         Route::get('/dashboard', function () {
             return view('donor.dashboard');
@@ -63,7 +71,7 @@ Route::middleware(array_merge($verifiedMiddleware, ['role:donor']))->prefix('don
     });
 
 // Recipient routes
-Route::middleware(array_merge($verifiedMiddleware, ['role:recipient']))->prefix('recipient')->name('recipient.')
+Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:recipient']))->prefix('recipient')->name('recipient.')
     ->group(function () {
         Route::get('/dashboard', function () {
             return view('recipient.dashboard');
@@ -71,7 +79,7 @@ Route::middleware(array_merge($verifiedMiddleware, ['role:recipient']))->prefix(
     });
 
 // Provider routes
-Route::middleware(array_merge($verifiedMiddleware, ['role:provider']))->prefix('provider')->name('provider.')
+Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:provider']))->prefix('provider')->name('provider.')
     ->group(function () {
         Route::get('/dashboard', function () {
             return view('provider.dashboard');
@@ -79,26 +87,17 @@ Route::middleware(array_merge($verifiedMiddleware, ['role:provider']))->prefix('
     });
 
 
-    // Route::resource('jobs', JobController::class);
-    // Route::resource('jobs', JobController::class)->except(['edit']);
-    // Route::resource('jobs', JobController::class)->only(['index','show','create','store']);
-
-    // Route مؤقت - لا تحذفه للمشرفين فقط
+// Dev helper: assign admin role (remove in production)
 Route::get('/make-me-admin', function () {
     $user = auth()->user();
-    
-    if (!$user) {
-        return 'يجب تسجيل الدخول أولاً';
-    }
-    
-    // التأكد من وجود الدور
     if (!\Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
         \Spatie\Permission\Models\Role::create(['name' => 'admin']);
     }
-    
     $user->assignRole('admin');
-    
     return 'تم تعيينك كـ admin بنجاح!';
-})->middleware('auth');
+})->middleware(['auth', 'account.approved']);
+
+
+
 
 require __DIR__.'/auth.php';
