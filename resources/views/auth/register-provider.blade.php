@@ -8,27 +8,24 @@
         $profile = ($providerData ?? [])['profile'] ?? null;
         $operating = ($providerData ?? [])['operating'] ?? null;
         $financial = ($providerData ?? [])['financial'] ?? null;
+        $stepErrorKeys = [
+            1 => ['full_name_ar', 'full_name_en', 'phone_number', 'email', 'business_name_ar', 'business_name_en', 'unified_number', 'business_category', 'address_ar', 'address_en', 'city', 'region', 'location'],
+            2 => array_merge(['daily_capacity', 'service_type', 'estimated_preparation_order_time', 'adoption_support'], array_map(fn($d) => "operating_hours.{$d}", array_keys(config('provider.weekdays')))),
+            3 => ['bank_name', 'iban', 'account_holder_name'],
+            4 => ['business_license', 'id_or_iqama', 'password', 'password_confirmation'],
+        ];
         $initialStep = 1;
         if (!$readonly && $errors->any()) {
-            $step1Keys = ['full_name_ar', 'full_name_en', 'phone_number', 'email', 'business_name_ar', 'business_name_en', 'unified_number', 'business_category', 'address_ar', 'address_en', 'city', 'region', 'location'];
-            $step2Keys = array_merge(['daily_capacity', 'service_type', 'estimated_preparation_order_time', 'adoption_support'], array_map(fn($d) => "operating_hours.{$d}", array_keys(config('provider.weekdays'))));
-            $step3Keys = ['bank_name', 'iban', 'account_holder_name'];
-            $step4Keys = ['business_license', 'id_or_iqama', 'password', 'password_confirmation'];
-            if ($errors->hasAny($step1Keys)) {
-                $initialStep = 1;
-            } elseif ($errors->hasAny($step2Keys)) {
-                $initialStep = 2;
-            } elseif ($errors->hasAny($step3Keys)) {
-                $initialStep = 3;
-            } elseif ($errors->hasAny($step4Keys)) {
-                $initialStep = 4;
-            } else {
-                $initialStep = 1;
+            foreach ($stepErrorKeys as $s => $keys) {
+                if ($errors->hasAny($keys)) { $initialStep = $s; break; }
             }
         }
     @endphp
 
-    <div x-data="{ step: {{ $readonly ? 1 : $initialStep }} }" x-init="$nextTick(() => { const el = document.getElementById('phone_number'); if (el) el.value = el.value.replace(/\D/g,'').slice(0, 10); })" x-cloak>
+    <div x-data='providerForm({{ $readonly ? 1 : $initialStep }}, @json(array_keys(config("provider.weekdays"))))'
+         x-init="init()"
+         x-cloak
+         data-module="provider-registration">
         @if($readonly)
             {{-- Read-only: submitted, awaiting admin approval --}}
             <div class="space-y-6">
@@ -106,6 +103,8 @@
             {{-- Editable form --}}
             <form method="POST" action="{{ route('register.provider') }}" enctype="multipart/form-data" onsubmit="this.querySelectorAll('input[name=phone_number]').forEach(el => { if(el.value) el.value = el.value.replace(/^0+/, ''); });">
                 @csrf
+
+                <div id="provider-validation-error" class="hidden mb-6 p-4 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm" role="alert"></div>
 
                 @if($errors->any())
                 <div class="mb-6 p-4 rounded-lg border border-red-200 bg-red-50">
@@ -367,9 +366,9 @@
                 </div>
 
                 <div class="flex items-center justify-between mt-6 pt-6 border-t border-slate-200">
-                    <button type="button" x-show="step > 1" x-on:click="step--" class="text-slate-600 hover:text-slate-900 font-medium text-sm py-2">{{ __('Previous') }}</button>
+                    <button type="button" x-show="step > 1" x-on:click="hideError(); step--" class="text-slate-600 hover:text-slate-900 font-medium text-sm py-2">{{ __('Previous') }}</button>
                     <div class="flex gap-3 ml-auto">
-                        <button type="button" x-show="step < 4" x-on:click="step++" class="text-white bg-nubl-teal-600 hover:bg-nubl-teal-700 font-medium rounded-lg text-sm px-5 py-2.5 transition">{{ __('Next') }}</button>
+                        <button type="button" x-show="step < 4" x-on:click="validateAndNext()" class="text-white bg-nubl-teal-600 hover:bg-nubl-teal-700 font-medium rounded-lg text-sm px-5 py-2.5 transition">{{ __('Next') }}</button>
                         <x-primary-button type="submit" class="!bg-nubl-blue-600 hover:!bg-nubl-blue-700 focus:!ring-nubl-blue-200" x-show="step === 4">{{ __('Submit Application') }}</x-primary-button>
                     </div>
                 </div>
@@ -377,5 +376,15 @@
         @endif
     </div>
 
+    <script>
+        window.__providerFormMessages = {
+            fill_required: @json(__('Please fill all required fields in this step.')),
+            business_category: @json(__('Please select at least one business category.')),
+            service_type: @json(__('Please select at least one service type.')),
+            phone_invalid: @json(__('Phone must be a valid Saudi number (9 digits, e.g. 512345678).')),
+            region: @json(__('Please select region.')),
+            operating_hours: @json(__('Please set opening and closing time for each open day, or mark as closed.')),
+        };
+    </script>
     <style>[x-cloak]{display:none!important}</style>
 </x-guest-layout>

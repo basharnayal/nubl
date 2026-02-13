@@ -19,6 +19,7 @@ return new class extends Migration
             $table->unsignedInteger('daily_capacity');
             $table->json('service_type'); // ['meal_preparation', 'delivery', ...]
             $table->string('estimated_preparation_order_time'); // e.g. "30 minutes"
+            $table->string('adoption_support', 20)->nullable(); // yes, partially, no
             $table->timestamps();
         });
     }
