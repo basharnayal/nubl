@@ -24,7 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /** active = full access. pending_approval = recipient awaiting admin approval */
     public const STATUS_ACTIVE = 'active';
     public const STATUS_PENDING_APPROVAL = 'pending_approval';
-
+    public const STATUS_REJECTED = 'rejected';
     /**
      * The attributes that are mass assignable.
      *
@@ -37,6 +37,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'membership_type',
         'status',
         'phone_number',
+        'rejection_reason',
     ];
 
     /**
@@ -80,7 +81,7 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasFullAccess(): bool
     {
-        return $this->status !== self::STATUS_PENDING_APPROVAL;
+        return $this->status == self::STATUS_ACTIVE;
     }
 
     /**

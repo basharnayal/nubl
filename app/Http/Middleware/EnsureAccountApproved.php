@@ -21,7 +21,7 @@ class EnsureAccountApproved
 
         $user = auth()->user();
 
-        if ($user->status === User::STATUS_PENDING_APPROVAL) {
+        if (in_array($user->status, [User::STATUS_PENDING_APPROVAL, User::STATUS_REJECTED])) {
             return redirect()->route('approval.pending');
         }
 

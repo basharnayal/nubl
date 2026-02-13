@@ -30,7 +30,7 @@ class VerifyEmailController extends Controller
      */
     protected function redirectAfterVerification(EmailVerificationRequest $request): RedirectResponse
     {
-        if ($request->user()->status === \App\Models\User::STATUS_PENDING_APPROVAL) {
+        if (in_array($request->user()->status, [\App\Models\User::STATUS_PENDING_APPROVAL, \App\Models\User::STATUS_REJECTED])) {
             return redirect()->route('approval.pending');
         }
 

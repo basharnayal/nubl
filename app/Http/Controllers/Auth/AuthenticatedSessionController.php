@@ -30,7 +30,7 @@ class AuthenticatedSessionController extends Controller
         if (config('app.email_verification_enabled', true) && !$user->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');
         }
-        if ($user->status === User::STATUS_PENDING_APPROVAL) {
+        if (in_array($user->status, [User::STATUS_PENDING_APPROVAL, User::STATUS_REJECTED])) {
             return redirect()->route('approval.pending');
         }
 
