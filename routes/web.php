@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\ProviderRegistrationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AccountApprovalController;
+use App\Http\Controllers\Recipient\RecipientController;
 
 // Auth middleware: requires email verification if EMAIL_VERIFICATION_ENABLED=true
 $authMiddleware = config('app.email_verification_enabled', true)
@@ -73,6 +74,8 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:recipi
         Route::get('/dashboard', function () {
             return view('recipient.dashboard');
         })->name('dashboard');
+
+        Route::get('/providers', [RecipientController::class, 'providersList'])->name('providers.list');
     });
 
 // Donor routes

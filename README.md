@@ -26,7 +26,7 @@ This project uses **Spatie Laravel Permission** for role management:
 
 - **admin** - System administrator
 - **donor** - Donor (Gracious Neighbor)
-- **beneficiary** - Beneficiary (Neighbor)
+- **recipient** - Recipient (Neighbor)
 - **provider** - Provider (Local supermarkets/restaurants)
 
 ---
@@ -124,7 +124,7 @@ nubl/
 │   │   ├── Controllers/          # Controllers (organized by role)
 │   │   │   ├── Admin/
 │   │   │   ├── Donor/
-│   │   │   ├── Beneficiary/
+│   │   │   ├── recipient/
 │   │   │   └── Provider/
 │   │   ├── Middleware/           # Custom Middleware
 │   │   ├── Requests/             # Form Requests (Validation)
@@ -148,15 +148,15 @@ nubl/
 │       ├── components/           # Blade Components
 │       ├── admin/                # Admin Views
 │       ├── donor/                # Donor Views
-│       ├── beneficiary/         # Beneficiary Views
+│       ├── recipient/            # Recipient Views
 │       └── provider/             # Provider Views
 │
 └── routes/
     ├── web.php                   # Web Routes
     ├── admin.php                 # Admin Routes (to be created)
     ├── donor.php                 # Donor Routes (to be created)
-    ├── beneficiary.php          # Beneficiary Routes (to be created)
-    └── provider.php             # Provider Routes (to be created)
+    ├── recipient.php             # Recipient Routes (to be created)
+    └── provider.php              # Provider Routes (to be created)
 ```
 
 ### Architecture Pattern

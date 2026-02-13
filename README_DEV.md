@@ -299,7 +299,7 @@ The project has 4 main roles:
 
 - **`admin`** - System administrator (has access to everything)
 - **`donor`** - Donor (Gracious Neighbor) - can make donations
-- **`recipient`** - Beneficiary (Neighbor) - can request items
+- **`recipient`** - Recipient (Neighbor) - can request items
 - **`provider`** - Provider (Local supermarkets/restaurants) - can fulfill requests
 
 ### Using Roles in Routes

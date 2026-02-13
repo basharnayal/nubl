@@ -19,7 +19,7 @@ class PermissionSeeder extends Seeder
         // ADMIN PERMISSIONS
         // ============================================
         $adminPermissions = [
-            // FR 1.4 - Approve accounts (Beneficiary/Provider)
+            // FR 1.4 - Approve accounts (Recipient/Provider)
             'accounts.approve',
 
             // FR 7.1 - Review/approve/reject requests
@@ -82,7 +82,7 @@ class PermissionSeeder extends Seeder
         ];
 
         // ============================================
-        // BENEFICIARY (RECIPIENT) PERMISSIONS
+        // RECIPIENT PERMISSIONS
         // ============================================
         $recipientPermissions = [
             // FR 5.1 - Submit digital item requests
