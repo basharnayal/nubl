@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\ProviderRegistrationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AccountApprovalController;
+use App\Http\Controllers\Admin\UserManagementController;
 
 // Auth middleware: requires email verification if EMAIL_VERIFICATION_ENABLED=true
 $authMiddleware = config('app.email_verification_enabled', true)
@@ -51,7 +52,17 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin'
         Route::post('/users/{user}/reject', [AccountApprovalController::class, 'reject'])->name('users.reject');
         Route::get('/users/{user}/application', [AccountApprovalController::class, 'showApplication'])->name('users.application');
         Route::get('/users/{user}/file/{type}', [AccountApprovalController::class, 'serveFile'])->name('users.file');
-        
+
+        // User Management (CRUD + deactivate/reactivate) - separate from approval flow
+        Route::get('/manage/users', [UserManagementController::class, 'index'])->name('manage.users.index');
+        Route::get('/manage/users/create', [UserManagementController::class, 'create'])->name('manage.users.create');
+        Route::post('/manage/users', [UserManagementController::class, 'store'])->name('manage.users.store');
+        Route::get('/manage/users/{user}', [UserManagementController::class, 'show'])->name('manage.users.show');
+        Route::get('/manage/users/{user}/edit', [UserManagementController::class, 'edit'])->name('manage.users.edit');
+        Route::put('/manage/users/{user}', [UserManagementController::class, 'update'])->name('manage.users.update');
+        Route::delete('/manage/users/{user}', [UserManagementController::class, 'destroy'])->name('manage.users.destroy');
+        Route::post('/manage/users/{user}/deactivate', [UserManagementController::class, 'deactivate'])->name('manage.users.deactivate');
+        Route::post('/manage/users/{user}/reactivate', [UserManagementController::class, 'reactivate'])->name('manage.users.reactivate');
     });
 
     

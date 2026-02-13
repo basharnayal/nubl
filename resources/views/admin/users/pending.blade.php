@@ -7,13 +7,6 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @if(session('success'))
-                <div class="mb-4 p-4 rounded-lg bg-green-50 border border-green-200 text-green-800">{{ session('success') }}</div>
-            @endif
-            @if(session('error'))
-                <div class="mb-4 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800">{{ session('error') }}</div>
-            @endif
-
             @if($pendingUsers->isEmpty())
                 <div class="bg-white rounded-lg shadow p-8 text-center text-gray-500">
                     {{ __('No pending or rejected approvals.') }}
