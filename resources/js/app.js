@@ -11,6 +11,7 @@ window.Alpine = Alpine;
 const PAGE_MODULES = {
     // فقط اضف الملف هنا واستخدم data-module="key" في ال Blade
     'provider-registration': () => import('./provider-registration'),
+    'recipient-providers': () => import('./recipient-providers'),
 };
 const moduleName = document.querySelector('[data-module]')?.getAttribute('data-module');
 const loadModule = moduleName && PAGE_MODULES[moduleName] ? PAGE_MODULES[moduleName]() : Promise.resolve();
