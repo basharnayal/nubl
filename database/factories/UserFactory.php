@@ -32,7 +32,33 @@ class UserFactory extends Factory
             'membership_type' => \App\Models\User::MEMBERSHIP_DONOR,
             'status' => \App\Models\User::STATUS_ACTIVE,
             'phone_number' => '0501234567',
+            'is_active' => true,
         ];
+    }
+
+    /**
+     * Indicate that the user has admin role.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'membership_type' => \App\Models\User::MEMBERSHIP_DONOR,
+        ])->afterCreating(function (\App\Models\User $user) {
+            if (!\Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
+                \Spatie\Permission\Models\Role::create(['name' => 'admin']);
+            }
+            $user->assignRole('admin');
+        });
+    }
+
+    /**
+     * Indicate that the user is inactive (deactivated).
+     */
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
+        ]);
     }
 
     /**

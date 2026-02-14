@@ -27,6 +27,15 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
+        if (!$user->is_active) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'email' => __('Your account has been deactivated. Please contact support.'),
+            ]);
+        }
         if (config('app.email_verification_enabled', true) && !$user->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');
         }

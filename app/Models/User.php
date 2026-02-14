@@ -39,6 +39,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'status',
         'phone_number',
         'rejection_reason',
+        'is_active',
     ];
 
     /**
@@ -113,7 +114,51 @@ class User extends Authenticatable implements MustVerifyEmail
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Scope: only active users (not deactivated by admin).
+     */
+    public function scopeActive($query)
+    {
+        return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope: only inactive (deactivated) users.
+     */
+    public function scopeInactive($query)
+    {
+        return $query->where('is_active', false);
+    }
+
+    /**
+     * Deactivate user (admin action). Blocks login.
+     */
+    public function deactivate(): void
+    {
+        $this->update(['is_active' => false]);
+    }
+
+    /**
+     * Reactivate user (admin action).
+     */
+    public function reactivate(): void
+    {
+        $this->update(['is_active' => true]);
+    }
+
+    /**
+     * Check if user can log in (active + not pending/rejected).
+     */
+    public function canLogin(): bool
+    {
+        if (!$this->is_active) {
+            return false;
+        }
+        return !in_array($this->status, [self::STATUS_PENDING_APPROVAL, self::STATUS_REJECTED]);
     }
 
     /**
