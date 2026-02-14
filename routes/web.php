@@ -11,11 +11,8 @@ use App\Http\Controllers\Auth\ProviderRegistrationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AccountApprovalController;
-<<<<<<< HEAD
 use App\Http\Controllers\Recipient\RecipientController;
-=======
 use App\Http\Controllers\Admin\UserManagementController;
->>>>>>> 316d2a82d51e53fd402f3a5a055b05c8248336d7
 
 // Auth middleware: requires email verification if EMAIL_VERIFICATION_ENABLED=true
 $authMiddleware = config('app.email_verification_enabled', true)
