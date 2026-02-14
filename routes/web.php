@@ -76,6 +76,7 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:recipi
         })->name('dashboard');
 
         Route::get('/providers', [RecipientController::class, 'providersList'])->name('providers.list');
+        Route::get('/providers/{provider}/menu', [RecipientController::class, 'providerMenu'])->name('providers.menu');
     });
 
 // Donor routes
