@@ -493,6 +493,171 @@ if (!auth()->user()->can('donations.create')) {
 
 ---
 
+<<<<<<< Updated upstream
+=======
+## Flowbite Components
+
+Essential Flowbite Blade components for consistent UI across the application.
+
+### Available Components
+
+- `flowbite-modal` - Modal dialogs
+- `flowbite-alert` - Alert notifications
+- `flowbite-card` - Card components
+- `flowbite-button` - Buttons with Flowbite styles
+
+### Flowbite Modal
+
+```blade
+{{-- Basic Modal --}}
+<x-flowbite-modal id="example-modal" title="Modal Title">
+    <p>Modal content goes here</p>
+</x-flowbite-modal>
+
+{{-- Modal with Footer --}}
+<x-flowbite-modal 
+    id="confirm-modal" 
+    title="Confirm Action"
+    size="md"
+    :footer="'<button>Confirm</button>'"
+>
+    <p>Are you sure you want to proceed?</p>
+</x-flowbite-modal>
+
+{{-- Trigger Button --}}
+<button data-modal-target="example-modal" data-modal-toggle="example-modal">
+    Open Modal
+</button>
+```
+
+**Props:**
+- `id` (required) - Unique modal ID
+- `title` - Modal title
+- `size` - sm, md, lg, xl, 2xl, 3xl, 4xl, 5xl, 6xl, 7xl
+- `showCloseButton` - Show/hide close button (default: true)
+- `footer` - Footer content (HTML string)
+
+### Flowbite Alert
+
+```blade
+{{-- Basic Alert --}}
+<x-flowbite-alert type="info">
+    This is an info alert
+</x-flowbite-alert>
+
+{{-- Dismissible Alert --}}
+<x-flowbite-alert type="success" dismissible>
+    Operation completed successfully!
+</x-flowbite-alert>
+
+{{-- All Types --}}
+<x-flowbite-alert type="info">Info message</x-flowbite-alert>
+<x-flowbite-alert type="success">Success message</x-flowbite-alert>
+<x-flowbite-alert type="warning">Warning message</x-flowbite-alert>
+<x-flowbite-alert type="danger">Error message</x-flowbite-alert>
+```
+
+**Props:**
+- `type` - info, success, warning, danger
+- `dismissible` - Enable dismiss button (default: false)
+- `icon` - Show/hide icon (default: true)
+- `id` - Custom ID (auto-generated if not provided)
+
+### Flowbite Card
+
+```blade
+{{-- Basic Card --}}
+<x-flowbite-card title="Card Title" subtitle="Card subtitle">
+    <p>Card content</p>
+</x-flowbite-card>
+
+{{-- Card with Image --}}
+<x-flowbite-card 
+    title="Product Name"
+    image="/path/to/image.jpg"
+    imageAlt="Product"
+    href="/product/1"
+>
+    <p>Product description</p>
+</x-flowbite-card>
+
+{{-- Card with Footer --}}
+<x-flowbite-card title="Card Title" :footer="'<a href=\"#\">Learn More</a>'">
+    <p>Card content</p>
+</x-flowbite-card>
+```
+
+**Props:**
+- `title` - Card title
+- `subtitle` - Card subtitle
+- `image` - Image URL
+- `imageAlt` - Image alt text
+- `footer` - Footer content (HTML string)
+- `href` - Make card clickable (link)
+- `class` - Additional CSS classes
+
+### Flowbite Button
+
+```blade
+{{-- Primary Button --}}
+<x-flowbite-button variant="primary">Click Me</x-flowbite-button>
+
+{{-- Different Variants --}}
+<x-flowbite-button variant="primary">Primary</x-flowbite-button>
+<x-flowbite-button variant="secondary">Secondary</x-flowbite-button>
+<x-flowbite-button variant="success">Success</x-flowbite-button>
+<x-flowbite-button variant="danger">Danger</x-flowbite-button>
+<x-flowbite-button variant="warning">Warning</x-flowbite-button>
+<x-flowbite-button variant="info">Info</x-flowbite-button>
+
+{{-- Outline Buttons --}}
+<x-flowbite-button variant="primary" outline>Outline Primary</x-flowbite-button>
+
+{{-- Different Sizes --}}
+<x-flowbite-button size="xs">Extra Small</x-flowbite-button>
+<x-flowbite-button size="sm">Small</x-flowbite-button>
+<x-flowbite-button size="md">Medium</x-flowbite-button>
+<x-flowbite-button size="lg">Large</x-flowbite-button>
+<x-flowbite-button size="xl">Extra Large</x-flowbite-button>
+
+{{-- Pill Button --}}
+<x-flowbite-button variant="primary" pill>Pill Button</x-flowbite-button>
+
+{{-- Submit Button --}}
+<x-flowbite-button type="submit" variant="primary">Submit</x-flowbite-button>
+```
+
+**Props:**
+- `type` - button, submit, reset
+- `variant` - primary, secondary, success, danger, warning, info, light, dark
+- `size` - xs, sm, md, lg, xl
+- `pill` - Rounded pill style (default: false)
+- `outline` - Outline style (default: false)
+- `disabled` - Disable button (default: false)
+
+### Usage Examples
+
+```blade
+{{-- Modal with Alert --}}
+<x-flowbite-modal id="success-modal" title="Success">
+    <x-flowbite-alert type="success" dismissible>
+        Your changes have been saved!
+    </x-flowbite-alert>
+</x-flowbite-modal>
+
+{{-- Card with Button --}}
+<x-flowbite-card title="Donation" subtitle="Make a donation">
+    <p>Help support our cause</p>
+    <div class="mt-4">
+        <x-flowbite-button variant="primary" href="/donate">
+            Donate Now
+        </x-flowbite-button>
+    </div>
+</x-flowbite-card>
+```
+
+---
+>>>>>>> Stashed changes
 ## Additional Documentation
 
 > **📝 Add new documentation sections below this line.**
@@ -502,3 +667,73 @@ if (!auth()->user()->can('donations.create')) {
 > **Conventions: Follow the same style as existing sections.**
 
 ---
+
+
+## Provider Menu Management + Recipient Browsing (ECS-62)
+
+### Routes
+
+**All routes are defined in `routes/web.php`.**
+
+**Provider (Prefix: `/provider`, Middleware: `auth`, `account.approved`, `role:provider`)**
+- `GET /provider/menu-items` - List menu items
+- `GET /provider/menu-items/create` - Show create form
+- `POST /provider/menu-items` - Store new item
+- `GET /provider/menu-items/{item}/edit` - Show edit form
+- `PUT /provider/menu-items/{item}` - Update item
+- `DELETE /provider/menu-items/{item}` - Deactivate item (soft delete behavior)
+*(Note: `/provider/application` is accessible without approval)*
+
+**Recipient (Prefix: `/recipient`, Middleware: `auth`, `account.approved`, `role:recipient`)**
+- `GET /recipient/providers` - Browse providers
+- `GET /recipient/providers/{provider}` - View provider menu
+
+### Main Controllers
+
+- `App\Http\Controllers\Provider\MenuItemController`: Handles CRUD for provider's menu items. Ensures providers can only manage their own items.
+- `App\Http\Controllers\Recipient\ProviderMenuController`: Handles listing providers and showing their menus to recipients.
+
+### Views
+
+**Provider:**
+- `resources/views/provider/menu-items/index.blade.php`
+- `resources/views/provider/menu-items/create.blade.php`
+- `resources/views/provider/menu-items/edit.blade.php`
+
+**Recipient:**
+- `resources/views/recipient/providers/index.blade.php`
+- `resources/views/recipient/providers/show.blade.php`
+
+### Application Logic & Assumptions
+
+- **Menu Items:** Linked to `User` (provider) via `provider_id`.
+- **Provider Profile:** `ProviderProfile` is used to display business information. It is linked to `User` via `user_id`.
+- **Validation:** `StoreMenuItemRequest` and `UpdateMenuItemRequest` enforce validation rules.
+- **Deactivation:** Deleting a menu item sets `is_active` to `0` (false) instead of deleting the record, preserving history.
+
+### Manual Verification Steps
+
+1.  **Provider - Manage Menu:**
+    - Login as a **Provider**.
+    - Navigate to `/provider/menu-items`.
+    - Click "Add New Item". Fill form (Name, Price, Category) and submit.
+    - Verify item appears in the list.
+    - Click "Edit". Change price. Submit. Verify update.
+    - Click "Deactivate". Verify item status changes to Inactive.
+
+2.  **Recipient - Browse & View:**
+    - Login as a **Recipient**.
+    - Navigate to `/recipient/providers`.
+    - You should see a list of active providers.
+    - Click "View Menu & Order" on a provider.
+    - You should see the provider's details and their **active** menu items.
+    - Verify that inactive items (deactivated by provider) are NOT shown.
+
+3.  **Access Control:**
+    - As a Recipient, try to access `/provider/menu-items`. Expect **403 Forbidden**.
+    - As a Provider, try to edit another provider's item ID. Expect **404 Not Found**.
+
+### Test Data Notes
+
+- Ensure `ProviderProfile` exists for providers to be visible in the recipient list.
+- Required fields for `ProviderProfile`: `business_name_en`, `business_category` (array), `city`, `location`.

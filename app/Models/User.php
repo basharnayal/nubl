@@ -25,6 +25,61 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
+<<<<<<< Updated upstream
+=======
+     * Get the recipient profile (for recipient users only).
+     */
+    public function recipientProfile(): HasOne
+    {
+        return $this->hasOne(RecipientProfile::class);
+    }
+
+    /**
+     * Get the recipient KYC details (for recipient users only).
+     */
+    public function recipientKycDetails(): HasOne
+    {
+        return $this->hasOne(RecipientKycDetails::class);
+    }
+
+    public function providerProfile(): HasOne
+    {
+        return $this->hasOne(ProviderProfile::class, 'user_id');
+    }
+
+    public function providerOperatingInfo(): HasOne
+    {
+        return $this->hasOne(ProviderOperatingInfo::class);
+    }
+
+    public function providerFinancialInfo(): HasOne
+    {
+        return $this->hasOne(ProviderFinancialInfo::class);
+    }
+
+    public function providerDocuments(): HasOne
+    {
+        return $this->hasOne(ProviderDocuments::class);
+    }
+
+    /**
+     * Get the menu items for this provider (when user is a provider).
+     */
+    public function menuItems(): HasMany
+    {
+        return $this->hasMany(ProviderMenuItem::class, 'provider_id');
+    }
+
+    /**
+     * Check if the user has full access (not pending approval).
+     */
+    public function hasFullAccess(): bool
+    {
+        return $this->status == self::STATUS_ACTIVE;
+    }
+
+    /**
+>>>>>>> Stashed changes
      * The attributes that should be hidden for serialization.
      *
      * @var list<string>
