@@ -33,4 +33,9 @@ class ProviderProfile extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function menuItems(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ProviderMenuItem::class, 'provider_id', 'user_id');
+    }
 }

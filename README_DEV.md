@@ -757,3 +757,73 @@ Essential Flowbite Blade components for consistent UI across the application.
 > **Conventions: Follow the same style as existing sections.**
 
 ---
+
+
+## Provider Menu Management + Recipient Browsing (ECS-62)
+
+### Routes
+
+**All routes are defined in `routes/web.php`.**
+
+**Provider (Prefix: `/provider`, Middleware: `auth`, `account.approved`, `role:provider`)**
+- `GET /provider/menu-items` - List menu items
+- `GET /provider/menu-items/create` - Show create form
+- `POST /provider/menu-items` - Store new item
+- `GET /provider/menu-items/{item}/edit` - Show edit form
+- `PUT /provider/menu-items/{item}` - Update item
+- `DELETE /provider/menu-items/{item}` - Deactivate item (soft delete behavior)
+*(Note: `/provider/application` is accessible without approval)*
+
+**Recipient (Prefix: `/recipient`, Middleware: `auth`, `account.approved`, `role:recipient`)**
+- `GET /recipient/providers` - Browse providers
+- `GET /recipient/providers/{provider}` - View provider menu
+
+### Main Controllers
+
+- `App\Http\Controllers\Provider\MenuItemController`: Handles CRUD for provider's menu items. Ensures providers can only manage their own items.
+- `App\Http\Controllers\Recipient\ProviderMenuController`: Handles listing providers and showing their menus to recipients.
+
+### Views
+
+**Provider:**
+- `resources/views/provider/menu-items/index.blade.php`
+- `resources/views/provider/menu-items/create.blade.php`
+- `resources/views/provider/menu-items/edit.blade.php`
+
+**Recipient:**
+- `resources/views/recipient/providers/index.blade.php`
+- `resources/views/recipient/providers/show.blade.php`
+
+### Application Logic & Assumptions
+
+- **Menu Items:** Linked to `User` (provider) via `provider_id`.
+- **Provider Profile:** `ProviderProfile` is used to display business information. It is linked to `User` via `user_id`.
+- **Validation:** `StoreMenuItemRequest` and `UpdateMenuItemRequest` enforce validation rules.
+- **Deactivation:** Deleting a menu item sets `is_active` to `0` (false) instead of deleting the record, preserving history.
+
+### Manual Verification Steps
+
+1.  **Provider - Manage Menu:**
+    - Login as a **Provider**.
+    - Navigate to `/provider/menu-items`.
+    - Click "Add New Item". Fill form (Name, Price, Category) and submit.
+    - Verify item appears in the list.
+    - Click "Edit". Change price. Submit. Verify update.
+    - Click "Deactivate". Verify item status changes to Inactive.
+
+2.  **Recipient - Browse & View:**
+    - Login as a **Recipient**.
+    - Navigate to `/recipient/providers`.
+    - You should see a list of active providers.
+    - Click "View Menu & Order" on a provider.
+    - You should see the provider's details and their **active** menu items.
+    - Verify that inactive items (deactivated by provider) are NOT shown.
+
+3.  **Access Control:**
+    - As a Recipient, try to access `/provider/menu-items`. Expect **403 Forbidden**.
+    - As a Provider, try to edit another provider's item ID. Expect **404 Not Found**.
+
+### Test Data Notes
+
+- Ensure `ProviderProfile` exists for providers to be visible in the recipient list.
+- Required fields for `ProviderProfile`: `business_name_en`, `business_category` (array), `city`, `location`.

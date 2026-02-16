@@ -18,6 +18,7 @@ class ProviderMenuItem extends Model
         'sku',
         'max_per_request',
         'is_active',
+        'image_path',
     ];
 
     protected function casts(): array
@@ -26,6 +27,11 @@ class ProviderMenuItem extends Model
             'price' => 'decimal:2',
             'is_active' => 'boolean',
         ];
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image_path ? asset('storage/' . $this->image_path) : null;
     }
 
     public function provider(): BelongsTo
@@ -39,5 +45,13 @@ class ProviderMenuItem extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope to items owned by a specific provider.
+     */
+    public function scopeOwnedBy($query, $userId)
+    {
+        return $query->where('provider_id', $userId);
     }
 }

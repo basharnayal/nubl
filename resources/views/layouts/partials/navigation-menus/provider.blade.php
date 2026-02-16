@@ -8,7 +8,7 @@
     <x-nav-link href="#" :active="request()->is('provider/fulfillments*')">
         {{ __('Fulfillments') }}
     </x-nav-link>
-    <x-nav-link href="#" :active="request()->is('provider/inventory*')">
+    <x-nav-link :href="route('provider.menu-items.index')" :active="request()->routeIs('provider.menu-items.*')">
         {{ __('Inventory') }}
     </x-nav-link>
     <x-nav-link href="#" :active="request()->is('provider/schedule*')">
@@ -27,7 +27,7 @@
     <x-responsive-nav-link href="#" :active="request()->is('provider/fulfillments*')">
         {{ __('Fulfillments') }}
     </x-responsive-nav-link>
-    <x-responsive-nav-link href="#" :active="request()->is('provider/inventory*')">
+    <x-responsive-nav-link :href="route('provider.menu-items.index')" :active="request()->routeIs('provider.menu-items.*')">
         {{ __('Inventory') }}
     </x-responsive-nav-link>
     <x-responsive-nav-link href="#" :active="request()->is('provider/schedule*')">

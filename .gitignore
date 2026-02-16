@@ -22,3 +22,9 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Local debug outputs
+output.txt
+routes_dump*.txt
+test_output.txt
+

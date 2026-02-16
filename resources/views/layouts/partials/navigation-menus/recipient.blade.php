@@ -5,7 +5,7 @@
     <x-nav-link :href="route('recipient.dashboard')" :active="request()->routeIs('recipient.dashboard')">
         {{ __('Dashboard') }}
     </x-nav-link>
-    <x-nav-link :href="route('recipient.providers.list')" :active="request()->routeIs('recipient.providers.list')">
+    <x-nav-link :href="route('recipient.providers.index')" :active="request()->routeIs('recipient.providers.*')">
         {{ __('Available providers') }}
     </x-nav-link>
     <x-nav-link href="#" :active="request()->is('recipient/requests*')">
@@ -21,7 +21,8 @@
     <x-responsive-nav-link :href="route('recipient.dashboard')" :active="request()->routeIs('recipient.dashboard')">
         {{ __('Dashboard') }}
     </x-responsive-nav-link>
-    <x-responsive-nav-link :href="route('recipient.providers.list')" :active="request()->routeIs('recipient.providers.list')">
+    <x-responsive-nav-link :href="route('recipient.providers.index')"
+        :active="request()->routeIs('recipient.providers.*')">
         {{ __('Available providers') }}
     </x-responsive-nav-link>
     <x-responsive-nav-link href="#" :active="request()->is('recipient/requests*')">

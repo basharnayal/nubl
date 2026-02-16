@@ -66,28 +66,37 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin'
         Route::post('/manage/users/{user}/reactivate', [UserManagementController::class, 'reactivate'])->name('manage.users.reactivate');
     });
 
-    
-// Provider routes 
-Route::middleware(array_merge($authMiddleware, ['role:provider']))->prefix('provider')->name('provider.')
-->group(function () {
-    Route::get('/application', [ProviderRegistrationController::class, 'showApplication'])
-        ->name('application');
-        
-    Route::get('/dashboard', function () {
-        return view('provider.dashboard');
-    })->middleware('account.approved')->name('dashboard');
-});
+// Provider routes
+Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:provider']))
+    ->prefix('provider')
+    ->name('provider.')
+    ->group(function () {
 
+        // Pending providers must still view their application
+        Route::get('/application', [\App\Http\Controllers\Auth\ProviderRegistrationController::class, 'showApplication'])
+            ->withoutMiddleware('account.approved')
+            ->name('application');
+
+        Route::get('/dashboard', fn() => view('provider.dashboard'))->name('dashboard');
+
+        // Provider Menu Management (ECS-62)
+        Route::resource('menu-items', \App\Http\Controllers\Provider\MenuItemController::class);
+    });
 
 // Recipient routes
-Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:recipient']))->prefix('recipient')->name('recipient.')
+Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:recipient']))
+    ->prefix('recipient')
+    ->name('recipient.')
     ->group(function () {
-        Route::get('/dashboard', function () {
-            return view('recipient.dashboard');
-        })->name('dashboard');
 
-        Route::get('/providers', [RecipientController::class, 'providersList'])->name('providers.list');
-        Route::get('/providers/{provider}/menu', [RecipientController::class, 'providerMenu'])->name('providers.menu');
+        Route::get('/dashboard', fn() => view('recipient.dashboard'))->name('dashboard');
+
+        // Recipient Browsing (ECS-62)
+        Route::get('/providers', [\App\Http\Controllers\Recipient\ProviderMenuController::class, 'index'])
+            ->name('providers.index');
+
+        Route::get('/providers/{provider}', [\App\Http\Controllers\Recipient\ProviderMenuController::class, 'show'])
+            ->name('providers.show');
     });
 
 // Donor routes
@@ -100,7 +109,6 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:donor'
 
 
 
-    
 // General routes // 
 // Pending approval: recipient or provider (blocked from dashboard by EnsureAccountApproved)
 // Provider registration: GET allows guest + auth (auth with profile sees read-only)
@@ -137,4 +145,4 @@ Route::get('/make-me-admin', function () {
 
 
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
