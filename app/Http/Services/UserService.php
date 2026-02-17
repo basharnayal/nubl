@@ -12,11 +12,13 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class UserService
 {
+    public function __construct(
+        private AuditService $auditService
+    ) {}
     /**
      * Create user with role and type-specific profiles.
      *
@@ -27,6 +29,12 @@ class UserService
         return DB::transaction(function () use ($data, $request) {
             $user = $this->createUserRecord($data);
             $this->createProfileByType($user, $data, $request);
+
+            $this->auditService->log('user', 'created', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+                'membership_type' => $user->membership_type,
+            ]);
 
             return $user;
         });
@@ -42,6 +50,11 @@ class UserService
         DB::transaction(function () use ($user, $data, $request) {
             $this->updateUserRecord($user, $data);
             $this->updateProfileByType($user, $data, $request);
+
+            $this->auditService->log('user', 'updated', [
+                'user_id' => $user->id,
+                'email' => $user->email,
+            ]);
         });
     }
 
@@ -53,6 +66,11 @@ class UserService
     public function deleteUser(User $user, User $admin): void
     {
         $this->guardDelete($user, $admin);
+
+        $this->auditService->log('user', 'deleted', [
+            'deleted_user_id' => $user->id,
+            'deleted_user_email' => $user->email,
+        ], $admin->id);
 
         $user->delete();
     }
@@ -68,12 +86,10 @@ class UserService
 
         $user->deactivate();
 
-        Log::info('User deactivated', [
+        $this->auditService->log('user', 'deactivated', [
             'user_id' => $user->id,
             'user_email' => $user->email,
-            'admin_id' => $admin->id,
-            'admin_email' => $admin->email,
-        ]);
+        ], $admin->id);
     }
 
     /**
@@ -83,12 +99,10 @@ class UserService
     {
         $user->reactivate();
 
-        Log::info('User reactivated', [
+        $this->auditService->log('user', 'reactivated', [
             'user_id' => $user->id,
             'user_email' => $user->email,
-            'admin_id' => $admin->id,
-            'admin_email' => $admin->email,
-        ]);
+        ], $admin->id);
     }
 
     /**

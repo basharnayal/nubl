@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Http\Controllers\Provider;
+
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Provider\StoreMenuItemRequest;
 use App\Http\Requests\Provider\UpdateMenuItemRequest;
+use App\Http\Services\AuditService;
 use App\Models\ProviderMenuItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -11,6 +13,10 @@ use Illuminate\Support\Facades\Storage;
 
 class MenuItemController extends Controller
 {
+    public function __construct(
+        private AuditService $auditService
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
@@ -56,7 +62,13 @@ class MenuItemController extends Controller
             $data['image_path'] = $path;
         }
 
-        ProviderMenuItem::create($data);
+        $menuItem = ProviderMenuItem::create($data);
+
+        $this->auditService->log('menu_item', 'created', [
+            'menu_item_id' => $menuItem->id,
+            'name' => $menuItem->name,
+            'category' => $menuItem->category,
+        ]);
 
         return redirect()->route('provider.menu-items.index')
             ->with('success', 'Menu item created successfully.');
@@ -92,6 +104,11 @@ class MenuItemController extends Controller
 
         $menuItem->update($data);
 
+        $this->auditService->log('menu_item', 'updated', [
+            'menu_item_id' => $menuItem->id,
+            'name' => $menuItem->name,
+        ]);
+
         return redirect()->route('provider.menu-items.index')
             ->with('success', 'Menu item updated successfully.');
     }
@@ -116,6 +133,11 @@ class MenuItemController extends Controller
         // Actually, user explicitly said: "set is_active = 0 if column exists (it does)"
 
         $menuItem->update(['is_active' => false]);
+
+        $this->auditService->log('menu_item', 'deactivated', [
+            'menu_item_id' => $menuItem->id,
+            'name' => $menuItem->name,
+        ]);
 
         return redirect()->route('provider.menu-items.index')
             ->with('success', 'Menu item deactivated successfully.');

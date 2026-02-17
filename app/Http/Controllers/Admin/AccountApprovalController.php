@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Services\AuditService;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -12,6 +13,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AccountApprovalController extends Controller
 {
+    public function __construct(
+        private AuditService $auditService
+    ) {}
+
     public function index(): View
     {
         $pendingUsers = User::whereIn('status', [User::STATUS_PENDING_APPROVAL, User::STATUS_REJECTED])
@@ -31,6 +36,12 @@ class AccountApprovalController extends Controller
         }
 
         $user->update(['status' => User::STATUS_ACTIVE, 'rejection_reason' => null]);
+
+        $this->auditService->log('account_approval', 'approved', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'membership_type' => $user->membership_type,
+        ]);
 
         return redirect()->route('admin.users.pending')->with('success', __('Account approved successfully.'));
     }
@@ -56,6 +67,12 @@ class AccountApprovalController extends Controller
 
         $user->update([
             'status' => User::STATUS_REJECTED,
+            'rejection_reason' => $validated['rejection_reason'],
+        ]);
+
+        $this->auditService->log('account_approval', 'rejected', [
+            'user_id' => $user->id,
+            'email' => $user->email,
             'rejection_reason' => $validated['rejection_reason'],
         ]);
 

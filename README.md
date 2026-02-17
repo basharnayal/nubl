@@ -14,6 +14,7 @@ A digital platform for neighborhood-based food assistance (sadaqah) that connect
 - **Build Tool**: Vite
 - **Authentication**: Laravel Sanctum
 - **Authorization**: Spatie Laravel Permission
+- **Audit Logging**: Spatie Laravel Activity Log
 - **Database**: MySQL
 
 **Note**: This project explicitly does NOT use Vue, React, Livewire, or SPA frontend.
@@ -58,6 +59,8 @@ php artisan key:generate
 php artisan migrate
 php artisan vendor:publish --provider="Spatie\Permission\PermissionServiceProvider"
 php artisan db:seed --class=RoleSeeder
+
+# Activity Log migrations are auto-loaded; run migrate if not yet run
 
 # 5. Build Assets
 npm run build
@@ -336,6 +339,48 @@ $user->hasAllRoles(['admin', 'donor']); // Returns true/false
 
 ---
 
+## 📝 Spatie Activity Log (Audit)
+
+This project uses **Spatie Laravel Activity Log** for audit logging. Important events (user actions, approvals, menu changes, etc.) are recorded in the `activity_log` table.
+
+### Usage via AuditService
+
+Use the `AuditService` for consistent logging across the app:
+
+```php
+// In a Service or Controller (inject AuditService)
+$this->auditService->log('entity', 'action', [
+    'entity_id' => 123,
+    'extra_data' => 'value',
+], $userId); // $userId optional, defaults to auth()->user()
+```
+
+### Current Audit Points
+
+| Entity           | Actions                          | Location                    |
+|-----------------|-----------------------------------|-----------------------------|
+| `user`          | created, updated, deleted, deactivated, reactivated | `UserService`               |
+| `account_approval` | approved, rejected             | `AccountApprovalController` |
+| `menu_item`     | created, updated, deactivated     | `MenuItemController`        |
+| `donation`      | confirmed                         | `DonationService` (when used) |
+
+### Direct Spatie Usage (optional)
+
+For one-off logs without AuditService:
+
+```php
+activity()->log('Something happened');
+activity()->causedBy($user)->withProperties(['key' => 'value'])->log('custom.event');
+```
+
+### Important Files
+
+- **Service**: `app/Http/Services/AuditService.php` - Wrapper for consistent audit API
+- **Table**: `activity_log` - Stores all audit entries
+- **Docs**: [Spatie Activity Log](https://spatie.be/docs/laravel-activitylog)
+
+---
+
 ## 🏛️ Architecture Best Practices
 
 ### Service Layer Pattern
@@ -528,6 +573,7 @@ php artisan migrate:fresh --seed
 - `laravel/framework` ^12.0 - Core Laravel
 - `laravel/sanctum` ^4.3 - API Authentication
 - `spatie/laravel-permission` ^6.24 - Roles & Permissions
+- `spatie/laravel-activitylog` ^4.11 - Audit Logging
 
 ### NPM Packages
 - `tailwindcss` ^4.1.18 - CSS Framework
@@ -544,6 +590,7 @@ php artisan migrate:fresh --seed
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 - [Flowbite Documentation](https://flowbite.com/docs)
 - [Spatie Laravel Permission](https://spatie.be/docs/laravel-permission)
+- [Spatie Laravel Activity Log](https://spatie.be/docs/laravel-activitylog)
 - [Alpine.js Documentation](https://alpinejs.dev)
 
 ---
