@@ -64,6 +64,10 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin'
         Route::delete('/manage/users/{user}', [UserManagementController::class, 'destroy'])->name('manage.users.destroy');
         Route::post('/manage/users/{user}/deactivate', [UserManagementController::class, 'deactivate'])->name('manage.users.deactivate');
         Route::post('/manage/users/{user}/reactivate', [UserManagementController::class, 'reactivate'])->name('manage.users.reactivate');
+
+        // Admin Request Management (ECS-63)
+        Route::get('/requests', [\App\Http\Controllers\Admin\AdminRequestController::class, 'index'])->name('requests.index');
+        Route::put('/requests/{request}', [\App\Http\Controllers\Admin\AdminRequestController::class, 'update'])->name('requests.update');
     });
 
 // Provider routes
@@ -81,6 +85,17 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:provid
 
         // Provider Menu Management (ECS-62)
         Route::resource('menu-items', \App\Http\Controllers\Provider\MenuItemController::class);
+
+        // Provider Requests (ECS-63)
+        Route::resource('requests', \App\Http\Controllers\Provider\ProviderRequestController::class)
+            ->only(['index', 'show', 'update']);
+
+        // Toggle Active
+        Route::post('/profile/toggle-active', [\App\Http\Controllers\Provider\ProviderProfileController::class, 'toggleActive'])
+            ->name('profile.toggle-active');
+
+        Route::get('/profile/edit', [\App\Http\Controllers\Provider\ProviderProfileController::class, 'edit'])
+            ->name('profile.edit');
     });
 
 // Recipient routes
@@ -97,6 +112,15 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:recipi
 
         Route::get('/providers/{provider}', [\App\Http\Controllers\Recipient\ProviderMenuController::class, 'show'])
             ->name('providers.show');
+
+        // Recipient Request Submission
+        Route::resource('requests', \App\Http\Controllers\Recipient\RecipientRequestController::class)
+            ->only(['index', 'show', 'store']);
+    });
+
+Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:provider']))
+    ->prefix('provider')->name('provider.')->group(function () {
+        // ... (existing provider routes wrapper usually, but here we just append to the existing group if possible, or new one)
     });
 
 // Donor routes

@@ -5,7 +5,7 @@
     <x-nav-link :href="route('provider.dashboard')" :active="request()->routeIs('provider.dashboard')">
         {{ __('Dashboard') }}
     </x-nav-link>
-    <x-nav-link href="#" :active="request()->is('provider/fulfillments*')">
+    <x-nav-link :href="route('provider.requests.index')" :active="request()->routeIs('provider.requests.*')">
         {{ __('Fulfillments') }}
     </x-nav-link>
     <x-nav-link :href="route('provider.menu-items.index')" :active="request()->routeIs('provider.menu-items.*')">
@@ -24,10 +24,11 @@
     <x-responsive-nav-link :href="route('provider.dashboard')" :active="request()->routeIs('provider.dashboard')">
         {{ __('Dashboard') }}
     </x-responsive-nav-link>
-    <x-responsive-nav-link href="#" :active="request()->is('provider/fulfillments*')">
+    <x-responsive-nav-link :href="route('provider.requests.index')" :active="request()->routeIs('provider.requests.*')">
         {{ __('Fulfillments') }}
     </x-responsive-nav-link>
-    <x-responsive-nav-link :href="route('provider.menu-items.index')" :active="request()->routeIs('provider.menu-items.*')">
+    <x-responsive-nav-link :href="route('provider.menu-items.index')"
+        :active="request()->routeIs('provider.menu-items.*')">
         {{ __('Inventory') }}
     </x-responsive-nav-link>
     <x-responsive-nav-link href="#" :active="request()->is('provider/schedule*')">
