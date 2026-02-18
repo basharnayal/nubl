@@ -14,9 +14,9 @@ use App\Http\Controllers\Admin\AccountApprovalController;
 use App\Http\Controllers\Recipient\RecipientController;
 use App\Http\Controllers\Admin\UserManagementController;
 
-// Auth middleware: requires email verification if EMAIL_VERIFICATION_ENABLED=true
-$authMiddleware = config('app.email_verification_enabled', true)
-    ? ['auth', 'email.verified']
+// Auth middleware: phone OTP is primary verification; email remains optional
+$authMiddleware = config('app.phone_verification_enabled', true)
+    ? ['auth', 'phone.verified']
     : ['auth'];
 
 Route::get('/', function () {
@@ -116,7 +116,7 @@ Route::get('/register/provider', [ProviderRegistrationController::class, 'create
 
 Route::get('/approval-pending', function () {
     return view('auth.approval-pending');
-})->middleware('auth')->name('approval.pending');
+})->middleware($authMiddleware)->name('approval.pending');
 
 
 

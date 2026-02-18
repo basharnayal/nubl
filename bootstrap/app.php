@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'permission' => \App\Http\Middleware\EnsurePermission::class,
             'redirect.by.role' => \App\Http\Middleware\RedirectByRole::class,
             'email.verified' => \App\Http\Middleware\EnsureEmailVerified::class,
+            'phone.verified' => \App\Http\Middleware\EnsurePhoneVerified::class,
             'account.approved' => \App\Http\Middleware\EnsureAccountApproved::class,
         ]);
     

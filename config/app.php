@@ -96,7 +96,7 @@ return [
     */
 
     'email_verification_enabled' => env('EMAIL_VERIFICATION_ENABLED', true),
-
+    'phone_verification_enabled' => env('PHONE_VERIFICATION_ENABLED', true),
     /*
     |--------------------------------------------------------------------------
     | Encryption Key

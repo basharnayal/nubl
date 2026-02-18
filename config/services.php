@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'taqnyat' => [
+        'bearer' => env('TAQNYAT_BEARER_TOKEN'),
+        'sender' => env('TAQNYAT_SENDER_NAME', 'NUBL'),
+    ],
+
 ];

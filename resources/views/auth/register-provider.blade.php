@@ -12,7 +12,7 @@
             1 => ['full_name_ar', 'full_name_en', 'phone_number', 'email', 'business_name_ar', 'business_name_en', 'unified_number', 'business_category', 'address_ar', 'address_en', 'city', 'region', 'location'],
             2 => array_merge(['daily_capacity', 'service_type', 'estimated_preparation_order_time', 'adoption_support'], array_map(fn($d) => "operating_hours.{$d}", array_keys(config('provider.weekdays')))),
             3 => ['bank_name', 'iban', 'account_holder_name'],
-            4 => ['business_license', 'id_or_iqama', 'password', 'password_confirmation'],
+            4 => ['business_license', 'id_or_iqama', 'password'],
         ];
         $initialStep = 1;
         if (!$readonly && $errors->any()) {
@@ -357,11 +357,6 @@
                         <x-input-label for="password" :value="__('Password')" required />
                         <x-text-input id="password" name="password" type="password" class="block mt-1 w-full" required autocomplete="new-password" />
                         <x-input-error :messages="$errors->get('password')" class="mt-2" />
-                    </div>
-                    <div>
-                        <x-input-label for="password_confirmation" :value="__('Confirm Password')" required />
-                        <x-text-input id="password_confirmation" name="password_confirmation" type="password" class="block mt-1 w-full" required autocomplete="new-password" />
-                        <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                     </div>
                 </div>
 

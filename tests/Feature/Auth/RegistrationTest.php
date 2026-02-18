@@ -33,7 +33,6 @@ class RegistrationTest extends TestCase
             'phone_number' => '0501234567',
             'email' => 'donor@example.com',
             'password' => 'password',
-            'password_confirmation' => 'password',
         ]);
 
         $this->assertAuthenticated();
@@ -41,7 +40,7 @@ class RegistrationTest extends TestCase
             'email' => 'donor@example.com',
             'membership_type' => 'donor',
             'status' => 'active',
-            'phone_number' => '0501234567',
+            'phone_number' => '966501234567',
         ]);
         $response->assertRedirect(route('dashboard', absolute: false));
     }
@@ -52,7 +51,6 @@ class RegistrationTest extends TestCase
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => 'password',
-            'password_confirmation' => 'password',
         ]);
 
         $response->assertSessionHasErrors('membership_type');

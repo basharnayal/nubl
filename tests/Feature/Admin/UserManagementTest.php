@@ -83,7 +83,7 @@ class UserManagementTest extends TestCase
             'password' => 'password123',
             'password_confirmation' => 'password123',
             'membership_type' => 'donor',
-            'phone_number' => '0501234567',
+            'phone_number' => '966501234567',
         ]);
 
         $response->assertRedirect(route('admin.manage.users.index'));
@@ -107,7 +107,7 @@ class UserManagementTest extends TestCase
             'name' => 'Updated Name',
             'email' => $user->email,
             'membership_type' => 'donor',
-            'phone_number' => '0509876543',
+            'phone_number' => '966509876543',
             'password' => '',
         ]);
 
@@ -116,7 +116,7 @@ class UserManagementTest extends TestCase
 
         $user->refresh();
         $this->assertSame('Updated Name', $user->name);
-        $this->assertSame('0509876543', $user->phone_number);
+        $this->assertSame('966509876543', $user->phone_number);
     }
 
     public function test_admin_can_delete_user(): void

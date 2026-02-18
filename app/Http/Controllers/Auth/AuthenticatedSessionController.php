@@ -36,7 +36,10 @@ class AuthenticatedSessionController extends Controller
                 'email' => __('Your account has been deactivated. Please contact support.'),
             ]);
         }
-        if (config('app.email_verification_enabled', true) && !$user->hasVerifiedEmail()) {
+        if (config('app.phone_verification_enabled', true) && ! $user->hasVerifiedPhone()) {
+            return redirect()->route('verification.phone');
+        }
+        if (config('app.email_verification_enabled', true) && ! $user->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');
         }
         if (in_array($user->status, [User::STATUS_PENDING_APPROVAL, User::STATUS_REJECTED])) {

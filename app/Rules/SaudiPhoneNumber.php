@@ -2,14 +2,15 @@
 
 namespace App\Rules;
 
+use App\Helpers\PhoneHelper;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
 class SaudiPhoneNumber implements ValidationRule
 {
     /**
-     * Saudi phone format: (009665|9665|\+9665|05|5)(5|0|3|6|4|9|1|8|7)([0-9]{7})
-     * Validates international (+966/00966), standard (966), or local (05/5) format.
+     * Saudi phone format: 9 digits starting with 5, 1, or 2.
+     * Accepts: 05XXXXXXXX, 5XXXXXXXX, +9665..., 9665..., 009665...
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -18,10 +19,7 @@ class SaudiPhoneNumber implements ValidationRule
             return;
         }
 
-        $normalized = preg_replace('/\s+/', '', $value);
-        $pattern = '/^(009665|9665|\+9665|05|5)(5|0|3|6|4|9|1|8|7)([0-9]{7})$/';
-
-        if (! preg_match($pattern, $normalized)) {
+        if (! PhoneHelper::isValid($value)) {
             $fail(__('The :attribute must be a valid Saudi phone number (e.g. 05XXXXXXXX).'));
         }
     }

@@ -38,6 +38,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'membership_type',
         'status',
         'phone_number',
+        'phone_verified_at',
         'rejection_reason',
         'is_active',
     ];
@@ -113,9 +114,22 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return [
             'email_verified_at' => 'datetime',
+            'phone_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
         ];
+    }
+
+    /**
+     * Find user by normalized phone (users.phone_number or provider_profile.phone_number).
+     */
+    public static function findByPhone(string $normalizedPhone): ?self
+    {
+        $user = static::where('phone_number', $normalizedPhone)->first();
+        if ($user) {
+            return $user;
+        }
+        return static::whereHas('providerProfile', fn ($q) => $q->where('phone_number', $normalizedPhone))->first();
     }
 
     /**
@@ -159,6 +173,26 @@ class User extends Authenticatable implements MustVerifyEmail
             return false;
         }
         return !in_array($this->status, [self::STATUS_PENDING_APPROVAL, self::STATUS_REJECTED]);
+    }
+
+    /**
+     * Check if phone verification is required (primary verification method).
+     */
+    public static function phoneVerificationRequired(): bool
+    {
+        return config('app.phone_verification_enabled', true);
+    }
+
+    /**
+     * Check if user's phone is verified.
+     */
+    public function hasVerifiedPhone(): bool
+    {
+        if (! self::phoneVerificationRequired()) {
+            return true;
+        }
+
+        return $this->phone_verified_at !== null;
     }
 
     /**

@@ -33,7 +33,7 @@
 
                     <div>
                         <x-input-label for="phone_number" :value="__('Phone (Saudi)')" required />
-                        <x-text-input id="phone_number" name="phone_number" type="tel" value="{{ old('phone_number', $user->phone_number ?? $user->providerProfile?->phone_number) }}" placeholder="05XXXXXXXX" class="block mt-1 w-full" maxlength="10" required />
+                        <x-text-input id="phone_number" name="phone_number" type="tel" value="{{ old('phone_number', ($user->phone_number ?? $user->providerProfile?->phone_number) ? \App\Helpers\PhoneHelper::formatForInput($user->phone_number ?? $user->providerProfile?->phone_number) : '') }}" placeholder="05XXXXXXXX" class="block mt-1 w-full" maxlength="10" required />
                         <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
                     </div>
 

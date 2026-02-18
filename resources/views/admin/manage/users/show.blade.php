@@ -20,7 +20,7 @@
                     <div><dt class="text-sm text-gray-500">ID</dt><dd class="text-gray-900">{{ $user->id }}</dd></div>
                     <div><dt class="text-sm text-gray-500">{{ __('Name') }}</dt><dd class="text-gray-900">{{ $user->name }}</dd></div>
                     <div><dt class="text-sm text-gray-500">{{ __('Email') }}</dt><dd class="text-gray-900">{{ $user->email }}</dd></div>
-                    <div><dt class="text-sm text-gray-500">{{ __('Phone') }}</dt><dd class="text-gray-900">{{ $user->phone_number ?? $user->providerProfile?->phone_number ?? '-' }}</dd></div>
+                    <div><dt class="text-sm text-gray-500">{{ __('Phone') }}</dt><dd class="text-gray-900">{{ $user->phone_number || $user->providerProfile?->phone_number ? \App\Helpers\PhoneHelper::formatForDisplay($user->phone_number ?? $user->providerProfile?->phone_number) : '-' }}</dd></div>
                     <div><dt class="text-sm text-gray-500">{{ __('Role') }}</dt><dd class="text-gray-900">{{ $user->roles->pluck('name')->implode(', ') ?: '-' }}</dd></div>
                     <div><dt class="text-sm text-gray-500">{{ __('Membership') }}</dt><dd class="text-gray-900">{{ ucfirst($user->membership_type ?? '-') }}</dd></div>
                     <div><dt class="text-sm text-gray-500">{{ __('Status') }}</dt>
@@ -44,7 +44,7 @@
                     <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div><dt class="text-sm text-gray-500">{{ __('Name') }}</dt><dd class="text-gray-900">{{ $user->name }}</dd></div>
                         <div><dt class="text-sm text-gray-500">{{ __('Email') }}</dt><dd class="text-gray-900">{{ $user->email }}</dd></div>
-                        <div><dt class="text-sm text-gray-500">{{ __('Phone') }}</dt><dd class="text-gray-900">{{ $user->phone_number ?? '-' }}</dd></div>
+                        <div><dt class="text-sm text-gray-500">{{ __('Phone') }}</dt><dd class="text-gray-900">{{ $user->phone_number ? \App\Helpers\PhoneHelper::formatForDisplay($user->phone_number) : '-' }}</dd></div>
                         <div><dt class="text-sm text-gray-500">{{ __('Nationality') }}</dt><dd class="text-gray-900">{{ $user->recipientProfile->nationality ?? '-' }}</dd></div>
                         <div><dt class="text-sm text-gray-500">{{ __('ID Type') }}</dt><dd class="text-gray-900">{{ ucfirst(str_replace('_', ' ', $user->recipientProfile->id_type ?? '-')) }}</dd></div>
                         <div><dt class="text-sm text-gray-500">{{ __('Address') }}</dt><dd class="text-gray-900">{{ $user->recipientProfile->short_address ?? '-' }}</dd></div>
@@ -118,7 +118,7 @@
                         <div><x-input-label :value="__('Full Name (English)')" /><p class="mt-1 text-gray-900">{{ $profile->full_name_en ?? '-' }}</p></div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                        <div><x-input-label :value="__('Phone')" /><p class="mt-1 text-gray-900">{{ $profile->phone_number ?? $user->phone_number ?? '-' }}</p></div>
+                        <div><x-input-label :value="__('Phone')" /><p class="mt-1 text-gray-900">{{ ($profile->phone_number ?? $user->phone_number) ? \App\Helpers\PhoneHelper::formatForDisplay($profile->phone_number ?? $user->phone_number) : '-' }}</p></div>
                         <div><x-input-label :value="__('Email')" /><p class="mt-1 text-gray-900">{{ $profile->email ?? $user->email ?? '-' }}</p></div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">

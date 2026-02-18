@@ -17,6 +17,8 @@ use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\OtpLoginController;
+use App\Http\Controllers\Auth\PhoneVerificationController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
@@ -34,6 +36,14 @@ Route::middleware('guest')->group(function () {
 
     Route::post('login', [AuthenticatedSessionController::class, 'store']);
 
+    Route::post('login/otp/request', [OtpLoginController::class, 'requestOtp'])
+        ->middleware('throttle:6,1')
+        ->name('login.otp.request');
+
+    Route::post('login/otp/verify', [OtpLoginController::class, 'verify'])
+        ->middleware('throttle:6,1')
+        ->name('login.otp.verify');
+
     Route::get('forgot-password', [PasswordResetLinkController::class, 'create'])
         ->name('password.request');
 
@@ -49,6 +59,15 @@ Route::middleware('guest')->group(function () {
 
 // Authenticated users only
 Route::middleware('auth')->group(function () {
+    Route::get('verify-phone', [PhoneVerificationController::class, 'show'])
+        ->name('verification.phone');
+    Route::post('verify-phone', [PhoneVerificationController::class, 'verify'])
+        ->middleware('throttle:6,1')
+        ->name('verification.phone.verify');
+    Route::post('verify-phone/resend', [PhoneVerificationController::class, 'resend'])
+        ->middleware('throttle:6,1')
+        ->name('verification.phone.resend');
+
     Route::get('verify-email', EmailVerificationPromptController::class)
         ->name('verification.notice');
 

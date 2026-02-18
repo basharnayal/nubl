@@ -59,7 +59,7 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $user->id }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $user->name }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $user->email }}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $user->phone_number ?? $user->providerProfile?->phone_number ?? '-' }}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $user->phone_number || $user->providerProfile?->phone_number ? \App\Helpers\PhoneHelper::formatForDisplay($user->phone_number ?? $user->providerProfile?->phone_number) : '-' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ $user->roles->pluck('name')->implode(',') ?: '-' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($user->is_active)

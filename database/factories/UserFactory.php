@@ -31,7 +31,7 @@ class UserFactory extends Factory
             'remember_token' => Str::random(10),
             'membership_type' => \App\Models\User::MEMBERSHIP_DONOR,
             'status' => \App\Models\User::STATUS_ACTIVE,
-            'phone_number' => '0501234567',
+            'phone_number' => '9665' . fake()->unique()->numerify('########'),
             'is_active' => true,
         ];
     }

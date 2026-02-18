@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\PhoneHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Services\OtpService;
 use App\Models\ProviderDocuments;
 use App\Models\ProviderFinancialInfo;
 use App\Models\ProviderOperatingInfo;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use App\Rules\SaudiPhoneNumber;
+use App\Rules\SaudiPhoneUnique;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,6 +28,10 @@ use Illuminate\View\View;
  */
 class ProviderRegistrationController extends Controller
 {
+    public function __construct(
+        private OtpService $otpService
+    ) {}
+
     public function create(Request $request): View|RedirectResponse
     {
         // If provider already submitted, show read-only view
@@ -68,7 +75,7 @@ class ProviderRegistrationController extends Controller
             // Step 1
             'full_name_ar' => ['required', 'string', 'max:255'],
             'full_name_en' => ['required', 'string', 'max:255'],
-            'phone_number' => ['required', 'string', new SaudiPhoneNumber],
+            'phone_number' => ['required', 'string', new SaudiPhoneNumber, new SaudiPhoneUnique],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'business_name_ar' => ['required', 'string', 'max:255'],
             'business_name_en' => ['required', 'string', 'max:255'],
@@ -91,7 +98,7 @@ class ProviderRegistrationController extends Controller
             'iban' => ['required', 'string', 'max:50'],
             'account_holder_name' => ['required', 'string', 'max:255'],
             // Step 4
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', Rules\Password::defaults()],
             'business_license' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.$maxBytes],
             'id_or_iqama' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.$maxBytes],
         ]);
@@ -124,14 +131,17 @@ class ProviderRegistrationController extends Controller
         $licensePath = $request->file('business_license')->store('provider_documents', 'local');
         $idPath = $request->file('id_or_iqama')->store('provider_documents', 'local');
 
+        $phoneNormalized = PhoneHelper::normalize($validated['phone_number']);
+
         try {
-            DB::transaction(function () use ($validated, $operatingHours, $licensePath, $idPath) {
+            DB::transaction(function () use ($validated, $phoneNormalized, $operatingHours, $licensePath, $idPath) {
                 $user = User::create([
                     'name' => $validated['full_name_en'],
                     'email' => $validated['email'],
                     'password' => Hash::make($validated['password']),
                     'membership_type' => User::MEMBERSHIP_PROVIDER,
                     'status' => User::STATUS_PENDING_APPROVAL,
+                    'phone_number' => $phoneNormalized,
                 ]);
 
                 $user->assignRole('provider');
@@ -140,7 +150,7 @@ class ProviderRegistrationController extends Controller
                     'user_id' => $user->id,
                     'full_name_ar' => $validated['full_name_ar'],
                     'full_name_en' => $validated['full_name_en'],
-                    'phone_number' => $validated['phone_number'],
+                    'phone_number' => $phoneNormalized,
                     'email' => $validated['email'],
                     'business_name_ar' => $validated['business_name_ar'],
                     'business_name_en' => $validated['business_name_en'],
@@ -177,6 +187,10 @@ class ProviderRegistrationController extends Controller
 
                 event(new Registered($user));
                 Auth::login($user);
+
+                if (config('app.phone_verification_enabled', true)) {
+                    $this->otpService->sendOtp($user);
+                }
             });
         } catch (\Throwable $e) {
             Storage::disk('local')->delete($licensePath);
@@ -184,7 +198,10 @@ class ProviderRegistrationController extends Controller
             throw $e;
         }
 
-        if (config('app.email_verification_enabled', true) && !Auth::user()->hasVerifiedEmail()) {
+        if (config('app.phone_verification_enabled', true)) {
+            return redirect()->route('verification.phone');
+        }
+        if (config('app.email_verification_enabled', true) && ! Auth::user()->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');
         }
         return redirect()->route('approval.pending');

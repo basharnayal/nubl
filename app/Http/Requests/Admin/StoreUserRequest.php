@@ -6,6 +6,7 @@ use App\Models\RecipientKycDetails;
 use App\Models\RecipientProfile;
 use App\Models\User;
 use App\Rules\SaudiPhoneNumber;
+use App\Rules\SaudiPhoneUnique;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules;
 
@@ -26,7 +27,7 @@ class StoreUserRequest extends FormRequest
         ];
 
         if (in_array($this->membership_type, ['donor', 'recipient', 'provider'])) {
-            $rules['phone_number'] = ['required', 'string', new SaudiPhoneNumber];
+            $rules['phone_number'] = ['required', 'string', new SaudiPhoneNumber, new SaudiPhoneUnique];
         }
 
         if ($this->membership_type === 'recipient') {

@@ -2,6 +2,7 @@
 
 namespace App\Http\Services;
 
+use App\Helpers\PhoneHelper;
 use App\Models\ProviderDocuments;
 use App\Models\ProviderFinancialInfo;
 use App\Models\ProviderOperatingInfo;
@@ -147,7 +148,7 @@ class UserService
             'password' => Hash::make($data['password']),
             'membership_type' => $data['membership_type'],
             'status' => User::STATUS_ACTIVE,
-            'phone_number' => $data['phone_number'] ?? null,
+            'phone_number' => isset($data['phone_number']) ? PhoneHelper::normalize($data['phone_number']) : null,
             'is_active' => true,
         ]);
 
@@ -242,7 +243,7 @@ class UserService
             'name' => $data['name'],
             'email' => $data['email'],
             'membership_type' => $data['membership_type'],
-            'phone_number' => $data['phone_number'] ?? null,
+            'phone_number' => isset($data['phone_number']) ? PhoneHelper::normalize($data['phone_number']) : null,
         ];
 
         if (! empty($data['password'] ?? '')) {
@@ -292,7 +293,7 @@ class UserService
             $profile->update([
                 'full_name_ar' => $data['full_name_ar'],
                 'full_name_en' => $data['full_name_en'],
-                'phone_number' => $data['phone_number'],
+                'phone_number' => isset($data['phone_number']) ? PhoneHelper::normalize($data['phone_number']) : $profile->phone_number,
                 'email' => $data['email'],
                 'business_name_ar' => $data['business_name_ar'],
                 'business_name_en' => $data['business_name_en'],
