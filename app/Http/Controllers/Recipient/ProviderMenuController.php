@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\ProviderMenuItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProviderMenuController extends Controller
 {
@@ -69,6 +70,23 @@ class ProviderMenuController extends Controller
             ->distinct()
             ->pluck('category');
 
-        return view('recipient.providers.show', compact('provider', 'menuItems', 'categories'));
+        // Calculate weekly allowance usage
+        $weekStart = now()->startOfWeek(\Illuminate\Support\Carbon::SUNDAY);
+        $weekEnd = now()->endOfWeek(\Illuminate\Support\Carbon::SATURDAY);
+
+        $weeklyUsed = \App\Models\Request::where('recipient_id', auth()->id())
+            ->whereBetween('created_at', [$weekStart, $weekEnd])
+            ->whereIn('status', [
+                'PENDING',
+                'PROVIDER_APPROVED',
+                'ADMIN_PENDING',
+                'ADMIN_APPROVED',
+                'REDEEMABLE',
+                'FULFILLED'
+            ])
+            ->where('funding_source', '!=', 'PROVIDER_ADOPTION') // Double safety
+            ->sum('reserved_amount');
+
+        return view('recipient.providers.show', compact('provider', 'menuItems', 'categories', 'weeklyUsed'));
     }
 }

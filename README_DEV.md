@@ -827,3 +827,202 @@ Essential Flowbite Blade components for consistent UI across the application.
 
 - Ensure `ProviderProfile` exists for providers to be visible in the recipient list.
 - Required fields for `ProviderProfile`: `business_name_en`, `business_category` (array), `city`, `location`.
+
+---
+
+## Request Lifecycle V2 (ECS-63)
+
+### Overview
+The Request Lifecycle V2 introduces a multi-item request system with a complete approval workflow involving Recipients, Providers, and Admins. It replaces the single-item request model.
+
+### Key Features
+- **Multi-Item Requests:** Recipients can add multiple items from a single provider to a "cart" and submit them as one request.
+- **Weekly Allowance Logic:**
+    - Limit: 400 SAR per week.
+    - Usage is calculated based on requests that are `PENDING`, `PROVIDER_APPROVED`, `ADMIN_PENDING`, `ADMIN_APPROVED`, `REDEEMABLE`, or `FULFILLED`.
+    - `ADOPTED`, `REJECTED`, and `CANCELLED` requests do NOT count towards the limit.
+- **Provider Workflow:**
+    - **Adopt:** Provider funds the request (`PROVIDER_ADOPTION` source). Status -> `ADOPTED`.
+    - **Approve:** Provider approves for City Fund usage (`CITY_FUND` source). Status -> `PROVIDER_APPROVED` (or `ADMIN_PENDING` if configured).
+    - **Reject:** Provider rejects request with a reason code and note. Status -> `PROVIDER_REJECTED`.
+- **Admin Workflow:**
+    - Admins review requests in `ADMIN_PENDING` status.
+    - Can `Approve` (Status -> `ADMIN_APPROVED`) or `Reject` (Status -> `ADMIN_REJECTED`).
+
+### Database Schema
+- **`requests` table:** Header information.
+    - `items`: HasMany `RequestItem`
+    - `reserved_amount`: Total cost of the request.
+    - `funding_source`: `CITY_FUND` or `PROVIDER_ADOPTION`.
+    - `rejection_reason_code`, `rejection_reason_note`: For rejections.
+- **`request_items` table:** Line items.
+    - `request_id`: FK to `requests`.
+    - `menu_item_id`: FK to `provider_menu_items`.
+    - `quantity`, `price_snapshot`.
+
+### Routes & Controllers
+- **Recipient:**
+    - `GET /recipient/providers/{provider}`: Menu with Cart UI.
+    - `POST /recipient/requests`: Submit multi-item request (`RecipientRequestController@store`).
+    - `GET /recipient/requests`: List requests.
+    - `GET /recipient/requests/{id}`: View request details.
+- **Provider:**
+    - `GET /provider/requests`: List incoming requests.
+    - `GET /provider/requests/{id}`: View and Act (Adopt/Approve/Reject) (`ProviderRequestController`).
+- **Admin:**
+    - `GET /admin/requests`: View request queue.
+    - `PUT /admin/requests/{id}`: Approve/Reject (`AdminRequestController`).
+
+### Testing
+- `RecipientRequestSubmissionTest`: Verifies submission, allowance logic, and item validation.
+- `ProviderRequestFlowTest`: Verifies provider actions (adopt, approve, reject) and access control.
+- `AdminRequestFlowTest`: Verifies admin actions and queue visibility.
+
+# ECS-63 – Recipient Request Submission
+
+## 1. Overview
+The Recipient Request Submission feature enables registered recipients to browse provider menus and submit food requests, subject to a strict weekly allowance of 400 SAR. This feature bridges the gap between recipient needs and provider availability, ensuring efficient resource allocation while maintaining rigorous financial controls.
+
+## 2. Business Objective
+- **Financial Control**: Enforce a hard limit on recipient spending (400 SAR/week).
+- **Operational Efficiency**: Automate the request process, reducing manual coordination.
+- **Recipient Empowerment**: Provide a self-service interface for recipients to choose their preferred meals within budget constraints.
+- **Provider Compliance**: Ensure requests are only routed to active providers with operational capacity designated as "ON".
+
+## 3. Functional Scope
+- **Request Creation**: Recipients can browse active provider menus and submit requests.
+- **Allowance Enforcement**: System validates request amount against remaining weekly allowance.
+- **Capacity Check**: Requests are blocked if provider capacity is OFF (`daily_capacity <= 0`).
+- **Validation**: Strict checks on menu item ownership, status, and provider activity.
+- **Notifications**: (Out of scope for this specific task, but planned for future).
+
+## 4. Technical Architecture
+The feature is built on top of the existing Laravel monolith, leveraging:
+- **Controllers**: `RecipientRequestController` handles the business logic.
+- **FormRequests**: `StoreRecipientRequest` encapsulates validation rules.
+- **Eloquent Models**: `Request`, `User` (Provider), `ProviderMenuItem`, `ProviderOperatingInfo`.
+- **Database**: Relational integrity enforced via foreign keys.
+
+## 5. Database Design
+A new `requests` table was introduced:
+- `id`: Primary Key.
+- `recipient_id`: FK to `users` (Cascade on delete).
+- `provider_id`: FK to `users` (Cascade on delete).
+- `menu_item_id`: FK to `provider_menu_items` (Cascade on delete).
+- `quantity`: Integer.
+- `price_snapshot`: Decimal(10, 2) - *Crucial for historical accuracy*.
+- `status`: Enum string ('REQUESTED', 'APPROVED', 'REDEEMABLE', 'FULFILLED', 'REJECTED').
+- `request_type`: String (copied from menu item category).
+- `timestamps`: `created_at`, `updated_at`.
+
+## 6. Validation & Security Rules
+- **Provider Active**: Must be `is_active=true` and `status='active'`.
+- **Capacity**: `ProviderOperatingInfo.daily_capacity` must be > 0.
+- **Item Ownership**: `menu_item.provider_id` must match `request.provider_id`.
+- **Item Active**: `menu_item.is_active` must be true.
+- **Quantity**: Must be integer >= 1. Max quantity per request enforced if set on item.
+
+## 7. Weekly Allowance Algorithm (Detailed Explanation)
+The allowance is calculated dynamically at the moment of request:
+1.  **Time Window**: `Carbon::now()->startOfWeek(Carbon::SUNDAY)` to `endOfWeek(Carbon::SATURDAY)`.
+2.  **Usage Calculation**:
+    ```sql
+    SELECT SUM(price_snapshot * quantity)
+    FROM requests
+    WHERE recipient_id = ?
+    AND created_at BETWEEN ? AND ?
+    AND status IN ('REDEEMABLE', 'FULFILLED')
+    ```
+    *Note: 'REQUESTED' status does NOT count towards allowance.*
+3.  **Check**: If `(Current Usage + New Request Amount) > 400.00`, the request is rejected with a 422 error.
+
+## 8. Edge Case Handling
+- **Concurrency**: Database transactions (implicit in Laravel) ensure atomicity.
+- **Zero Capacity**: Providers with 0 capacity are hidden/disabled in UI and blocked in backend.
+- **Inactive Items**: Items deactivated by providers mid-selection will trigger validation errors on submit.
+- **Timezone**: All dates are stored in UTC and processed using application time (configured to Riyadh time).
+
+## 9. RBAC & Authorization
+- **Middleware**: `auth`, `role:recipient`, `account.approved`.
+- **Policy**: Only users with the `recipient` role can access the submission endpoints.
+- **Manual Check**: `StoreRecipientRequest::authorize()` expressly checks `$user->hasRole('recipient')`.
+
+## 10. UI/UX Design Decisions
+- **Sticky Summary**: A persistent summary panel (sidebar/bottom sheet) keeps the allowance visibility high.
+- **Real-time Feedback**: Frontend calculates projected usage to warn users *before* submission.
+- **Capacity Badges**: Clear visual indicators of provider availability.
+- **Quantity Steppers**: Intuitive controls for adjusting order size.
+
+## 11. Performance Considerations
+- **Indexing**: Foreign keys are indexed. `created_at` index recommended for allowance queries as table grows.
+- **Eager Loading**: `ProviderMenuItem` relationships are eager loaded where appropriate.
+- **Query Optimization**: Allowance calculation is a single aggregate query, highly efficient.
+
+## 12. Testing Strategy
+Automated Feature tests (`tests/Feature/Recipient/RecipientRequestSubmissionTest.php`) cover:
+- **Happy Path**: Valid submission.
+- **Allowance Rejection**: Boundary testing at 400 SAR limit.
+- **Week Boundary**: Verifying past weeks don't affect current allowance.
+- **Security**: Trying to submit as non-recipient.
+- **Integrity**: Ownership and status checks.
+
+## 13. Traceability to Functional Requirements (Correct IDs)
+
+- **FR-5.1 – Beneficiary Submit Request**  
+  Implemented in `RecipientRequestController@store`, which creates a new row in the `requests` table after successful validation.
+
+- **FR-5.2 – Validate Request Inputs**  
+  Enforced via `StoreRecipientRequest` FormRequest, including:
+  - Provider active check  
+  - Capacity validation (`daily_capacity > 0`)  
+  - Menu item ownership verification  
+  - Menu item active status check  
+  - Quantity validation  
+
+- **FR-6.1 – Weekly Allowance Check (400 SAR Limit)**  
+  Implemented using a dynamic aggregate query:  
+  `weeklyUsed = SUM(price_snapshot * quantity)`  
+  Filtered by:
+  - `recipient_id = current user`
+  - `created_at` between Sunday–Saturday
+  - `status IN ('REDEEMABLE', 'FULFILLED')`
+
+- **FR-6.3 – Allowance Exceeded Message**  
+  When `(weeklyUsed + newAmount) > 400`, the system rejects the request and returns the exact validation message:  
+  > "You have exceeded your weekly allowance of 400 SAR."
+
+
+## 14. Traceability to Non-Functional Requirements (Correct IDs)
+
+- **NFR-1 – Performance Efficiency**  
+  The allowance check uses a single optimized aggregate SQL query, ensuring minimal processing overhead and fast response times.
+
+- **NFR-6 – Usability**  
+  The UI provides:
+  - Clear request summary panel  
+  - Real-time allowance feedback  
+  - Immediate validation error messages  
+
+- **NFR-7 – Reliability / Integrity**  
+  Data integrity is ensured through:
+  - Foreign key constraints  
+  - Transaction-safe request creation  
+  - `price_snapshot` preservation for historical accuracy  
+
+- **NFR-4 – Security**  
+  Access control is enforced via:
+  - Middleware: `auth` + `role:recipient`  
+  - Authorization in `StoreRecipientRequest`  
+  - Automatic `403 Forbidden` response for unauthorized users  
+
+
+## 15. Risks & Mitigations
+- **Risk**: Pending requests ('REQUESTED') not counting could allow "allowance stuffing" if approval is slow.
+    - *Mitigation*: Business rule accepted. Monitoring required.
+- **Risk**: Heavy read load on `requests` table for allowance checks.
+    - *Mitigation*: Index on `(recipient_id, created_at, status)` will optimize this.
+
+## 16. Future Improvements
+- **Notifications**: Email/SMS to recipient on status change.
+- **Real-time Updates**: WebSockets for immediate capacity updates.
+- **Soft Deletes**: Implementing SoftDeletes for audit trails.
