@@ -1,3 +1,4 @@
-<button {{ $attributes->merge(['type' => 'submit', 'class' => 'btn bg-primary text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus px-5 py-2']) }}>
+{{-- Delegates to lineone-button. Use for primary submit actions (auth, profile). --}}
+<x-lineone-button variant="primary" {{ $attributes->merge(['type' => 'submit']) }}>
     {{ $slot }}
-</button>
+</x-lineone-button>

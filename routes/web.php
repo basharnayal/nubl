@@ -121,17 +121,10 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:recipi
             ->only(['index', 'show', 'store']);
     });
 
-Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:provider']))
-    ->prefix('provider')->name('provider.')->group(function () {
-        // ... (existing provider routes wrapper usually, but here we just append to the existing group if possible, or new one)
-    });
-
 // Donor routes
 Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:donor']))->prefix('donor')->name('donor.')
     ->group(function () {
-        Route::get('/dashboard', function () {
-            return view('donor.dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [\App\Http\Controllers\Donor\DonorDashboardController::class, 'index'])->name('dashboard');
     });
 
 

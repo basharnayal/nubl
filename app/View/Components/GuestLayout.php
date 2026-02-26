@@ -11,7 +11,8 @@ class GuestLayout extends Component
      * Max width of the content area: 'default' (sm:max-w-md) or 'wide' (sm:max-w-2xl).
      */
     public function __construct(
-        public string $maxWidth = 'default'
+        public string $maxWidth = 'default',
+        public ?string $title = null
     ) {}
 
     /**
@@ -19,6 +20,6 @@ class GuestLayout extends Component
      */
     public function render(): View
     {
-        return view('layouts.guest');
+        return view('components.guest-layout');
     }
 }

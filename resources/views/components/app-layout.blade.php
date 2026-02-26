@@ -37,7 +37,6 @@
         </div>
 
         @include('components.app-partials.header', ['header' => $header ?? null])
-        <x-app-partials.mobile-searchbar />
         <x-app-partials.right-sidebar />
 
         <main class="main-content w-full px-[var(--margin-x)] pb-8">
@@ -63,7 +62,5 @@
     </div>
 
     <div id="x-teleport-target"></div>
-
-    <script>window.addEventListener("DOMContentLoaded", () => Alpine.start());</script>
 </body>
 </html>

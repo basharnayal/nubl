@@ -2,7 +2,7 @@
     Provider registration: 4 steps (Personal → Operating → Financial → Documents+Password).
     If providerData exists → prefill + read-only. Otherwise → editable form.
 --}}
-<x-guest-layout max-width="wide">
+<x-guest-layout max-width="wide" :title="__('Provider Registration')">
     @php
         $readonly = $providerData !== null;
         $profile = ($providerData ?? [])['profile'] ?? null;

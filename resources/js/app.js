@@ -72,8 +72,8 @@ breakpoints.init();
 
 // Page-specific modules: add data-module="key" to the page container
 const PAGE_MODULES = {
-    'provider-registration': () => import('./provider-registration'),
-    'recipient-providers': () => import('./recipient-providers'),
+    'provider-registration': () => import('./pages/provider-registration'),
+    'recipient-providers': () => import('./pages/recipient-providers'),
 };
 const moduleName = document.querySelector('[data-module]')?.getAttribute('data-module');
 const loadModule = moduleName && PAGE_MODULES[moduleName] ? PAGE_MODULES[moduleName]() : Promise.resolve();
