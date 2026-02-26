@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Ewallet extends Model
 {
@@ -22,6 +23,11 @@ class Ewallet extends Model
     public function provider(): BelongsTo
     {
         return $this->belongsTo(ProviderProfile::class, 'owner_id');
+    }
+
+    public function fundTransactions(): HasMany
+    {
+        return $this->hasMany(FundTransaction::class, 'wallet_id');
     }
 }
 

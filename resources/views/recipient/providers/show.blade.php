@@ -135,9 +135,9 @@
                             <h3 class="mb-4 text-base font-bold text-slate-800 dark:text-navy-100">{{ __('Weekly Allowance') }}</h3>
 
                             @php
-                                $allowance = 400;
+                                $allowance = $weeklyLimit ?? 400;
                                 $remaining = max(0, $allowance - $weeklyUsed);
-                                $percent = min(100, ($weeklyUsed / $allowance) * 100);
+                                $percent = min(100, ($allowance > 0 ? ($weeklyUsed / $allowance) * 100 : 0));
                                 $color = $percent > 90 ? 'bg-error' : ($percent > 75 ? 'bg-warning' : 'bg-success');
                             @endphp
 
@@ -178,6 +178,9 @@
                                     <p id="allowance-warning" class="mt-2 hidden text-xs font-bold text-error">{{ __('Exceeds weekly allowance!') }}</p>
                                 </div>
 
+                                @error('allowance')
+                                    <p class="mb-4 text-sm font-bold text-error">{{ $message }}</p>
+                                @enderror
                                 <form id="submit-request-form" action="{{ route('recipient.requests.store') }}" method="POST">
                                     @csrf
                                     <input type="hidden" name="provider_id" value="{{ $provider->id }}">
@@ -248,7 +251,7 @@
         let selectedItem = null;
         let selectedQty = 1;
         const weeklyUsed = {{ $weeklyUsed }};
-        const allowance = 400;
+        const allowance = {{ $weeklyLimit ?? 400 }};
 
         function openItemModal(id, name, price, max) {
             selectedItem = { id, name, price, max };

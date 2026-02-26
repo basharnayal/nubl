@@ -3,12 +3,25 @@
 namespace App\Http\Controllers\Recipient;
 
 use App\Http\Controllers\Controller;
+use App\Http\Services\RecipientAllowanceService;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class RecipientController extends Controller
 {
+    public function dashboard(Request $request): View
+    {
+        $user = $request->user();
+        $remainingLimit = RecipientAllowanceService::getRemainingLimit($user->id);
+        $weeklyLimit = RecipientAllowanceService::WEEKLY_LIMIT;
+
+        return view('recipient.dashboard', [
+            'remainingLimit' => $remainingLimit,
+            'weeklyLimit' => $weeklyLimit,
+        ]);
+    }
+
     public function providersList(): View
     {
         $providers = User::query()

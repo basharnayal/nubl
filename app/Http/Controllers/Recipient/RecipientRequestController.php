@@ -4,10 +4,9 @@ namespace App\Http\Controllers\Recipient;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Recipient\StoreRecipientRequest;
+use App\Http\Services\RecipientAllowanceService;
 use App\Models\ProviderMenuItem;
 use App\Models\Request as RequestModel;
-use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class RecipientRequestController extends Controller
 {
@@ -47,31 +46,10 @@ class RecipientRequestController extends Controller
         }
 
         // --- Weekly Allowance Logic ---
-        // Week: startOfWeek(SUNDAY) 00:00 -> endOfWeek(SATURDAY) 23:59:59
-        $now = Carbon::now();
-        $weekStart = $now->copy()->startOfWeek(Carbon::SUNDAY);
-        $weekEnd = $now->copy()->endOfWeek(Carbon::SATURDAY);
-
-        // Sum reserved_amount for this week
-        // Statuses that reserve budget: PENDING, PROVIDER_APPROVED, ADMIN_PENDING, ADMIN_APPROVED, REDEEMABLE, FULFILLED
-        // Exclude: REJECTED, CANCELLED, ADOPTED (Adopted is free for recipient)
-        $reservedStatuses = [
-            'PENDING',
-            'PROVIDER_APPROVED',
-            'ADMIN_PENDING',
-            'ADMIN_APPROVED',
-            'REDEEMABLE',
-            'FULFILLED'
-        ];
-
-        $weeklyUsed = RequestModel::where('recipient_id', $user->id)
-            ->whereBetween('created_at', [$weekStart, $weekEnd])
-            ->whereIn('status', $reservedStatuses)
-            ->where('funding_source', '!=', 'PROVIDER_ADOPTION') // Double check, though status ADOPTED usually covers it
-            ->sum('reserved_amount');
-
-        if (($weeklyUsed + $totalAmount) > 400) {
-            return back()->withErrors(['allowance' => 'You have exceeded your weekly allowance of 400 SAR.'])
+        // weekly_used = sum(price_snapshot * quantity) for REDEEMABLE/FULFILLED this week
+        // If weekly_used + A > 400 → reject
+        if (RecipientAllowanceService::wouldExceedAllowance($user->id, $totalAmount)) {
+            return back()->withErrors(['allowance' => __('Weekly allowance exceeded.')])
                 ->withInput();
         }
 

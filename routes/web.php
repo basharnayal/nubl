@@ -104,7 +104,7 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:recipi
     ->name('recipient.')
     ->group(function () {
 
-        Route::get('/dashboard', fn() => view('recipient.dashboard'))->name('dashboard');
+        Route::get('/dashboard', [RecipientController::class, 'dashboard'])->name('dashboard');
 
         // Recipient Browsing (ECS-62)
         Route::get('/providers', [\App\Http\Controllers\Recipient\ProviderMenuController::class, 'index'])

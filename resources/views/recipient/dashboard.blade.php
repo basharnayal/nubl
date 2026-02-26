@@ -15,10 +15,10 @@
                             </p>
                             <p class="mt-4 font-inter text-2xl font-semibold">
                                 <span class="text-indigo-100">{{ __('SAR') }}</span>
-                                <span class="text-white">280</span>
+                                <span class="text-white">{{ number_format($remainingLimit ?? 0, 0) }}</span>
                             </p>
                             <div class="badge mt-2 rounded-full bg-black/20 text-indigo-50">
-                                {{ __('Weekly limit') }} 400 {{ __('SAR') }}
+                                {{ __('Weekly limit') }} {{ $weeklyLimit ?? 400 }} {{ __('SAR') }}
                             </div>
                         </div>
                         <div class="absolute bottom-0 right-0 overflow-hidden rounded-lg">

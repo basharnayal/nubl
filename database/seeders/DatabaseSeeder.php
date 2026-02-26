@@ -26,7 +26,17 @@ class DatabaseSeeder extends Seeder
         // Step 3: Create system-level ewallet
         $this->call(EwalletSeeder::class);
 
-        // Step 4: Create test users (optional)
+        // Step 4: Create recipient user
+        $this->call(RecipientSeeder::class);
+
+        // Step 5: Create providers and menu items
+        $this->call(ProviderSeeder::class);
+        $this->call(ProviderMenuItemSeeder::class);
+
+        // Step 6: Create allowance test data (REDEEMABLE + FULFILLED requests)
+        $this->call(AllowanceTestDataSeeder::class);
+
+        // Step 7: Create other test users (optional)
         // Uncomment if you want to create test users
         
         // $admin = User::factory()->create([
