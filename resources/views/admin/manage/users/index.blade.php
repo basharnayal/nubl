@@ -20,14 +20,14 @@
                         {{-- Filter form: Search → Role → Status → Filter --}}
                         <form method="GET" action="{{ route('admin.manage.users.index') }}" class="flex flex-wrap items-center gap-2">
                             <input type="text" name="search" value="{{ request('search') }}" placeholder="{{ __('Search...') }}"
-                                class="form-input w-full min-w-32 rounded-lg border-slate-300 bg-transparent px-3 py-1.5 text-sm sm:w-36 dark:border-navy-450 dark:bg-navy-700">
-                            <select name="role" class="form-select w-auto min-w-24 rounded-lg border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-navy-450 dark:bg-navy-700">
+                                class="form-input form-input-lineone min-w-32 sm:w-36">
+                            <select name="role" class="form-select form-select-lineone w-auto min-w-24">
                                 <option value="">{{ __('All roles') }}</option>
                                 @foreach(['admin','donor','recipient','provider'] as $r)
                                     <option value="{{ $r }}" {{ request('role') === $r ? 'selected' : '' }}>{{ ucfirst($r) }}</option>
                                 @endforeach
                             </select>
-                            <select name="status" class="form-select w-auto min-w-24 rounded-lg border-slate-300 bg-white px-3 py-1.5 text-sm dark:border-navy-450 dark:bg-navy-700">
+                            <select name="status" class="form-select form-select-lineone w-auto min-w-24">
                                 <option value="">{{ __('All') }}</option>
                                 <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
                                 <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>{{ __('Inactive') }}</option>

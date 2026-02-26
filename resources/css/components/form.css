@@ -1,3 +1,20 @@
+.form-label {
+  @apply mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200;
+}
+
+/* Lineone standard form field styles - use for consistency across NUBL */
+.form-input-lineone {
+  @apply w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2 text-slate-800 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:text-navy-100 dark:placeholder:text-navy-400 dark:hover:border-navy-400 dark:focus:border-accent;
+}
+
+.form-textarea-lineone {
+  @apply w-full rounded-lg border border-slate-300 bg-transparent p-2.5 text-slate-800 placeholder:text-slate-400/70 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:text-navy-100 dark:placeholder:text-navy-400 dark:hover:border-navy-400 dark:focus:border-accent;
+}
+
+.form-select-lineone {
+  @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-800 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:bg-navy-700 dark:text-navy-100 dark:hover:border-navy-400 dark:focus:border-accent;
+}
+
 .form-input,
 .form-textarea,
 .form-select,
