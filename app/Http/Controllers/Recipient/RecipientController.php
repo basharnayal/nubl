@@ -32,7 +32,7 @@ class RecipientController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('recipient.Providerslist', ['providers' => $providers]);
+        return view('recipient.providers-list', ['providers' => $providers]);
     }
 
     /**
@@ -52,7 +52,7 @@ class RecipientController extends Controller
 
         $providerName = $provider->providerProfile->full_name_en ?? $provider->providerProfile->full_name_ar ?? $provider->name;
 
-        return view('recipient.partials.provider-menu', [
+        return view('recipient.provider-menu', [
             'provider' => $provider,
             'providerName' => $providerName,
             'menuItems' => $menuItems,

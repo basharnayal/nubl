@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\Provider;
 
 use App\Http\Controllers\Controller;
+use App\Http\Services\SystemWalletService;
 use App\Models\Request as RequestModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 class ProviderRequestController extends Controller
 {
+    public function __construct(
+        private SystemWalletService $systemWalletService
+    ) {}
+
     /**
      * Display a listing of the resource.
      */
@@ -53,16 +58,20 @@ class ProviderRequestController extends Controller
             return back()->with('error', 'This request is not in a pending state.');
         }
 
-        DB::transaction(function () use ($requestModel, $action, $validated) {
+        $result = DB::transaction(function () use ($requestModel, $action, $validated) {
             if ($action === 'adopt') {
                 $requestModel->update([
                     'status' => 'ADOPTED',
                     'funding_source' => 'PROVIDER_ADOPTION',
                 ]);
             } elseif ($action === 'approve') {
-                // Check city fund here if implemented. For now, assume available.
+                $amount = (float) $requestModel->reserved_amount;
+                if (! $this->systemWalletService->hasSufficientBalance($amount)) {
+                    return back()->with('error', __('City fund has insufficient balance for this request.'));
+                }
+                $this->systemWalletService->transferToProviderForRequest($requestModel);
                 $requestModel->update([
-                    'status' => 'PROVIDER_APPROVED', // Or ADMIN_PENDING if we want admin to review
+                    'status' => 'PROVIDER_APPROVED',
                     'funding_source' => 'CITY_FUND',
                 ]);
             } elseif ($action === 'reject') {
@@ -72,8 +81,10 @@ class ProviderRequestController extends Controller
                     'rejection_reason_note' => $validated['rejection_reason_note'] ?? null,
                 ]);
             }
+
+            return back()->with('success', __('Request updated successfully.'));
         });
 
-        return back()->with('success', 'Request updated successfully.');
+        return $result;
     }
 }

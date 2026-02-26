@@ -14,6 +14,7 @@ class SidebarComposer
             $view->with('sidebarMenu', ['title' => '', 'items' => [[]]]);
             $view->with('pageName', '');
             $view->with('routePrefix', '');
+            $view->with('dashboardUrl', route('dashboard'));
             return;
         }
 
@@ -22,10 +23,18 @@ class SidebarComposer
 
         $actor = $this->resolveActor();
         $sidebarMenu = SidebarPanel::forActor($actor);
+        $dashboardUrl = match ($actor) {
+            'admin' => route('admin.dashboard'),
+            'provider' => route('provider.dashboard'),
+            'recipient' => route('recipient.dashboard'),
+            'donor' => route('donor.dashboard'),
+            default => route('dashboard'),
+        };
 
         $view->with('sidebarMenu', $sidebarMenu);
         $view->with('pageName', $pageName);
         $view->with('routePrefix', $routePrefix);
+        $view->with('dashboardUrl', $dashboardUrl);
     }
 
     private function resolveActor(): ?string

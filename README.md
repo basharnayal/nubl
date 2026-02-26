@@ -205,6 +205,7 @@ export default defineConfig({
 
 - **Tailwind v4** uses CSS-first configuration (no `tailwind.config.js` needed)
 - **Lineone** components: `x-lineone-button`, `x-lineone-modal`, `x-lineone-alert`, `x-lineone-card`
+- **Buttons**: Use `x-lineone-button` (variants: primary, danger, success, etc.) for app pages. `x-primary-button` and `x-danger-button` are thin wrappers for auth/profile forms.
 - **Vite** must be running (`npm run dev`) during development
 - Use `npm run build` for production
 
@@ -387,20 +388,23 @@ class DonationController extends Controller
 
 ### Blade Layout Structure
 
+The project uses **Lineone sidebar layout** (not Breeze top-nav):
+
 ```blade
-{{-- resources/views/layouts/app.blade.php --}}
-@extends('layouts.app')
+{{-- Use x-app-layout for authenticated pages (sidebar + header) --}}
+<x-app-layout title="{{ __('Page Title') }}">
+    <div class="card p-6">
+        <!-- Page content -->
+    </div>
+</x-app-layout>
 
-@section('title', 'Page Title')
-
-@section('content')
-    <!-- Page content -->
-@endsection
-
-@push('scripts')
-    <!-- Additional scripts -->
-@endpush
+{{-- Use x-guest-layout for login, register, etc. --}}
+<x-guest-layout>
+    <!-- Guest page content -->
+</x-guest-layout>
 ```
+
+Navigation is driven by `SidebarPanel` and `SidebarComposer` (role-based sidebar menu).
 
 ### Route Organization
 

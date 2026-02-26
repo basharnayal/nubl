@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Provider;
 
+use App\Models\Ewallet;
 use App\Models\ProviderMenuItem;
+use App\Models\ProviderProfile;
 use App\Models\Request as RequestModel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,6 +34,33 @@ class ProviderRequestFlowTest extends TestCase
 
         $this->recipient = User::factory()->create(['status' => User::STATUS_ACTIVE]);
         $this->recipient->assignRole('recipient');
+
+        // System wallet (city fund) with balance for approve test
+        Ewallet::create([
+            'owner_type' => 'SYSTEM',
+            'owner_id' => null,
+            'balance' => 100,
+            'status' => true,
+        ]);
+
+        // Provider profile (creates provider ewallet via booted)
+        if (! $this->provider->providerProfile) {
+            ProviderProfile::create([
+                'user_id' => $this->provider->id,
+                'full_name_ar' => 'مزود اختبار',
+                'full_name_en' => 'Test Provider',
+                'phone_number' => '966501234567',
+                'email' => $this->provider->email,
+                'business_name_ar' => 'مطعم اختبار',
+                'business_name_en' => 'Test Restaurant',
+                'unified_number' => '7000123456',
+                'business_category' => ['restaurant'],
+                'address_ar' => 'الرياض',
+                'address_en' => 'Riyadh',
+                'city' => 'Riyadh',
+                'region' => 'central',
+            ]);
+        }
 
         // Menu Item
         $this->menuItem = ProviderMenuItem::create([
@@ -99,6 +128,26 @@ class ProviderRequestFlowTest extends TestCase
             'id' => $this->request->id,
             'status' => 'PROVIDER_APPROVED',
             'funding_source' => 'CITY_FUND',
+        ]);
+    }
+
+    /** @test */
+    public function provider_cannot_approve_when_city_fund_has_insufficient_balance()
+    {
+        // Drain system wallet
+        Ewallet::where('owner_type', 'SYSTEM')->update(['balance' => 10]);
+
+        $response = $this->actingAs($this->provider)
+            ->put(route('provider.requests.update', $this->request->id), [
+                'action' => 'approve',
+            ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('error');
+
+        $this->assertDatabaseHas('requests', [
+            'id' => $this->request->id,
+            'status' => 'PENDING',
         ]);
     }
 

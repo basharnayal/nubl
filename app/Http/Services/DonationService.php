@@ -58,6 +58,13 @@ class DonationService
             
             // Update city fund
             CityFund::first()->increment('balance', $donation->amount);
+
+            // Add funds to system wallet (Ewallet) – call when integrating with wallet flow
+            // app(SystemWalletService::class)->addFundsFromDonation(
+            //     $donation->amount,
+            //     $donation->user_id,
+            //     $donation->id, // or payment_id when payments table exists
+            // );
             
             // Audit log
             $this->auditService->log('donation', 'confirmed', [

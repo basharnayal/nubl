@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-guest-layout :title="__('Verify Phone')">
     <div class="w-full">
         <h1 class="text-xl font-semibold text-slate-900 mb-2">{{ __('Verify your phone number') }}</h1>
         <p class="mb-4 text-sm text-slate-600">

@@ -1,4 +1,4 @@
-<x-app-layout>
+<x-app-layout title="{{ __('Dashboard') }}" is-header-blur="true">
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-slate-800 dark:text-navy-100 leading-tight">
             {{ __('Dashboard') }}

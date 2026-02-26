@@ -1,4 +1,4 @@
-/* Variables */
+/* Variables - --margin-x: horizontal padding for main content (responsive) */
 :root {
     @apply [--margin-x:1rem]
     [--main-sidebar-width:4.5rem]

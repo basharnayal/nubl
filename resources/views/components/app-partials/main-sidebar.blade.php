@@ -9,7 +9,7 @@
 
         <!-- Main Section Link (Dashboard) -->
         <div class="is-scrollbar-hidden flex grow flex-col space-y-4 overflow-y-auto pt-6">
-            <a href="{{ auth()->user()?->hasRole('admin') ? route('admin.dashboard') : (auth()->user()?->hasRole('provider') ? route('provider.dashboard') : (auth()->user()?->hasRole('recipient') ? route('recipient.dashboard') : (auth()->user()?->hasRole('donor') ? route('donor.dashboard') : route('dashboard')))) }}"
+            <a href="{{ $dashboardUrl ?? route('dashboard') }}"
                 class="flex size-11 items-center justify-center rounded-lg outline-hidden transition-colors duration-200 {{ ($routePrefix ?? '') === 'admin' || ($routePrefix ?? '') === 'provider' || ($routePrefix ?? '') === 'recipient' || ($routePrefix ?? '') === 'donor' ? 'text-primary bg-primary/10 hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-navy-600 dark:text-accent-light dark:hover:bg-navy-450 dark:focus:bg-navy-450 dark:active:bg-navy-450/90' : 'hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25' }}"
                 x-tooltip.placement.right="'{{ __('Dashboard') }}'">
                 <svg class="size-7" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
