@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\EwalletSeeder;
 use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
@@ -22,7 +23,10 @@ class DatabaseSeeder extends Seeder
         // Step 2: Create Roles and assign Permissions
         $this->call(RoleSeeder::class);
 
-        // Step 3: Create test users (optional)
+        // Step 3: Create system-level ewallet
+        $this->call(EwalletSeeder::class);
+
+        // Step 4: Create test users (optional)
         // Uncomment if you want to create test users
         
         // $admin = User::factory()->create([
