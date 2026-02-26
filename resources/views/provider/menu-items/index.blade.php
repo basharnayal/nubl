@@ -24,13 +24,13 @@
                                     </svg>
                                 </div>
                                 <input type="text" name="search" id="search" value="{{ request('search') }}"
-                                    class="block w-full rounded-lg border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-3 text-sm text-slate-900 placeholder-slate-500 focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-navy-450 dark:bg-navy-700 dark:text-navy-100 dark:placeholder-navy-400 dark:focus:border-accent dark:focus:ring-accent/20"
+                                    class="form-input form-input-lineone pl-10"
                                     placeholder="{{ __('Search items...') }}">
                             </div>
                         </div>
                         <div class="w-full sm:w-48">
                             <select name="category"
-                                class="block w-full rounded-lg border border-slate-300 bg-slate-50 py-2.5 px-3 text-sm text-slate-900 focus:border-primary focus:ring-2 focus:ring-primary/20 dark:border-navy-450 dark:bg-navy-700 dark:text-navy-100 dark:focus:border-accent dark:focus:ring-accent/20">
+                                class="form-select form-select-lineone">
                                 <option value="">{{ __('All Categories') }}</option>
                                 @foreach($categories as $category)
                                     <option value="{{ $category }}" {{ request('category') == $category ? 'selected' : '' }}>

@@ -1,46 +1,54 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Admin Request Queue') }}
-        </h2>
-    </x-slot>
+<x-app-layout title="{{ __('Admin Request Queue') }}" is-header-blur="true">
+    <div class="pt-4">
+        <div class="grid grid-cols-1 gap-4 sm:gap-5 lg:gap-6">
+            <div>
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <h2 class="text-base font-medium tracking-wide text-slate-700 line-clamp-1 dark:text-navy-100">
+                        {{ __('Admin Request Queue') }}
+                    </h2>
+                </div>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-
+                <div class="card mt-3">
                     @if($requests->isEmpty())
-                        <div class="text-center py-12">
-                            <p class="text-gray-500">No pending requests requiring admin approval.</p>
+                        <div class="px-6 py-12 text-center text-slate-500 dark:text-navy-300">
+                            {{ __('No pending requests requiring admin approval.') }}
                         </div>
                     @else
-                        <div class="overflow-x-auto relative">
-                            <table class="w-full text-sm text-left text-gray-500">
-                                <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+                        <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
+                            <table class="is-hoverable w-full text-left">
+                                <thead>
                                     <tr>
-                                        <th class="py-3 px-6">ID</th>
-                                        <th class="py-3 px-6">Provider</th>
-                                        <th class="py-3 px-6">Recipient</th>
-                                        <th class="py-3 px-6">Amount</th>
-                                        <th class="py-3 px-6">Date</th>
-                                        <th class="py-3 px-6">Actions</th>
+                                        <th class="whitespace-nowrap rounded-tl-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('ID') }}</th>
+                                        <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Provider') }}</th>
+                                        <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Recipient') }}</th>
+                                        <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Amount') }}</th>
+                                        <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Date') }}</th>
+                                        <th class="whitespace-nowrap rounded-tr-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($requests as $request)
-                                        <tr class="bg-white border-b hover:bg-gray-50">
-                                            <td class="py-4 px-6">#{{ $request->id }}</td>
-                                            <td class="py-4 px-6">{{ $request->provider->name }}</td>
-                                            <td class="py-4 px-6">{{ $request->recipient->name }}</td>
-                                            <td class="py-4 px-6 font-bold">{{ number_format($request->reserved_amount, 2) }}
-                                                SAR</td>
-                                            <td class="py-4 px-6">{{ $request->created_at->diffForHumans() }}</td>
-                                            <td class="py-4 px-6">
-                                                <button
+                                        <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
+                                            <td class="whitespace-nowrap px-4 py-3 sm:px-5">
+                                                <p class="font-medium text-primary dark:text-accent-light">#{{ $request->id }}</p>
+                                            </td>
+                                            <td class="px-4 py-3 sm:px-5">
+                                                <span class="font-medium text-slate-700 dark:text-navy-100">{{ $request->provider->name }}</span>
+                                            </td>
+                                            <td class="px-4 py-3 sm:px-5">
+                                                <span class="font-medium text-slate-700 dark:text-navy-100">{{ $request->recipient->name }}</span>
+                                            </td>
+                                            <td class="whitespace-nowrap px-4 py-3 sm:px-5">
+                                                <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100">{{ number_format($request->reserved_amount, 2) }} {{ __('SAR') }}</p>
+                                            </td>
+                                            <td class="px-4 py-3 sm:px-5">
+                                                <div class="text-xs text-slate-500 dark:text-navy-300">{{ $request->created_at->diffForHumans() }}</div>
+                                            </td>
+                                            <td class="whitespace-nowrap px-4 py-3 sm:px-5">
+                                                <button type="button"
                                                     onclick="openReviewModal({{ json_encode($request) }}, {{ json_encode($request->items) }})"
-                                                    class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-2 focus:outline-none">
-                                                    Review
+                                                    class="btn size-8 rounded-full p-0 text-primary hover:bg-primary/10 focus:bg-primary/10 dark:text-accent dark:hover:bg-accent/10 dark:focus:bg-accent/10">
+                                                    {{ __('Review') }}
                                                 </button>
                                             </td>
                                         </tr>
@@ -48,44 +56,39 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="mt-4">
+                        <div class="mt-4 px-4 sm:px-5">
                             {{ $requests->links() }}
                         </div>
                     @endif
-
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Review Modal -->
+    {{-- Review Modal --}}
     <div id="review-modal" tabindex="-1" aria-hidden="true"
         class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full bg-black/50 backdrop-blur-sm flex">
         <div class="relative p-4 w-full max-w-2xl max-h-full">
-            <div class="relative bg-white rounded-lg shadow">
-                <!-- Modal header -->
-                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t">
-                    <h3 class="text-xl font-semibold text-gray-900" id="modal-title">
-                        Review Request #<span id="modal-req-id"></span>
+            <div class="relative rounded-lg border border-slate-150 bg-white shadow-soft dark:border-navy-600 dark:bg-navy-750">
+                <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-navy-600">
+                    <h3 class="text-base font-semibold text-slate-800 dark:text-navy-100" id="modal-title">
+                        {{ __('Review Request') }} #<span id="modal-req-id"></span>
                     </h3>
                     <button type="button" onclick="closeReviewModal()"
-                        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center">
-                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
-                            viewBox="0 0 14 14">
-                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                        class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20">
+                        <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
                         </svg>
                     </button>
                 </div>
-                <!-- Modal body -->
                 <div class="p-4 md:p-5 space-y-4">
-                    <div id="modal-items-list" class="space-y-2 bg-gray-50 p-4 rounded max-h-60 overflow-y-auto">
-                        <!-- Items injected here -->
+                    <div id="modal-items-list" class="space-y-2 rounded-lg bg-slate-100 p-4 max-h-60 overflow-y-auto dark:bg-navy-600/50">
+                        {{-- Items injected via JS --}}
                     </div>
 
-                    <div class="flex justify-between items-center font-bold text-lg border-t pt-4">
-                        <span>Total Amount:</span>
-                        <span id="modal-total" class="text-blue-600"></span>
+                    <div class="flex justify-between items-center font-bold text-lg border-t border-slate-200 pt-4 dark:border-navy-600">
+                        <span class="text-slate-700 dark:text-navy-100">{{ __('Total Amount') }}:</span>
+                        <span id="modal-total" class="text-primary dark:text-accent-light"></span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
@@ -94,40 +97,39 @@
                             @method('PUT')
                             <input type="hidden" name="action" value="approve">
                             <button type="submit"
-                                class="w-full text-white bg-green-600 hover:bg-green-700 focus:ring-4 focus:outline-none focus:ring-green-300 font-bold rounded-lg text-sm px-5 py-2.5 text-center">
-                                Approve (City Fund)
+                                class="btn w-full bg-success text-white hover:bg-success-focus focus:bg-success-focus active:bg-success-focus/90 dark:bg-success dark:hover:bg-success-focus dark:focus:bg-success-focus">
+                                {{ __('Approve (City Fund)') }}
                             </button>
                         </form>
 
-                        <button onclick="toggleRejectForm()"
-                            class="w-full text-white bg-red-600 hover:bg-red-700 focus:ring-4 focus:outline-none focus:ring-red-300 font-bold rounded-lg text-sm px-5 py-2.5 text-center">
-                            Reject
+                        <button type="button" onclick="toggleRejectForm()"
+                            class="btn w-full bg-error text-white hover:bg-error-focus focus:bg-error-focus active:bg-error-focus/90 dark:bg-error dark:hover:bg-error-focus dark:focus:bg-error-focus">
+                            {{ __('Reject') }}
                         </button>
                     </div>
 
-                    <!-- Reject Form -->
                     <form id="reject-form" method="POST"
-                        class="hidden mt-4 bg-red-50 p-4 rounded border border-red-100">
+                        class="hidden mt-4 rounded-lg border border-error/30 bg-error/10 p-4 dark:bg-error/15 dark:border-error/20">
                         @csrf
                         @method('PUT')
                         <input type="hidden" name="action" value="reject">
 
-                        <label class="block mb-2 text-sm font-medium text-red-900">Rejection Reason</label>
+                        <label class="mb-2 block text-sm font-medium text-slate-700 dark:text-navy-100">{{ __('Rejection Reason') }}</label>
                         <select name="rejection_reason_code" required
-                            class="bg-white border border-red-300 text-red-900 text-sm rounded-lg focus:ring-red-500 focus:border-red-500 block w-full p-2.5 mb-2">
-                            <option value="">Select Reason...</option>
-                            <option value="Insufficient Funds">Insufficient Funds</option>
-                            <option value="Policy Violation">Policy Violation</option>
-                            <option value="Duplicate Request">Duplicate Request</option>
-                            <option value="Other">Other</option>
+                            class="form-select form-select-lineone">
+                            <option value="">{{ __('Select Reason...') }}</option>
+                            <option value="Insufficient Funds">{{ __('Insufficient Funds') }}</option>
+                            <option value="Policy Violation">{{ __('Policy Violation') }}</option>
+                            <option value="Duplicate Request">{{ __('Duplicate Request') }}</option>
+                            <option value="Other">{{ __('Other') }}</option>
                         </select>
                         <textarea name="rejection_reason_note" rows="2"
-                            class="block p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-red-300 focus:ring-red-500 focus:border-red-500 mb-2"
-                            placeholder="Notes (optional)"></textarea>
+                            class="form-textarea form-textarea-lineone mt-2"
+                            placeholder="{{ __('Notes (optional)') }}"></textarea>
 
                         <button type="submit"
-                            class="w-full text-white bg-red-800 hover:bg-red-900 font-medium rounded-lg text-sm px-5 py-2.5">
-                            Confirm Rejection
+                            class="btn mt-3 w-full bg-error text-white hover:bg-error-focus dark:bg-error dark:hover:bg-error-focus">
+                            {{ __('Confirm Rejection') }}
                         </button>
                     </form>
                 </div>
@@ -140,33 +142,27 @@
             document.getElementById('modal-req-id').textContent = request.id;
             document.getElementById('modal-total').textContent = parseFloat(request.reserved_amount).toFixed(2) + ' SAR';
 
-            // Build Items
             const list = document.getElementById('modal-items-list');
             list.innerHTML = '';
             items.forEach(item => {
                 const div = document.createElement('div');
-                div.className = 'flex justify-between border-b border-gray-200 pb-2 last:border-0';
-                // Need menu item name, usually loaded with relationship
+                div.className = 'flex justify-between border-b border-slate-200 pb-2 last:border-0 dark:border-navy-500';
                 const itemName = item.menu_item ? item.menu_item.name : 'Item #' + item.menu_item_id;
-
                 div.innerHTML = `
                     <div>
-                        <span class="block font-medium">${itemName}</span>
-                        <span class="text-xs text-gray-500">Qty: ${item.quantity}</span>
+                        <span class="block font-medium text-slate-700 dark:text-navy-100">${itemName}</span>
+                        <span class="text-xs text-slate-500 dark:text-navy-300">Qty: ${item.quantity}</span>
                     </div>
-                    <span class="font-bold">${(item.price_snapshot * item.quantity).toFixed(2)}</span>
+                    <span class="font-bold text-slate-700 dark:text-navy-100">${(item.price_snapshot * item.quantity).toFixed(2)}</span>
                 `;
                 list.appendChild(div);
             });
 
-            // Set Action URLs
             const url = "{{ route('admin.requests.update', ':id') }}".replace(':id', request.id);
             document.getElementById('approve-form').action = url;
             document.getElementById('reject-form').action = url;
 
-            // Reset UI
             document.getElementById('reject-form').classList.add('hidden');
-
             document.getElementById('review-modal').classList.remove('hidden');
         }
 
