@@ -124,13 +124,18 @@ class RecipientRequestSubmissionTest extends TestCase
     {
         Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00')); // Wednesday
 
-        // Existing request: 300 SAR
-        RequestModel::create([
+        // Existing REDEEMABLE request: 300 SAR (counts towards allowance)
+        $existingReq = RequestModel::create([
             'recipient_id' => $this->recipient->id,
             'provider_id' => $this->provider->id,
             'reserved_amount' => 300.00,
-            'status' => 'PENDING', // Counts towards allowance
+            'status' => 'REDEEMABLE',
             'funding_source' => 'CITY_FUND',
+        ]);
+        $existingReq->items()->create([
+            'menu_item_id' => $this->menuItem1->id,
+            'quantity' => 6,
+            'price_snapshot' => 50.00,
         ]);
 
         // Try to add 120 SAR (300 + 120 = 420 > 400)

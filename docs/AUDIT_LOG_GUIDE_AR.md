@@ -106,6 +106,8 @@ class DonationService
 | `account_approval` | approved, rejected | AccountApprovalController |
 | `menu_item` | created, updated, deactivated | MenuItemController |
 | `donation` | confirmed | DonationService |
+| `request` | created | RecipientRequestController |
+| `wallet` | donation_added, payout_to_provider | SystemWalletService |
 
 عند إضافة كيان جديد، استخدم أسماء واضحة بالإنجليزي مثل: `order`, `payment`, `notification`.
 

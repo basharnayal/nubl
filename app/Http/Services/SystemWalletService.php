@@ -17,6 +17,9 @@ use App\Models\Request as RequestModel;
  */
 class SystemWalletService
 {
+    public function __construct(
+        private AuditService $auditService
+    ) {}
     /**
      * Add funds to the system wallet when a donor's payment is confirmed.
      * Call this from DonationService::confirmDonation() (or equivalent) after payment verification.
@@ -45,6 +48,12 @@ class SystemWalletService
             'request_id' => null,
             'order_redemption_id' => null,
         ]);
+
+        $this->auditService->log('wallet', 'donation_added', [
+            'amount' => $amount,
+            'donor_id' => $donorId,
+            'payment_id' => $paymentId,
+        ], $donorId);
     }
 
     /**
@@ -129,5 +138,11 @@ class SystemWalletService
             'request_id' => $request->id,
             'order_redemption_id' => null,
         ]);
+
+        $this->auditService->log('wallet', 'payout_to_provider', [
+            'request_id' => $request->id,
+            'amount' => $amount,
+            'provider_id' => $request->provider_id,
+        ], auth()->id());
     }
 }

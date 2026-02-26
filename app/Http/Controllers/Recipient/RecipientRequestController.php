@@ -4,12 +4,16 @@ namespace App\Http\Controllers\Recipient;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Recipient\StoreRecipientRequest;
+use App\Http\Services\AuditService;
 use App\Http\Services\RecipientAllowanceService;
 use App\Models\ProviderMenuItem;
 use App\Models\Request as RequestModel;
 
 class RecipientRequestController extends Controller
 {
+    public function __construct(
+        private AuditService $auditService
+    ) {}
     /**
      * Store a newly created resource in storage.
      */
@@ -67,6 +71,13 @@ class RecipientRequestController extends Controller
         foreach ($requestItemsPayload as $payload) {
             $req->items()->create($payload);
         }
+
+        $this->auditService->log('request', 'created', [
+            'request_id' => $req->id,
+            'recipient_id' => $user->id,
+            'provider_id' => $providerId,
+            'amount' => $totalAmount,
+        ]);
 
         return back()->with('success', 'Request submitted successfully!');
     }
