@@ -1,0 +1,69 @@
+@props([
+    'title' => null,
+    'isSidebarOpen' => 'true',
+    'isHeaderBlur' => 'true',
+    'hasMinSidebar' => null,
+    'headerSticky' => null,
+])
+
+<!doctype html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>{{ config('app.name') }} @isset($title) - {{ $title }} @endisset</title>
+
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+    <script>
+        localStorage.getItem("_x_darkMode_on") === "true" && document.documentElement.classList.add("dark");
+    </script>
+</head>
+<body x-data x-bind="$store.global.documentBody"
+    class="@isset($isSidebarOpen) {{ $isSidebarOpen === 'true' ? 'is-sidebar-open' : '' }} @endisset @isset($isHeaderBlur) {{ $isHeaderBlur === 'true' ? 'is-header-blur' : '' }} @endisset @isset($hasMinSidebar) {{ $hasMinSidebar === 'true' ? 'has-min-sidebar' : '' }} @endisset @isset($headerSticky) {{ $headerSticky === 'false' ? 'is-header-not-sticky' : '' }} @endisset">
+
+    <x-app-preloader />
+
+    <div id="root" class="min-h-100vh flex grow bg-slate-50 dark:bg-navy-900" x-cloak>
+        <div class="sidebar print:hidden">
+            <x-app-partials.main-sidebar />
+            <x-app-partials.sidebar-panel />
+        </div>
+
+        @include('components.app-partials.header', ['header' => $header ?? null])
+        <x-app-partials.mobile-searchbar />
+        <x-app-partials.right-sidebar />
+
+        <main class="main-content w-full px-[var(--margin-x)] pb-8">
+            @if(session('success') || session('error') || session('warning') || session('info'))
+                <div class="pt-4">
+                    @if(session('success'))
+                        <x-lineone-alert type="success" dismissible>{{ session('success') }}</x-lineone-alert>
+                    @endif
+                    @if(session('error'))
+                        <x-lineone-alert type="danger" dismissible>{{ session('error') }}</x-lineone-alert>
+                    @endif
+                    @if(session('warning'))
+                        <x-lineone-alert type="warning" dismissible>{{ session('warning') }}</x-lineone-alert>
+                    @endif
+                    @if(session('info'))
+                        <x-lineone-alert type="info" dismissible>{{ session('info') }}</x-lineone-alert>
+                    @endif
+                </div>
+            @endif
+
+            {{ $slot }}
+        </main>
+    </div>
+
+    <div id="x-teleport-target"></div>
+
+    <script>window.addEventListener("DOMContentLoaded", () => Alpine.start());</script>
+</body>
+</html>

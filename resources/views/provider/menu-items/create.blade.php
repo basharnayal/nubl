@@ -96,11 +96,8 @@
                     </div>
 
                     <div class="flex items-center gap-4">
-                        <button type="submit"
-                            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Create
-                            Item</button>
-                        <a href="{{ route('provider.menu-items.index') }}"
-                            class="text-gray-900 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Cancel</a>
+                        <x-lineone-button type="submit" variant="primary">Create Item</x-lineone-button>
+                        <x-lineone-button :href="route('provider.menu-items.index')" variant="slate" outline>Cancel</x-lineone-button>
                     </div>
                 </form>
 

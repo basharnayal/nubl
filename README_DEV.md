@@ -21,12 +21,12 @@
   - [Using Roles in Views](#using-roles-in-views)
   - [Managing Roles Programmatically](#managing-roles-programmatically)
   - [Permissions (Future Reference)](#permissions-future-reference)
-- [Flowbite Components](#flowbite-components)
+- [Lineone Components](#lineone-components)
   - [Available Components](#available-components)
-  - [Flowbite Modal](#flowbite-modal)
-  - [Flowbite Alert](#flowbite-alert)
-  - [Flowbite Card](#flowbite-card)
-  - [Flowbite Button](#flowbite-button)
+  - [Lineone Modal](#lineone-modal)
+  - [Lineone Alert](#lineone-alert)
+  - [Lineone Card](#lineone-card)
+  - [Lineone Button](#lineone-button)
   - [Usage Examples](#usage-examples)
 - [Additional Documentation](#additional-documentation)
 
@@ -585,165 +585,133 @@ if (!auth()->user()->can('donations.create')) {
 
 ---
 
-## Flowbite Components
+## Lineone Components
 
-Essential Flowbite Blade components for consistent UI across the application.
+Essential Lineone Blade components (Alpine.js + Tailwind) for consistent UI across the application.
 
 ### Available Components
 
-- `flowbite-modal` - Modal dialogs
-- `flowbite-alert` - Alert notifications
-- `flowbite-card` - Card components
-- `flowbite-button` - Buttons with Flowbite styles
+- `lineone-modal` - Modal dialogs (Alpine.js)
+- `lineone-alert` - Alert notifications
+- `lineone-card` - Card components
+- `lineone-button` - Buttons with Lineone styles
 
-### Flowbite Modal
+### Lineone Modal
 
 ```blade
-{{-- Basic Modal --}}
-<x-flowbite-modal id="example-modal" title="Modal Title">
+{{-- Basic Modal (Alpine.js events) --}}
+<x-lineone-modal id="example-modal" title="Modal Title">
     <p>Modal content goes here</p>
-</x-flowbite-modal>
+</x-lineone-modal>
 
-{{-- Modal with Footer --}}
-<x-flowbite-modal 
-    id="confirm-modal" 
-    title="Confirm Action"
-    size="md"
-    :footer="'<button>Confirm</button>'"
->
-    <p>Are you sure you want to proceed?</p>
-</x-flowbite-modal>
+{{-- Trigger: dispatch open-modal --}}
+<button @click="$dispatch('open-modal', 'example-modal')">Open Modal</button>
 
-{{-- Trigger Button --}}
-<button data-modal-target="example-modal" data-modal-toggle="example-modal">
-    Open Modal
-</button>
+{{-- Close: $dispatch('close-modal', 'example-modal') or Escape key --}}
 ```
 
 **Props:**
 - `id` (required) - Unique modal ID
 - `title` - Modal title
-- `size` - sm, md, lg, xl, 2xl, 3xl, 4xl, 5xl, 6xl, 7xl
-- `showCloseButton` - Show/hide close button (default: true)
-- `footer` - Footer content (HTML string)
+- `size` - sm, md, lg, xl, 2xl, 3xl
 
-### Flowbite Alert
+### Lineone Alert
 
 ```blade
 {{-- Basic Alert --}}
-<x-flowbite-alert type="info">
+<x-lineone-alert type="info">
     This is an info alert
-</x-flowbite-alert>
+</x-lineone-alert>
 
 {{-- Dismissible Alert --}}
-<x-flowbite-alert type="success" dismissible>
+<x-lineone-alert type="success" dismissible>
     Operation completed successfully!
-</x-flowbite-alert>
+</x-lineone-alert>
 
 {{-- All Types --}}
-<x-flowbite-alert type="info">Info message</x-flowbite-alert>
-<x-flowbite-alert type="success">Success message</x-flowbite-alert>
-<x-flowbite-alert type="warning">Warning message</x-flowbite-alert>
-<x-flowbite-alert type="danger">Error message</x-flowbite-alert>
+<x-lineone-alert type="info">Info message</x-lineone-alert>
+<x-lineone-alert type="success">Success message</x-lineone-alert>
+<x-lineone-alert type="warning">Warning message</x-lineone-alert>
+<x-lineone-alert type="danger">Error message</x-lineone-alert>
 ```
 
 **Props:**
 - `type` - info, success, warning, danger
 - `dismissible` - Enable dismiss button (default: false)
-- `icon` - Show/hide icon (default: true)
-- `id` - Custom ID (auto-generated if not provided)
 
-### Flowbite Card
+### Lineone Card
 
 ```blade
 {{-- Basic Card --}}
-<x-flowbite-card title="Card Title" subtitle="Card subtitle">
+<x-lineone-card title="Card Title" subtitle="Card subtitle">
     <p>Card content</p>
-</x-flowbite-card>
-
-{{-- Card with Image --}}
-<x-flowbite-card 
-    title="Product Name"
-    image="/path/to/image.jpg"
-    imageAlt="Product"
-    href="/product/1"
->
-    <p>Product description</p>
-</x-flowbite-card>
+</x-lineone-card>
 
 {{-- Card with Footer --}}
-<x-flowbite-card title="Card Title" :footer="'<a href=\"#\">Learn More</a>'">
+<x-lineone-card title="Card Title" :footer="'<a href=\"#\">Learn More</a>'">
     <p>Card content</p>
-</x-flowbite-card>
+</x-lineone-card>
 ```
 
 **Props:**
 - `title` - Card title
 - `subtitle` - Card subtitle
-- `image` - Image URL
-- `imageAlt` - Image alt text
-- `footer` - Footer content (HTML string)
-- `href` - Make card clickable (link)
-- `class` - Additional CSS classes
+- `footer` - Footer content (Blade slot or HTML)
 
-### Flowbite Button
+### Lineone Button
 
 ```blade
 {{-- Primary Button --}}
-<x-flowbite-button variant="primary">Click Me</x-flowbite-button>
+<x-lineone-button variant="primary">Click Me</x-lineone-button>
 
 {{-- Different Variants --}}
-<x-flowbite-button variant="primary">Primary</x-flowbite-button>
-<x-flowbite-button variant="secondary">Secondary</x-flowbite-button>
-<x-flowbite-button variant="success">Success</x-flowbite-button>
-<x-flowbite-button variant="danger">Danger</x-flowbite-button>
-<x-flowbite-button variant="warning">Warning</x-flowbite-button>
-<x-flowbite-button variant="info">Info</x-flowbite-button>
+<x-lineone-button variant="primary">Primary</x-lineone-button>
+<x-lineone-button variant="secondary">Secondary</x-lineone-button>
+<x-lineone-button variant="success">Success</x-lineone-button>
+<x-lineone-button variant="danger">Danger</x-lineone-button>
+<x-lineone-button variant="warning">Warning</x-lineone-button>
+<x-lineone-button variant="info">Info</x-lineone-button>
+<x-lineone-button variant="slate">Slate</x-lineone-button>
 
 {{-- Outline Buttons --}}
-<x-flowbite-button variant="primary" outline>Outline Primary</x-flowbite-button>
+<x-lineone-button variant="primary" outline>Outline Primary</x-lineone-button>
 
-{{-- Different Sizes --}}
-<x-flowbite-button size="xs">Extra Small</x-flowbite-button>
-<x-flowbite-button size="sm">Small</x-flowbite-button>
-<x-flowbite-button size="md">Medium</x-flowbite-button>
-<x-flowbite-button size="lg">Large</x-flowbite-button>
-<x-flowbite-button size="xl">Extra Large</x-flowbite-button>
+{{-- Link as Button --}}
+<x-lineone-button href="/donate" variant="primary">Donate Now</x-lineone-button>
 
-{{-- Pill Button --}}
-<x-flowbite-button variant="primary" pill>Pill Button</x-flowbite-button>
-
-{{-- Submit Button --}}
-<x-flowbite-button type="submit" variant="primary">Submit</x-flowbite-button>
+{{-- Sizes --}}
+<x-lineone-button size="xs">Extra Small</x-lineone-button>
+<x-lineone-button size="sm">Small</x-lineone-button>
+<x-lineone-button size="md">Medium</x-lineone-button>
+<x-lineone-button size="lg">Large</x-lineone-button>
 ```
 
 **Props:**
 - `type` - button, submit, reset
-- `variant` - primary, secondary, success, danger, warning, info, light, dark
-- `size` - xs, sm, md, lg, xl
-- `pill` - Rounded pill style (default: false)
+- `variant` - primary, secondary, success, danger, warning, info, slate
+- `size` - xs, sm, md, lg
 - `outline` - Outline style (default: false)
-- `disabled` - Disable button (default: false)
+- `href` - Render as link instead of button
 
 ### Usage Examples
 
 ```blade
 {{-- Modal with Alert --}}
-<x-flowbite-modal id="success-modal" title="Success">
-    <x-flowbite-alert type="success" dismissible>
+<x-lineone-modal id="success-modal" title="Success">
+    <x-lineone-alert type="success" dismissible>
         Your changes have been saved!
-    </x-flowbite-alert>
-</x-flowbite-modal>
+    </x-lineone-alert>
+</x-lineone-modal>
 
 {{-- Card with Button --}}
-<x-flowbite-card title="Donation" subtitle="Make a donation">
+<x-lineone-card title="Donation" subtitle="Make a donation">
     <p>Help support our cause</p>
     <div class="mt-4">
-        <x-flowbite-button variant="primary" href="/donate">
+        <x-lineone-button href="/donate" variant="primary">
             Donate Now
-        </x-flowbite-button>
+        </x-lineone-button>
     </div>
-</x-flowbite-card>
+</x-lineone-card>
 ```
 
 ---

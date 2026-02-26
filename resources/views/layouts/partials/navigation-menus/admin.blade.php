@@ -8,7 +8,7 @@
     <x-dropdown align="left" width="48">
         <x-slot name="trigger">
             <button
-                class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-150 ease-in-out {{ request()->is('admin/users*') || request()->is('admin/manage/*') ? 'border-nubl-teal-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                class="inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition duration-150 ease-in-out {{ request()->is('admin/users*') || request()->is('admin/manage/*') ? 'border-primary text-slate-800 dark:border-accent dark:text-navy-100' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                 {{ __('Users') }}
                 <svg class="ms-1 h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                     <path fill-rule="evenodd"

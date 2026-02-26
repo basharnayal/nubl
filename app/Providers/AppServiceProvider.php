@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Http\View\Composers\SidebarComposer;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -19,8 +21,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // منع التحميل البطئ للبيانات lazy loading عشان محد يجيب  العيد
-        // Model::preventLazyLoading();
-
+        View::composer('*', SidebarComposer::class);
     }
 }

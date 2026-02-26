@@ -1,5 +1,4 @@
 <x-guest-layout>
-    <style>[x-cloak]{display:none!important}</style>
     @php
         $otpPhone = session('otp_phone') ?? old('otp_phone');
         $hasOtpErrors = $errors->has('otp_phone') || $errors->has('otp_code');
@@ -8,36 +7,36 @@
     @endphp
 
     <div x-data="{ tab: '{{ $defaultTab }}' }" class="w-full">
-        {{-- Toggle: Phone (default) | Email --}}
-        <div class="flex rounded-xl bg-slate-100 p-1 mb-6">
-            <button type="button"
+        {{-- Toggle: Phone (OTP) | Email & Password --}}
+        <div role="tablist" aria-label="{{ __('Login method') }}" class="flex rounded-xl bg-slate-100 dark:bg-navy-600 p-1 mb-6">
+            <button type="button" role="tab" :aria-selected="tab === 'otp'" aria-controls="panel-otp" id="tab-otp"
                 @click="tab = 'otp'"
-                :class="tab === 'otp' ? 'bg-white text-nubl-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-800'"
+                :class="tab === 'otp' ? 'bg-white dark:bg-navy-700 text-primary dark:text-accent-light shadow-sm' : 'text-slate-600 dark:text-navy-300 hover:text-slate-800 dark:hover:text-navy-100'"
                 class="flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all duration-200 ease-out">
                 {{ __('Phone (OTP)') }}
             </button>
-            <button type="button"
+            <button type="button" role="tab" :aria-selected="tab === 'email'" aria-controls="panel-email" id="tab-email"
                 @click="tab = 'email'"
-                :class="tab === 'email' ? 'bg-white text-nubl-blue-600 shadow-sm' : 'text-slate-600 hover:text-slate-800'"
+                :class="tab === 'email' ? 'bg-white dark:bg-navy-700 text-primary dark:text-accent-light shadow-sm' : 'text-slate-600 dark:text-navy-300 hover:text-slate-800 dark:hover:text-navy-100'"
                 class="flex-1 py-2.5 px-4 text-sm font-medium rounded-lg transition-all duration-200 ease-out">
                 {{ __('Email & Password') }}
             </button>
         </div>
 
         {{-- OTP Login (default) --}}
-        <div x-show="tab === 'otp'" x-cloak x-transition:enter="transition ease-out duration-200"
+        <div id="panel-otp" role="tabpanel" aria-labelledby="tab-otp" x-show="tab === 'otp'" x-cloak x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             class="space-y-4">
 
             @if (session('otp_status'))
-                <div class="font-medium text-sm text-nubl-teal-600">
+                <div class="font-medium text-sm text-primary dark:text-accent-light">
                     {{ session('otp_status') }}
                 </div>
             @endif
 
             @if ($hasOtpErrors)
-                <div class="p-3 rounded-lg bg-red-50 border border-red-100">
-                    <p class="text-sm text-red-700">{{ $errors->first('otp_phone') ?: $errors->first('otp_code') }}</p>
+                <div class="p-3 rounded-lg bg-error/10 dark:bg-error/15 border border-error/20" role="alert">
+                    <p class="text-sm text-error dark:text-error">{{ $errors->first('otp_phone') ?: $errors->first('otp_code') }}</p>
                 </div>
             @endif
 
@@ -67,8 +66,8 @@
                     </div>
                     <div class="block mt-4">
                         <label for="otp_remember" class="inline-flex items-center">
-                            <input id="otp_remember" type="checkbox" class="rounded border-gray-300 text-nubl-teal-600 shadow-sm focus:ring-nubl-teal-500" name="otp_remember">
-                            <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+                            <input id="otp_remember" type="checkbox" class="rounded border-gray-300 text-primary dark:text-accent-light shadow-sm focus:ring-primary dark:focus:ring-accent" name="otp_remember">
+                            <span class="ms-2 text-sm text-slate-600 dark:text-navy-300">{{ __('Remember me') }}</span>
                         </label>
                     </div>
                     <div class="mt-4 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
@@ -107,7 +106,7 @@
         </div>
 
         {{-- Email + Password Login --}}
-        <div x-show="tab === 'email'" x-cloak x-transition:enter="transition ease-out duration-200"
+        <div id="panel-email" role="tabpanel" aria-labelledby="tab-email" x-show="tab === 'email'" x-cloak x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             class="space-y-4">
 
@@ -133,14 +132,14 @@
 
                 <div class="block mt-4">
                     <label for="remember_me" class="inline-flex items-center">
-                        <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-nubl-teal-600 shadow-sm focus:ring-nubl-teal-500" name="remember">
-                        <span class="ms-2 text-sm text-gray-600">{{ __('Remember me') }}</span>
+                        <input id="remember_me" type="checkbox" class="rounded border-gray-300 text-primary dark:text-accent-light shadow-sm focus:ring-primary dark:focus:ring-accent" name="remember">
+                        <span class="ms-2 text-sm text-slate-600 dark:text-navy-300">{{ __('Remember me') }}</span>
                     </label>
                 </div>
 
                 <div class="flex items-center justify-end mt-4 gap-3">
                     @if (Route::has('password.request'))
-                        <a class="underline text-sm text-nubl-teal-600 hover:text-nubl-teal-700 font-medium rounded-md" href="{{ route('password.request') }}">
+                        <a class="underline text-sm text-primary dark:text-accent-light hover:text-primary-focus dark:hover:text-accent font-medium rounded-md" href="{{ route('password.request') }}">
                             {{ __('Forgot your password?') }}
                         </a>
                     @endif

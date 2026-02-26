@@ -246,7 +246,7 @@
                             <button onclick="adjustModalQty(1)" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center hover:bg-gray-300 text-gray-800 font-bold">+</button>
                         </div>
                     </div>
-                    <button onclick="addToCart()" type="button" class="text-white w-full bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-bold rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Add to Request</button>
+                    <x-lineone-button type="button" onclick="addToCart()" variant="primary" class="w-full">Add to Request</x-lineone-button>
                 </div>
             </div>
         </div>
@@ -259,7 +259,7 @@
                 <p class="text-xs text-gray-500">Total Items: <span id="mobile-count" class="font-bold text-gray-900">0</span></p>
                 <p class="font-bold text-lg text-blue-600" id="mobile-total">0.00 SAR</p>
             </div>
-            <button onclick="document.getElementById('submit-btn').click()" id="mobile-submit-btn" disabled class="bg-blue-700 text-white font-bold py-2 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed">
+            <button onclick="document.getElementById('submit-btn').click()" id="mobile-submit-btn" disabled class="btn bg-primary text-white hover:bg-primary-focus disabled:opacity-50 disabled:cursor-not-allowed py-2 px-6">
                 Submit Request
             </button>
         </div>

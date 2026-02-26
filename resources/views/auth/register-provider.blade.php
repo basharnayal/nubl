@@ -29,7 +29,7 @@
         @if($readonly)
             {{-- Read-only: submitted, awaiting admin approval --}}
             <div class="space-y-6">
-                <p class="text-sm text-slate-600 p-3 bg-nubl-teal-50 rounded-lg border border-nubl-teal-100">{{ __('Your application (view only). Awaiting admin approval.') }}</p>
+                <p class="text-sm text-slate-600 p-3 bg-primary/10 rounded-lg border border-primary/20 dark:bg-accent/10 dark:border-accent/20">{{ __('Your application (view only). Awaiting admin approval.') }}</p>
 
                 {{-- Step 1: Personal --}}
                 <div x-show="step === 1" x-transition class="space-y-4">
@@ -94,8 +94,8 @@
                 <div class="flex items-center justify-between mt-6">
                     <button type="button" x-show="step > 1" x-on:click="step--" class="text-gray-600 hover:text-gray-900 font-medium text-sm">{{ __('Previous') }}</button>
                     <div class="flex gap-2">
-                        <button type="button" x-show="step < 4" x-on:click="step++" class="text-nubl-teal-600 hover:text-nubl-teal-700 font-medium text-sm">{{ __('Next') }}</button>
-                        <a href="{{ route('approval.pending') }}" class="text-nubl-teal-600 hover:text-nubl-teal-700 text-sm font-medium">{{ __('Back to status') }}</a>
+                        <button type="button" x-show="step < 4" x-on:click="step++" class="text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent font-medium text-sm">{{ __('Next') }}</button>
+                        <a href="{{ route('approval.pending') }}" class="text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent text-sm font-medium">{{ __('Back to status') }}</a>
                     </div>
                 </div>
             </div>
@@ -122,13 +122,13 @@
                 </div>
                 @endif
 
-                {{-- Flowbite-style steps --}}
+                {{-- Step indicator (Lineone/Alpine) --}}
                 <ol class="flex items-center w-full mb-8 text-sm font-medium text-center text-slate-500 sm:flex-nowrap">
                     @foreach([1 => __('Personal'), 2 => __('Operating'), 3 => __('Financial'), 4 => __('Documents')] as $s => $label)
                     <li class="flex items-center {{ $s < 4 ? 'flex-1' : '' }}">
                         <span class="flex items-center justify-center w-8 h-8 mr-2 rounded-full shrink-0"
-                            :class="step >= {{ $s }} ? (step === {{ $s }} ? 'bg-nubl-gold-500 text-white' : 'bg-nubl-teal-500 text-white') : 'bg-slate-200 text-slate-500'">{{ $s }}</span>
-                        <span class="hidden sm:inline" :class="step >= {{ $s }} ? (step === {{ $s }} ? 'text-nubl-gold-600' : 'text-nubl-teal-600') : ''">{{ $label }}</span>
+                            :class="step >= {{ $s }} ? (step === {{ $s }} ? 'bg-primary text-white dark:bg-accent' : 'bg-primary/80 text-white dark:bg-accent/80') : 'bg-slate-200 text-slate-500 dark:bg-navy-600 dark:text-navy-300'">{{ $s }}</span>
+                        <span class="hidden sm:inline" :class="step >= {{ $s }} ? (step === {{ $s }} ? 'text-primary dark:text-accent-light' : 'text-primary/80 dark:text-accent-light/80') : ''">{{ $label }}</span>
                         @if($s < 4)<span class="flex-1 h-px mx-2 bg-slate-200 shrink-0"></span>@endif
                     </li>
                     @endforeach
@@ -183,7 +183,7 @@
                             @foreach($businessCategories as $cat)
                             <label class="inline-flex items-center">
                                 <input type="checkbox" name="business_category[]" value="{{ $cat }}" {{ in_array($cat, old('business_category', [])) ? 'checked' : '' }}
-                                    class="rounded border-gray-300 text-nubl-teal-600 focus:ring-nubl-teal-500">
+                                    class="rounded border-gray-300 text-primary focus:ring-primary dark:text-accent-light dark:focus:ring-accent">
                                 <span class="ms-2 text-sm text-gray-700">{{ ucfirst(str_replace('_', ' ', $cat)) }}</span>
                             </label>
                             @endforeach
@@ -193,19 +193,19 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="address_ar" :value="__('Address (Arabic)')" required />
-                            <textarea id="address_ar" name="address_ar" rows="2" required class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:border-nubl-teal-500 focus:ring-nubl-teal-500">{{ old('address_ar') }}</textarea>
+                            <textarea id="address_ar" name="address_ar" rows="2" required class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:border-primary focus:ring-primary dark:focus:border-accent dark:focus:ring-accent">{{ old('address_ar') }}</textarea>
                             <x-input-error :messages="$errors->get('address_ar')" class="mt-2" />
                         </div>
                         <div>
                             <x-input-label for="address_en" :value="__('Address (English)')" required />
-                            <textarea id="address_en" name="address_en" rows="2" required class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:border-nubl-teal-500 focus:ring-nubl-teal-500">{{ old('address_en') }}</textarea>
+                            <textarea id="address_en" name="address_en" rows="2" required class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:border-primary focus:ring-primary dark:focus:border-accent dark:focus:ring-accent">{{ old('address_en') }}</textarea>
                             <x-input-error :messages="$errors->get('address_en')" class="mt-2" />
                         </div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <x-input-label for="city" :value="__('City')" required />
-                            <select id="city" name="city" required class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-nubl-teal-500 focus:border-nubl-teal-500">
+                            <select id="city" name="city" required class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:focus:ring-accent dark:focus:border-accent">
                                 <option value="">— {{ __('Select') }} —</option>
                                 @foreach(config('provider.cities', []) as $key => $label)
                                 <option value="{{ $key }}" {{ old('city') === $key ? 'selected' : '' }}>{{ $label }}</option>
@@ -220,7 +220,7 @@
                             <input type="hidden" name="region" value="{{ array_key_first($regions) }}">
                             <p class="mt-1 text-gray-700">{{ reset($regions) }}</p>
                             @else
-                            <select id="region" name="region" required class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-nubl-teal-500 focus:border-nubl-teal-500">
+                            <select id="region" name="region" required class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:focus:ring-accent dark:focus:border-accent">
                                 @foreach($regions as $key => $label)
                                 <option value="{{ $key }}" {{ old('region', 'western') === $key ? 'selected' : '' }}>{{ $label }}</option>
                                 @endforeach
@@ -250,7 +250,7 @@
                                     <label class="inline-flex items-center">
                                         <input type="checkbox" name="operating_hours[{{ $dayKey }}][closed]" value="1"
                                             x-model="closed"
-                                            class="rounded border-gray-300 text-nubl-teal-600 focus:ring-nubl-teal-500">
+                                            class="rounded border-gray-300 text-primary focus:ring-primary dark:text-accent-light dark:focus:ring-accent">
                                         <span class="ms-2 text-sm text-gray-600">{{ __('Closed') }}</span>
                                     </label>
                                 </div>
@@ -258,12 +258,12 @@
                                     <div class="flex-1">
                                         <x-input-label :value="__('Open')" class="text-xs" />
                                         <input type="time" name="operating_hours[{{ $dayKey }}][open]" value="{{ old("operating_hours.{$dayKey}.open", '09:00') }}"
-                                            x-bind:disabled="closed" class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-nubl-teal-500 focus:border-nubl-teal-500">
+                                            x-bind:disabled="closed" class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:focus:ring-accent dark:focus:border-accent">
                                     </div>
                                     <div class="flex-1">
                                         <x-input-label :value="__('Close')" class="text-xs" />
                                         <input type="time" name="operating_hours[{{ $dayKey }}][close]" value="{{ old("operating_hours.{$dayKey}.close", '17:00') }}"
-                                            x-bind:disabled="closed" class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-nubl-teal-500 focus:border-nubl-teal-500">
+                                            x-bind:disabled="closed" class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:focus:ring-accent dark:focus:border-accent">
                                     </div>
                                 </div>
                                 <x-input-error :messages="$errors->get('operating_hours.'.$dayKey)" class="mt-2" />
@@ -282,7 +282,7 @@
                             @foreach($serviceTypes as $st)
                             <label class="inline-flex items-center">
                                 <input type="checkbox" name="service_type[]" value="{{ $st }}" {{ in_array($st, old('service_type', [])) ? 'checked' : '' }}
-                                    class="rounded border-gray-300 text-nubl-teal-600 focus:ring-nubl-teal-500">
+                                    class="rounded border-gray-300 text-primary focus:ring-primary dark:text-accent-light dark:focus:ring-accent">
                                 <span class="ms-2 text-sm text-gray-700">{{ ucfirst(str_replace('_', ' ', $st)) }}</span>
                             </label>
                             @endforeach
@@ -292,7 +292,7 @@
                     <div>
                         <x-input-label for="estimated_preparation_order_time" :value="__('Estimated Preparation Time')" required />
                         <select id="estimated_preparation_order_time" name="estimated_preparation_order_time" required
-                            class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-nubl-teal-500 focus:border-nubl-teal-500">
+                            class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:focus:ring-accent dark:focus:border-accent">
                             <option value="15 minutes" {{ old('estimated_preparation_order_time') == '15 minutes' ? 'selected' : '' }}>15 {{ __('minutes') }}</option>
                             <option value="30 minutes" {{ old('estimated_preparation_order_time', '30 minutes') == '30 minutes' ? 'selected' : '' }}>30 {{ __('minutes') }}</option>
                             <option value="45 minutes" {{ old('estimated_preparation_order_time') == '45 minutes' ? 'selected' : '' }}>45 {{ __('minutes') }}</option>
@@ -304,7 +304,7 @@
                     </div>
                     <div>
                         <x-input-label for="adoption_support" :value="__('Do you wish to adopt orders as community support and service?')" required />
-                        <select id="adoption_support" name="adoption_support" required class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-nubl-teal-500 focus:border-nubl-teal-500">
+                        <select id="adoption_support" name="adoption_support" required class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:focus:ring-accent dark:focus:border-accent">
                             <option value="">— {{ __('Select') }} —</option>
                             @foreach(config('provider.adoption_support_options', []) as $key => $label)
                             <option value="{{ $key }}" {{ old('adoption_support') === $key ? 'selected' : '' }}>{{ __($label) }}</option>
@@ -344,13 +344,13 @@
                     <div>
                         <x-input-label for="business_license" :value="__('Business License')" required />
                         <input id="business_license" name="business_license" type="file" accept=".pdf,.jpg,.jpeg,.png" required
-                            class="block mt-1 w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-nubl-teal-50 file:text-nubl-teal-700 hover:file:bg-nubl-teal-100 cursor-pointer">
+                            class="block mt-1 w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20 dark:file:bg-accent/10 dark:file:text-accent-light dark:hover:file:bg-accent/20 cursor-pointer">
                         <x-input-error :messages="$errors->get('business_license')" class="mt-2" />
                     </div>
                     <div>
                         <x-input-label for="id_or_iqama" :value="__('ID or Iqama')" required />
                         <input id="id_or_iqama" name="id_or_iqama" type="file" accept=".pdf,.jpg,.jpeg,.png" required
-                            class="block mt-1 w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-nubl-teal-50 file:text-nubl-teal-700 hover:file:bg-nubl-teal-100 cursor-pointer">
+                            class="block mt-1 w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-primary/10 file:text-primary hover:file:bg-primary/20 dark:file:bg-accent/10 dark:file:text-accent-light dark:hover:file:bg-accent/20 cursor-pointer">
                         <x-input-error :messages="$errors->get('id_or_iqama')" class="mt-2" />
                     </div>
                     <div>
@@ -363,8 +363,8 @@
                 <div class="flex items-center justify-between mt-6 pt-6 border-t border-slate-200">
                     <button type="button" x-show="step > 1" x-on:click="hideError(); step--" class="text-slate-600 hover:text-slate-900 font-medium text-sm py-2">{{ __('Previous') }}</button>
                     <div class="flex gap-3 ml-auto">
-                        <button type="button" x-show="step < 4" x-on:click="validateAndNext()" class="text-white bg-nubl-teal-600 hover:bg-nubl-teal-700 font-medium rounded-lg text-sm px-5 py-2.5 transition">{{ __('Next') }}</button>
-                        <x-primary-button type="submit" class="!bg-nubl-blue-600 hover:!bg-nubl-blue-700 focus:!ring-nubl-blue-200" x-show="step === 4">{{ __('Submit Application') }}</x-primary-button>
+                        <button type="button" x-show="step < 4" x-on:click="validateAndNext()" class="btn bg-primary text-white hover:bg-primary-focus dark:bg-accent dark:hover:bg-accent-focus font-medium rounded-lg text-sm px-5 py-2.5 transition">{{ __('Next') }}</button>
+                        <x-primary-button type="submit" x-show="step === 4">{{ __('Submit Application') }}</x-primary-button>
                     </div>
                 </div>
             </form>

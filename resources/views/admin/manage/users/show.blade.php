@@ -5,7 +5,7 @@
                 {{ __('User') }}: {{ $user->name }}
             </h2>
             <div class="flex gap-2">
-                <a href="{{ route('admin.manage.users.edit', $user) }}" class="inline-flex items-center px-4 py-2 bg-nubl-teal-600 text-white rounded-lg hover:bg-nubl-teal-700 font-medium text-sm">{{ __('Edit') }}</a>
+                <x-lineone-button :href="route('admin.manage.users.edit', $user)" variant="primary" size="sm">{{ __('Edit') }}</x-lineone-button>
                 <a href="{{ route('admin.manage.users.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium text-sm">{{ __('Back') }}</a>
             </div>
         </div>
@@ -74,7 +74,7 @@
                                     @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
                                         <img src="{{ route('admin.users.file', [$user, 'id_photo']) }}" alt="ID Photo" class="max-w-full max-h-64 rounded-lg border object-contain" />
                                     @else
-                                        <span class="text-nubl-teal-600 hover:underline">{{ __('ID Photo') }}</span>
+                                        <span class="text-primary dark:text-accent-light hover:underline">{{ __('ID Photo') }}</span>
                                     @endif
                                 </a>
                             </dd>
@@ -89,7 +89,7 @@
                                     @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
                                         <img src="{{ route('admin.users.file', [$user, 'address_confirmation']) }}" alt="Address Confirmation" class="max-w-full max-h-64 rounded-lg border object-contain" />
                                     @else
-                                        <span class="text-nubl-teal-600 hover:underline">{{ __('Address Confirmation') }}</span>
+                                        <span class="text-primary dark:text-accent-light hover:underline">{{ __('Address Confirmation') }}</span>
                                     @endif
                                 </a>
                             </dd>
@@ -191,7 +191,7 @@
                                     @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
                                         <img src="{{ route('admin.users.file', [$user, 'business_license']) }}" alt="Business License" class="max-w-full max-h-64 rounded-lg border object-contain" />
                                     @else
-                                        <span class="inline-flex items-center px-3 py-2 bg-nubl-teal-100 text-nubl-teal-700 rounded-lg text-sm font-medium hover:bg-nubl-teal-200">{{ __('Business License') }}</span>
+                                        <span class="inline-flex items-center px-3 py-2 bg-primary/10 text-primary dark:bg-accent/10 dark:text-accent-light rounded-lg text-sm font-medium hover:bg-primary/20 dark:hover:bg-accent/20">{{ __('Business License') }}</span>
                                     @endif
                                 </a>
                             </dd>
@@ -206,7 +206,7 @@
                                     @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
                                         <img src="{{ route('admin.users.file', [$user, 'id_or_iqama']) }}" alt="ID / Iqama" class="max-w-full max-h-64 rounded-lg border object-contain" />
                                     @else
-                                        <span class="inline-flex items-center px-3 py-2 bg-nubl-teal-100 text-nubl-teal-700 rounded-lg text-sm font-medium hover:bg-nubl-teal-200">{{ __('ID / Iqama') }}</span>
+                                        <span class="inline-flex items-center px-3 py-2 bg-primary/10 text-primary dark:bg-accent/10 dark:text-accent-light rounded-lg text-sm font-medium hover:bg-primary/20 dark:hover:bg-accent/20">{{ __('ID / Iqama') }}</span>
                                     @endif
                                 </a>
                             </dd>
@@ -222,19 +222,19 @@
                 @if($user->is_active)
                     <form method="POST" action="{{ route('admin.manage.users.deactivate', $user) }}" onsubmit="return confirm('{{ __('Deactivate this user?') }}')">
                         @csrf
-                        <button type="submit" class="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-medium">{{ __('Deactivate') }}</button>
+                        <x-lineone-button type="submit" variant="warning">{{ __('Deactivate') }}</x-lineone-button>
                     </form>
                 @else
                     <form method="POST" action="{{ route('admin.manage.users.reactivate', $user) }}">
                         @csrf
-                        <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">{{ __('Reactivate') }}</button>
+                        <x-lineone-button type="submit" variant="success">{{ __('Reactivate') }}</x-lineone-button>
                     </form>
                 @endif
                 @if($user->id !== auth()->id())
                     <form method="POST" action="{{ route('admin.manage.users.destroy', $user) }}" onsubmit="return confirm('{{ __('Permanently delete this user?') }}')">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">{{ __('Delete') }}</button>
+                        <x-lineone-button type="submit" variant="danger">{{ __('Delete') }}</x-lineone-button>
                     </form>
                 @endif
             </div>

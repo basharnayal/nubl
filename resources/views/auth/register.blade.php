@@ -12,17 +12,17 @@
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {{-- Donor: gold (giving) | Recipient: teal (hope) | Provider: blue (trust) --}}
                 <label class="relative flex cursor-pointer rounded-lg border p-4 transition-all duration-200 focus:outline-none"
-                    :class="membershipType === 'donor' ? 'border-nubl-gold-500 ring-2 ring-nubl-gold-500 bg-nubl-gold-50/50' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                    :class="membershipType === 'donor' ? 'border-secondary ring-2 ring-secondary bg-secondary/10 dark:border-secondary dark:ring-secondary dark:bg-secondary/10' : 'border-slate-200 hover:border-slate-300 bg-white dark:border-navy-600 dark:hover:border-navy-500 dark:bg-navy-750'">
                     <input type="radio" name="membership_type" value="donor" required x-model="membershipType" x-on:change="onMembershipChange()" class="sr-only">
                     <span class="flex flex-1 items-center justify-center text-sm font-medium text-slate-700">{{ __('Donor') }}</span>
                 </label>
                 <label class="relative flex cursor-pointer rounded-lg border p-4 transition-all duration-200 focus:outline-none"
-                    :class="membershipType === 'recipient' ? 'border-nubl-teal-500 ring-2 ring-nubl-teal-500 bg-nubl-teal-50/50' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                    :class="membershipType === 'recipient' ? 'border-primary ring-2 ring-primary bg-primary/10 dark:border-accent dark:ring-accent dark:bg-accent/10' : 'border-slate-200 hover:border-slate-300 bg-white dark:border-navy-600 dark:hover:border-navy-500 dark:bg-navy-750'">
                     <input type="radio" name="membership_type" value="recipient" required x-model="membershipType" x-on:change="onMembershipChange()" class="sr-only">
                     <span class="flex flex-1 items-center justify-center text-sm font-medium text-slate-700">{{ __('Recipient') }}</span>
                 </label>
                 <label class="relative flex cursor-pointer rounded-lg border p-4 transition-all duration-200 focus:outline-none"
-                    :class="membershipType === 'provider' ? 'border-nubl-blue-500 ring-2 ring-nubl-blue-500 bg-nubl-blue-50/50' : 'border-slate-200 hover:border-slate-300 bg-white'">
+                    :class="membershipType === 'provider' ? 'border-primary ring-2 ring-primary bg-primary/10 dark:border-accent dark:ring-accent dark:bg-accent/10' : 'border-slate-200 hover:border-slate-300 bg-white dark:border-navy-600 dark:hover:border-navy-500 dark:bg-navy-750'">
                     <input type="radio" name="membership_type" value="provider" required x-model="membershipType" x-on:change="onMembershipChange()" class="sr-only">
                     <span class="flex flex-1 items-center justify-center text-sm font-medium text-slate-700">{{ __('Provider') }}</span>
                 </label>
@@ -32,10 +32,10 @@
 
         {{-- Provider: separate multi-step form at /register/provider --}}
         <div x-show="membershipType === 'provider'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-            class="p-4 rounded-lg border border-nubl-teal-200 bg-nubl-teal-50" x-cloak>
-            <p class="text-slate-600 text-sm mb-4">{{ __('Provider registration requires additional business information.') }}</p>
+            class="p-4 rounded-lg border border-primary/20 bg-primary/10 dark:border-accent/20 dark:bg-accent/10" x-cloak>
+            <p class="text-slate-600 dark:text-navy-300 text-sm mb-4">{{ __('Provider registration requires additional business information.') }}</p>
             <a href="{{ route('register.provider') }}"
-                class="inline-flex items-center justify-center px-4 py-2.5 bg-nubl-teal-600 text-white text-sm font-medium rounded-lg hover:bg-nubl-teal-700 focus:ring-4 focus:ring-nubl-teal-200 transition">
+                class="btn inline-flex items-center justify-center px-4 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-focus focus:ring-4 focus:ring-primary/20 dark:bg-accent dark:hover:bg-accent-focus dark:focus:ring-accent/20 transition">
                 {{ __('Continue to Provider Registration') }}
             </a>
         </div>
@@ -73,7 +73,7 @@
         </div>
 
         {{-- Donor only: phone — gold accent (giving) --}}
-        <div x-show="membershipType === 'donor'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-cloak class="space-y-4 mt-4 p-4 rounded-lg border border-nubl-gold-200 bg-nubl-gold-50/50">
+        <div x-show="membershipType === 'donor'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-cloak class="space-y-4 mt-4 p-4 rounded-lg border border-secondary/20 bg-secondary/10 dark:border-secondary/20 dark:bg-secondary/10">
             <div>
                 <x-input-label for="phone_number" :value="__('Phone Number (Saudi format)')" required />
                 <x-text-input id="phone_number" class="block mt-1 w-full" type="tel" name="phone_number" :value="old('phone_number')" placeholder="05XXXXXXXX"
@@ -90,7 +90,7 @@
         <div x-show="membershipType === 'recipient'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-cloak class="space-y-4 mt-4"
             x-bind:aria-hidden="membershipType !== 'recipient'">
             {{-- Recipient phone — teal accent (same style as donor) --}}
-            <div class="p-4 rounded-lg border border-nubl-teal-200 bg-nubl-teal-50/50">
+            <div class="p-4 rounded-lg border border-primary/20 bg-primary/10 dark:border-accent/20 dark:bg-accent/10">
                 <x-input-label for="recipient_phone_number" :value="__('Phone Number (Saudi format)')" required />
                 <x-text-input id="recipient_phone_number" class="block mt-1 w-full" type="tel" name="phone_number" :value="old('phone_number')" placeholder="05XXXXXXXX"
                     maxlength="10"
@@ -106,7 +106,7 @@
                 <select id="nationality" name="nationality"
                     x-bind:required="membershipType === 'recipient'"
                     x-bind:disabled="membershipType !== 'recipient'"
-                    class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-nubl-teal-500 focus:border-nubl-teal-500">
+                    class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:focus:ring-accent dark:focus:border-accent">
                     <option value="">— {{ __('Select') }} —</option>
                     @foreach(config('nationalities') as $country)
                         <option value="{{ $country }}" {{ old('nationality') === $country ? 'selected' : '' }}>{{ $country }}</option>
@@ -121,7 +121,7 @@
                     x-bind:required="membershipType === 'recipient'"
                     x-bind:disabled="membershipType !== 'recipient'"
                     placeholder="{{ __('City, district, or area sufficient to identify where you live') }}"
-                    class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-nubl-teal-500 focus:border-nubl-teal-500 placeholder:text-slate-400" />
+                    class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:focus:ring-accent dark:focus:border-accent placeholder:text-slate-400" />
                 <x-input-error :messages="$errors->get('short_address')" class="mt-2" />
             </div>
 
@@ -130,7 +130,7 @@
                 <select id="id_type" name="id_type"
                     x-bind:required="membershipType === 'recipient'"
                     x-bind:disabled="membershipType !== 'recipient'"
-                    class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-nubl-teal-500 focus:border-nubl-teal-500">
+                    class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:focus:ring-accent dark:focus:border-accent">
                     <option value="">— {{ __('Select') }} —</option>
                     <option value="national_id" {{ old('id_type') === 'national_id' ? 'selected' : '' }}>{{ __('National ID') }}</option>
                     <option value="iqama" {{ old('id_type') === 'iqama' ? 'selected' : '' }}>{{ __('Iqama') }}</option>
@@ -139,14 +139,14 @@
             </div>
 
             {{-- Identity photo: camera capture required — teal accent --}}
-            <div class="rounded-lg border border-nubl-teal-200 bg-nubl-teal-50 p-4">
+            <div class="rounded-lg border border-primary/20 bg-primary/10 dark:border-accent/20 dark:bg-accent/10 p-4">
                 <x-input-label :value="__('Identity Photo (Capture with camera)')" required />
                 <p class="text-sm text-slate-600 mt-1 mb-3">{{ __('You must capture your identity document using your device camera. File upload is not allowed.') }}</p>
 
                 <div x-show="!idPhotoCaptured" class="space-y-3">
                     <div x-show="!cameraActive" class="flex gap-2">
                         <button type="button" x-on:click="startCamera()"
-                            class="text-white bg-nubl-teal-600 hover:bg-nubl-teal-700 focus:ring-4 focus:ring-nubl-teal-200 font-medium rounded-lg text-sm px-5 py-2.5 transition">
+                            class="text-white bg-primary hover:bg-primary-focus focus:ring-4 focus:ring-primary/20 dark:bg-accent dark:hover:bg-accent-focus dark:focus:ring-accent/20 font-medium rounded-lg text-sm px-5 py-2.5 transition">
                             {{ __('Start Camera') }}
                         </button>
                     </div>
@@ -154,7 +154,7 @@
                         <video id="camera-preview" x-ref="video" autoplay playsinline class="w-full rounded-lg border border-gray-300"></video>
                         <div class="flex gap-2">
                             <button type="button" x-on:click="capturePhoto()"
-                                class="text-white bg-nubl-teal-600 hover:bg-nubl-teal-700 focus:ring-4 focus:ring-nubl-teal-200 font-medium rounded-lg text-sm px-5 py-2.5 transition">
+                                class="text-white bg-primary hover:bg-primary-focus focus:ring-4 focus:ring-primary/20 dark:bg-accent dark:hover:bg-accent-focus dark:focus:ring-accent/20 font-medium rounded-lg text-sm px-5 py-2.5 transition">
                                 {{ __('Capture Photo') }}
                             </button>
                             <button type="button" x-on:click="stopCamera()"
@@ -167,7 +167,7 @@
                 <div x-show="idPhotoCaptured" class="space-y-2">
                     <img x-ref="previewImg" src="" alt="Captured" class="max-h-40 rounded-lg border border-gray-300" />
                     <button type="button" x-on:click="retakePhoto()"
-                        class="text-nubl-teal-600 hover:text-nubl-teal-700 font-medium text-sm">
+                        class="text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent font-medium text-sm">
                         {{ __('Retake photo') }}
                     </button>
                 </div>
@@ -182,7 +182,7 @@
                 <select id="income_band" name="income_band"
                     x-bind:required="membershipType === 'recipient'"
                     x-bind:disabled="membershipType !== 'recipient'"
-                    class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-nubl-teal-500 focus:border-nubl-teal-500">
+                    class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:focus:ring-accent dark:focus:border-accent">
                     <option value="">— {{ __('Select') }} —</option>
                     <option value="0-500" {{ old('income_band') === '0-500' ? 'selected' : '' }}>0 - 500 {{ __('SAR/month') }}</option>
                     <option value="500-1000" {{ old('income_band') === '500-1000' ? 'selected' : '' }}>500 - 1,000 {{ __('SAR/month') }}</option>
@@ -209,7 +209,7 @@
                 <select id="marital_status" name="marital_status"
                     x-bind:required="membershipType === 'recipient'"
                     x-bind:disabled="membershipType !== 'recipient'"
-                    class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-nubl-teal-500 focus:border-nubl-teal-500">
+                    class="block mt-1 w-full px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg shadow-sm focus:ring-primary focus:border-primary dark:focus:ring-accent dark:focus:border-accent">
                     <option value="">— {{ __('Select') }} —</option>
                     <option value="single" {{ old('marital_status') === 'single' ? 'selected' : '' }}>{{ __('Single') }}</option>
                     <option value="married" {{ old('marital_status') === 'married' ? 'selected' : '' }}>{{ __('Married') }}</option>
@@ -226,13 +226,13 @@
                         <input type="radio" name="is_student" value="1" {{ old('is_student') === '1' || old('is_student') === true ? 'checked' : '' }}
                             x-bind:required="membershipType === 'recipient'"
                             x-bind:disabled="membershipType !== 'recipient'"
-                            class="w-4 h-4 text-nubl-teal-600 bg-slate-100 border-slate-300 focus:ring-nubl-teal-500 focus:ring-2">
+                            class="w-4 h-4 text-primary bg-slate-100 border-slate-300 focus:ring-primary focus:ring-2 dark:text-accent-light dark:focus:ring-accent">
                         <span class="ms-2 text-sm font-medium text-gray-900">{{ __('Yes, I am a student') }}</span>
                     </label>
                     <label class="inline-flex items-center cursor-pointer">
                         <input type="radio" name="is_student" value="0" {{ old('is_student') === '0' || old('is_student') === false ? 'checked' : '' }}
                             x-bind:disabled="membershipType !== 'recipient'"
-                            class="w-4 h-4 text-nubl-teal-600 bg-slate-100 border-slate-300 focus:ring-nubl-teal-500 focus:ring-2">
+                            class="w-4 h-4 text-primary bg-slate-100 border-slate-300 focus:ring-primary focus:ring-2 dark:text-accent-light dark:focus:ring-accent">
                         <span class="ms-2 text-sm font-medium text-gray-900">{{ __('No') }}</span>
                     </label>
                 </fieldset>
@@ -240,14 +240,14 @@
             </div>
 
             {{-- Address proof: camera capture required — gold accent --}}
-            <div class="rounded-lg border border-nubl-gold-200 bg-nubl-gold-50/70 p-4">
+            <div class="rounded-lg border border-secondary/20 bg-secondary/10 p-4">
                 <x-input-label :value="__('Address confirmation photo')" required />
                 <p class="text-sm text-slate-600 mt-1 mb-3">{{ __('Capture a photo of your address proof (e.g. utility bill, lease) using your device camera.') }}</p>
 
                 <div x-show="!addressPhotoCaptured" class="space-y-3">
                     <div x-show="!addressCameraActive" class="flex gap-2">
                         <button type="button" x-on:click="startAddressCamera()"
-                            class="text-white bg-nubl-gold-500 hover:bg-nubl-gold-600 focus:ring-4 focus:ring-nubl-gold-200 font-medium rounded-lg text-sm px-5 py-2.5 transition">
+                            class="text-white bg-secondary hover:bg-secondary-focus focus:ring-4 focus:ring-secondary/20 font-medium rounded-lg text-sm px-5 py-2.5 transition">
                             {{ __('Start Camera') }}
                         </button>
                     </div>
@@ -255,7 +255,7 @@
                         <video id="address-camera-preview" x-ref="addressVideo" autoplay playsinline class="w-full rounded-lg border border-gray-300"></video>
                         <div class="flex gap-2">
                             <button type="button" x-on:click="captureAddressPhoto()"
-                                class="text-white bg-nubl-gold-500 hover:bg-nubl-gold-600 focus:ring-4 focus:ring-nubl-gold-200 font-medium rounded-lg text-sm px-5 py-2.5 transition">
+                                class="text-white bg-secondary hover:bg-secondary-focus focus:ring-4 focus:ring-secondary/20 font-medium rounded-lg text-sm px-5 py-2.5 transition">
                                 {{ __('Capture Photo') }}
                             </button>
                             <button type="button" x-on:click="stopAddressCamera()"
@@ -268,7 +268,7 @@
                 <div x-show="addressPhotoCaptured" class="space-y-2">
                     <img x-ref="addressPreviewImg" src="" alt="Address captured" class="max-h-40 rounded-lg border border-gray-300" />
                     <button type="button" x-on:click="retakeAddressPhoto()"
-                        class="text-nubl-gold-600 hover:text-nubl-gold-700 font-medium text-sm">
+                        class="text-secondary hover:text-secondary-focus font-medium text-sm">
                         {{ __('Retake photo') }}
                     </button>
                 </div>
@@ -279,15 +279,15 @@
         </div>
 
         <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-4 mt-8 pt-6 border-t border-slate-200">
-            <a class="text-sm text-nubl-teal-600 hover:text-nubl-teal-700 font-medium" href="{{ route('login') }}">
+            <a class="text-sm text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent font-medium" href="{{ route('login') }}">
                 {{ __('Already registered?') }}
             </a>
             <div class="flex gap-3">
                 <a x-show="membershipType === 'provider'" x-cloak href="{{ route('register.provider') }}"
-                    class="inline-flex items-center justify-center px-5 py-2.5 bg-nubl-teal-600 text-white text-sm font-medium rounded-lg hover:bg-nubl-teal-700 focus:ring-4 focus:ring-nubl-teal-200 transition">
+                    class="btn inline-flex items-center justify-center px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary-focus focus:ring-4 focus:ring-primary/20 dark:bg-accent dark:hover:bg-accent-focus dark:focus:ring-accent/20 transition">
                     {{ __('Continue to Provider Registration') }}
                 </a>
-                <x-primary-button type="submit" class="!bg-nubl-blue-600 hover:!bg-nubl-blue-700 focus:!ring-nubl-blue-200" x-show="membershipType && membershipType !== 'provider'" x-cloak>
+                <x-primary-button type="submit" x-show="membershipType && membershipType !== 'provider'" x-cloak>
                     {{ __('Register') }}
                 </x-primary-button>
             </div>
@@ -429,7 +429,4 @@
         }
     </script>
 
-    <style>
-        [x-cloak] { display: none !important; }
-    </style>
 </x-guest-layout>

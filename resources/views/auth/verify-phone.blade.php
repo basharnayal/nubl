@@ -16,14 +16,14 @@
         @endif
 
         @if (session('status'))
-            <div class="mb-4 font-medium text-sm text-nubl-teal-600">
+            <div class="mb-4 font-medium text-sm text-primary dark:text-accent-light">
                 {{ session('status') }}
             </div>
         @endif
 
         @if ($errors->any())
-            <div class="mb-4 p-3 rounded-lg bg-red-50 border border-red-100">
-                <p class="text-sm text-red-700">{{ $errors->first() }}</p>
+            <div class="mb-4 p-3 rounded-lg bg-error/10 dark:bg-error/15 border border-error/20" role="alert">
+                <p class="text-sm text-error">{{ $errors->first() }}</p>
             </div>
         @endif
 
@@ -60,8 +60,8 @@
                 @csrf
                 <button type="submit"
                     :disabled="countdown > 0"
-                    class="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-slate-300 text-slate-700 text-sm font-medium rounded-lg hover:bg-slate-50 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                    <span x-show="countdown > 0" x-text="'{{ __('Resend in') }} ' + countdown + 's'"></span>
+                    class="btn w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-slate-300 dark:border-navy-500 text-slate-700 dark:text-navy-200 text-sm font-medium rounded-lg hover:bg-slate-100 dark:hover:bg-navy-600 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <span x-show="countdown > 0" x-cloak x-text="'{{ __('Resend in') }} ' + countdown + 's'"></span>
                     <span x-show="countdown === 0" x-cloak>{{ __('Resend code') }}</span>
                 </button>
             </form>
@@ -100,10 +100,10 @@
             });
         </script>
 
-        <div class="mt-6 pt-4 border-t border-slate-200">
+        <div class="mt-6 pt-4 border-t border-slate-200 dark:border-navy-600">
             <form method="POST" action="{{ route('logout') }}" class="inline">
                 @csrf
-                <button type="submit" class="text-sm text-slate-500 hover:text-slate-700 underline">
+                <button type="submit" class="text-sm text-slate-500 dark:text-navy-400 hover:text-slate-700 dark:hover:text-navy-200 underline">
                     {{ __('Log out') }}
                 </button>
             </form>

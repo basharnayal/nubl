@@ -39,8 +39,8 @@ Route::middleware(array_merge($authMiddleware, ['account.approved']))->group(fun
 
 
 
-// $$ Role-specific dashboards $$ 
-// Admin routes 
+// $$ Role-specific dashboards $$
+// Admin routes
 Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin']))->prefix('admin')->name('admin.')
     ->group(function () {
         Route::get('/dashboard', function () {
@@ -113,6 +113,9 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:recipi
         Route::get('/providers/{provider}', [\App\Http\Controllers\Recipient\ProviderMenuController::class, 'show'])
             ->name('providers.show');
 
+        Route::get('/providers/{provider}/menu', [RecipientController::class, 'providerMenu'])
+            ->name('providers.menu');
+
         // Recipient Request Submission
         Route::resource('requests', \App\Http\Controllers\Recipient\RecipientRequestController::class)
             ->only(['index', 'show', 'store']);
@@ -133,7 +136,7 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:donor'
 
 
 
-// General routes // 
+// General routes //
 // Pending approval: recipient or provider (blocked from dashboard by EnsureAccountApproved)
 // Provider registration: GET allows guest + auth (auth with profile sees read-only)
 Route::get('/register/provider', [ProviderRegistrationController::class, 'create'])->name('register.provider');
@@ -152,10 +155,6 @@ Route::get('/test-roles', function () {
     return view('test-roles', ['roles' => auth()->user()->roles->pluck('name')->toArray()]);
 })->middleware(['auth', 'role:admin'])->name('test-roles');
 
-Route::get('/test-flowbite', function () {
-    return view('test-flowbite');
-})->name('test-flowbite');
-
 // Dev helper: assign admin role (remove in production)
 Route::get('/make-me-admin', function () {
     $user = auth()->user();
@@ -164,7 +163,7 @@ Route::get('/make-me-admin', function () {
     }
     $user->assignRole('admin');
     return 'تم تعيينك كـ admin بنجاح!';
-})->middleware(['auth', 'account.approved']);
+});
 
 
 

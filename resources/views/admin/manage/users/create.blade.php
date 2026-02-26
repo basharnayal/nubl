@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">{{ __('Create User') }}</h2>
-            <a href="{{ route('admin.manage.users.index') }}" class="text-sm text-nubl-teal-600 hover:text-nubl-teal-700 font-medium">{{ __('Back') }}</a>
+            <a href="{{ route('admin.manage.users.index') }}" class="text-sm text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent font-medium">{{ __('Back') }}</a>
         </div>
     </x-slot>
 
@@ -15,7 +15,7 @@
                     <div>
                         <x-input-label for="membership_type" :value="__('User Type')" required />
                         <select id="membership_type" name="membership_type" required x-model="type"
-                            class="block mt-1 w-full rounded-lg border-gray-300 shadow-sm focus:border-nubl-teal-500 focus:ring-nubl-teal-500">
+                            class="block mt-1 w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary dark:focus:border-accent dark:focus:ring-accent">
                             <option value="donor">{{ __('Donor') }}</option>
                             <option value="recipient">{{ __('Recipient') }}</option>
                             <option value="provider">{{ __('Provider') }}</option>
@@ -65,7 +65,7 @@
                 </div>
 
                 <div class="mt-6">
-                    <button type="submit" class="px-4 py-2 bg-nubl-teal-600 text-white rounded-lg hover:bg-nubl-teal-700 font-medium">{{ __('Create User') }}</button>
+                    <x-lineone-button type="submit" variant="primary">{{ __('Create User') }}</x-lineone-button>
                 </div>
             </form>
         </div>

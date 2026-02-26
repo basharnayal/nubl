@@ -1,67 +1,43 @@
 /**
- * Recipient providers list: Flowbite modal for provider menu.
+ * Recipient providers list: Alpine-based modal for provider menu.
  */
-import { Modal } from 'flowbite';
+function providerMenuModal() {
+  return {
+    show: false,
+    title: 'Menu',
+    body: '<p class="text-slate-500 dark:text-navy-300">Loading…</p>',
+    loading: true,
 
-const MODAL_ID = 'provider-menu-modal';
+    open(menuUrl, providerName) {
+      if (!menuUrl) return;
+      this.title = providerName || 'Menu';
+      this.body = '<p class="text-slate-500 dark:text-navy-300">Loading…</p>';
+      this.loading = true;
+      this.show = true;
+      document.body.classList.add('overflow-hidden');
 
-function initProviderMenuModal() {
-  const modalEl = document.getElementById(MODAL_ID);
-  const titleEl = document.getElementById('provider-menu-modal-title');
-  const bodyEl = document.getElementById('provider-menu-modal-body');
-
-  if (!modalEl || !titleEl || !bodyEl) return;
-
-  const modal = new Modal(modalEl);
-
-  // Manually bind close: our Modal is created after initFlowbite, so data-modal-hide was not bound
-  const closeBtn = document.querySelector(`[data-modal-hide="${MODAL_ID}"]`);
-  if (closeBtn) {
-    closeBtn.addEventListener('click', () => {
-      modal.hide();
-      document.body.classList.remove('overflow-hidden');
-    });
-  }
-
-  function openMenuForCard(card) {
-    const url = card.getAttribute('data-menu-url');
-    const name = card.getAttribute('data-provider-name') || 'Menu';
-
-    if (!url) return;
-
-    titleEl.textContent = name;
-    bodyEl.innerHTML = '<p class="text-gray-500">Loading…</p>';
-
-    document.body.classList.add('overflow-hidden');
-    modal.show();
-
-    fetch(url, {
-      headers: { 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html' },
-    })
-      .then((r) => r.text())
-      .then((html) => {
-        bodyEl.innerHTML = html;
+      fetch(menuUrl, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest', Accept: 'text/html' },
       })
-      .catch(() => {
-        bodyEl.innerHTML =
-          '<p class="text-red-500">Failed to load menu. Please try again.</p>';
-      });
-  }
+        .then((r) => r.text())
+        .then((html) => {
+          this.body = html;
+          this.loading = false;
+        })
+        .catch(() => {
+          this.body = '<p class="text-error">Failed to load menu. Please try again.</p>';
+          this.loading = false;
+        });
+    },
 
-  document.querySelectorAll('.provider-card').forEach((card) => {
-    card.addEventListener('click', () => openMenuForCard(card));
-    card.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        openMenuForCard(card);
-      }
-    });
-  });
+    close() {
+      this.show = false;
+      document.body.classList.remove('overflow-hidden');
+    },
+  };
 }
 
-// Module loads after DOM is ready; run init when script executes
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initProviderMenuModal);
-} else {
-  initProviderMenuModal();
+// Register Alpine component - runs before Alpine.start()
+if (window.Alpine) {
+  Alpine.data('providerMenuModal', providerMenuModal);
 }

@@ -9,7 +9,7 @@ A digital platform for neighborhood-based food assistance (sadaqah) that connect
 - **Backend**: Laravel 12 (PHP 8.2+)
 - **Frontend**: Blade Templates (Server-Side Rendering)
 - **CSS Framework**: Tailwind CSS v4
-- **UI Components**: Flowbite v4
+- **UI Components**: Lineone (Alpine.js + Tailwind)
 - **JavaScript**: Alpine.js
 - **Build Tool**: Vite
 - **Authentication**: Laravel Sanctum
@@ -195,52 +195,16 @@ export default defineConfig({
 });
 ```
 
-### CSS Configuration
+### CSS & JavaScript
 
-**`resources/css/app.css`**
-```css
-@import "tailwindcss";
-@import "flowbite/src/themes/default";
-@plugin "flowbite/plugin";
-@source "../../node_modules/flowbite";
-```
-
-### JavaScript Configuration
-
-**`resources/js/app.js`**
-```javascript
-import './bootstrap';
-import '../css/app.css';
-
-import Alpine from 'alpinejs';
-window.Alpine = Alpine;
-Alpine.start();
-```
-
-### Blade Layout
-
-**`resources/views/layouts/app.blade.php`**
-```blade
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <!-- ... -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body>
-    <!-- ... -->
-    @stack('scripts')
-    
-    <!-- Flowbite Script -->
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
-</body>
-</html>
-```
+- **Tailwind v4** with Lineone theme (colors, components)
+- **Alpine.js** with plugins (persist, collapse, intersect)
+- **Vite** for bundling (`npm run dev` / `npm run build`)
 
 ### Important Notes
 
 - **Tailwind v4** uses CSS-first configuration (no `tailwind.config.js` needed)
-- **Flowbite v4** requires CDN script in layout
+- **Lineone** components: `x-lineone-button`, `x-lineone-modal`, `x-lineone-alert`, `x-lineone-card`
 - **Vite** must be running (`npm run dev`) during development
 - Use `npm run build` for production
 
@@ -578,8 +542,8 @@ php artisan migrate:fresh --seed
 ### NPM Packages
 - `tailwindcss` ^4.1.18 - CSS Framework
 - `@tailwindcss/vite` ^4.1.18 - Tailwind Vite Plugin
-- `flowbite` ^4.0.1 - UI Components
-- `alpinejs` ^3.4.2 - JavaScript Framework
+- `alpinejs` ^3.15.3 - JavaScript Framework
+- `simplebar`, `apexcharts`, `tom-select`, etc. - Lineone dependencies
 - `vite` ^7.0.7 - Build Tool
 
 ---
@@ -588,7 +552,7 @@ php artisan migrate:fresh --seed
 
 - [Laravel Documentation](https://laravel.com/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [Flowbite Documentation](https://flowbite.com/docs)
+- [Lineone Template](https://lineone.pixelcave.com) - UI reference
 - [Spatie Laravel Permission](https://spatie.be/docs/laravel-permission)
 - [Spatie Laravel Activity Log](https://spatie.be/docs/laravel-activitylog)
 - [Alpine.js Documentation](https://alpinejs.dev)

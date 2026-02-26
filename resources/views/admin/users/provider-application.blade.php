@@ -5,7 +5,7 @@
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Provider Application') }} — {{ $user->name }}
             </h2>
-            <a href="{{ route('admin.users.pending') }}" class="text-sm text-nubl-teal-600 hover:text-nubl-teal-700 font-medium">{{ __('Back to pending') }}</a>
+            <a href="{{ route('admin.users.pending') }}" class="text-sm text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent font-medium">{{ __('Back to pending') }}</a>
         </div>
     </x-slot>
 
@@ -99,7 +99,7 @@
                                 <img src="{{ route('admin.users.file', [$user, 'business_license']) }}" alt="Business License" class="max-w-full max-h-64 rounded-lg border object-contain" />
                             </a>
                         @else
-                            <a href="{{ route('admin.users.file', [$user, 'business_license']) }}" target="_blank" class="mt-2 inline-flex items-center px-3 py-2 bg-nubl-teal-100 text-nubl-teal-700 rounded-lg text-sm font-medium hover:bg-nubl-teal-200">
+                            <a href="{{ route('admin.users.file', [$user, 'business_license']) }}" target="_blank" class="mt-2 inline-flex items-center px-3 py-2 bg-primary/10 text-primary dark:bg-accent/10 dark:text-accent-light rounded-lg text-sm font-medium hover:bg-primary/20 dark:hover:bg-accent/20">
                                 {{ __('View / Download') }}
                             </a>
                         @endif
@@ -112,7 +112,7 @@
                                 <img src="{{ route('admin.users.file', [$user, 'id_or_iqama']) }}" alt="ID / Iqama" class="max-w-full max-h-64 rounded-lg border object-contain" />
                             </a>
                         @else
-                            <a href="{{ route('admin.users.file', [$user, 'id_or_iqama']) }}" target="_blank" class="mt-2 inline-flex items-center px-3 py-2 bg-nubl-teal-100 text-nubl-teal-700 rounded-lg text-sm font-medium hover:bg-nubl-teal-200">
+                            <a href="{{ route('admin.users.file', [$user, 'id_or_iqama']) }}" target="_blank" class="mt-2 inline-flex items-center px-3 py-2 bg-primary/10 text-primary dark:bg-accent/10 dark:text-accent-light rounded-lg text-sm font-medium hover:bg-primary/20 dark:hover:bg-accent/20">
                                 {{ __('View / Download') }}
                             </a>
                         @endif
@@ -126,7 +126,7 @@
             <div class="flex gap-3">
                 <form method="POST" action="{{ route('admin.users.approve', $user) }}">
                     @csrf
-                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-medium">{{ __('Approve') }}</button>
+                    <x-lineone-button type="submit" variant="success">{{ __('Approve') }}</x-lineone-button>
                 </form>
                 @if($user->status === \App\Models\User::STATUS_PENDING_APPROVAL)
                 <a href="{{ route('admin.users.reject.form', $user) }}" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">{{ __('Reject') }}</a>

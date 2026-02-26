@@ -23,16 +23,16 @@
         @if(session('success') || session('error') || session('warning') || session('info'))
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 w-full">
                 @if(session('success'))
-                    <x-flowbite-alert type="success" dismissible>{{ session('success') }}</x-flowbite-alert>
+                    <x-lineone-alert type="success" dismissible>{{ session('success') }}</x-lineone-alert>
                 @endif
                 @if(session('error'))
-                    <x-flowbite-alert type="danger" dismissible>{{ session('error') }}</x-flowbite-alert>
+                    <x-lineone-alert type="danger" dismissible>{{ session('error') }}</x-lineone-alert>
                 @endif
                 @if(session('warning'))
-                    <x-flowbite-alert type="warning" dismissible>{{ session('warning') }}</x-flowbite-alert>
+                    <x-lineone-alert type="warning" dismissible>{{ session('warning') }}</x-lineone-alert>
                 @endif
                 @if(session('info'))
-                    <x-flowbite-alert type="info" dismissible>{{ session('info') }}</x-flowbite-alert>
+                    <x-lineone-alert type="info" dismissible>{{ session('info') }}</x-lineone-alert>
                 @endif
             </div>
         @endif
