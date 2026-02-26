@@ -2,7 +2,7 @@
     Registration: donor (instant) or recipient (pending approval).
     Recipient requires camera capture for ID + address proof (no file upload).
 --}}
-<x-guest-layout>
+<x-guest-layout :title="__('Register')">
     <form method="POST" action="{{ route('register') }}" x-data="registerForm()" x-init="init()" x-on:submit="validateBeforeSubmit($event)">
         @csrf
 

@@ -1,5 +1,5 @@
 {{-- Recipients & Providers with status=pending_approval or rejected --}}
-<x-guest-layout>
+<x-guest-layout :title="__('Approval Pending')">
     <div class="w-full">
         <div class="rounded-xl border border-slate-200 dark:border-navy-600 bg-white dark:bg-navy-750 p-6 sm:p-8 shadow-sm">
             <div class="flex items-start gap-4">

@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-guest-layout :title="__('Login')">
     @php
         $otpPhone = session('otp_phone') ?? old('otp_phone');
         $hasOtpErrors = $errors->has('otp_phone') || $errors->has('otp_code');

@@ -24,7 +24,7 @@
         </div>
     </div>
     <!-- END Status Card -->
-        <div class="mt-4 grid grid-cols-12 gap-4 sm:mt-5 sm:gap-5 lg:mt-6 lg:gap-6">
+    <div class="mt-4 grid grid-cols-12 gap-4 sm:mt-5 sm:gap-5 lg:mt-6 lg:gap-6">
             <div class="card col-span-12 lg:col-span-8">
                 <div class="mt-3 flex flex-col justify-between px-4 sm:flex-row sm:items-center sm:px-5">
                     <div class="flex flex-1 items-center justify-between space-x-2 sm:flex-initial">

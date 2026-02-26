@@ -2,7 +2,7 @@
     View My Application: single page, read-only, all data at once.
     Used by providers to review their submission and by admin for approval.
 --}}
-<x-guest-layout max-width="wide">
+<x-guest-layout max-width="wide" :title="__('My Application')">
     <div class="space-y-8 overflow-y-auto">
         <div class="flex items-center justify-between">
             <h1 class="text-xl font-bold text-slate-800 dark:text-navy-100">{{ __('My Application') }}</h1>

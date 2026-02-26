@@ -1,4 +1,4 @@
-<x-guest-layout>
+<x-guest-layout :title="__('Verify Email')">
     <h1 class="text-xl font-semibold text-slate-800 dark:text-navy-100 mb-2">{{ __('Verify your email') }}</h1>
     <div class="mb-4 text-sm text-slate-600 dark:text-navy-300">
         {{ __('Thanks for signing up! Before getting started, could you verify your email address by clicking on the link we just emailed to you? If you didn\'t receive the email, we will gladly send you another.') }}

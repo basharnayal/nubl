@@ -1,5 +1,5 @@
 <x-app-layout title="{{ __('Browse Providers') }}" is-header-blur="true">
-    <div class="pt-4">
+    <div class="mt-4">
         <div class="grid grid-cols-1 gap-4 sm:gap-5 lg:gap-6">
             <div>
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
