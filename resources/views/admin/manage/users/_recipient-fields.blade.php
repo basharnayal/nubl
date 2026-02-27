@@ -41,7 +41,7 @@
     <x-input-label for="marital_status" :value="__('Marital Status')" required />
     <select id="marital_status" name="marital_status" class="form-select form-select-lineone mt-1.5">
         @foreach(\App\Models\RecipientKycDetails::MARITAL_STATUSES as $s)
-            <option value="{{ $s }}" {{ ($old['marital_status'] ?? '') === $s ? 'selected' : '' }}>{{ ucfirst($s) }}</option>
+            <option value="{{ $s }}" {{ ($old['marital_status'] ?? '') === $s ? 'selected' : '' }}>{{ __(ucfirst($s)) }}</option>
         @endforeach
     </select>
 </div>

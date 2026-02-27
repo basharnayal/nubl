@@ -23,6 +23,15 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+// Locale switch (default: English, user can switch to Arabic)
+Route::get('/locale/{locale}', function (string $locale) {
+    $allowed = ['en', 'ar'];
+    if (in_array($locale, $allowed)) {
+        session(['locale' => $locale]);
+    }
+    return redirect()->back();
+})->name('locale.switch');
+
 // Redirect by role
 Route::get('/dashboard', function () {
     return view('dashboard');

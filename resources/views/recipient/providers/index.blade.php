@@ -30,9 +30,17 @@
                             <h5 class="mb-2 text-lg font-bold tracking-tight text-slate-800 dark:text-navy-100">
                                 {{ $provider->providerProfile->business_name_en ?? $provider->name }}
                             </h5>
-                            <p class="mb-3 truncate text-sm text-slate-600 dark:text-navy-300">
-                                {{ $provider->providerProfile->business_category ? implode(', ', $provider->providerProfile->business_category) : __('General Provider') }}
+                            <p class="mb-2 truncate text-sm text-slate-600 dark:text-navy-300">
+                                {{ $provider->providerProfile->business_category ? implode(', ', array_map(fn($c) => ucfirst(str_replace('_', ' ', $c)), $provider->providerProfile->business_category)) : __('General Provider') }}
                             </p>
+                            @if($provider->providerOperatingInfo && !empty($provider->providerOperatingInfo->service_type))
+                            <p class="mb-3 flex items-center text-xs text-slate-500 dark:text-navy-400">
+                                <svg class="mr-1 size-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                {{ implode(', ', array_map(fn($s) => ucfirst(str_replace('_', ' ', $s)), $provider->providerOperatingInfo->service_type)) }}
+                            </p>
+                            @endif
 
                             <div class="mb-4 flex items-center text-sm text-slate-500 dark:text-navy-400">
                                 <svg class="mr-1 size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

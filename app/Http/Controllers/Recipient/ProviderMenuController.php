@@ -29,8 +29,8 @@ class ProviderMenuController extends Controller
             });
         }
 
-        // Optimization: Eager load profile
-        $providers = $query->with('providerProfile')->paginate(12);
+        // Optimization: Eager load profile and operating info (for service_type display)
+        $providers = $query->with(['providerProfile', 'providerOperatingInfo'])->paginate(12);
 
         return view('recipient.providers.index', compact('providers'));
     }
@@ -50,7 +50,7 @@ class ProviderMenuController extends Controller
             abort(404);
         }
 
-        $provider->load('providerProfile');
+        $provider->load(['providerProfile', 'providerOperatingInfo']);
 
         $query = ProviderMenuItem::where('provider_id', $provider->id)->active();
 

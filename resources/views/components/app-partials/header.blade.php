@@ -4,7 +4,7 @@
             <!-- Left: Sidebar Toggle -->
             <div class="size-7">
                 <button
-                    class="menu-toggle cursor-pointer ml-0.5 flex size-7 flex-col justify-center space-y-1.5 text-primary outline-hidden focus:outline-hidden dark:text-accent-light/80"
+                    class="menu-toggle cursor-pointer ms-0.5 flex size-7 flex-col justify-center space-y-1.5 text-primary outline-hidden focus:outline-hidden dark:text-accent-light/80"
                     :class="$store.global.isSidebarExpanded && 'active'"
                     @click="$store.global.isSidebarExpanded = !$store.global.isSidebarExpanded">
                     <span></span>
@@ -13,8 +13,28 @@
                 </button>
             </div>
 
-            <!-- Right: Mobile Search Toggle, Page Title, Dark Mode -->
-            <div class="-mr-1.5 flex items-center space-x-2">
+            <!-- Right: Language, Page Title, Dark Mode -->
+            <div class="-me-1.5 flex items-center space-x-2">
+                {{-- Language switcher --}}
+                <div x-data="usePopper({ placement: '{{ app()->getLocale() === 'ar' ? 'bottom-start' : 'bottom-end' }}', offset: 8 })" @click.outside="isShowPopper && (isShowPopper = false)" class="flex">
+                    <button @click="isShowPopper = !isShowPopper" x-ref="popperRef"
+                        class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20"
+                        title="{{ __('Language') }}">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-slate-500 dark:text-navy-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                        </svg>
+                    </button>
+                    <div :class="isShowPopper && 'show'" class="popper-root fixed z-[9999]" x-ref="popperRoot">
+                        <div class="popper-box mx-4 mt-1 flex flex-col rounded-lg border border-slate-150 bg-white shadow-soft dark:border-navy-800 dark:bg-navy-700 dark:shadow-soft-dark sm:m-0 min-w-[120px]">
+                            <a href="{{ route('locale.switch', 'en') }}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-100 dark:text-navy-100 dark:hover:bg-navy-600 {{ app()->getLocale() === 'en' ? 'bg-primary/10 text-primary dark:bg-accent-light/15 dark:text-accent-light font-medium' : '' }}">
+                                English
+                            </a>
+                            <a href="{{ route('locale.switch', 'ar') }}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-100 dark:text-navy-100 dark:hover:bg-navy-600 {{ app()->getLocale() === 'ar' ? 'bg-primary/10 text-primary dark:bg-accent-light/15 dark:text-accent-light font-medium' : '' }}">
+                                {{ __('Arabic') }}
+                            </a>
+                        </div>
+                    </div>
+                </div>
                 @if(!empty($header))
                     <div class="text-sm font-medium text-slate-700 dark:text-navy-100">
                         {!! $header !!}
