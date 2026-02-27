@@ -11,6 +11,9 @@ class Request extends Model
 {
     use HasFactory;
 
+    /** Core request statuses: REQUESTED → APPROVED | REDEEMABLE | REJECTED → FULFILLED (no transition logic for FULFILLED) */
+    public const STATUSES = ['REQUESTED', 'APPROVED', 'REDEEMABLE', 'REJECTED', 'FULFILLED'];
+
     protected $guarded = ['id'];
 
     protected $casts = [
@@ -64,8 +67,8 @@ class Request extends Model
     {
         // Statuses that hold the allowance reservation
         return in_array($this->status, [
-            'PENDING',
-            'PROVIDER_APPROVED',
+            'REQUESTED',
+            'APPROVED',
             'ADMIN_PENDING',
             'ADMIN_APPROVED',
             'REDEEMABLE',

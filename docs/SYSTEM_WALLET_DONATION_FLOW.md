@@ -4,6 +4,16 @@
 
 The **system wallet** (Ewallet with `owner_type = SYSTEM`) is the city fund. It receives donations from donors and pays out to providers when they approve requests with city fund.
 
+## Balance Calculation
+
+**Balance =** sum(amount) where `wallet_id = wallet.id` AND `direction = 'IN'`  
+**minus** sum(amount) where `wallet_id = wallet.id` AND `direction = 'OUT'`
+
+The `ewallets.balance` column is kept in sync by `FundTransactionObserver` — on each new `FundTransaction`, the wallet balance is incremented (IN) or decremented (OUT). Applies to all wallets (city fund and provider).
+
+- **`Ewallet::syncBalance()`** — recalculates from transactions and updates the column
+- **`php artisan wallets:sync-balances`** — syncs all wallet balances (useful for fixing existing data)
+
 ---
 
 ## Flows
@@ -22,12 +32,10 @@ The **system wallet** (Ewallet with `owner_type = SYSTEM`) is the city fund. It 
 | **Adopt (My Fund)** | No change | No change (provider covers cost themselves) |
 | **Approve (City Fund)** | Deducts `reserved_amount` | Credits provider with `reserved_amount` |
 
-When provider clicks **Approve (City Fund)**:
-1. Check system wallet has sufficient balance
-2. Deduct amount from system wallet
-3. Credit provider wallet
-4. Create `FundTransaction` records (OUT from system, IN to provider, source: PAYOUT)
-5. Update request status to PROVIDER_APPROVED, funding_source to CITY_FUND
+When provider clicks **Accept (City Fund)**:
+1. Check system wallet has sufficient balance (`ewallets.balance`, kept in sync by `FundTransactionObserver`)
+2. Create `FundTransaction` records (OUT from system wallet, IN to provider wallet, source: PAYOUT) — observer updates both wallet balances
+3. Update request status to REDEEMABLE, funding_source to CITY_FUND
 
 ---
 
@@ -37,10 +45,10 @@ When provider clicks **Approve (City Fund)**:
 
 | Method | Description |
 |--------|-------------|
-| `addFundsFromDonation($amount, $donorId, $paymentId?)` | Increments system wallet balance and creates a `FundTransaction` record (source: DONATION, direction: IN) |
+| `addFundsFromDonation($amount, $donorId, $paymentId?)` | Creates a `FundTransaction` record (source: DONATION, direction: IN). `FundTransactionObserver` updates wallet balance. |
 | `getSystemWallet()` | Returns the system's default Ewallet |
-| `hasSufficientBalance($amount)` | Returns true if system wallet balance ≥ amount |
-| `transferToProviderForRequest($request)` | Deducts from system wallet, credits provider wallet, creates audit records |
+| `hasSufficientBalance($amount)` | Returns true if `ewallets.balance` ≥ amount (balance kept in sync by observer) |
+| `transferToProviderForRequest($request)` | Creates FundTransaction OUT (system) and IN (provider). Observer updates both wallet balances. |
 
 ---
 
@@ -62,5 +70,12 @@ The call is currently **commented out** in `DonationService`. Uncomment when rea
 
 ## Data Model
 
-- **Ewallet** (`owner_type = SYSTEM`, `owner_id = null`) – holds pooled donation funds
-- **FundTransaction** – audit trail: each donation creates a record with `source = DONATION`, `direction = IN`
+- **Ewallet** (`owner_type = SYSTEM`, `owner_id = null`) – holds pooled donation funds; `balance` kept in sync by `FundTransactionObserver`
+- **FundTransaction** – audit trail; each record triggers observer to update wallet `balance`
+- **FundTransactionObserver** (`app/Observers/FundTransactionObserver.php`) – on `created`: IN → increment balance, OUT → decrement balance
+
+---
+
+## Missing / TODO
+
+- **`is_provider_donation`** — Indicates if the fulfillment was a provider donation (adoption) or from city fund, to know whether to deduct from city fund or not. Currently inferred from `funding_source` on the request; an explicit field may be needed.

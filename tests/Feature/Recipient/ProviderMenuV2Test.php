@@ -68,14 +68,15 @@ class ProviderMenuV2Test extends TestCase
     {
         Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00')); // Wednesday
 
-        // Create a previous V2 request that consumes allowance
-        RequestModel::create([
+        // Create a previous request that consumes allowance (REDEEMABLE/FULFILLED count)
+        $req = RequestModel::create([
             'recipient_id' => $this->recipient->id,
             'provider_id' => $this->provider->id,
             'reserved_amount' => 150.00,
-            'status' => 'PENDING',
+            'status' => 'REDEEMABLE',
             'funding_source' => 'CITY_FUND',
         ]);
+        $req->items()->create(['menu_item_id' => $this->menuItem->id, 'quantity' => 3, 'price_snapshot' => 50.00]);
 
         // Create a rejected request (should not count)
         RequestModel::create([
@@ -86,12 +87,12 @@ class ProviderMenuV2Test extends TestCase
             'funding_source' => 'CITY_FUND',
         ]);
 
-        // Create an adopted request (should not count)
+        // Create an adopted request (APPROVED + PROVIDER_ADOPTION, should not count)
         RequestModel::create([
             'recipient_id' => $this->recipient->id,
             'provider_id' => $this->provider->id,
             'reserved_amount' => 50.00,
-            'status' => 'ADOPTED',
+            'status' => 'APPROVED',
             'funding_source' => 'PROVIDER_ADOPTION',
         ]);
 

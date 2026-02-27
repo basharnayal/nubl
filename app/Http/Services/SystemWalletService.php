@@ -34,10 +34,7 @@ class SystemWalletService
         // 1. Get the default system wallet
         $systemWallet = Ewallet::where('owner_type', 'SYSTEM')->firstOrFail();
 
-        // 2. Increment the wallet balance by $amount
-        $systemWallet->increment('balance', $amount);
-
-        // 3. Create a FundTransaction record for audit trail
+        // 2. Create FundTransaction (balance is calculated from transactions: sum(IN) - sum(OUT))
         FundTransaction::create([
             'wallet_id' => $systemWallet->id,
             'sponsor_id' => $donorId,
@@ -110,13 +107,7 @@ class SystemWalletService
             'status' => true,
         ]);
 
-        // 1. Deduct from system wallet
-        $systemWallet->decrement('balance', $amount);
-
-        // 2. Credit provider wallet
-        $providerWallet->increment('balance', $amount);
-
-        // 3. Create audit records
+        // Create FundTransactions (balance calculated from transactions: sum(IN) - sum(OUT))
         FundTransaction::create([
             'wallet_id' => $systemWallet->id,
             'sponsor_id' => null,

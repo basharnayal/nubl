@@ -6,10 +6,10 @@ This commit implements the recipient weekly allowance feature end-to-end:
 
 - **RecipientAllowanceService** – New service class encapsulating weekly limit logic (400 SAR, Sunday–Saturday), with methods for `getWeeklyUsed`, `getRemainingLimit`, and `wouldExceedAllowance`
 - **Dashboard** – Dynamic display of remaining allowance and weekly limit instead of hardcoded values
-- **Request validation** – New requests are rejected with "Weekly allowance exceeded" when they would exceed the limit; only REDEEMABLE and FULFILLED requests count toward usage
+- **Request validation** – New requests are rejected with "Weekly allowance exceeded" when they would exceed the limit; REQUESTED, REDEEMABLE, and FULFILLED requests count toward usage
 - **Provider menu / cart** – Cart sidebar shows live allowance usage; JavaScript disables submit when projected total exceeds limit; validation error displayed on rejection
 - **FundTransaction model & migration** – New `fund_transactions` table for tracking wallet movements (donations, redemptions, refunds, etc.)
-- **Seeders** – `RecipientSeeder`, `ProviderSeeder`, `ProviderMenuItemSeeder` for test data; `AllowanceTestDataSeeder` seeds REDEEMABLE + FULFILLED requests (120 SAR) so remaining limit = 280 SAR for testing
+- **Seeders** – `RecipientSeeder`, `ProviderSeeder`, `ProviderMenuItemSeeder` for test data; `AllowanceTestDataSeeder` seeds REDEEMABLE + FULFILLED (135 SAR) + APPROVED (25 SAR, does not count); remaining limit = 265 SAR
 
 ---
 
@@ -24,7 +24,7 @@ This document describes the implementation of the recipient weekly allowance fea
 1. **Weekly limit:** 400 SAR per recipient per week
 2. **Week definition:** Sunday 00:00 → Saturday 23:59:59
 3. **Reset:** The limit implicitly resets at the start of each new week (no manual reset required)
-4. **Usage calculation:** Sum of `price_snapshot × quantity` for all request items where the parent request has `status IN ('REDEEMABLE'OR 'FULFILLED')` and was created within the current week
+4. **Usage calculation:** Sum of `price_snapshot × quantity` for all request items where the parent request has `status IN ('REQUESTED', 'REDEEMABLE', 'FULFILLED')` and was created within the current week. **remaining_limit = 400 - weekly_used**
 5. **Validation:** When submitting a new request, if `weekly_used + new_request_total > 400`, the request is rejected with "Weekly allowance exceeded."
 
 ---
@@ -40,7 +40,7 @@ A dedicated service class that encapsulates all weekly allowance logic:
 | Method | Description |
 |--------|-------------|
 | `getCurrentWeekBounds()` | Returns `[weekStart, weekEnd]` (Sunday 00:00 – Saturday 23:59:59) |
-| `getWeeklyUsed($recipientId)` | Sums `price_snapshot × quantity` from `request_items` joined with `requests` where `recipient_id` matches, `status IN ('REDEEMABLE','FULFILLED')`, and `created_at` is within the current week |
+| `getWeeklyUsed($recipientId)` | Sums `price_snapshot × quantity` from `request_items` joined with `requests` where `recipient_id` matches, `status IN ('REQUESTED','REDEEMABLE','FULFILLED')`, and `created_at` is within the current week |
 | `getRemainingLimit($recipientId)` | Returns `max(0, 400 - weekly_used)` |
 | `wouldExceedAllowance($recipientId, $amount)` | Returns `true` if `weekly_used + amount > 400` |
 
@@ -67,7 +67,7 @@ A dedicated service class that encapsulates all weekly allowance logic:
 
 - Uses `RecipientAllowanceService::wouldExceedAllowance($user->id, $totalAmount)` before creating a request
 - If the check fails, returns `back()->withErrors(['allowance' => __('Weekly allowance exceeded.')])`
-- Removed the previous logic that summed `reserved_amount` across multiple statuses (PENDING, PROVIDER_APPROVED, etc.)
+- Removed the previous logic that summed `reserved_amount` across multiple statuses (REQUESTED, APPROVED, etc.)
 
 ---
 
@@ -86,7 +86,7 @@ A dedicated service class that encapsulates all weekly allowance logic:
 
 - **`requests`** – has `recipient_id`, `status`, `created_at`
 - **`request_items`** – has `request_id`, `price_snapshot`, `quantity`
-- Only requests with `status IN ('REDEEMABLE', 'FULFILLED')` count toward `weekly_used`
+- Only requests with `status IN ('REQUESTED', 'REDEEMABLE', 'FULFILLED')` count toward `weekly_used`
 
 ---
 
@@ -124,4 +124,4 @@ A dedicated service class that encapsulates all weekly allowance logic:
 
 ## Note on Statuses
 
-Only **REDEEMABLE** and **FULFILLED** requests count toward the weekly limit. Pending or in-progress requests (e.g. PENDING, ADMIN_APPROVED) do not. If you need to reserve budget for pending requests as well, the status list in `RecipientAllowanceService::getWeeklyUsed()` can be extended.
+**REQUESTED**, **REDEEMABLE**, and **FULFILLED** requests count toward the weekly limit. APPROVED (provider adopted) and REJECTED do not.

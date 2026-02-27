@@ -60,7 +60,7 @@
                 <div class="card sticky top-6 p-6">
                     <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Actions') }}</h3>
 
-                    @if($request->status === 'PENDING')
+                    @if($request->status === 'REQUESTED')
                         <div class="space-y-4">
                             <form action="{{ route('provider.requests.update', $request->id) }}" method="POST">
                                 @csrf
@@ -83,10 +83,10 @@
                                 <input type="hidden" name="action" value="approve">
                                 <button type="submit"
                                     class="btn w-full bg-primary text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus">
-                                    {{ __('Approve (City Fund)') }}
+                                    {{ __('Accept (City Fund)') }}
                                 </button>
                                 <p class="mt-1 text-center text-xs text-slate-500 dark:text-navy-400">
-                                    {{ __('Request will be paid from the City Fund.') }}
+                                    {{ __('Accept order; amount will be deducted from City Fund.') }}
                                 </p>
                             </form>
 

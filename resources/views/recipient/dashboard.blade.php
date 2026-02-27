@@ -118,22 +118,21 @@
                     <div class="mt-3 space-y-3.5">
                         @php
                             $statusLabels = [
-                                'PENDING' => __('Pending'),
-                                'ADOPTED' => __('Adopted'),
-                                'PROVIDER_APPROVED' => __('Provider Approved'),
+                                'REQUESTED' => __('Requested'),
+                                'APPROVED' => __('Approved'), // Provider adopted (PROVIDER_ADOPTION)
                                 'ADMIN_PENDING' => __('Admin Pending'),
                                 'ADMIN_APPROVED' => __('Admin Approved'),
                                 'REDEEMABLE' => __('Redeemable'),
                                 'FULFILLED' => __('Fulfilled'),
-                                'PROVIDER_REJECTED' => __('Rejected'),
+                                'REJECTED' => __('Rejected'),
                                 'ADMIN_REJECTED' => __('Rejected'),
                             ];
                         @endphp
                         @forelse($recentRequests as $req)
                         <a href="{{ route('recipient.requests.show', $req->id) }}" class="card block p-3 hover:bg-slate-50 dark:hover:bg-navy-600/50 transition-colors">
                             <div class="flex items-center space-x-3">
-                                <div class="flex size-10 shrink-0 items-center justify-center rounded-lg {{ in_array($req->status, ['FULFILLED']) ? 'bg-success/10' : (in_array($req->status, ['REDEEMABLE', 'ADOPTED']) ? 'bg-info/10' : 'bg-primary/10 dark:bg-accent/10') }}">
-                                    <i class="fa-solid fa-utensils {{ in_array($req->status, ['FULFILLED']) ? 'text-success' : (in_array($req->status, ['REDEEMABLE', 'ADOPTED']) ? 'text-info' : 'text-primary dark:text-accent-light') }}"></i>
+                                <div class="flex size-10 shrink-0 items-center justify-center rounded-lg {{ in_array($req->status, ['FULFILLED']) ? 'bg-success/10' : (in_array($req->status, ['REDEEMABLE', 'APPROVED']) ? 'bg-info/10' : 'bg-primary/10 dark:bg-accent/10') }}">
+                                    <i class="fa-solid fa-utensils {{ in_array($req->status, ['FULFILLED']) ? 'text-success' : (in_array($req->status, ['REDEEMABLE', 'APPROVED']) ? 'text-info' : 'text-primary dark:text-accent-light') }}"></i>
                                 </div>
                                 <div class="flex-1">
                                     <p class="font-medium text-slate-700 dark:text-navy-100">{{ $req->items->first()?->menuItem?->name ?? __('Request') }}</p>
@@ -144,9 +143,9 @@
                                     </div>
                                 </div>
                             </div>
-                            <p class="-mt-3 text-right text-xs font-medium {{ $req->status === 'FULFILLED' ? 'text-success' : (in_array($req->status, ['REDEEMABLE', 'ADOPTED']) ? 'text-info' : 'text-primary dark:text-accent-light') }}">{{ $statusLabels[$req->status] ?? str_replace('_', ' ', $req->status) }}</p>
+                            <p class="-mt-3 text-right text-xs font-medium {{ $req->status === 'FULFILLED' ? 'text-success' : (in_array($req->status, ['REDEEMABLE', 'APPROVED']) ? 'text-info' : 'text-primary dark:text-accent-light') }}">{{ $statusLabels[$req->status] ?? str_replace('_', ' ', $req->status) }}</p>
                             <div class="progress mt-2 h-1.5 bg-slate-150 dark:bg-navy-500">
-                                <div class="relative overflow-hidden rounded-full {{ $req->status === 'FULFILLED' ? 'w-full bg-success' : (in_array($req->status, ['REDEEMABLE', 'ADOPTED']) ? 'w-3/4 bg-info' : 'w-3/12 bg-primary dark:bg-accent') }}"></div>
+                                <div class="relative overflow-hidden rounded-full {{ $req->status === 'FULFILLED' ? 'w-full bg-success' : (in_array($req->status, ['REDEEMABLE', 'APPROVED']) ? 'w-3/4 bg-info' : 'w-3/12 bg-primary dark:bg-accent') }}"></div>
                             </div>
                         </a>
                         @empty

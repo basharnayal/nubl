@@ -51,14 +51,13 @@
                                             <td class="px-4 py-3 sm:px-5">
                                                 @php
                                                     $statusConfig = [
-                                                        'PENDING' => ['class' => 'bg-warning/10 text-warning dark:bg-warning/15', 'label' => __('Pending')],
-                                                        'ADOPTED' => ['class' => 'bg-primary/10 text-primary dark:bg-accent-light/15 dark:text-accent-light', 'label' => __('Adopted')],
-                                                        'PROVIDER_APPROVED' => ['class' => 'bg-info/10 text-info dark:bg-info/15', 'label' => __('Provider Approved')],
+                                                        'REQUESTED' => ['class' => 'bg-warning/10 text-warning dark:bg-warning/15', 'label' => __('Requested')],
+                                                        'APPROVED' => ['class' => 'bg-info/10 text-info dark:bg-info/15', 'label' => __('Approved')],
                                                         'ADMIN_PENDING' => ['class' => 'bg-warning/10 text-warning dark:bg-warning/15', 'label' => __('Admin Pending')],
                                                         'ADMIN_APPROVED' => ['class' => 'bg-success/10 text-success dark:bg-success/15', 'label' => __('Admin Approved')],
                                                         'REDEEMABLE' => ['class' => 'bg-success/10 text-success dark:bg-success/15', 'label' => __('Redeemable')],
                                                         'FULFILLED' => ['class' => 'bg-slate-200/80 text-slate-600 dark:bg-navy-500 dark:text-navy-200', 'label' => __('Fulfilled')],
-                                                        'PROVIDER_REJECTED' => ['class' => 'bg-error/10 text-error dark:bg-error/15', 'label' => __('Rejected')],
+                                                        'REJECTED' => ['class' => 'bg-error/10 text-error dark:bg-error/15', 'label' => __('Rejected')],
                                                         'ADMIN_REJECTED' => ['class' => 'bg-error/10 text-error dark:bg-error/15', 'label' => __('Rejected')],
                                                     ];
                                                     $config = $statusConfig[$request->status] ?? ['class' => 'bg-slate-200/80 text-slate-600 dark:bg-navy-500 dark:text-navy-200', 'label' => str_replace('_', ' ', $request->status)];

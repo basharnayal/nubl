@@ -47,36 +47,38 @@ class ProviderRequestController extends Controller
         $requestModel = RequestModel::forProvider(auth()->id())->findOrFail($id);
 
         $validated = $request->validate([
-            'action' => ['required', 'in:adopt,approve,reject'],
+            'action' => ['required', 'in:adopt,approve,reject'], // adopt->APPROVED, approve->REDEEMABLE, reject->REJECTED; FULFILLED is separate
             'rejection_reason_code' => ['required_if:action,reject', 'string', 'nullable'],
             'rejection_reason_note' => ['nullable', 'string'],
         ]);
 
         $action = $validated['action'];
 
-        if ($requestModel->status !== 'PENDING') {
+        if ($requestModel->status !== 'REQUESTED') {
             return back()->with('error', 'This request is not in a pending state.');
         }
 
         $result = DB::transaction(function () use ($requestModel, $action, $validated) {
             if ($action === 'adopt') {
+                // Provider adopts = pays from own pocket, CITY_FUND not affected
                 $requestModel->update([
-                    'status' => 'ADOPTED',
+                    'status' => 'APPROVED',
                     'funding_source' => 'PROVIDER_ADOPTION',
                 ]);
             } elseif ($action === 'approve') {
+                // Provider accepts using City Fund = deducted from city fund, status REDEEMABLE (recipient can redeem)
                 $amount = (float) $requestModel->reserved_amount;
                 if (! $this->systemWalletService->hasSufficientBalance($amount)) {
                     return back()->with('error', __('City fund has insufficient balance for this request.'));
                 }
                 $this->systemWalletService->transferToProviderForRequest($requestModel);
                 $requestModel->update([
-                    'status' => 'PROVIDER_APPROVED',
+                    'status' => 'REDEEMABLE',
                     'funding_source' => 'CITY_FUND',
                 ]);
             } elseif ($action === 'reject') {
                 $requestModel->update([
-                    'status' => 'PROVIDER_REJECTED',
+                    'status' => 'REJECTED',
                     'rejection_reason_code' => $validated['rejection_reason_code'],
                     'rejection_reason_note' => $validated['rejection_reason_note'] ?? null,
                 ]);

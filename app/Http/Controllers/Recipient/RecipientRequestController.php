@@ -63,7 +63,7 @@ class RecipientRequestController extends Controller
             'provider_id' => $providerId,
             'reserved_amount' => $totalAmount,
             'funding_source' => 'CITY_FUND', // Default
-            'status' => 'PENDING',
+            'status' => 'REQUESTED',
             'is_flagged' => false,
         ]);
 

@@ -807,12 +807,12 @@ The Request Lifecycle V2 introduces a multi-item request system with a complete 
 - **Multi-Item Requests:** Recipients can add multiple items from a single provider to a "cart" and submit them as one request.
 - **Weekly Allowance Logic:**
     - Limit: 400 SAR per week.
-    - Usage is calculated based on requests that are `PENDING`, `PROVIDER_APPROVED`, `ADMIN_PENDING`, `ADMIN_APPROVED`, `REDEEMABLE`, or `FULFILLED`.
-    - `ADOPTED`, `REJECTED`, and `CANCELLED` requests do NOT count towards the limit.
+    - Usage is calculated based on requests that are `REQUESTED`, `APPROVED`, `ADMIN_PENDING`, `ADMIN_APPROVED`, `REDEEMABLE`, or `FULFILLED`.
+    - `APPROVED` (PROVIDER_ADOPTION), `REJECTED`, and `CANCELLED` requests do NOT count towards the limit.
 - **Provider Workflow:**
-    - **Adopt:** Provider funds the request (`PROVIDER_ADOPTION` source). Status -> `ADOPTED`.
-    - **Approve:** Provider approves for City Fund usage (`CITY_FUND` source). Status -> `PROVIDER_APPROVED` (or `ADMIN_PENDING` if configured).
-    - **Reject:** Provider rejects request with a reason code and note. Status -> `PROVIDER_REJECTED`.
+    - **Adopt:** Provider funds the request (`PROVIDER_ADOPTION` source). Status -> `APPROVED`. CITY_FUND not affected.
+    - **Approve (Accept):** Provider accepts with City Fund (`CITY_FUND` source). Status -> `REDEEMABLE`. Deducted from city fund (transfers to provider wallet).
+    - **Reject:** Provider rejects request with a reason code and note. Status -> `REJECTED`.
 - **Admin Workflow:**
     - Admins review requests in `ADMIN_PENDING` status.
     - Can `Approve` (Status -> `ADMIN_APPROVED`) or `Reject` (Status -> `ADMIN_REJECTED`).

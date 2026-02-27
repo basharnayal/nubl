@@ -110,7 +110,7 @@ class AdminRequestFlowTest extends TestCase
     /** @test */
     public function admin_cannot_act_on_non_admin_pending_request()
     {
-        $this->request->update(['status' => 'PENDING']); // Provider level
+        $this->request->update(['status' => 'REQUESTED']); // Provider level
 
         $response = $this->actingAs($this->admin)
             ->put(route('admin.requests.update', $this->request->id), [
@@ -122,7 +122,7 @@ class AdminRequestFlowTest extends TestCase
 
         $this->assertDatabaseHas('requests', [
             'id' => $this->request->id,
-            'status' => 'PENDING',
+            'status' => 'REQUESTED',
         ]);
     }
 }

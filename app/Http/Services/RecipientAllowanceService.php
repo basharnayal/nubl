@@ -24,7 +24,8 @@ class RecipientAllowanceService
 
     /**
      * Sum of (price_snapshot * quantity) for this recipient this week
-     * where request status IN ('REDEEMABLE', 'FULFILLED').
+     * where request status IN ('REQUESTED', 'REDEEMABLE', 'FULFILLED').
+     * remaining_limit = 400 - getWeeklyUsed().
      */
     public static function getWeeklyUsed(int $recipientId): float
     {
@@ -34,7 +35,7 @@ class RecipientAllowanceService
             ->join('requests', 'request_items.request_id', '=', 'requests.id')
             ->where('requests.recipient_id', $recipientId)
             ->whereBetween('requests.created_at', [$weekStart, $weekEnd])
-            ->whereIn('requests.status', ['REDEEMABLE', 'FULFILLED'])
+            ->whereIn('requests.status', ['REQUESTED', 'REDEEMABLE', 'FULFILLED'])
             ->selectRaw('COALESCE(SUM(request_items.price_snapshot * request_items.quantity), 0) as total')
             ->value('total');
 

@@ -67,7 +67,7 @@ class RecipientInterfaceTest extends TestCase
             'recipient_id' => $this->recipient->id,
             'provider_id' => $this->provider->id,
             'reserved_amount' => 50.00,
-            'status' => 'PENDING',
+            'status' => 'REQUESTED',
             'funding_source' => 'CITY_FUND',
         ]);
 

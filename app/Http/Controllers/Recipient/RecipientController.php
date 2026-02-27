@@ -17,8 +17,8 @@ class RecipientController extends Controller
         $remainingLimit = RecipientAllowanceService::getRemainingLimit($user->id);
         $weeklyLimit = RecipientAllowanceService::WEEKLY_LIMIT;
 
-        $activeStatuses = ['PENDING', 'PROVIDER_APPROVED', 'ADMIN_PENDING', 'ADMIN_APPROVED', 'REDEEMABLE', 'ADOPTED'];
-        $pendingStatuses = ['PENDING', 'PROVIDER_APPROVED', 'ADMIN_PENDING', 'ADMIN_APPROVED'];
+        $activeStatuses = ['REQUESTED', 'APPROVED', 'REDEEMABLE']; // APPROVED = provider adopted, REDEEMABLE = accepted with City Fund
+        $pendingStatuses = ['REQUESTED', 'APPROVED'];
 
         $activeRequestsCount = RequestModel::forRecipient($user->id)
             ->whereIn('status', $activeStatuses)

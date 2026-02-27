@@ -97,7 +97,7 @@ class RecipientRequestSubmissionTest extends TestCase
             'recipient_id' => $this->recipient->id,
             'provider_id' => $this->provider->id,
             'reserved_amount' => 120.00, // (50*2) + (20*1)
-            'status' => 'PENDING',
+            'status' => 'REQUESTED',
         ]);
 
         // Check Items
@@ -184,13 +184,13 @@ class RecipientRequestSubmissionTest extends TestCase
     {
         Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00'));
 
-        // Adopted request (Provider pays)
+        // Adopted request (Provider pays) - APPROVED + PROVIDER_ADOPTION, does NOT count toward allowance
         RequestModel::create([
             'recipient_id' => $this->recipient->id,
             'provider_id' => $this->provider->id,
             'reserved_amount' => 350.00,
-            'status' => 'ADOPTED', // Should NOT count
-            'funding_source' => 'PROVIDER_ADOPTION', // Explicitly logic checks source too
+            'status' => 'APPROVED',
+            'funding_source' => 'PROVIDER_ADOPTION',
         ]);
 
         // Try to add 100 SAR (0 + 100 < 400)

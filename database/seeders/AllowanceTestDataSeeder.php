@@ -9,10 +9,11 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 
 /**
- * Seeds REDEEMABLE and FULFILLED requests for the recipient to test weekly allowance logic.
+ * Seeds REDEEMABLE, FULFILLED, and APPROVED requests for the recipient to test weekly allowance logic.
  * Run after RecipientSeeder, ProviderSeeder, and ProviderMenuItemSeeder.
  *
- * Creates requests totaling 120 SAR so remaining limit = 400 - 120 = 280.
+ * Counts toward allowance: REDEEMABLE (85) + FULFILLED (35) + FULFILLED (15) = 135 SAR. remaining = 265.
+ * APPROVED (provider adopted, 25 SAR) does NOT count toward allowance.
  */
 class AllowanceTestDataSeeder extends Seeder
 {
@@ -81,6 +82,38 @@ class AllowanceTestDataSeeder extends Seeder
                 'price_snapshot' => $item2->price,
             ]
         );
+
+        // Request 3: FULFILLED - Vegetable Soup (15 SAR)
+        $item3 = $menuItems->firstWhere('name', 'Vegetable Soup') ?? $menuItems->skip(2)->first() ?? $menuItems->first();
+        $req3 = Request::create([
+            'recipient_id' => $recipient->id,
+            'provider_id' => $provider->id,
+            'reserved_amount' => $item3->price * 1,
+            'funding_source' => 'CITY_FUND',
+            'status' => 'FULFILLED',
+            'is_flagged' => false,
+        ]);
+        $req3->items()->create([
+            'menu_item_id' => $item3->id,
+            'quantity' => 1,
+            'price_snapshot' => $item3->price,
+        ]);
+
+        // Request 4: APPROVED - Provider adopted (Daily support order, 25 SAR) — does NOT count toward allowance
+        $item4 = $menuItems->firstWhere('name', 'Daily support order') ?? $menuItems->first();
+        $req4 = Request::create([
+            'recipient_id' => $recipient->id,
+            'provider_id' => $provider->id,
+            'reserved_amount' => $item4->price * 1,
+            'funding_source' => 'PROVIDER_ADOPTION',
+            'status' => 'APPROVED',
+            'is_flagged' => false,
+        ]);
+        $req4->items()->create([
+            'menu_item_id' => $item4->id,
+            'quantity' => 1,
+            'price_snapshot' => $item4->price,
+        ]);
 
         $this->command->info('Allowance test data seeded.');
     }

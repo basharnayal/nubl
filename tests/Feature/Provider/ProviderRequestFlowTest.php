@@ -3,6 +3,7 @@
 namespace Tests\Feature\Provider;
 
 use App\Models\Ewallet;
+use App\Models\FundTransaction;
 use App\Models\ProviderMenuItem;
 use App\Models\ProviderProfile;
 use App\Models\Request as RequestModel;
@@ -35,12 +36,22 @@ class ProviderRequestFlowTest extends TestCase
         $this->recipient = User::factory()->create(['status' => User::STATUS_ACTIVE]);
         $this->recipient->assignRole('recipient');
 
-        // System wallet (city fund) with balance for approve test
-        Ewallet::create([
+        // System wallet (city fund) - balance calculated from fund_transactions (sum IN - sum OUT)
+        $systemWallet = Ewallet::create([
             'owner_type' => 'SYSTEM',
             'owner_id' => null,
-            'balance' => 100,
+            'balance' => 0,
             'status' => true,
+        ]);
+        FundTransaction::create([
+            'wallet_id' => $systemWallet->id,
+            'sponsor_id' => null,
+            'source' => FundTransaction::SOURCE_DONATION,
+            'amount' => 100,
+            'direction' => FundTransaction::DIRECTION_IN,
+            'payment_id' => null,
+            'request_id' => null,
+            'order_redemption_id' => null,
         ]);
 
         // Provider profile (creates provider ewallet via booted)
@@ -75,7 +86,7 @@ class ProviderRequestFlowTest extends TestCase
             'recipient_id' => $this->recipient->id,
             'provider_id' => $this->provider->id,
             'reserved_amount' => 50.00,
-            'status' => 'PENDING',
+            'status' => 'REQUESTED',
             'funding_source' => 'CITY_FUND',
         ]);
 
@@ -107,9 +118,10 @@ class ProviderRequestFlowTest extends TestCase
 
         $response->assertRedirect();
 
+        // APPROVED = provider adopted (funding_source PROVIDER_ADOPTION, CITY_FUND not affected)
         $this->assertDatabaseHas('requests', [
             'id' => $this->request->id,
-            'status' => 'ADOPTED',
+            'status' => 'APPROVED',
             'funding_source' => 'PROVIDER_ADOPTION',
         ]);
     }
@@ -124,9 +136,10 @@ class ProviderRequestFlowTest extends TestCase
 
         $response->assertRedirect();
 
+        // approve = provider accepts with City Fund, deducted from city fund, status REDEEMABLE
         $this->assertDatabaseHas('requests', [
             'id' => $this->request->id,
-            'status' => 'PROVIDER_APPROVED',
+            'status' => 'REDEEMABLE',
             'funding_source' => 'CITY_FUND',
         ]);
     }
@@ -134,8 +147,20 @@ class ProviderRequestFlowTest extends TestCase
     /** @test */
     public function provider_cannot_approve_when_city_fund_has_insufficient_balance()
     {
-        // Drain system wallet
-        Ewallet::where('owner_type', 'SYSTEM')->update(['balance' => 10]);
+        // Drain system wallet to 10 SAR (insufficient for 50 SAR request)
+        $systemWallet = Ewallet::where('owner_type', 'SYSTEM')->first();
+        FundTransaction::where('wallet_id', $systemWallet->id)->delete();
+        FundTransaction::create([
+            'wallet_id' => $systemWallet->id,
+            'sponsor_id' => null,
+            'source' => FundTransaction::SOURCE_DONATION,
+            'amount' => 10,
+            'direction' => FundTransaction::DIRECTION_IN,
+            'payment_id' => null,
+            'request_id' => null,
+            'order_redemption_id' => null,
+        ]);
+        $systemWallet->syncBalance();
 
         $response = $this->actingAs($this->provider)
             ->put(route('provider.requests.update', $this->request->id), [
@@ -147,7 +172,7 @@ class ProviderRequestFlowTest extends TestCase
 
         $this->assertDatabaseHas('requests', [
             'id' => $this->request->id,
-            'status' => 'PENDING',
+            'status' => 'REQUESTED',
         ]);
     }
 
@@ -165,7 +190,7 @@ class ProviderRequestFlowTest extends TestCase
 
         $this->assertDatabaseHas('requests', [
             'id' => $this->request->id,
-            'status' => 'PROVIDER_REJECTED',
+            'status' => 'REJECTED',
             'rejection_reason_code' => 'Item Unavailable',
             'rejection_reason_note' => 'Out of stock',
         ]);

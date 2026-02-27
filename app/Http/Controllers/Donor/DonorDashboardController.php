@@ -24,11 +24,11 @@ class DonorDashboardController extends Controller
         $donorChartData = $this->donorImpactChartPlaceholder();
 
         // Platform need (real-time, encouraging)
-        $pendingRequestsCount = RequestModel::whereIn('status', ['PENDING', 'PROVIDER_APPROVED', 'ADMIN_PENDING'])
+        $pendingRequestsCount = RequestModel::whereIn('status', ['REQUESTED', 'APPROVED', 'REDEEMABLE'])
             ->count();
-        $pendingAmount = RequestModel::whereIn('status', ['PENDING', 'PROVIDER_APPROVED', 'ADMIN_PENDING'])
+        $pendingAmount = RequestModel::whereIn('status', ['REQUESTED', 'APPROVED', 'REDEEMABLE'])
             ->sum('reserved_amount');
-        $recipientsWaiting = RequestModel::whereIn('status', ['PENDING', 'PROVIDER_APPROVED', 'ADMIN_PENDING'])
+        $recipientsWaiting = RequestModel::whereIn('status', ['REQUESTED', 'APPROVED', 'REDEEMABLE'])
             ->selectRaw('COUNT(DISTINCT recipient_id) as total')->value('total') ?? 0;
         $fulfilledCount = RequestModel::where('status', 'FULFILLED')->count();
         $fundedPercent = $fulfilledCount > 0
