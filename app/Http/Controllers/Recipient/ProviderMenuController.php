@@ -54,7 +54,18 @@ class ProviderMenuController extends Controller
 
         $query = ProviderMenuItem::where('provider_id', $provider->id)->active();
 
-        if ($request->filled('category')) {
+        if ($request->filled('category_id')) {
+            $cat = \App\Models\MenuItemCategory::find($request->category_id);
+            if ($cat) {
+                $query->where(function ($q) use ($cat) {
+                    $q->where('category_id', $cat->id)
+                        ->orWhere(function ($sq) use ($cat) {
+                            $sq->whereNull('category_id')
+                                ->where('category', $cat->name);
+                        });
+                });
+            }
+        } elseif ($request->filled('category')) {
             $query->where('category', $request->category);
         }
 
@@ -65,10 +76,14 @@ class ProviderMenuController extends Controller
         $menuItems = $query->latest()->get();
 
         // Get categories for filter
-        $categories = ProviderMenuItem::where('provider_id', $provider->id)
-            ->active()
-            ->distinct()
-            ->pluck('category');
+        $businessCategories = $provider->providerProfile?->business_category ?? ['Other'];
+        $bCat = is_array($businessCategories) && count($businessCategories) > 0 ? $businessCategories[0] : (is_string($businessCategories) ? $businessCategories : 'Other');
+
+        $categoriesQuery = \App\Models\MenuItemCategory::where('is_active', true);
+        if ($bCat !== 'Other') {
+            $categoriesQuery->whereIn('business_category', [$bCat, 'Other']);
+        }
+        $categories = $categoriesQuery->orderBy('name')->get();
 
         $weeklyUsed = RecipientAllowanceService::getWeeklyUsed(auth()->id());
         $weeklyLimit = RecipientAllowanceService::WEEKLY_LIMIT;

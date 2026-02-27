@@ -1,4 +1,5 @@
-<x-app-layout title="{{ $provider->providerProfile->business_name_en ?? $provider->name }} - {{ __('Menu') }}" is-header-blur="true">
+<x-app-layout title="{{ $provider->providerProfile->business_name_en ?? $provider->name }} - {{ __('Menu') }}"
+    is-header-blur="true">
     <div class="pb-24 pt-4 lg:pb-8">
         <div class="relative">
             <div class="lg:flex lg:gap-8">
@@ -20,32 +21,39 @@
                             @endphp
                             <div>
                                 @if($capacityOn)
-                                    <span class="badge rounded-full bg-success/10 text-success dark:bg-success/15">{{ __('Capacity') }}: ON</span>
+                                    <span
+                                        class="badge rounded-full bg-success/10 text-success dark:bg-success/15">{{ __('Capacity') }}:
+                                        ON</span>
                                 @else
-                                    <span class="badge rounded-full bg-error/10 text-error dark:bg-error/15">{{ __('Capacity') }}: OFF</span>
+                                    <span
+                                        class="badge rounded-full bg-error/10 text-error dark:bg-error/15">{{ __('Capacity') }}:
+                                        OFF</span>
                                 @endif
                             </div>
                         </div>
 
-                        <div class="mt-2 grid grid-cols-1 gap-4 text-sm text-slate-500 md:grid-cols-2 dark:text-navy-400">
+                        <div
+                            class="mt-2 grid grid-cols-1 gap-4 text-sm text-slate-500 md:grid-cols-2 dark:text-navy-400">
                             <p class="flex items-center">
                                 <svg class="mr-2 size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+                                    </path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
                                 {{ $provider->providerProfile->location ?? ($provider->providerProfile->city . ', ' . $provider->providerProfile->region) }}
                             </p>
                             @if($provider->providerOperatingInfo && !empty($provider->providerOperatingInfo->service_type))
-                            <p class="flex items-center">
-                                <svg class="mr-2 size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                </svg>
-                                {{ __('Service Type') }}:
-                                {{ implode(', ', array_map(fn($s) => ucfirst(str_replace('_', ' ', $s)), $provider->providerOperatingInfo->service_type)) }}
-                            </p>
+                                <p class="flex items-center">
+                                    <svg class="mr-2 size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
+                                        </path>
+                                    </svg>
+                                    {{ __('Service Type') }}:
+                                    {{ implode(', ', array_map(fn($s) => ucfirst(str_replace('_', ' ', $s)), $provider->providerOperatingInfo->service_type)) }}
+                                </p>
                             @endif
                             <p class="flex items-center">
                                 <svg class="mr-2 size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,23 +78,67 @@
                     @endif
                     @if($errors->any())
                         <div class="mb-4">
-                        <x-lineone-alert type="danger" dismissible>
-                            <ul class="list-disc pl-5">
-                                @foreach ($errors->all() as $error)
-                                    <li>{{ $error }}</li>
-                                @endforeach
-                            </ul>
-                        </x-lineone-alert>
+                            <x-lineone-alert type="danger" dismissible>
+                                <ul class="list-disc pl-5">
+                                    @foreach ($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </x-lineone-alert>
                         </div>
                     @endif
+
+                    {{-- Filters --}}
+                    <div class="card mb-4 p-4">
+                        <form method="GET" action="{{ route('recipient.providers.show', $provider) }}"
+                            class="flex flex-col gap-4 sm:flex-row sm:items-center">
+                            <div class="relative w-full sm:w-64">
+                                <label for="search" class="sr-only">{{ __('Search') }}</label>
+                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                    <svg class="size-4 text-slate-500" fill="currentColor" viewBox="0 0 20 20"
+                                        xmlns="http://www.w3.org/2000/svg">
+                                        <path fill-rule="evenodd"
+                                            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                            clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                                <input type="text" name="search" id="search" value="{{ request('search') }}"
+                                    class="form-input form-input-lineone pl-9"
+                                    placeholder="{{ __('Search items...') }}">
+                            </div>
+                            <div class="w-full sm:w-48">
+                                <label for="category_id" class="sr-only">{{ __('Category') }}</label>
+                                <select name="category_id" id="category_id"
+                                    class="form-select form-select-lineone ltr:pl-3 ltr:pr-9 rtl:pr-3 rtl:pl-10 rtl:bg-[position:left_0.5rem_center]">
+                                    <option value="">{{ __('All Categories') }}</option>
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>
+                                            {{ $cat->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="flex gap-2">
+                                <button type="submit"
+                                    class="btn bg-primary text-white hover:bg-primary-focus dark:bg-accent dark:hover:bg-accent-focus">{{ __('Filter') }}</button>
+                                @if(request()->anyFilled(['search', 'category_id']))
+                                    <a href="{{ route('recipient.providers.show', $provider) }}"
+                                        class="btn border border-slate-300 text-slate-800 hover:bg-slate-150 dark:border-navy-450 dark:text-navy-100 dark:hover:bg-navy-500">{{ __('Reset') }}</a>
+                                @endif
+                            </div>
+                        </form>
+                    </div>
 
                     {{-- Menu Grid --}}
                     <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
                         @forelse($menuItems as $item)
-                            <div class="card group relative flex h-full flex-col overflow-hidden transition-shadow hover:shadow-soft dark:hover:shadow-soft-dark">
+                            <div
+                                class="card group relative flex h-full flex-col overflow-hidden transition-shadow hover:shadow-soft dark:hover:shadow-soft-dark">
                                 @if(!$item->is_active)
-                                    <div class="absolute inset-0 z-10 flex items-center justify-center bg-white/60 dark:bg-navy-900/60">
-                                        <span class="badge rounded-full bg-slate-600 px-3 py-1 text-sm font-bold text-white dark:bg-navy-500">{{ __('Unavailable') }}</span>
+                                    <div
+                                        class="absolute inset-0 z-10 flex items-center justify-center bg-white/60 dark:bg-navy-900/60">
+                                        <span
+                                            class="badge rounded-full bg-slate-600 px-3 py-1 text-sm font-bold text-white dark:bg-navy-500">{{ __('Unavailable') }}</span>
                                     </div>
                                 @endif
 
@@ -94,27 +146,35 @@
                                     <img class="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                         src="{{ $item->image_url }}" alt="{{ $item->name }}">
                                 @else
-                                    <div class="flex h-48 w-full items-center justify-center bg-slate-100 text-slate-400 dark:bg-navy-700 dark:text-navy-400">
+                                    <div
+                                        class="flex h-48 w-full items-center justify-center bg-slate-100 text-slate-400 dark:bg-navy-700 dark:text-navy-400">
                                         <svg class="size-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                            </path>
                                         </svg>
                                     </div>
                                 @endif
 
                                 <div class="flex flex-grow flex-col p-5">
                                     <div class="mb-2 flex items-start justify-between">
-                                        <h5 class="line-clamp-2 text-lg font-bold tracking-tight text-slate-800 dark:text-navy-100">
+                                        <h5
+                                            class="line-clamp-2 text-lg font-bold tracking-tight text-slate-800 dark:text-navy-100">
                                             {{ $item->name }}
                                         </h5>
-                                        <span class="badge shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary dark:bg-accent-light/15 dark:text-accent-light">{{ number_format($item->price, 2) }} {{ __('SAR') }}</span>
+                                        <span
+                                            class="badge shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary dark:bg-accent-light/15 dark:text-accent-light">{{ number_format($item->price, 2) }}
+                                            {{ __('SAR') }}</span>
                                     </div>
-                                    <p class="mb-3 line-clamp-3 text-sm font-normal text-slate-600 dark:text-navy-300">{{ $item->description }}</p>
+                                    <p class="mb-3 line-clamp-3 text-sm font-normal text-slate-600 dark:text-navy-300">
+                                        {{ $item->description }}
+                                    </p>
 
                                     <div class="mt-auto">
                                         <div class="mt-4 flex items-center justify-between">
                                             @if($item->max_per_request)
-                                                <span class="text-xs font-medium text-warning">{{ __('Max') }} {{ $item->max_per_request }} /{{ __('req') }}</span>
+                                                <span class="text-xs font-medium text-warning">{{ __('Max') }}
+                                                    {{ $item->max_per_request }} /{{ __('req') }}</span>
                                             @else
                                                 <span></span>
                                             @endif
@@ -131,7 +191,9 @@
                             </div>
                         @empty
                             <div class="col-span-full rounded-lg py-12 text-center">
-                                <p class="text-slate-500 dark:text-navy-300">{{ __('No menu items found for this provider.') }}</p>
+                                <p class="text-slate-500 dark:text-navy-300">
+                                    {{ __('No menu items found for this provider.') }}
+                                </p>
                             </div>
                         @endforelse
                     </div>
@@ -142,7 +204,9 @@
                     <div class="sticky top-6">
                         {{-- Weekly Allowance Card --}}
                         <div class="card mb-6 p-6">
-                            <h3 class="mb-4 text-base font-bold text-slate-800 dark:text-navy-100">{{ __('Weekly Allowance') }}</h3>
+                            <h3 class="mb-4 text-base font-bold text-slate-800 dark:text-navy-100">
+                                {{ __('Weekly Allowance') }}
+                            </h3>
 
                             @php
                                 $allowance = $weeklyLimit ?? 400;
@@ -152,25 +216,33 @@
                             @endphp
 
                             <div class="mb-2 h-2.5 w-full rounded-full bg-slate-200 dark:bg-navy-600">
-                                <div class="{{ $color }} h-2.5 rounded-full transition-all duration-500" style="width: {{ $percent }}%"></div>
+                                <div class="{{ $color }} h-2.5 rounded-full transition-all duration-500"
+                                    style="width: {{ $percent }}%"></div>
                             </div>
 
                             <div class="mb-1 flex justify-between text-sm">
                                 <span class="text-slate-600 dark:text-navy-300">{{ __('Used') }}:</span>
-                                <span class="font-bold text-slate-800 dark:text-navy-100">{{ number_format($weeklyUsed, 2) }} {{ __('SAR') }}</span>
+                                <span
+                                    class="font-bold text-slate-800 dark:text-navy-100">{{ number_format($weeklyUsed, 2) }}
+                                    {{ __('SAR') }}</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-slate-600 dark:text-navy-300">{{ __('Remaining') }}:</span>
-                                <span class="font-bold {{ $remaining < 50 ? 'text-error' : 'text-success' }}">{{ number_format($remaining, 2) }} {{ __('SAR') }}</span>
+                                <span
+                                    class="font-bold {{ $remaining < 50 ? 'text-error' : 'text-success' }}">{{ number_format($remaining, 2) }}
+                                    {{ __('SAR') }}</span>
                             </div>
                         </div>
 
                         {{-- Cart Summary (Desktop) --}}
                         <div class="hidden lg:block">
                             <div class="card border-primary/20 p-6 dark:border-accent/20">
-                                <h3 class="mb-4 text-base font-bold text-slate-800 dark:text-navy-100">{{ __('Your Request') }}</h3>
+                                <h3 class="mb-4 text-base font-bold text-slate-800 dark:text-navy-100">
+                                    {{ __('Your Request') }}
+                                </h3>
 
-                                <div id="cart-items" class="is-scrollbar-hidden mb-4 max-h-60 space-y-3 overflow-y-auto">
+                                <div id="cart-items"
+                                    class="is-scrollbar-hidden mb-4 max-h-60 space-y-3 overflow-y-auto">
                                     <div class="py-4 text-center text-sm text-slate-500 dark:text-navy-400">
                                         {{ __('No items selected.') }}
                                     </div>
@@ -185,13 +257,16 @@
                                         <span>{{ __('After Request') }}:</span>
                                         <span id="cart-projected-week" class="font-medium"></span>
                                     </div>
-                                    <p id="allowance-warning" class="mt-2 hidden text-xs font-bold text-error">{{ __('Exceeds weekly allowance!') }}</p>
+                                    <p id="allowance-warning" class="mt-2 hidden text-xs font-bold text-error">
+                                        {{ __('Exceeds weekly allowance!') }}
+                                    </p>
                                 </div>
 
                                 @error('allowance')
                                     <p class="mb-4 text-sm font-bold text-error">{{ $message }}</p>
                                 @enderror
-                                <form id="submit-request-form" action="{{ route('recipient.requests.store') }}" method="POST">
+                                <form id="submit-request-form" action="{{ route('recipient.requests.store') }}"
+                                    method="POST">
                                     @csrf
                                     <input type="hidden" name="provider_id" value="{{ $provider->id }}">
                                     <div id="form-items-container"></div>
@@ -213,15 +288,18 @@
     <div id="item-modal" tabindex="-1" aria-hidden="true"
         class="hidden fixed inset-0 left-0 right-0 top-0 z-50 flex h-[calc(100%-1rem)] max-h-full items-center justify-center overflow-y-auto overflow-x-hidden bg-black/50 backdrop-blur-sm md:inset-0">
         <div class="relative max-h-full w-full max-w-md p-4">
-            <div class="relative rounded-lg border border-slate-150 bg-white shadow-soft dark:border-navy-600 dark:bg-navy-750">
+            <div
+                class="relative rounded-lg border border-slate-150 bg-white shadow-soft dark:border-navy-600 dark:bg-navy-750">
                 <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-navy-600">
                     <h3 class="text-base font-semibold text-slate-800 dark:text-navy-100" id="modal-title">
                         {{ __('Select Item') }}
                     </h3>
                     <button type="button" onclick="closeItemModal()"
                         class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20">
-                        <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
                         </svg>
                         <span class="sr-only">{{ __('Close') }}</span>
                     </button>
@@ -231,25 +309,33 @@
                     <div class="mb-4 flex items-center justify-between rounded-lg bg-slate-100 p-3 dark:bg-navy-600/50">
                         <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Quantity') }}</span>
                         <div class="flex items-center">
-                            <button type="button" onclick="adjustModalQty(-1)" class="btn size-8 flex items-center justify-center rounded-full bg-slate-200 font-bold text-slate-800 hover:bg-slate-300 dark:bg-navy-600 dark:text-navy-100 dark:hover:bg-navy-500">-</button>
-                            <span id="modal-qty" class="mx-4 text-lg font-bold text-slate-800 dark:text-navy-100">1</span>
-                            <button type="button" onclick="adjustModalQty(1)" class="btn size-8 flex items-center justify-center rounded-full bg-slate-200 font-bold text-slate-800 hover:bg-slate-300 dark:bg-navy-600 dark:text-navy-100 dark:hover:bg-navy-500">+</button>
+                            <button type="button" onclick="adjustModalQty(-1)"
+                                class="btn size-8 flex items-center justify-center rounded-full bg-slate-200 font-bold text-slate-800 hover:bg-slate-300 dark:bg-navy-600 dark:text-navy-100 dark:hover:bg-navy-500">-</button>
+                            <span id="modal-qty"
+                                class="mx-4 text-lg font-bold text-slate-800 dark:text-navy-100">1</span>
+                            <button type="button" onclick="adjustModalQty(1)"
+                                class="btn size-8 flex items-center justify-center rounded-full bg-slate-200 font-bold text-slate-800 hover:bg-slate-300 dark:bg-navy-600 dark:text-navy-100 dark:hover:bg-navy-500">+</button>
                         </div>
                     </div>
-                    <x-lineone-button type="button" onclick="addToCart()" variant="primary" class="w-full">{{ __('Add to Request') }}</x-lineone-button>
+                    <x-lineone-button type="button" onclick="addToCart()" variant="primary"
+                        class="w-full">{{ __('Add to Request') }}</x-lineone-button>
                 </div>
             </div>
         </div>
     </div>
 
     {{-- Mobile Sticky Cart Summary --}}
-    <div class="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] dark:border-navy-600 dark:bg-navy-800 lg:hidden">
+    <div
+        class="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] dark:border-navy-600 dark:bg-navy-800 lg:hidden">
         <div class="flex items-center justify-between">
             <div>
-                <p class="text-xs text-slate-500 dark:text-navy-400">{{ __('Total Items') }}: <span id="mobile-count" class="font-bold text-slate-800 dark:text-navy-100">0</span></p>
-                <p class="text-lg font-bold text-primary dark:text-accent-light" id="mobile-total">0.00 {{ __('SAR') }}</p>
+                <p class="text-xs text-slate-500 dark:text-navy-400">{{ __('Total Items') }}: <span id="mobile-count"
+                        class="font-bold text-slate-800 dark:text-navy-100">0</span></p>
+                <p class="text-lg font-bold text-primary dark:text-accent-light" id="mobile-total">0.00 {{ __('SAR') }}
+                </p>
             </div>
-            <button type="button" onclick="document.getElementById('submit-btn').click()" id="mobile-submit-btn" disabled
+            <button type="button" onclick="document.getElementById('submit-btn').click()" id="mobile-submit-btn"
+                disabled
                 class="btn bg-primary px-6 py-2 text-white hover:bg-primary-focus disabled:cursor-not-allowed disabled:opacity-50 dark:bg-accent dark:hover:bg-accent-focus">
                 {{ __('Submit Request') }}
             </button>
