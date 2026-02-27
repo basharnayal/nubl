@@ -13,12 +13,11 @@
                             <p class="mt-3 text-base font-medium tracking-wide text-indigo-100">
                                 {{ __('Remaining weekly limit') }}
                             </p>
-                            <p class="mt-4 font-inter text-2xl font-semibold">
-                                <span class="text-indigo-100">{{ __('SAR') }}</span>
-                                <span class="text-white">{{ number_format($remainingLimit ?? 0, 0) }}</span>
+                            <p class="mt-4 font-inter text-2xl font-semibold" dir="ltr">
+                                <span class="text-indigo-100">{!! '&#x20C1;' !!}</span><span class="text-white">{{ number_format($remainingLimit ?? 0, 0) }}</span>
                             </p>
-                            <div class="badge mt-2 rounded-full bg-black/20 text-indigo-50">
-                                {{ __('Weekly limit') }} {{ $weeklyLimit ?? 400 }} {{ __('SAR') }}
+                            <div class="badge mt-2 rounded-full bg-black/20 text-indigo-50" dir="ltr">
+                                {{ __('Weekly limit') }} {!! '&#x20C1;' !!}{{ $weeklyLimit ?? 400 }}
                             </div>
                         </div>
                         <div class="absolute bottom-0 right-0 overflow-hidden rounded-lg">
@@ -30,7 +29,7 @@
                         <div class="card justify-center p-4.5">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-base font-semibold text-slate-700 dark:text-navy-100">3</p>
+                                    <p class="text-base font-semibold text-slate-700 dark:text-navy-100">{{ $activeRequestsCount ?? 0 }}</p>
                                     <p class="text-xs-plus line-clamp-1">{{ __('Active Requests') }}</p>
                                 </div>
                                 <div class="mask is-star flex size-10 shrink-0 items-center justify-center bg-primary dark:bg-accent">
@@ -41,7 +40,7 @@
                             </div>
                             <div>
                                 <div class="badge mt-2 space-x-1 bg-success/10 py-1 px-1.5 text-success dark:bg-success/15">
-                                    <span>2</span>
+                                    <span>{{ $pendingCount ?? 0 }}</span>
                                     <span class="text-tiny-plus">{{ __('pending') }}</span>
                                 </div>
                             </div>
@@ -49,7 +48,7 @@
                         <div class="card justify-center p-4.5">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-base font-semibold text-slate-700 dark:text-navy-100">21</p>
+                                    <p class="text-base font-semibold text-slate-700 dark:text-navy-100">{{ $completedOrdersCount ?? 0 }}</p>
                                     <p class="text-xs-plus line-clamp-1">{{ __('Completed Orders') }}</p>
                                 </div>
                                 <div class="mask is-star flex size-10 shrink-0 items-center justify-center bg-success">
@@ -59,18 +58,16 @@
                                 </div>
                             </div>
                             <div>
-                                <div class="badge mt-2 space-x-1 bg-success/10 py-1 px-1.5 text-success dark:bg-success/15">
-                                    <span>+12%</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
+                                <a href="{{ route('recipient.requests.index') }}" class="badge mt-2 inline-flex space-x-1 bg-success/10 py-1 px-1.5 text-success dark:bg-success/15 hover:bg-success/20">
+                                    <span>{{ __('View') }}</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                </a>
                             </div>
                         </div>
                         <div class="card justify-center p-4.5">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-base font-semibold text-slate-700 dark:text-navy-100">8</p>
+                                    <p class="text-base font-semibold text-slate-700 dark:text-navy-100">{{ $providersCount ?? 0 }}</p>
                                     <p class="text-xs-plus line-clamp-1">{{ __('Providers') }}</p>
                                 </div>
                                 <div class="mask is-star flex size-10 shrink-0 items-center justify-center bg-info">
@@ -89,7 +86,7 @@
                         <div class="card justify-center p-4.5">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <p class="text-base font-semibold text-slate-700 dark:text-navy-100">2</p>
+                                    <p class="text-base font-semibold text-slate-700 dark:text-navy-100">{{ $pendingCount ?? 0 }}</p>
                                     <p class="text-xs-plus line-clamp-1">{{ __('Pending') }}</p>
                                 </div>
                                 <div class="mask is-star flex size-10 shrink-0 items-center justify-center bg-warning">
@@ -119,63 +116,45 @@
                         </a>
                     </div>
                     <div class="mt-3 space-y-3.5">
-                        <div class="card p-3">
+                        @php
+                            $statusLabels = [
+                                'PENDING' => __('Pending'),
+                                'ADOPTED' => __('Adopted'),
+                                'PROVIDER_APPROVED' => __('Provider Approved'),
+                                'ADMIN_PENDING' => __('Admin Pending'),
+                                'ADMIN_APPROVED' => __('Admin Approved'),
+                                'REDEEMABLE' => __('Redeemable'),
+                                'FULFILLED' => __('Fulfilled'),
+                                'PROVIDER_REJECTED' => __('Rejected'),
+                                'ADMIN_REJECTED' => __('Rejected'),
+                            ];
+                        @endphp
+                        @forelse($recentRequests as $req)
+                        <a href="{{ route('recipient.requests.show', $req->id) }}" class="card block p-3 hover:bg-slate-50 dark:hover:bg-navy-600/50 transition-colors">
                             <div class="flex items-center space-x-3">
-                                <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 dark:bg-accent/10">
-                                    <i class="fa-solid fa-utensils text-primary dark:text-accent-light"></i>
+                                <div class="flex size-10 shrink-0 items-center justify-center rounded-lg {{ in_array($req->status, ['FULFILLED']) ? 'bg-success/10' : (in_array($req->status, ['REDEEMABLE', 'ADOPTED']) ? 'bg-info/10' : 'bg-primary/10 dark:bg-accent/10') }}">
+                                    <i class="fa-solid fa-utensils {{ in_array($req->status, ['FULFILLED']) ? 'text-success' : (in_array($req->status, ['REDEEMABLE', 'ADOPTED']) ? 'text-info' : 'text-primary dark:text-accent-light') }}"></i>
                                 </div>
                                 <div class="flex-1">
-                                    <p class="font-medium text-slate-700 dark:text-navy-100">{{ __('Family meal package') }}</p>
+                                    <p class="font-medium text-slate-700 dark:text-navy-100">{{ $req->items->first()?->menuItem?->name ?? __('Request') }}</p>
                                     <div class="mt-0.5 flex text-xs text-slate-400 dark:text-navy-300">
-                                        <p>{{ __('Provider: Al-Rashid Kitchen') }}</p>
+                                        <p>{{ __('Provider:') }} {{ $req->provider->providerProfile->full_name_en ?? $req->provider->providerProfile->full_name_ar ?? $req->provider->name }}</p>
                                         <div class="mx-2 my-1 hidden w-px bg-slate-200 dark:bg-navy-500 sm:flex"></div>
-                                        <p class="hidden sm:flex">{{ __('Requested: Today') }}</p>
+                                        <p class="hidden sm:flex">{{ __('Requested:') }} {{ $req->created_at->diffForHumans() }}</p>
                                     </div>
                                 </div>
                             </div>
-                            <p class="-mt-3 text-right text-xs font-medium text-primary dark:text-accent-light">{{ __('Pending') }}</p>
+                            <p class="-mt-3 text-right text-xs font-medium {{ $req->status === 'FULFILLED' ? 'text-success' : (in_array($req->status, ['REDEEMABLE', 'ADOPTED']) ? 'text-info' : 'text-primary dark:text-accent-light') }}">{{ $statusLabels[$req->status] ?? str_replace('_', ' ', $req->status) }}</p>
                             <div class="progress mt-2 h-1.5 bg-slate-150 dark:bg-navy-500">
-                                <div class="is-active relative w-3/12 overflow-hidden rounded-full bg-primary dark:bg-accent"></div>
+                                <div class="relative overflow-hidden rounded-full {{ $req->status === 'FULFILLED' ? 'w-full bg-success' : (in_array($req->status, ['REDEEMABLE', 'ADOPTED']) ? 'w-3/4 bg-info' : 'w-3/12 bg-primary dark:bg-accent') }}"></div>
                             </div>
+                        </a>
+                        @empty
+                        <div class="card p-3 text-center text-slate-500 dark:text-navy-400">
+                            <p>{{ __('No requests yet.') }}</p>
+                            <a href="{{ route('recipient.providers.index') }}" class="mt-2 inline-block text-primary dark:text-accent-light hover:underline">{{ __('Browse providers') }}</a>
                         </div>
-                        <div class="card p-3">
-                            <div class="flex items-center space-x-3">
-                                <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-success/10">
-                                    <i class="fa-solid fa-box text-success"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-medium text-slate-700 dark:text-navy-100">{{ __('Daily support order') }}</p>
-                                    <div class="mt-0.5 flex text-xs text-slate-400 dark:text-navy-300">
-                                        <p>{{ __('Provider: Community Kitchen') }}</p>
-                                        <div class="mx-2 my-1 hidden w-px bg-slate-200 dark:bg-navy-500 sm:flex"></div>
-                                        <p class="hidden sm:flex">{{ __('Completed: Yesterday') }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="-mt-3 text-right text-xs font-medium text-success">{{ __('Completed') }}</p>
-                            <div class="progress mt-2 h-1.5 bg-slate-150 dark:bg-navy-500">
-                                <div class="relative w-full overflow-hidden rounded-full bg-success"></div>
-                            </div>
-                        </div>
-                        <div class="card p-3">
-                            <div class="flex items-center space-x-3">
-                                <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-info/10">
-                                    <i class="fa-solid fa-bowl-food text-info"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <p class="font-medium text-slate-700 dark:text-navy-100">{{ __('Weekly assistance') }}</p>
-                                    <div class="mt-0.5 flex text-xs text-slate-400 dark:text-navy-300">
-                                        <p>{{ __('Provider: Hope Foundation') }}</p>
-                                        <div class="mx-2 my-1 hidden w-px bg-slate-200 dark:bg-navy-500 sm:flex"></div>
-                                        <p class="hidden sm:flex">{{ __('Scheduled: This week') }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <p class="-mt-3 text-right text-xs font-medium text-info">{{ __('In progress') }}</p>
-                            <div class="progress mt-2 h-1.5 bg-info/15 dark:bg-info/25">
-                                <div class="w-6/12 rounded-full bg-info"></div>
-                            </div>
-                        </div>
+                        @endforelse
                     </div>
                 </div>
                 {{-- Recent Activity & Providers --}}
@@ -191,26 +170,24 @@
                             </a>
                         </div>
                         <div class="space-y-3.5">
-                            @foreach([
-                                ['provider' => 'Al-Rashid Kitchen', 'date' => __('Today'), 'status' => __('Order received')],
-                                ['provider' => 'Community Kitchen', 'date' => __('Yesterday'), 'status' => __('Delivered')],
-                                ['provider' => 'Hope Foundation', 'date' => __('2 days ago'), 'status' => __('Confirmed')],
-                            ] as $item)
-                            <div class="flex cursor-pointer items-center justify-between">
+                            @forelse($recentRequests as $activityReq)
+                            <a href="{{ route('recipient.requests.show', $activityReq->id) }}" class="flex cursor-pointer items-center justify-between hover:bg-slate-50 dark:hover:bg-navy-600/50 rounded-lg -mx-2 px-2 py-2 transition-colors">
                                 <div class="flex items-center space-x-3.5">
                                     <div class="avatar size-10">
-                                        <div class="is-initial rounded-full bg-primary/10 text-sm-plus font-medium text-primary dark:bg-accent/10 dark:text-accent-light">{{ substr($item['provider'], 0, 2) }}</div>
+                                        <div class="is-initial rounded-full bg-primary/10 text-sm-plus font-medium text-primary dark:bg-accent/10 dark:text-accent-light">{{ substr($activityReq->provider->providerProfile->full_name_en ?? $activityReq->provider->name ?? '??', 0, 2) }}</div>
                                     </div>
                                     <div>
-                                        <p class="font-medium text-slate-700 dark:text-navy-100">{{ $item['provider'] }}</p>
-                                        <p class="text-xs text-slate-400 line-clamp-1 dark:text-navy-300">{{ $item['date'] }} — {{ $item['status'] }}</p>
+                                        <p class="font-medium text-slate-700 dark:text-navy-100">{{ $activityReq->provider->providerProfile->full_name_en ?? $activityReq->provider->providerProfile->full_name_ar ?? $activityReq->provider->name }}</p>
+                                        <p class="text-xs text-slate-400 line-clamp-1 dark:text-navy-300">{{ $activityReq->created_at->diffForHumans() }} — {{ $statusLabels[$activityReq->status] ?? $activityReq->status }}</p>
                                     </div>
                                 </div>
                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
-                            </div>
-                            @endforeach
+                            </a>
+                            @empty
+                            <p class="text-xs text-slate-500 dark:text-navy-400">{{ __('No recent activity.') }}</p>
+                            @endforelse
                         </div>
                     </div>
                     <div class="card px-4 pb-4 sm:px-5">
@@ -224,14 +201,14 @@
                             </a>
                         </div>
                         <div class="space-y-3.5">
-                            @foreach(['Al-Rashid Kitchen', 'Community Kitchen', 'Hope Foundation'] as $name)
-                            <a href="{{ route('recipient.providers.index') }}" class="flex cursor-pointer items-center justify-between space-x-2 hover:bg-slate-50 dark:hover:bg-navy-600/50 rounded-lg -mx-2 px-2 py-2 transition-colors">
+                            @forelse($providers ?? [] as $provider)
+                            <a href="{{ route('recipient.providers.show', $provider->id) }}" class="flex cursor-pointer items-center justify-between space-x-2 hover:bg-slate-50 dark:hover:bg-navy-600/50 rounded-lg -mx-2 px-2 py-2 transition-colors">
                                 <div class="flex items-center space-x-3">
                                     <div class="avatar size-10">
-                                        <div class="is-initial rounded-full bg-secondary/10 text-sm-plus font-medium text-secondary">{{ substr($name, 0, 2) }}</div>
+                                        <div class="is-initial rounded-full bg-secondary/10 text-sm-plus font-medium text-secondary">{{ substr($provider->providerProfile->full_name_en ?? $provider->providerProfile->full_name_ar ?? $provider->name ?? '??', 0, 2) }}</div>
                                     </div>
                                     <div>
-                                        <p class="font-medium text-slate-700 dark:text-navy-100">{{ $name }}</p>
+                                        <p class="font-medium text-slate-700 dark:text-navy-100">{{ $provider->providerProfile->full_name_en ?? $provider->providerProfile->full_name_ar ?? $provider->name }}</p>
                                         <p class="text-xs text-slate-400 line-clamp-1 dark:text-navy-300">{{ __('View menu') }}</p>
                                     </div>
                                 </div>
@@ -239,7 +216,9 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
                             </a>
-                            @endforeach
+                            @empty
+                            <p class="text-xs text-slate-500 dark:text-navy-400">{{ __('No providers available.') }}</p>
+                            @endforelse
                         </div>
                     </div>
                 </div>

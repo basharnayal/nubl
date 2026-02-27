@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Recipient;
 
 use App\Http\Controllers\Controller;
 use App\Http\Services\RecipientAllowanceService;
+use App\Models\Request as RequestModel;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -16,9 +17,51 @@ class RecipientController extends Controller
         $remainingLimit = RecipientAllowanceService::getRemainingLimit($user->id);
         $weeklyLimit = RecipientAllowanceService::WEEKLY_LIMIT;
 
+        $activeStatuses = ['PENDING', 'PROVIDER_APPROVED', 'ADMIN_PENDING', 'ADMIN_APPROVED', 'REDEEMABLE', 'ADOPTED'];
+        $pendingStatuses = ['PENDING', 'PROVIDER_APPROVED', 'ADMIN_PENDING', 'ADMIN_APPROVED'];
+
+        $activeRequestsCount = RequestModel::forRecipient($user->id)
+            ->whereIn('status', $activeStatuses)
+            ->count();
+
+        $pendingCount = RequestModel::forRecipient($user->id)
+            ->whereIn('status', $pendingStatuses)
+            ->count();
+
+        $completedOrdersCount = RequestModel::forRecipient($user->id)
+            ->where('status', 'FULFILLED')
+            ->count();
+
+        $providersCount = User::query()
+            ->where('membership_type', User::MEMBERSHIP_PROVIDER)
+            ->where('status', User::STATUS_ACTIVE)
+            ->has('providerProfile')
+            ->count();
+
+        $recentRequests = RequestModel::forRecipient($user->id)
+            ->with(['provider.providerProfile', 'items.menuItem'])
+            ->latest()
+            ->take(5)
+            ->get();
+
+        $providers = User::query()
+            ->where('membership_type', User::MEMBERSHIP_PROVIDER)
+            ->where('status', User::STATUS_ACTIVE)
+            ->has('providerProfile')
+            ->with('providerProfile')
+            ->orderBy('name')
+            ->take(5)
+            ->get();
+
         return view('recipient.dashboard', [
             'remainingLimit' => $remainingLimit,
             'weeklyLimit' => $weeklyLimit,
+            'activeRequestsCount' => $activeRequestsCount,
+            'pendingCount' => $pendingCount,
+            'completedOrdersCount' => $completedOrdersCount,
+            'providersCount' => $providersCount,
+            'recentRequests' => $recentRequests,
+            'providers' => $providers,
         ]);
     }
 

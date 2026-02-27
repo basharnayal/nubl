@@ -33,15 +33,8 @@
                     </div>
 
                     <div class="text-right">
-                        @if(in_array($request->status, ['ADOPTED', 'PROVIDER_APPROVED', 'ADMIN_APPROVED', 'REDEEMABLE']))
-                            <button type="button" onclick="alert('{{ __('QR Code generation coming soon!') }}')"
-                                class="btn inline-flex items-center bg-success text-white hover:bg-success-focus focus:bg-success-focus dark:bg-success dark:hover:bg-success-focus">
-                                <svg class="mr-2 size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 4v1m6 11h2m-6 0h-2v4h2v-4zM6 6h6v6H6V6zm2 2v2h2V8H8zm8-2h6v6h-6V6zm2 2v2h2V8h-2zM6 18h6v6H6v-6zm2 2v2h2v-2H8z"></path>
-                                </svg>
-                                {{ __('View QR Code') }}
-                            </button>
+                        @if($request->status === 'REDEEMABLE')
+                            <span class="inline-block text-sm text-slate-600 dark:text-navy-300">{{ __('Show this QR code to the provider to redeem') }}</span>
                         @endif
                     </div>
                 </div>
@@ -53,6 +46,16 @@
                         @if($request->rejection_reason_note)
                             <p class="mt-1 text-sm text-slate-600 dark:text-navy-300">{{ $request->rejection_reason_note }}</p>
                         @endif
+                    </div>
+                @endif
+
+                @if($request->status === 'REDEEMABLE')
+                    <div class="mt-6 flex flex-col items-center border-t border-slate-200 pt-6 dark:border-navy-600">
+                        <p class="mb-4 text-sm font-medium text-slate-700 dark:text-navy-100">{{ __('Show this QR code to the provider to redeem your order') }}</p>
+                        <div class="rounded-lg border-2 border-slate-200 bg-white p-4 dark:border-navy-600 dark:bg-navy-800">
+                            {!! app('qrcode')->size(200)->generate((string) $request->id) !!}
+                        </div>
+                        <p class="mt-3 text-xs text-slate-500 dark:text-navy-400">{{ __('Request #') }}{{ $request->id }}</p>
                     </div>
                 @endif
             </div>
