@@ -59,7 +59,7 @@
                             maxlength="6"
                             autocomplete="one-time-code"
                             class="block mt-1 w-full text-center text-lg tracking-[0.5em]"
-                            placeholder="000000"
+                            placeholder="{{ __('Verification code placeholder') }}"
                             autofocus
                             :value="old('otp_code')"
                         />
@@ -90,7 +90,7 @@
                             name="phone"
                             type="tel"
                             class="block mt-1 w-full"
-                            placeholder="05XXXXXXXX"
+                            placeholder="{{ __('Phone placeholder') }}"
                             :value="old('phone')"
                             autocomplete="tel"
                         />

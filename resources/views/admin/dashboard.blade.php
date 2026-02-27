@@ -1,9 +1,9 @@
-<x-app-layout title="Admin Dashboard" is-header-blur="true">
+<x-app-layout title="{{ __('Admin Dashboard') }}" is-header-blur="true">
     <div class="mt-4 grid grid-cols-12 gap-4 transition-all duration-[.25s] sm:mt-5 sm:gap-5 lg:mt-6 lg:gap-6">
             <div class="col-span-12 lg:col-span-8">
                 <div class="flex items-center justify-between space-x-2">
                     <h2 class="text-base font-medium tracking-wide text-slate-800 line-clamp-1 dark:text-navy-100">
-                        Sales Overview
+                        {{ __('Sales Overview') }}
                     </h2>
                     <div x-data="{ activeTab: 'tabRecent' }"
                         class="is-scrollbar-hidden overflow-x-auto rounded-lg bg-slate-200 text-slate-600 dark:bg-navy-800 dark:text-navy-200">
@@ -12,13 +12,13 @@
                                 :class="activeTab === 'tabRecent' ? 'bg-white shadow-sm dark:bg-navy-500 dark:text-navy-100' :
                                     'hover:text-slate-800 focus:text-slate-800 dark:hover:text-navy-100 dark:focus:text-navy-100'"
                                 class="btn shrink-0 px-3 py-1 text-xs-plus font-medium">
-                                Last month
+                                {{ __('Last month') }}
                             </button>
                             <button @click="activeTab = 'tabAll'"
                                 :class="activeTab === 'tabAll' ? 'bg-white shadow-sm dark:bg-navy-500 dark:text-navy-100' :
                                     'hover:text-slate-800 focus:text-slate-800 dark:hover:text-navy-100 dark:focus:text-navy-100'"
                                 class="btn shrink-0 px-3 py-1 text-xs-plus font-medium">
-                                Last year
+                                {{ __('Last year') }}
                             </button>
                         </div>
                     </div>
@@ -48,7 +48,7 @@
                                 </button>
                             </div>
                             <p class="text-xs text-slate-400 dark:text-navy-300">
-                                this month
+                                {{ __('this month') }}
                             </p>
                         </div>
                         <div class="mt-3 flex items-center space-x-2">
@@ -77,7 +77,7 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z" />
                             </svg>
-                            <span> Download Report</span>
+                            <span> {{ __('Download Report') }}</span>
                         </button>
                     </div>
 
@@ -102,7 +102,7 @@
                                     d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <p class="mt-1 text-xs-plus">Income</p>
+                        <p class="mt-1 text-xs-plus">{{ __('Income') }}</p>
                     </div>
                     <div class="rounded-lg bg-slate-150 p-4 dark:bg-navy-700">
                         <div class="flex justify-between">
@@ -115,7 +115,7 @@
                                     d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                             </svg>
                         </div>
-                        <p class="mt-1 text-xs-plus">Completed</p>
+                        <p class="mt-1 text-xs-plus">{{ __('Completed') }}</p>
                     </div>
                     <div class="rounded-lg bg-slate-150 p-4 dark:bg-navy-700">
                         <div class="flex justify-between">
@@ -128,7 +128,7 @@
                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <p class="mt-1 text-xs-plus">Pending</p>
+                        <p class="mt-1 text-xs-plus">{{ __('Pending') }}</p>
                     </div>
                     <div class="rounded-lg bg-slate-150 p-4 dark:bg-navy-700">
                         <div class="flex justify-between">
@@ -142,7 +142,7 @@
                                     d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
                             </svg>
                         </div>
-                        <p class="mt-1 text-xs-plus">Dispatch</p>
+                        <p class="mt-1 text-xs-plus">{{ __('Dispatch') }}</p>
                     </div>
                     <div class="rounded-lg bg-slate-150 p-4 dark:bg-navy-700">
                         <div class="flex justify-between space-x-1">
@@ -155,7 +155,7 @@
                                     d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                             </svg>
                         </div>
-                        <p class="mt-1 text-xs-plus">Products</p>
+                        <p class="mt-1 text-xs-plus">{{ __('Products') }}</p>
                     </div>
                     <div class="rounded-lg bg-slate-150 p-4 dark:bg-navy-700">
                         <div class="flex justify-between">
@@ -168,7 +168,7 @@
                                     d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
                         </div>
-                        <p class="mt-1 text-xs-plus">Customers</p>
+                        <p class="mt-1 text-xs-plus">{{ __('Customers') }}</p>
                     </div>
                 </div>
             </div>
@@ -194,7 +194,7 @@
                                 <ul>
                                     <li>
                                         <a href="#"
-                                            class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Action</a>
+                                            class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
                                     </li>
                                     <li>
                                         <a href="#"
@@ -403,7 +403,7 @@
                                 <ul>
                                     <li>
                                         <a href="#"
-                                            class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Action</a>
+                                            class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
                                     </li>
                                     <li>
                                         <a href="#"
@@ -433,15 +433,15 @@
                         <span class="text-3xl text-slate-700 dark:text-navy-100">9.7</span>
                         <span class="text-xs text-success">+2.1%</span>
                     </p>
-                    <p class="text-xs-plus">Performance score</p>
+                    <p class="text-xs-plus">{{ __('Performance score') }}</p>
                 </div>
                 <div class="mt-4 flex h-2 space-x-1">
-                    <div class="w-5/12 rounded-full bg-primary dark:bg-accent" x-tooltip.primary="'Exellent'"></div>
-                    <div class="w-2/12 rounded-full bg-success" x-tooltip.success="'Very Good'"></div>
-                    <div class="w-2/12 rounded-full bg-info" x-tooltip.info="'Good'"></div>
+                    <div class="w-5/12 rounded-full bg-primary dark:bg-accent" x-tooltip.primary="'{{ __('Exellent') }}'"></div>
+                    <div class="w-2/12 rounded-full bg-success" x-tooltip.success="'{{ __('Very Good') }}'"></div>
+                    <div class="w-2/12 rounded-full bg-info" x-tooltip.info="'{{ __('Good') }}'"></div>
 
-                    <div class="w-2/12 rounded-full bg-warning" x-tooltip.warning="'Poor'"></div>
-                    <div class="w-1/12 rounded-full bg-error" x-tooltip.error="'Very Poor'"></div>
+                    <div class="w-2/12 rounded-full bg-warning" x-tooltip.warning="'{{ __('Poor') }}'"></div>
+                    <div class="w-1/12 rounded-full bg-error" x-tooltip.error="'{{ __('Very Poor') }}'"></div>
                 </div>
 
                 <div class="is-scrollbar-hidden mt-4 min-w-full overflow-x-auto">
@@ -454,7 +454,7 @@
                                             class="size-3.5 rounded-full border-2 border-primary dark:border-accent">
                                         </div>
                                         <p class="font-medium tracking-wide text-slate-700 dark:text-navy-100">
-                                            Exellent
+                                            {{ __('Exellent') }}
                                         </p>
                                     </div>
                                 </td>
@@ -470,7 +470,7 @@
                                     <div class="flex items-center space-x-2">
                                         <div class="size-3.5 rounded-full border-2 border-success"></div>
                                         <p class="font-medium tracking-wide text-slate-700 dark:text-navy-100">
-                                            Very Good
+                                            {{ __('Very Good') }}
                                         </p>
                                     </div>
                                 </td>
@@ -486,7 +486,7 @@
                                     <div class="flex items-center space-x-2">
                                         <div class="size-3.5 rounded-full border-2 border-info"></div>
                                         <p class="font-medium tracking-wide text-slate-700 dark:text-navy-100">
-                                            Good
+                                            {{ __('Good') }}
                                         </p>
                                     </div>
                                 </td>
@@ -502,7 +502,7 @@
                                     <div class="flex items-center space-x-2">
                                         <div class="size-3.5 rounded-full border-2 border-warning"></div>
                                         <p class="font-medium tracking-wide text-slate-700 dark:text-navy-100">
-                                            Poor
+                                            {{ __('Poor') }}
                                         </p>
                                     </div>
                                 </td>
@@ -518,7 +518,7 @@
                                     <div class="flex items-center space-x-2">
                                         <div class="size-3.5 rounded-full border-2 border-error"></div>
                                         <p class="font-medium tracking-wide text-slate-700 dark:text-navy-100">
-                                            Very Poor
+                                            {{ __('Very Poor') }}
                                         </p>
                                     </div>
                                 </td>
@@ -548,7 +548,7 @@
                 </p>
 
                 <div class="mt-4">
-                    <p>Sales Growth</p>
+                    <p>{{ __('Sales Growth') }}</p>
                     <div class="mt-1.5 flex items-center space-x-2">
                         <div class="flex size-7 items-center justify-center rounded-full bg-success/15 text-success">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
@@ -614,19 +614,19 @@
                     </div>
                     <div class="flex justify-between space-x-2">
                         <div>
-                            <p class="text-xs-plus">Sells</p>
+                            <p class="text-xs-plus">{{ __('Sells') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 2 348
                             </p>
                         </div>
                         <div>
-                            <p class="text-xs-plus">Target</p>
+                            <p class="text-xs-plus">{{ __('Target') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 3 000
                             </p>
                         </div>
                         <div>
-                            <p class="text-xs-plus">Clients</p>
+                            <p class="text-xs-plus">{{ __('Clients') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 78
                             </p>
@@ -634,30 +634,30 @@
                     </div>
                     <div class="grow">
                         <div class="flex w-full space-x-1">
-                            <div x-tooltip="'Phone Calls'" class="h-2 w-4/12 rounded-full bg-primary dark:bg-accent">
+                            <div x-tooltip="'{{ __('Phone Calls') }}'" class="h-2 w-4/12 rounded-full bg-primary dark:bg-accent">
                             </div>
-                            <div x-tooltip="'Chats Messages'" class="h-2 w-3/12 rounded-full bg-success"></div>
-                            <div x-tooltip="'Emails'" class="h-2 w-5/12 rounded-full bg-info"></div>
+                            <div x-tooltip="'{{ __('Chat Messages') }}'" class="h-2 w-3/12 rounded-full bg-success"></div>
+                            <div x-tooltip="'{{ __('Emails') }}'" class="h-2 w-5/12 rounded-full bg-info"></div>
                         </div>
                         <div class="mt-2 flex flex-wrap">
                             <div class="mr-4 mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-primary dark:bg-accent"></div>
                                 <div class="flex space-x-1 text-xs leading-6">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Calls</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Calls') }}</span>
                                     <span>33%</span>
                                 </div>
                             </div>
                             <div class="mr-4 mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-success"></div>
                                 <div class="flex space-x-1 text-xs">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Chat Messages</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Chat Messages') }}</span>
                                     <span>17%</span>
                                 </div>
                             </div>
                             <div class="mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-info"></div>
                                 <div class="flex space-x-1 text-xs">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Emails</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Emails') }}</span>
                                     <span>50%</span>
                                 </div>
                             </div>
@@ -665,11 +665,11 @@
                     </div>
                     <div class="flex justify-between">
                         <div class="flex space-x-2">
-                            <img x-tooltip="'Award Level 1'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 1') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-19.svg') }}" alt="avatar" />
-                            <img x-tooltip="'Award Level 2'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 2') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-2.svg') }}" alt="avatar" />
-                            <img x-tooltip="'Award Level 3'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 3') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-5.svg') }}" alt="avatar" />
                         </div>
                         <button
@@ -729,19 +729,19 @@
                     </div>
                     <div class="flex justify-between space-x-2">
                         <div>
-                            <p class="text-xs-plus">Sells</p>
+                            <p class="text-xs-plus">{{ __('Sells') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 1 451
                             </p>
                         </div>
                         <div>
-                            <p class="text-xs-plus">Target</p>
+                            <p class="text-xs-plus">{{ __('Target') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 2 000
                             </p>
                         </div>
                         <div>
-                            <p class="text-xs-plus">Clients</p>
+                            <p class="text-xs-plus">{{ __('Clients') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 54
                             </p>
@@ -749,30 +749,30 @@
                     </div>
                     <div class="grow">
                         <div class="flex w-full space-x-1">
-                            <div x-tooltip="'Phone Calls'" class="h-2 w-3/12 rounded-full bg-primary dark:bg-accent">
+                            <div x-tooltip="'{{ __('Phone Calls') }}'" class="h-2 w-3/12 rounded-full bg-primary dark:bg-accent">
                             </div>
-                            <div x-tooltip="'Chats Messages'" class="h-2 w-7/12 rounded-full bg-success"></div>
-                            <div x-tooltip="'Emails'" class="h-2 w-2/12 rounded-full bg-info"></div>
+                            <div x-tooltip="'{{ __('Chat Messages') }}'" class="h-2 w-7/12 rounded-full bg-success"></div>
+                            <div x-tooltip="'{{ __('Emails') }}'" class="h-2 w-2/12 rounded-full bg-info"></div>
                         </div>
                         <div class="mt-2 flex flex-wrap">
                             <div class="mr-4 mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-primary dark:bg-accent"></div>
                                 <div class="flex space-x-1 text-xs leading-6">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Calls</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Calls') }}</span>
                                     <span>24%</span>
                                 </div>
                             </div>
                             <div class="mr-4 mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-success"></div>
                                 <div class="flex space-x-1 text-xs">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Chat Messages</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Chat Messages') }}</span>
                                     <span>56%</span>
                                 </div>
                             </div>
                             <div class="mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-info"></div>
                                 <div class="flex space-x-1 text-xs">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Emails</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Emails') }}</span>
                                     <span>20%</span>
                                 </div>
                             </div>
@@ -780,11 +780,11 @@
                     </div>
                     <div class="flex justify-between">
                         <div class="flex space-x-2">
-                            <img x-tooltip="'Award Level 1'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 1') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-1.svg') }}" alt="avatar" />
-                            <img x-tooltip="'Award Level 2'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 2') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-6.svg') }}" alt="avatar" />
-                            <img x-tooltip="'Award Level 3'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 3') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-9.svg') }}" alt="avatar" />
                         </div>
                         <button
@@ -844,19 +844,19 @@
                     </div>
                     <div class="flex justify-between space-x-2">
                         <div>
-                            <p class="text-xs-plus">Sells</p>
+                            <p class="text-xs-plus">{{ __('Sells') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 423
                             </p>
                         </div>
                         <div>
-                            <p class="text-xs-plus">Target</p>
+                            <p class="text-xs-plus">{{ __('Target') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 500
                             </p>
                         </div>
                         <div>
-                            <p class="text-xs-plus">Clients</p>
+                            <p class="text-xs-plus">{{ __('Clients') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 16
                             </p>
@@ -864,30 +864,30 @@
                     </div>
                     <div class="grow">
                         <div class="flex w-full space-x-1">
-                            <div x-tooltip="'Phone Calls'" class="h-2 w-8/12 rounded-full bg-primary dark:bg-accent">
+                            <div x-tooltip="'{{ __('Phone Calls') }}'" class="h-2 w-8/12 rounded-full bg-primary dark:bg-accent">
                             </div>
-                            <div x-tooltip="'Chats Messages'" class="h-2 w-2/12 rounded-full bg-success"></div>
-                            <div x-tooltip="'Emails'" class="w-2/12 rounded-full bg-info"></div>
+                            <div x-tooltip="'{{ __('Chat Messages') }}'" class="h-2 w-2/12 rounded-full bg-success"></div>
+                            <div x-tooltip="'{{ __('Emails') }}'" class="w-2/12 rounded-full bg-info"></div>
                         </div>
                         <div class="mt-2 flex flex-wrap">
                             <div class="mr-4 mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-primary dark:bg-accent"></div>
                                 <div class="flex space-x-1 text-xs leading-6">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Calls</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Calls') }}</span>
                                     <span>60%</span>
                                 </div>
                             </div>
                             <div class="mr-4 mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-success"></div>
                                 <div class="flex space-x-1 text-xs">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Chat Messages</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Chat Messages') }}</span>
                                     <span>23%</span>
                                 </div>
                             </div>
                             <div class="mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-info"></div>
                                 <div class="flex space-x-1 text-xs">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Emails</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Emails') }}</span>
                                     <span>17%</span>
                                 </div>
                             </div>
@@ -895,9 +895,9 @@
                     </div>
                     <div class="flex justify-between">
                         <div class="flex space-x-2">
-                            <img x-tooltip="'Award Level 2'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 2') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-14.svg') }}" alt="avatar" />
-                            <img x-tooltip="'Award Level 3'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 3') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-13.svg') }}" alt="avatar" />
                         </div>
                         <button
@@ -957,19 +957,19 @@
                     </div>
                     <div class="flex justify-between space-x-2">
                         <div>
-                            <p class="text-xs-plus">Sells</p>
+                            <p class="text-xs-plus">{{ __('Sells') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 579
                             </p>
                         </div>
                         <div>
-                            <p class="text-xs-plus">Target</p>
+                            <p class="text-xs-plus">{{ __('Target') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 800
                             </p>
                         </div>
                         <div>
-                            <p class="text-xs-plus">Clients</p>
+                            <p class="text-xs-plus">{{ __('Clients') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 24
                             </p>
@@ -977,30 +977,30 @@
                     </div>
                     <div class="grow">
                         <div class="flex w-full space-x-1">
-                            <div x-tooltip="'Phone Calls'" class="h-2 w-4/12 rounded-full bg-primary dark:bg-accent">
+                            <div x-tooltip="'{{ __('Phone Calls') }}'" class="h-2 w-4/12 rounded-full bg-primary dark:bg-accent">
                             </div>
-                            <div x-tooltip="'Chats Messages'" class="h-2 w-4/12 rounded-full bg-success"></div>
-                            <div x-tooltip="'Emails'" class="h-2 w-4/12 rounded-full bg-info"></div>
+                            <div x-tooltip="'{{ __('Chat Messages') }}'" class="h-2 w-4/12 rounded-full bg-success"></div>
+                            <div x-tooltip="'{{ __('Emails') }}'" class="h-2 w-4/12 rounded-full bg-info"></div>
                         </div>
                         <div class="mt-2 flex flex-wrap">
                             <div class="mr-4 mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-primary dark:bg-accent"></div>
                                 <div class="flex space-x-1 text-xs leading-6">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Calls</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Calls') }}</span>
                                     <span>30%</span>
                                 </div>
                             </div>
                             <div class="mr-4 mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-success"></div>
                                 <div class="flex space-x-1 text-xs">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Chat Messages</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Chat Messages') }}</span>
                                     <span>36%</span>
                                 </div>
                             </div>
                             <div class="mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-info"></div>
                                 <div class="flex space-x-1 text-xs">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Emails</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Emails') }}</span>
                                     <span>34%</span>
                                 </div>
                             </div>
@@ -1008,9 +1008,9 @@
                     </div>
                     <div class="flex justify-between">
                         <div class="flex space-x-2">
-                            <img x-tooltip="'Award Level 2'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 2') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-15.svg') }}" alt="avatar" />
-                            <img x-tooltip="'Award Level 3'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 3') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-13.svg') }}" alt="avatar" />
                         </div>
                         <button
@@ -1066,19 +1066,19 @@
                     </div>
                     <div class="flex justify-between space-x-2">
                         <div>
-                            <p class="text-xs-plus">Sells</p>
+                            <p class="text-xs-plus">{{ __('Sells') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 6 541
                             </p>
                         </div>
                         <div>
-                            <p class="text-xs-plus">Target</p>
+                            <p class="text-xs-plus">{{ __('Target') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 8 000
                             </p>
                         </div>
                         <div>
-                            <p class="text-xs-plus">Clients</p>
+                            <p class="text-xs-plus">{{ __('Clients') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 145
                             </p>
@@ -1086,30 +1086,30 @@
                     </div>
                     <div class="grow">
                         <div class="flex w-full space-x-1">
-                            <div x-tooltip="'Phone Calls'" class="h-2 w-6/12 rounded-full bg-primary dark:bg-accent">
+                            <div x-tooltip="'{{ __('Phone Calls') }}'" class="h-2 w-6/12 rounded-full bg-primary dark:bg-accent">
                             </div>
-                            <div x-tooltip="'Chats Messages'" class="h-2 w-4/12 rounded-full bg-success"></div>
-                            <div x-tooltip="'Emails'" class="h-2 w-2/12 rounded-full bg-info"></div>
+                            <div x-tooltip="'{{ __('Chat Messages') }}'" class="h-2 w-4/12 rounded-full bg-success"></div>
+                            <div x-tooltip="'{{ __('Emails') }}'" class="h-2 w-2/12 rounded-full bg-info"></div>
                         </div>
                         <div class="mt-2 flex flex-wrap">
                             <div class="mr-4 mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-primary dark:bg-accent"></div>
                                 <div class="flex space-x-1 text-xs leading-6">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Calls</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Calls') }}</span>
                                     <span>55%</span>
                                 </div>
                             </div>
                             <div class="mr-4 mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-success"></div>
                                 <div class="flex space-x-1 text-xs">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Chat Messages</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Chat Messages') }}</span>
                                     <span>30%</span>
                                 </div>
                             </div>
                             <div class="mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-info"></div>
                                 <div class="flex space-x-1 text-xs">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Emails</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Emails') }}</span>
                                     <span>15%</span>
                                 </div>
                             </div>
@@ -1117,11 +1117,11 @@
                     </div>
                     <div class="flex justify-between">
                         <div class="flex space-x-2">
-                            <img x-tooltip="'Award Level 2'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 2') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-15.svg') }}" alt="avatar" />
-                            <img x-tooltip="'Award Level 3'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 3') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-5.svg') }}" alt="avatar" />
-                            <img x-tooltip="'Award Level 3'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 3') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-25.svg') }}" alt="avatar" />
                         </div>
                         <button
@@ -1182,19 +1182,19 @@
 
                     <div class="flex justify-between space-x-2">
                         <div>
-                            <p class="text-xs-plus">Sells</p>
+                            <p class="text-xs-plus">{{ __('Sells') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 3 481
                             </p>
                         </div>
                         <div>
-                            <p class="text-xs-plus">Target</p>
+                            <p class="text-xs-plus">{{ __('Target') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 5 000
                             </p>
                         </div>
                         <div>
-                            <p class="text-xs-plus">Clients</p>
+                            <p class="text-xs-plus">{{ __('Clients') }}</p>
                             <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                 96
                             </p>
@@ -1203,30 +1203,30 @@
 
                     <div class="grow">
                         <div class="flex w-full space-x-1">
-                            <div x-tooltip="'Phone Calls'" class="h-2 w-1/12 rounded-full bg-primary dark:bg-accent">
+                            <div x-tooltip="'{{ __('Phone Calls') }}'" class="h-2 w-1/12 rounded-full bg-primary dark:bg-accent">
                             </div>
-                            <div x-tooltip="'Chats Messages'" class="h-2 w-5/12 rounded-full bg-success"></div>
-                            <div x-tooltip="'Emails'" class="h-2 w-6/12 rounded-full bg-info"></div>
+                            <div x-tooltip="'{{ __('Chat Messages') }}'" class="h-2 w-5/12 rounded-full bg-success"></div>
+                            <div x-tooltip="'{{ __('Emails') }}'" class="h-2 w-6/12 rounded-full bg-info"></div>
                         </div>
                         <div class="mt-2 flex flex-wrap">
                             <div class="mr-4 mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-primary dark:bg-accent"></div>
                                 <div class="flex space-x-1 text-xs leading-6">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Calls</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Calls') }}</span>
                                     <span>9%</span>
                                 </div>
                             </div>
                             <div class="mr-4 mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-success"></div>
                                 <div class="flex space-x-1 text-xs">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Chat Messages</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Chat Messages') }}</span>
                                     <span>41%</span>
                                 </div>
                             </div>
                             <div class="mb-1 inline-flex items-center space-x-2 font-inter">
                                 <div class="size-2 rounded-full bg-info"></div>
                                 <div class="flex space-x-1 text-xs">
-                                    <span class="font-medium text-slate-700 dark:text-navy-100">Emails</span>
+                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Emails') }}</span>
                                     <span>50%</span>
                                 </div>
                             </div>
@@ -1235,11 +1235,11 @@
 
                     <div class="flex justify-between">
                         <div class="flex space-x-2">
-                            <img x-tooltip="'Award Level 2'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 2') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-1.svg') }}" alt="avatar" />
-                            <img x-tooltip="'Award Level 3'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 3') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-24.svg') }}" alt="avatar" />
-                            <img x-tooltip="'Award Level 3'" class="size-6"
+                            <img x-tooltip="'{{ __('Award Level 3') }}'" class="size-6"
                                 src="{{ asset('images/awards/award-30.svg') }}" alt="avatar" />
                         </div>
                         <button
@@ -1280,7 +1280,7 @@
                                 <ul>
                                     <li>
                                         <a href="#"
-                                            class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Action</a>
+                                            class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
                                     </li>
                                     <li>
                                         <a href="#"
@@ -1313,14 +1313,14 @@
                                 <span class="text-2xl font-medium text-slate-700 dark:text-navy-100">393</span>
                                 <span class="text-xs">Mb</span>
                             </div>
-                            <p class="text-xs-plus">HTTP Traffic</p>
+                            <p class="text-xs-plus">{{ __('HTTP Traffic') }}</p>
                         </div>
 
                         <div class="progress mt-3 h-1.5 bg-slate-150 dark:bg-navy-500">
                             <div class="is-active relative w-8/12 overflow-hidden rounded-full bg-success"></div>
                         </div>
                         <div class="mt-2 flex justify-between text-xs text-slate-400 dark:text-navy-300">
-                            <p>Monthly target</p>
+                            <p>{{ __('Monthly target') }}</p>
                             <p>17%</p>
                         </div>
                     </div>
@@ -1330,14 +1330,14 @@
                                 <span class="text-2xl font-medium text-slate-700 dark:text-navy-100">293</span>
                                 <span class="text-xs">Mb</span>
                             </div>
-                            <p class="text-xs-plus">SMTP Traffic</p>
+                            <p class="text-xs-plus">{{ __('SMTP Traffic') }}</p>
                         </div>
 
                         <div class="progress mt-3 h-1.5 bg-slate-150 dark:bg-navy-500">
                             <div class="relative w-8/12 overflow-hidden rounded-full bg-warning"></div>
                         </div>
                         <div class="mt-2 flex justify-between text-xs text-slate-400 dark:text-navy-300">
-                            <p>Monthly target</p>
+                            <p>{{ __('Monthly target') }}</p>
                             <p>65%</p>
                         </div>
                     </div>
@@ -1347,14 +1347,14 @@
                                 <span class="text-2xl font-medium text-slate-700 dark:text-navy-100">293</span>
                                 <span class="text-xs">Mb</span>
                             </div>
-                            <p class="text-xs-plus">FTP Traffic</p>
+                            <p class="text-xs-plus">{{ __('FTP Traffic') }}</p>
                         </div>
 
                         <div class="progress mt-3 h-1.5 bg-slate-150 dark:bg-navy-500">
                             <div class="relative w-5/12 overflow-hidden rounded-full bg-secondary"></div>
                         </div>
                         <div class="mt-2 flex justify-between text-xs text-slate-400 dark:text-navy-300">
-                            <p>Monthly target</p>
+                            <p>{{ __('Monthly target') }}</p>
                             <p>79%</p>
                         </div>
                     </div>
@@ -1373,7 +1373,7 @@
                             </div>
                         </div>
                         <div class="mt-2 flex justify-between text-xs text-slate-400 dark:text-navy-300">
-                            <p>Monthly target</p>
+                            <p>{{ __('Monthly target') }}</p>
                             <p>79%</p>
                         </div>
                     </div>
@@ -1381,7 +1381,7 @@
 
                 <div class="mt-4 flex grow items-center justify-between px-4 sm:px-5">
                     <div class="flex space-x-2 items-center">
-                        <p class="text-xs-plus">Performance</p>
+                        <p class="text-xs-plus">{{ __('Performance') }}</p>
 
                         <p class="text-slate-800 dark:text-navy-100">3.2%</p>
 
@@ -1425,7 +1425,7 @@
                                 <ul>
                                     <li>
                                         <a href="#"
-                                            class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Action</a>
+                                            class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
                                     </li>
                                     <li>
                                         <a href="#"
@@ -1463,7 +1463,7 @@
                                 </p>
                                 <span class="text-xs text-slate-400 dark:text-navy-300">12 minute ago</span>
                             </div>
-                            <p class="py-1">John Doe changed his avatar photo</p>
+                            <p class="py-1">{{ __('John Doe changed his avatar photo') }}</p>
                             <div class="avatar mt-2 size-16">
                                 <img class="mask is-squircle" src="{{ asset('images/200x200.png') }}"
                                     alt="avatar" />
@@ -1522,9 +1522,9 @@
                                 <p class="pb-2 font-medium leading-none text-slate-600 dark:text-navy-100 sm:pb-0">
                                     ER Diagram
                                 </p>
-                                <span class="text-xs text-slate-400 dark:text-navy-300">a day ago</span>
+                                <span class="text-xs text-slate-400 dark:text-navy-300">{{ __('a day ago') }}</span>
                             </div>
-                            <p class="py-1">Team completed the ER diagram app</p>
+                            <p class="py-1">{{ __('Team completed the ER diagram app') }}</p>
                             <div>
                                 <p class="text-xs text-slate-400 dark:text-navy-300">
                                     Members:
@@ -1580,9 +1580,9 @@
                                 <p class="pb-2 font-medium leading-none text-slate-600 dark:text-navy-100 sm:pb-0">
                                     Weekly Report
                                 </p>
-                                <span class="text-xs text-slate-400 dark:text-navy-300">a day ago</span>
+                                <span class="text-xs text-slate-400 dark:text-navy-300">{{ __('a day ago') }}</span>
                             </div>
-                            <p class="py-1">The weekly report was uploaded</p>
+                            <p class="py-1">{{ __('The weekly report was uploaded') }}</p>
                         </div>
                     </li>
                 </ol>

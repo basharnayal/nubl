@@ -151,7 +151,7 @@
                     </div>
                     <div>
                         <x-input-label for="phone_number" :value="__('Phone (Saudi +966)')" required />
-                        <x-text-input id="phone_number" name="phone_number" type="tel" value="{{ old('phone_number') }}" placeholder="05XXXXXXXX" class="block mt-1 w-full" maxlength="10"
+                        <x-text-input id="phone_number" name="phone_number" type="tel" value="{{ old('phone_number') }}" placeholder="{{ __('Phone placeholder') }}" class="block mt-1 w-full" maxlength="10"
                             x-on:input="$event.target.value = $event.target.value.replace(/\D/g,'').slice(0, 10)" required />
                         <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
                     </div>

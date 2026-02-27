@@ -1,0 +1,87 @@
+/**
+ * RTL layout overrides
+ * Applied when html[dir="rtl"] (e.g. Arabic locale)
+ * Mirrors sidebar, header, and main content positioning from LTR
+ */
+
+[dir="rtl"] .menu-toggle.active span {
+    @apply mr-2 ml-0 translate-x-2 -translate-x-0;
+}
+
+[dir="rtl"] .menu-toggle.active span:nth-child(1) {
+    @apply rotate-45;
+}
+
+[dir="rtl"] .menu-toggle.active span:nth-child(3) {
+    @apply -rotate-45;
+}
+
+/* Sidebar: move from left to right */
+[dir="rtl"] .main-sidebar {
+    @apply left-auto right-0 translate-x-full md:translate-x-0;
+}
+
+[dir="rtl"] .is-sidebar-open .main-sidebar {
+    @apply translate-x-0;
+}
+
+[dir="rtl"] .sidebar-panel {
+    @apply left-auto right-0 translate-x-full;
+}
+
+[dir="rtl"] .is-sidebar-open .sidebar-panel {
+    @apply translate-x-0;
+}
+
+[dir="rtl"] .sidebar-panel-min {
+    @apply left-auto right-0 top-0 translate-x-full md:-translate-x-[var(--main-sidebar-width)];
+}
+
+[dir="rtl"] .is-sidebar-open .sidebar-panel-min {
+    @apply translate-x-full;
+}
+
+/* Header: move from right to left */
+[dir="rtl"] nav.header {
+    @apply right-auto left-0;
+}
+
+[dir="rtl"] nav.header:before {
+    left: auto;
+    right: calc(-100vw + 100%);
+}
+
+/* Main content: margin-left → margin-right */
+[dir="rtl"] .main-content {
+    @apply ml-0 md:mr-[var(--main-sidebar-width)] md:ml-0;
+}
+
+[dir="rtl"] .has-min-sidebar .main-content {
+    @apply md:mr-[calc(var(--main-sidebar-width)+var(--sidebar-panel-min-width))] md:ml-0;
+}
+
+[dir="rtl"] .is-sidebar-open .main-content {
+    @apply xl:mr-[calc(var(--main-sidebar-width)+var(--sidebar-panel-width))] xl:ml-0;
+}
+
+/* Sideblock navigation - override LTR -translate-x-full with translate-x-full */
+[dir="rtl"] .navigation\:sideblock .sidebar-panel {
+    @apply translate-x-full;
+}
+
+[dir="rtl"] .navigation\:sideblock.is-sidebar-open .sidebar-panel {
+    @apply translate-x-0;
+}
+
+[dir="rtl"] .navigation\:sideblock .main-content {
+    @apply mr-0;
+}
+
+[dir="rtl"] .navigation\:sideblock.is-sidebar-open .main-content {
+    @apply xl:mr-[var(--sideblock-width)] xl:ml-0;
+}
+
+/* Inline space - margin flips for RTL (mr → me for logical) */
+[dir="rtl"] .inline-space > :not([hidden]) {
+    @apply mr-0 me-2.5;
+}

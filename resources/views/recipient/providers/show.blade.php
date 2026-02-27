@@ -29,7 +29,7 @@
 
                         <div class="mt-2 grid grid-cols-1 gap-4 text-sm text-slate-500 md:grid-cols-2 dark:text-navy-400">
                             <p class="flex items-center">
-                                <svg class="mr-2 size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="mr-2 size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -37,8 +37,18 @@
                                 </svg>
                                 {{ $provider->providerProfile->location ?? ($provider->providerProfile->city . ', ' . $provider->providerProfile->region) }}
                             </p>
+                            @if($provider->providerOperatingInfo && !empty($provider->providerOperatingInfo->service_type))
                             <p class="flex items-center">
-                                <svg class="mr-2 size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="mr-2 size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                                </svg>
+                                {{ __('Service Type') }}:
+                                {{ implode(', ', array_map(fn($s) => ucfirst(str_replace('_', ' ', $s)), $provider->providerOperatingInfo->service_type)) }}
+                            </p>
+                            @endif
+                            <p class="flex items-center">
+                                <svg class="mr-2 size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>

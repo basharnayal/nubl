@@ -6,6 +6,7 @@
 @source '../**/*.js';
 
 @import "./base.css" layer(base);
+@import "./rtl.css" layer(base);
 @import "./components.css" layer(components);
 
 @import "tailwindcss";

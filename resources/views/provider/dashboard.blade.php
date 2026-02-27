@@ -3,9 +3,9 @@
     <div class="card overflow-hidden mt-4">
         <div class="p-6 text-slate-800 dark:text-navy-100 flex justify-between items-center">
             <div>
-                <h3 class="text-lg font-bold">Store Status</h3>
+                <h3 class="text-lg font-bold">{{ __('Store Status') }}</h3>
                 <p class="text-sm text-slate-500 dark:text-navy-300">
-                    Current Status:
+                    {{ __('Current Status:') }}
                     <span class="font-bold {{ auth()->user()->is_active ? 'text-success' : 'text-error' }}">
                         {{ auth()->user()->is_active ? 'ACTIVE' : 'INACTIVE' }}
                     </span>
@@ -18,7 +18,7 @@
             <form method="POST" action="{{ route('provider.profile.toggle-active') }}">
                 @csrf
                 <button type="submit" class="btn bg-slate-150 text-slate-800 hover:bg-slate-200 dark:bg-navy-500 dark:text-navy-50 dark:hover:bg-navy-450">
-                    {{ auth()->user()->is_active ? 'Pause Store' : 'Activate Store' }}
+                    {{ auth()->user()->is_active ? __('Pause Store') : __('Activate Store') }}
                 </button>
             </form>
         </div>
@@ -29,7 +29,7 @@
                 <div class="mt-3 flex flex-col justify-between px-4 sm:flex-row sm:items-center sm:px-5">
                     <div class="flex flex-1 items-center justify-between space-x-2 sm:flex-initial">
                         <h2 class="text-sm-plus font-medium tracking-wide text-slate-700 dark:text-navy-100">
-                            Requests Overview
+                            {{ __('Requests Overview') }}
                         </h2>
                         <div x-data="usePopper({ placement: 'bottom-start', offset: 4 })" @click.outside="if(isShowPopper) isShowPopper = false"
                             class="inline-flex">
@@ -48,7 +48,7 @@
                                     <ul>
                                         <li>
                                             <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Action</a>
+                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
                                         </li>
                                         <li>
                                             <a href="#"
@@ -101,7 +101,7 @@
                                     d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <p class="mt-1 text-xs-plus">Income</p>
+                        <p class="mt-1 text-xs-plus">{{ __('Income') }}</p>
                     </div>
                     <div class="rounded-lg bg-slate-100 p-4 dark:bg-navy-600">
                         <div class="flex justify-between">
@@ -114,7 +114,7 @@
                                     d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                             </svg>
                         </div>
-                        <p class="mt-1 text-xs-plus">Completed</p>
+                        <p class="mt-1 text-xs-plus">{{ __('Completed') }}</p>
                     </div>
                     <div class="rounded-lg bg-slate-100 p-4 dark:bg-navy-600">
                         <div class="flex justify-between">
@@ -127,7 +127,7 @@
                                     d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                         </div>
-                        <p class="mt-1 text-xs-plus">Pending</p>
+                        <p class="mt-1 text-xs-plus">{{ __('Pending') }}</p>
                     </div>
                     <div class="rounded-lg bg-slate-100 p-4 dark:bg-navy-600">
                         <div class="flex justify-between">
@@ -141,7 +141,7 @@
                                     d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
                             </svg>
                         </div>
-                        <p class="mt-1 text-xs-plus">Requests</p>
+                        <p class="mt-1 text-xs-plus">{{ __('Requests') }}</p>
                     </div>
                 </div>
 
@@ -176,7 +176,7 @@
                                     <ul>
                                         <li>
                                             <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Action</a>
+                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
                                         </li>
                                         <li>
                                             <a href="#"
@@ -228,7 +228,7 @@
                 <div class="card">
                     <div class="mt-3 flex items-center justify-between px-4 sm:px-5">
                         <h2 class="font-medium tracking-wide text-slate-700 dark:text-navy-100">
-                            Income
+                            {{ __('Income') }}
                         </h2>
 
                         <div x-data="usePopper({ placement: 'bottom-end', offset: 4 })" @click.outside="if(isShowPopper) isShowPopper = false"
@@ -248,7 +248,7 @@
                                     <ul>
                                         <li>
                                             <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Action</a>
+                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
                                         </li>
                                         <li>
                                             <a href="#"
@@ -306,7 +306,7 @@
                                     <ul>
                                         <li>
                                             <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Action</a>
+                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
                                         </li>
                                         <li>
                                             <a href="#"
@@ -364,7 +364,7 @@
                                 <ul>
                                     <li>
                                         <a href="#"
-                                            class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Action</a>
+                                            class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
                                     </li>
                                     <li>
                                         <a href="#"
@@ -401,13 +401,13 @@
                                     Travis Fuller
                                 </p>
                                 <p class="text-xs-plus text-slate-400 dark:text-navy-300">
-                                    Salesman
+                                    {{ __('Salesman') }}
                                 </p>
                             </div>
                         </div>
                         <div class="mt-5">
                             <div>
-                                <p>Sales</p>
+                                <p>{{ __('Sales') }}</p>
                                 <div class="mt-0.5 flex space-x-2">
                                     <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                         2 348
@@ -467,13 +467,13 @@
                                     Konnor Guzman
                                 </p>
                                 <p class="text-xs-plus text-slate-400 dark:text-navy-300">
-                                    Salesman
+                                    {{ __('Salesman') }}
                                 </p>
                             </div>
                         </div>
                         <div class="mt-5">
                             <div>
-                                <p>Sales</p>
+                                <p>{{ __('Sales') }}</p>
                                 <div class="mt-0.5 flex space-x-2">
                                     <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                         6 052
@@ -533,13 +533,13 @@
                                     Katrina West
                                 </p>
                                 <p class="text-xs-plus text-slate-400 dark:text-navy-300">
-                                    Saleswoman
+                                    {{ __('Saleswoman') }}
                                 </p>
                             </div>
                         </div>
                         <div class="mt-5">
                             <div>
-                                <p>Sales</p>
+                                <p>{{ __('Sales') }}</p>
                                 <div class="mt-0.5 flex space-x-2">
                                     <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                         2 348
@@ -599,13 +599,13 @@
                                     Henry Curtis
                                 </p>
                                 <p class="text-xs-plus text-slate-400 dark:text-navy-300">
-                                    Salesman
+                                    {{ __('Salesman') }}
                                 </p>
                             </div>
                         </div>
                         <div class="mt-5">
                             <div>
-                                <p>Sales</p>
+                                <p>{{ __('Sales') }}</p>
                                 <div class="mt-0.5 flex space-x-2">
                                     <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
                                         4 574
@@ -680,7 +680,7 @@
                                     <ul>
                                         <li>
                                             <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Action</a>
+                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
                                         </li>
                                         <li>
                                             <a href="#"
@@ -710,14 +710,14 @@
                             <span class="text-2xl text-slate-700 dark:text-navy-100">135K</span>
                             <span class="text-xs text-success">+3.1%</span>
                         </p>
-                        <p class="text-xs-plus">View in this month</p>
+                        <p class="text-xs-plus">{{ __('View in this month') }}</p>
                     </div>
                     <div class="mt-5 space-y-4">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/100x100.png') }}"
                                     alt="flag" />
-                                <p>Instagram</p>
+                                <p>{{ __('Instagram') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -734,7 +734,7 @@
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/100x100.png') }}"
                                     alt="flag" />
-                                <p>Facebook</p>
+                                <p>{{ __('Facebook') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -751,7 +751,7 @@
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/100x100.png') }}"
                                     alt="flag" />
-                                <p>Youtube</p>
+                                <p>{{ __('Youtube') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -768,7 +768,7 @@
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/100x100.png') }}"
                                     alt="flag" />
-                                <p>Pinterest</p>
+                                <p>{{ __('Pinterest') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -785,7 +785,7 @@
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/100x100.png') }}"
                                     alt="flag" />
-                                <p>Discord</p>
+                                <p>{{ __('Discord') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -802,7 +802,7 @@
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/100x100.png') }}"
                                     alt="flag" />
-                                <p>TikTok</p>
+                                <p>{{ __('TikTok') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -819,7 +819,7 @@
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/100x100.png') }}"
                                     alt="flag" />
-                                <p>Twitter</p>
+                                <p>{{ __('Twitter') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -836,7 +836,7 @@
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/100x100.png') }}"
                                     alt="flag" />
-                                <p>Tumblr</p>
+                                <p>{{ __('Tumblr') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -866,14 +866,14 @@
                         <p>
                             <span class="text-2xl text-slate-700 dark:text-navy-100">64</span>
                         </p>
-                        <p class="text-xs-plus">Countries</p>
+                        <p class="text-xs-plus">{{ __('Countries') }}</p>
                     </div>
                     <div class="mt-5 space-y-4">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/flags/australia-round.svg') }}"
                                     alt="flag" />
-                                <p>Australia</p>
+                                <p>{{ __('Australia') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -890,7 +890,7 @@
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/flags/brazil-round.svg') }}"
                                     alt="flag" />
-                                <p>Brazil</p>
+                                <p>{{ __('Brazil') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -907,7 +907,7 @@
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/flags/china-round.svg') }}"
                                     alt="flag" />
-                                <p>China</p>
+                                <p>{{ __('China') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -924,7 +924,7 @@
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/flags/india-round.svg') }}"
                                     alt="flag" />
-                                <p>India</p>
+                                <p>{{ __('India') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -941,7 +941,7 @@
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/flags/italy-round.svg') }}"
                                     alt="flag" />
-                                <p>Italy</p>
+                                <p>{{ __('Italy') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -958,7 +958,7 @@
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/flags/japan-round.svg') }}"
                                     alt="flag" />
-                                <p>Japan</p>
+                                <p>{{ __('Japan') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -975,7 +975,7 @@
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/flags/russia-round.svg') }}"
                                     alt="flag" />
-                                <p>Russia</p>
+                                <p>{{ __('Russia') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -992,7 +992,7 @@
                             <div class="flex items-center space-x-2">
                                 <img class="size-6" src="{{ asset('images/flags/spain-round.svg') }}"
                                     alt="flag" />
-                                <p>Spain</p>
+                                <p>{{ __('Spain') }}</p>
                             </div>
                             <div class="flex items-center space-x-2">
                                 <p class="text-sm-plus text-slate-800 dark:text-navy-100">
@@ -1011,7 +1011,7 @@
             <div class="col-span-12">
                 <div class="flex items-center justify-between">
                     <h2 class="text-base font-medium tracking-wide text-slate-700 line-clamp-1 dark:text-navy-100">
-                        Latest Requests
+                        {{ __('Latest Requests') }}
                     </h2>
                     <a href="{{ route('provider.requests.index') }}"
                         class="border-b border-dotted border-current pb-0.5 text-xs-plus font-medium text-primary outline-hidden transition-colors duration-300 hover:text-primary/70 focus:text-primary/70 dark:text-accent-light dark:hover:text-accent-light/70 dark:focus:text-accent-light/70 mr-2">
@@ -1023,7 +1023,7 @@
                                 <input x-effect="isInputActive === true && $nextTick(() => { $el.focus()});"
                                     :class="isInputActive ? 'w-32 lg:w-48' : 'w-0'"
                                     class="form-input bg-transparent px-1 text-right transition-all duration-100 placeholder:text-slate-500 dark:placeholder:text-navy-200"
-                                    placeholder="Search here..." type="text" />
+                                    placeholder="{{ __('Search here...') }}" type="text" />
                             </label>
                             <button @click="isInputActive = !isInputActive"
                                 class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
@@ -1050,7 +1050,7 @@
                                     <ul>
                                         <li>
                                             <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Action</a>
+                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
                                         </li>
                                         <li>
                                             <a href="#"
@@ -1151,7 +1151,7 @@
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                         <div class="badge space-x-2.5 text-xs-plus text-warning">
                                             <div class="size-2 rounded-full bg-current"></div>
-                                            <span>Await Auth</span>
+                                            <span>{{ __('Await Auth') }}</span>
                                         </div>
                                     </td>
 
@@ -1206,7 +1206,7 @@
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                         <div class="badge space-x-2.5 text-xs-plus text-success">
                                             <div class="size-2 rounded-full bg-current"></div>
-                                            <span>Paid</span>
+                                            <span>{{ __('Paid') }}</span>
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
@@ -1260,7 +1260,7 @@
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                         <div class="badge space-x-2.5 text-xs-plus text-success">
                                             <div class="size-2 rounded-full bg-current"></div>
-                                            <span>Paid</span>
+                                            <span>{{ __('Paid') }}</span>
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
@@ -1315,7 +1315,7 @@
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                         <div class="badge space-x-2.5 text-xs-plus text-success">
                                             <div class="size-2 rounded-full bg-current"></div>
-                                            <span>Paid</span>
+                                            <span>{{ __('Paid') }}</span>
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
@@ -1369,7 +1369,7 @@
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                         <div class="badge space-x-2.5 text-xs-plus text-error">
                                             <div class="size-2 rounded-full bg-current"></div>
-                                            <span>Failed</span>
+                                            <span>{{ __('Failed') }}</span>
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
@@ -1423,7 +1423,7 @@
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                         <div class="badge space-x-2.5 text-xs-plus text-warning">
                                             <div class="size-2 rounded-full bg-current"></div>
-                                            <span>Await Auth</span>
+                                            <span>{{ __('Await Auth') }}</span>
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
@@ -1478,7 +1478,7 @@
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                         <div class="badge space-x-2.5 text-xs-plus text-warning">
                                             <div class="size-2 rounded-full bg-current"></div>
-                                            <span>Await Auth</span>
+                                            <span>{{ __('Await Auth') }}</span>
                                         </div>
                                     </td>
 
@@ -1533,7 +1533,7 @@
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                         <div class="badge space-x-2.5 text-xs-plus text-success">
                                             <div class="size-2 rounded-full bg-current"></div>
-                                            <span>Paid</span>
+                                            <span>{{ __('Paid') }}</span>
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
@@ -1588,7 +1588,7 @@
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                         <div class="badge space-x-2.5 text-xs-plus text-success">
                                             <div class="size-2 rounded-full bg-current"></div>
-                                            <span>Paid</span>
+                                            <span>{{ __('Paid') }}</span>
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
@@ -1644,7 +1644,7 @@
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                         <div class="badge space-x-2.5 text-xs-plus text-success">
                                             <div class="size-2 rounded-full bg-current"></div>
-                                            <span>Paid</span>
+                                            <span>{{ __('Paid') }}</span>
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
@@ -1669,7 +1669,7 @@
                     <div
                         class="flex flex-col justify-between space-y-4 px-4 py-4 sm:flex-row sm:items-center sm:space-y-0 sm:px-5">
                         <div class="flex items-center space-x-2 text-xs-plus">
-                            <span>Show</span>
+                            <span>{{ __('Show') }}</span>
                             <label class="block">
                                 <select
                                     class="form-select rounded-full border border-slate-300 bg-white px-2 py-1 pr-6 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:bg-navy-700 dark:hover:border-navy-400 dark:focus:border-accent">
@@ -1678,7 +1678,7 @@
                                     <option>50</option>
                                 </select>
                             </label>
-                            <span>entries</span>
+                            <span>{{ __('entries') }}</span>
                         </div>
 
                         <ol class="pagination">

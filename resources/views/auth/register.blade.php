@@ -76,7 +76,7 @@
         <div x-show="membershipType === 'donor'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-cloak class="space-y-4 mt-4 p-4 rounded-lg border border-secondary/20 bg-secondary/10 dark:border-secondary/20 dark:bg-secondary/10">
             <div>
                 <x-input-label for="phone_number" :value="__('Phone Number (Saudi format)')" required />
-                <x-text-input id="phone_number" class="block mt-1 w-full" type="tel" name="phone_number" :value="old('phone_number')" placeholder="05XXXXXXXX"
+                <x-text-input id="phone_number" class="block mt-1 w-full" type="tel" name="phone_number" :value="old('phone_number')" placeholder="{{ __('Phone placeholder') }}"
                     maxlength="10"
                     x-bind:required="membershipType === 'donor'"
                     x-bind:disabled="membershipType !== 'donor'"
@@ -92,7 +92,7 @@
             {{-- Recipient phone — teal accent (same style as donor) --}}
             <div class="p-4 rounded-lg border border-primary/20 bg-primary/10 dark:border-accent/20 dark:bg-accent/10">
                 <x-input-label for="recipient_phone_number" :value="__('Phone Number (Saudi format)')" required />
-                <x-text-input id="recipient_phone_number" class="block mt-1 w-full" type="tel" name="phone_number" :value="old('phone_number')" placeholder="05XXXXXXXX"
+                <x-text-input id="recipient_phone_number" class="block mt-1 w-full" type="tel" name="phone_number" :value="old('phone_number')" placeholder="{{ __('Phone placeholder') }}"
                     maxlength="10"
                     x-bind:required="membershipType === 'recipient'"
                     x-bind:disabled="membershipType !== 'recipient'"
@@ -165,7 +165,7 @@
                     </div>
                 </div>
                 <div x-show="idPhotoCaptured" class="space-y-2">
-                    <img x-ref="previewImg" src="" alt="Captured" class="max-h-40 rounded-lg border border-gray-300" />
+                    <img x-ref="previewImg" src="" alt="{{ __('Captured') }}" class="max-h-40 rounded-lg border border-gray-300" />
                     <button type="button" x-on:click="retakePhoto()"
                         class="text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent font-medium text-sm">
                         {{ __('Retake photo') }}
@@ -266,7 +266,7 @@
                     </div>
                 </div>
                 <div x-show="addressPhotoCaptured" class="space-y-2">
-                    <img x-ref="addressPreviewImg" src="" alt="Address captured" class="max-h-40 rounded-lg border border-gray-300" />
+                    <img x-ref="addressPreviewImg" src="" alt="{{ __('Address captured') }}" class="max-h-40 rounded-lg border border-gray-300" />
                     <button type="button" x-on:click="retakeAddressPhoto()"
                         class="text-secondary hover:text-secondary-focus font-medium text-sm">
                         {{ __('Retake photo') }}

@@ -41,7 +41,7 @@
                     maxlength="6"
                     autocomplete="one-time-code"
                     class="block mt-1 w-full text-center text-lg tracking-[0.5em]"
-                    placeholder="000000"
+                    placeholder="{{ __('Verification code placeholder') }}"
                     autofocus
                     :value="old('otp')"
                 />
