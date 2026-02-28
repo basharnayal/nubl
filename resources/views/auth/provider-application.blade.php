@@ -2,14 +2,11 @@
     View My Application: single page, read-only, all data at once.
     Used by providers to review their submission and by admin for approval.
 --}}
-<x-guest-layout max-width="wide" :title="__('My Application')">
+<x-register-layout :title="__('My Application')" :heading="__('My Application')" :subheading="__('Your application (view only). Awaiting admin approval.')" max-width="wide">
     <div class="space-y-8 overflow-y-auto">
-        <div class="flex items-center justify-between">
-            <h1 class="text-xl font-bold text-slate-800 dark:text-navy-100">{{ __('My Application') }}</h1>
+        <div class="flex items-center justify-between mb-4">
             <a href="{{ route('approval.pending') }}" class="text-sm text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent font-medium">{{ __('Back to status') }}</a>
         </div>
-
-        <p class="text-sm text-slate-600 p-3 bg-primary/10 rounded-lg border border-primary/20 dark:bg-accent/10 dark:border-accent/20">{{ __('Your application (view only). Awaiting admin approval.') }}</p>
 
         @php
             $profile = $providerData['profile'] ?? null;
@@ -91,4 +88,4 @@
             <p class="text-sm text-gray-600">{{ __('Business license and ID/Iqama have been submitted.') }}</p>
         </section>
     </div>
-</x-guest-layout>
+</x-register-layout>

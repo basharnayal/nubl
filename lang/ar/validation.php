@@ -228,7 +228,7 @@ return [
         'number'                   => 'الرقم',
         'password'                 => 'كلمة المرور',
         'password_confirmation'    => 'تأكيد كلمة المرور',
-        'phone'                    => 'الهاتف',
+        'phone'                    => 'رقم الجوال',
         'photo'                    => 'الصورة',
         'portfolio'                => 'ملف الأعمال',
         'postal_code'              => 'الرمز البريدي',
