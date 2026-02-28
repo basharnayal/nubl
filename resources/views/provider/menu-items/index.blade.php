@@ -29,12 +29,13 @@
                             </div>
                         </div>
                         <div class="w-full sm:w-48">
-                            <select name="category"
-                                class="form-select form-select-lineone">
+                            <select name="category_id"
+                                class="form-select form-select-lineone ltr:pl-3 ltr:pr-9 rtl:pr-3 rtl:pl-10 rtl:bg-[position:left_0.5rem_center]"
+                                onfocus="if (typeof TomSelect !== 'undefined' && !this.tomselect) new TomSelect(this, {create: false})">
                                 <option value="">{{ __('All Categories') }}</option>
                                 @foreach($categories as $category)
-                                    <option value="{{ $category }}" {{ request('category') == $category ? 'selected' : '' }}>
-                                        {{ $category }}
+                                    <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
                                     </option>
                                 @endforeach
                             </select>
@@ -44,7 +45,7 @@
                                 class="rounded-lg bg-primary px-5 py-2.5 text-sm font-medium text-white hover:bg-primary-focus focus:ring-4 focus:ring-primary/30 dark:bg-accent dark:hover:bg-accent-focus dark:focus:ring-accent/30">
                                 {{ __('Filter') }}
                             </button>
-                            @if(request()->anyFilled(['search', 'category']))
+                            @if(request()->anyFilled(['search', 'category_id', 'category']))
                                 <a href="{{ route('provider.menu-items.index') }}"
                                     class="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-900 hover:bg-slate-50 focus:ring-4 focus:ring-slate-200 dark:border-navy-450 dark:bg-navy-700 dark:text-navy-100 dark:hover:bg-navy-600 dark:focus:ring-navy-500">
                                     {{ __('Reset') }}

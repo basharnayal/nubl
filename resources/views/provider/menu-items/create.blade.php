@@ -45,15 +45,17 @@
                                         class="form-input form-input-lineone">
                                 </div>
                                 <div>
-                                    <label for="category" class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Category') }} *</label>
-                                    <input type="text" id="category" name="category" value="{{ old('category') }}" required
-                                        list="categories-list"
-                                        class="form-input form-input-lineone">
-                                    <datalist id="categories-list">
+                                    <label for="category_id" class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Category') }} *</label>
+                                    <select id="category_id" name="category_id" required
+                                        class="form-select form-select-lineone w-full ltr:pl-3 ltr:pr-9 rtl:pr-3 rtl:pl-10 rtl:bg-[position:left_0.5rem_center]"
+                                        onfocus="if (typeof TomSelect !== 'undefined' && !this.tomselect) new TomSelect(this, {create: false})">
+                                        <option value="">{{ __('Select Category') }}</option>
                                         @foreach($categories as $cat)
-                                            <option value="{{ $cat }}">
+                                            <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
+                                                {{ $cat->name }}
+                                            </option>
                                         @endforeach
-                                    </datalist>
+                                    </select>
                                 </div>
                             </div>
 
@@ -70,11 +72,11 @@
                                 </div>
                             </div>
 
-                            <div class="flex items-center">
+                            <label class="inline-flex items-center space-x-2">
                                 <input id="is_active" name="is_active" type="checkbox" value="1" {{ old('is_active', true) ? 'checked' : '' }}
-                                    class="form-checkbox size-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-navy-450 dark:bg-navy-700 dark:checked:bg-primary">
-                                <label for="is_active" class="ml-2 text-sm font-medium text-slate-700 dark:text-navy-100">{{ __('Available for ordering') }}</label>
-                            </div>
+                                    class="form-checkbox is-basic size-5 rounded border-slate-400/70 checked:bg-primary checked:border-primary hover:border-primary focus:border-primary dark:border-navy-400 dark:checked:bg-accent dark:checked:border-accent dark:hover:border-accent dark:focus:border-accent">
+                                <span class="text-sm font-medium text-slate-700 dark:text-navy-100">{{ __('Available for ordering') }}</span>
+                            </label>
                         </div>
 
                         <div class="mt-6 flex items-center gap-4">

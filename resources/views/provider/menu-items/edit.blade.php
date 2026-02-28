@@ -8,7 +8,8 @@
 
                 <div class="card mt-3 p-6">
                     @if ($errors->any())
-                        <div class="mb-4 rounded-lg border border-error/30 bg-error/10 p-4 dark:bg-error/15 dark:border-error/20">
+                        <div
+                            class="mb-4 rounded-lg border border-error/30 bg-error/10 p-4 dark:bg-error/15 dark:border-error/20">
                             <ul class="list-disc list-inside text-sm text-error dark:text-error">
                                 @foreach ($errors->all() as $error)
                                     <li>{{ $error }}</li>
@@ -17,19 +18,24 @@
                         </div>
                     @endif
 
-                    <form method="POST" action="{{ route('provider.menu-items.update', $menuItem->id) }}" enctype="multipart/form-data">
+                    <form method="POST" action="{{ route('provider.menu-items.update', $menuItem->id) }}"
+                        enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
                         <div class="space-y-4">
                             <div>
-                                <label for="name" class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Item Name') }} *</label>
-                                <input type="text" id="name" name="name" value="{{ old('name', $menuItem->name) }}" required
-                                    class="form-input form-input-lineone">
+                                <label for="name"
+                                    class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Item Name') }}
+                                    *</label>
+                                <input type="text" id="name" name="name" value="{{ old('name', $menuItem->name) }}"
+                                    required class="form-input form-input-lineone">
                             </div>
 
                             <div>
-                                <label for="image" class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Image') }} ({{ __('Optional') }})</label>
+                                <label for="image"
+                                    class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Image') }}
+                                    ({{ __('Optional') }})</label>
                                 @if($menuItem->image_url)
                                     <div class="mb-2">
                                         <img src="{{ $menuItem->image_url }}" alt="{{ __('Current Image') }}"
@@ -38,58 +44,74 @@
                                 @endif
                                 <input type="file" id="image" name="image" accept="image/*"
                                     class="form-input form-input-lineone file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-white file:hover:bg-primary-focus dark:file:bg-accent dark:file:hover:bg-accent-focus">
-                                <p class="mt-1 text-xs text-slate-500 dark:text-navy-400">{{ __('SVG, PNG, JPG or GIF (MAX. 2MB).') }}</p>
+                                <p class="mt-1 text-xs text-slate-500 dark:text-navy-400">
+                                    {{ __('SVG, PNG, JPG or GIF (MAX. 2MB).') }}
+                                </p>
                             </div>
 
                             <div>
-                                <label for="description" class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Description') }}</label>
+                                <label for="description"
+                                    class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Description') }}</label>
                                 <textarea id="description" name="description" rows="3"
                                     class="form-textarea form-textarea-lineone">{{ old('description', $menuItem->description) }}</textarea>
                             </div>
 
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label for="price" class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Price') }} *</label>
-                                    <input type="number" step="0.01" id="price" name="price" value="{{ old('price', $menuItem->price) }}" required
+                                    <label for="price"
+                                        class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Price') }}
+                                        *</label>
+                                    <input type="number" step="0.01" id="price" name="price"
+                                        value="{{ old('price', $menuItem->price) }}" required
                                         class="form-input form-input-lineone">
                                 </div>
                                 <div>
-                                    <label for="category" class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Category') }} *</label>
-                                    <input type="text" id="category" name="category" value="{{ old('category', $menuItem->category) }}" required
-                                        list="categories-list"
-                                        class="form-input form-input-lineone">
-                                    <datalist id="categories-list">
+                                    <label for="category_id"
+                                        class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Category') }}
+                                        *</label>
+                                    <select id="category_id" name="category_id" required
+                                        class="form-select form-select-lineone w-full ltr:pl-3 ltr:pr-9 rtl:pr-3 rtl:pl-10 rtl:bg-[position:left_0.5rem_center]"
+                                        onfocus="if (typeof TomSelect !== 'undefined' && !this.tomselect) new TomSelect(this, {create: false})">
+                                        <option value="">{{ __('Select Category') }}</option>
                                         @foreach($categories as $cat)
-                                            <option value="{{ $cat }}">
+                                            <option value="{{ $cat->id }}" {{ old('category_id', $menuItem->category_id) == $cat->id ? 'selected' : '' }}>
+                                                {{ $cat->name }}
+                                            </option>
                                         @endforeach
-                                    </datalist>
+                                    </select>
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label for="sku" class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('SKU') }} ({{ __('Optional') }})</label>
+                                    <label for="sku"
+                                        class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('SKU') }}
+                                        ({{ __('Optional') }})</label>
                                     <input type="text" id="sku" name="sku" value="{{ old('sku', $menuItem->sku) }}"
                                         class="form-input form-input-lineone">
                                 </div>
                                 <div>
-                                    <label for="max_per_request" class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Max Per Request') }}</label>
-                                    <input type="number" id="max_per_request" name="max_per_request" value="{{ old('max_per_request', $menuItem->max_per_request) }}"
+                                    <label for="max_per_request"
+                                        class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Max Per Request') }}</label>
+                                    <input type="number" id="max_per_request" name="max_per_request"
+                                        value="{{ old('max_per_request', $menuItem->max_per_request) }}"
                                         class="form-input form-input-lineone">
                                 </div>
                             </div>
 
-                            <div class="flex items-center">
+                            <label class="inline-flex items-center space-x-2">
                                 <input id="is_active-hidden" type="hidden" name="is_active" value="0">
                                 <input id="is_active" name="is_active" type="checkbox" value="1" {{ old('is_active', $menuItem->is_active) ? 'checked' : '' }}
-                                    class="form-checkbox size-4 rounded border-slate-300 text-primary focus:ring-primary dark:border-navy-450 dark:bg-navy-700 dark:checked:bg-primary">
-                                <label for="is_active" class="ml-2 text-sm font-medium text-slate-700 dark:text-navy-100">{{ __('Available for ordering') }}</label>
-                            </div>
+                                    class="form-checkbox is-basic size-5 rounded border-slate-400/70 checked:bg-primary checked:border-primary hover:border-primary focus:border-primary dark:border-navy-400 dark:checked:bg-accent dark:checked:border-accent dark:hover:border-accent dark:focus:border-accent">
+                                <span
+                                    class="text-sm font-medium text-slate-700 dark:text-navy-100">{{ __('Available for ordering') }}</span>
+                            </label>
                         </div>
 
                         <div class="mt-6 flex items-center gap-4">
                             <x-lineone-button type="submit" variant="primary">{{ __('Update Item') }}</x-lineone-button>
-                            <x-lineone-button :href="route('provider.menu-items.index')" variant="slate" outline>{{ __('Cancel') }}</x-lineone-button>
+                            <x-lineone-button :href="route('provider.menu-items.index')" variant="slate"
+                                outline>{{ __('Cancel') }}</x-lineone-button>
                         </div>
                     </form>
                 </div>

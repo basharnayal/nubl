@@ -17,6 +17,7 @@ class ProviderMenuItem extends Model
         'category',
         'sku',
         'max_per_request',
+        'category_id',
         'is_active',
         'image_path',
     ];
@@ -37,6 +38,11 @@ class ProviderMenuItem extends Model
     public function provider(): BelongsTo
     {
         return $this->belongsTo(User::class, 'provider_id');
+    }
+
+    public function menuItemCategory(): BelongsTo
+    {
+        return $this->belongsTo(MenuItemCategory::class, 'category_id');
     }
 
     /**

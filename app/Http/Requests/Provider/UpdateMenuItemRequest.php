@@ -15,7 +15,26 @@ class UpdateMenuItemRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
-            'category' => 'required|string|max:50',
+            'category_id' => [
+                'required',
+                'exists:menu_item_categories,id',
+                function ($attribute, $value, $fail) {
+                    $provider = $this->user();
+                    $profile = $provider->providerProfile;
+                    $businessCategories = $profile?->business_category ?? ['Other'];
+                    $businessCategory = is_array($businessCategories) && count($businessCategories) > 0
+                        ? $businessCategories[0]
+                        : (is_string($businessCategories) ? $businessCategories : 'Other');
+
+                    if (strtolower($businessCategory) !== 'other') {
+                        $category = \App\Models\MenuItemCategory::find($value);
+                        if ($category && strtolower($category->business_category) !== strtolower($businessCategory) && strtolower($category->business_category) !== 'other') {
+                            $fail('The selected category does not match your business category.');
+                        }
+                    }
+                },
+            ],
+            'category' => 'nullable|string|max:50',
             'price' => 'required|numeric|min:0',
             'description' => 'nullable|string|max:2000',
             'sku' => 'nullable|string|max:100',

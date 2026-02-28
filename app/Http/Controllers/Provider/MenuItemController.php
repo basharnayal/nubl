@@ -15,7 +15,8 @@ class MenuItemController extends Controller
 {
     public function __construct(
         private AuditService $auditService
-    ) {}
+    ) {
+    }
 
     /**
      * Display a listing of the resource.
@@ -28,12 +29,26 @@ class MenuItemController extends Controller
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
-        if ($request->filled('category')) {
+        $provider = Auth::user();
+        $profile = $provider->providerProfile;
+        $businessCategories = $profile?->business_category ?? ['Other'];
+        $businessCategory = is_array($businessCategories) && count($businessCategories) > 0
+            ? $businessCategories[0]
+            : (is_string($businessCategories) ? $businessCategories : 'Other');
+
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        } elseif ($request->filled('category')) {
             $query->where('category', $request->category);
         }
 
         $menuItems = $query->latest()->paginate(10);
-        $categories = ProviderMenuItem::ownedBy(Auth::id())->distinct()->pluck('category');
+
+        $categoriesQuery = \App\Models\MenuItemCategory::where('is_active', true);
+        if ($businessCategory !== 'Other') {
+            $categoriesQuery->whereIn('business_category', [$businessCategory, 'Other']);
+        }
+        $categories = $categoriesQuery->orderBy('name')->get();
 
         return view('provider.menu-items.index', compact('menuItems', 'categories'));
     }
@@ -43,9 +58,19 @@ class MenuItemController extends Controller
      */
     public function create()
     {
-        // If categories are predefined in code, pass them here. 
-        // For now, allow free text or select from existing used categories.
-        $categories = ProviderMenuItem::ownedBy(Auth::id())->distinct()->pluck('category');
+        $provider = Auth::user();
+        $profile = $provider->providerProfile;
+        $businessCategories = $profile?->business_category ?? ['Other'];
+        $businessCategory = is_array($businessCategories) && count($businessCategories) > 0
+            ? $businessCategories[0]
+            : (is_string($businessCategories) ? $businessCategories : 'Other');
+
+        $categoriesQuery = \App\Models\MenuItemCategory::where('is_active', true);
+        if ($businessCategory !== 'Other') {
+            $categoriesQuery->whereIn('business_category', [$businessCategory, 'Other']);
+        }
+        $categories = $categoriesQuery->orderBy('name')->get();
+
         return view('provider.menu-items.create', compact('categories'));
     }
 
@@ -56,6 +81,11 @@ class MenuItemController extends Controller
     {
         $data = $request->validated();
         $data['provider_id'] = Auth::id();
+
+        $category = \App\Models\MenuItemCategory::find($data['category_id']);
+        if ($category) {
+            $data['category'] = $category->name;
+        }
 
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('menu-items', 'public');
@@ -80,7 +110,20 @@ class MenuItemController extends Controller
     public function edit($id)
     {
         $menuItem = ProviderMenuItem::ownedBy(Auth::id())->findOrFail($id);
-        $categories = ProviderMenuItem::ownedBy(Auth::id())->distinct()->pluck('category');
+
+        $provider = Auth::user();
+        $profile = $provider->providerProfile;
+        $businessCategories = $profile?->business_category ?? ['Other'];
+        $businessCategory = is_array($businessCategories) && count($businessCategories) > 0
+            ? $businessCategories[0]
+            : (is_string($businessCategories) ? $businessCategories : 'Other');
+
+        $categoriesQuery = \App\Models\MenuItemCategory::where('is_active', true);
+        if ($businessCategory !== 'Other') {
+            $categoriesQuery->whereIn('business_category', [$businessCategory, 'Other']);
+        }
+        $categories = $categoriesQuery->orderBy('name')->get();
+
         return view('provider.menu-items.edit', compact('menuItem', 'categories'));
     }
 
@@ -91,6 +134,11 @@ class MenuItemController extends Controller
     {
         $menuItem = ProviderMenuItem::ownedBy(Auth::id())->findOrFail($id);
         $data = $request->validated();
+
+        $category = \App\Models\MenuItemCategory::find($data['category_id']);
+        if ($category) {
+            $data['category'] = $category->name;
+        }
 
         if ($request->hasFile('image')) {
             // Delete old image if exists
