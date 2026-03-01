@@ -26,20 +26,23 @@
                             ];
                             $config = $statusConfig[$request->status] ?? ['class' => 'bg-slate-200/80 text-slate-600 dark:bg-navy-500 dark:text-navy-200', 'label' => str_replace('_', ' ', $request->status)];
                         @endphp
-                        <span class="badge mt-1 inline-block rounded-full px-3 py-1 text-lg font-bold {{ $config['class'] }}">
+                        <span
+                            class="badge mt-1 inline-block rounded-full px-3 py-1 text-lg font-bold {{ $config['class'] }}">
                             {{ $config['label'] }}
                         </span>
                     </div>
 
                     <div class="text-right">
                         @if($request->status === 'REDEEMABLE')
-                            <span class="inline-block text-sm text-slate-600 dark:text-navy-300">{{ __('Show this QR code to the provider to redeem') }}</span>
+                            <span
+                                class="inline-block text-sm text-slate-600 dark:text-navy-300">{{ __('Show this QR code to the provider to redeem') }}</span>
                         @endif
                     </div>
                 </div>
 
                 @if($request->rejection_reason_code)
-                    <div class="mt-4 rounded-lg border border-error/30 bg-error/10 p-4 dark:bg-error/15 dark:border-error/20">
+                    <div
+                        class="mt-4 rounded-lg border border-error/30 bg-error/10 p-4 dark:bg-error/15 dark:border-error/20">
                         <p class="font-bold text-slate-800 dark:text-navy-100">{{ __('Reason for Rejection') }}:</p>
                         <p class="text-slate-700 dark:text-navy-200">{{ $request->rejection_reason_code }}</p>
                         @if($request->rejection_reason_note)
@@ -50,11 +53,48 @@
 
                 @if($request->status === 'REDEEMABLE')
                     <div class="mt-6 flex flex-col items-center border-t border-slate-200 pt-6 dark:border-navy-600">
-                        <p class="mb-4 text-sm font-medium text-slate-700 dark:text-navy-100">{{ __('Show this QR code to the provider to redeem your order') }}</p>
-                        <div class="rounded-lg border-2 border-slate-200 bg-white p-4 dark:border-navy-600 dark:bg-navy-800">
-                            {!! app('qrcode')->size(200)->generate((string) $request->id) !!}
-                        </div>
-                        <p class="mt-3 text-xs text-slate-500 dark:text-navy-400">{{ __('Request #') }}{{ $request->id }}</p>
+                        @if($request->redemption)
+                            @if($request->redemption->status === 'REDEEMED')
+                                <div
+                                    class="rounded-lg border border-success/30 bg-success/10 p-4 text-center font-bold text-success dark:border-success/20 dark:bg-success/15">
+                                    {{ __('Order already redeemed.') }}
+                                </div>
+                            @elseif($request->redemption->status === 'EXPIRED' || $request->redemption->redeem_expires_at->isPast())
+                                <div
+                                    class="rounded-lg border border-error/30 bg-error/10 p-4 text-center font-bold text-error dark:border-error/20 dark:bg-error/15">
+                                    {{ __('QR Expired.') }}
+                                </div>
+                            @elseif($request->redemption->status === 'PENDING')
+                                @php
+                                    $rawTokenDecrypted = Illuminate\Support\Facades\Crypt::decryptString($request->redemption->token_ciphertext);
+                                @endphp
+                                <p class="mb-4 text-sm font-medium text-slate-700 dark:text-navy-100">
+                                    {{ __('Show this QR code to the provider to redeem your order') }}</p>
+                                <div class="flex flex-col items-center justify-center space-y-3">
+                                    <div
+                                        class="rounded-lg border-2 border-slate-200 bg-white p-4 dark:border-navy-600 dark:bg-navy-800">
+                                        {!! app('qrcode')->size(200)->generate($rawTokenDecrypted) !!}
+                                    </div>
+                                    <div
+                                        class="bg-slate-100 px-4 py-2 rounded-lg border border-slate-200 text-center dark:bg-navy-700 dark:border-navy-600 w-full max-w-[240px]">
+                                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1 dark:text-navy-300">
+                                            {{ __('Manual Code') }}</p>
+                                        <p
+                                            class="text-lg font-mono font-bold tracking-widest text-slate-800 select-all dark:text-navy-100">
+                                            {{ $rawTokenDecrypted }}</p>
+                                    </div>
+                                </div>
+                                <p class="mt-4 text-sm font-bold text-error">
+                                    {{ __('Expires in') }}:
+                                    {{ $request->redemption->redeem_expires_at->timezone('Asia/Riyadh')->diffForHumans() }}
+                                    ({{ $request->redemption->redeem_expires_at->timezone('Asia/Riyadh')->format('h:i A') }})
+                                </p>
+                                <p class="mt-1 text-xs text-slate-500 dark:text-navy-400">{{ __('Request #') }}{{ $request->id }}
+                                </p>
+                            @endif
+                        @else
+                            <p class="text-sm font-medium text-slate-500">{{ __('QR Code is being generated...') }}</p>
+                        @endif
                     </div>
                 @endif
             </div>
@@ -64,29 +104,47 @@
             {{-- Items List --}}
             <div class="md:col-span-2">
                 <div class="card p-6">
-                    <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Request Items') }}</h3>
+                    <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Request Items') }}
+                    </h3>
                     <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
                         <table class="is-hoverable w-full text-left">
                             <thead>
                                 <tr>
-                                    <th class="whitespace-nowrap rounded-tl-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Item') }}</th>
-                                    <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Quantity') }}</th>
-                                    <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Price') }}</th>
-                                    <th class="whitespace-nowrap rounded-tr-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Total') }}</th>
+                                    <th
+                                        class="whitespace-nowrap rounded-tl-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
+                                        {{ __('Item') }}</th>
+                                    <th
+                                        class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
+                                        {{ __('Quantity') }}</th>
+                                    <th
+                                        class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
+                                        {{ __('Price') }}</th>
+                                    <th
+                                        class="whitespace-nowrap rounded-tr-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
+                                        {{ __('Total') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($request->items as $item)
                                     <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
-                                        <td class="px-4 py-3 font-medium text-slate-700 dark:text-navy-100 sm:px-5">{{ $item->menuItem->name ?? __('Unknown Item') }}</td>
+                                        <td class="px-4 py-3 font-medium text-slate-700 dark:text-navy-100 sm:px-5">
+                                            {{ $item->menuItem->name ?? __('Unknown Item') }}</td>
                                         <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $item->quantity }}</td>
-                                        <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $item->price_snapshot }} {{ __('SAR') }}</td>
-                                        <td class="whitespace-nowrap px-4 py-3 font-bold text-slate-700 dark:text-navy-100 sm:px-5">{{ number_format($item->price_snapshot * $item->quantity, 2) }} {{ __('SAR') }}</td>
+                                        <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $item->price_snapshot }}
+                                            {{ __('SAR') }}</td>
+                                        <td
+                                            class="whitespace-nowrap px-4 py-3 font-bold text-slate-700 dark:text-navy-100 sm:px-5">
+                                            {{ number_format($item->price_snapshot * $item->quantity, 2) }} {{ __('SAR') }}
+                                        </td>
                                     </tr>
                                 @endforeach
-                                <tr class="border-t border-slate-200 bg-slate-100 font-bold dark:border-navy-600 dark:bg-navy-700/50">
-                                    <td colspan="3" class="px-4 py-3 text-right text-slate-700 dark:text-navy-100 sm:px-5">{{ __('Grand Total') }}</td>
-                                    <td class="whitespace-nowrap px-4 py-3 text-primary dark:text-accent-light sm:px-5">{{ number_format($request->reserved_amount, 2) }} {{ __('SAR') }}</td>
+                                <tr
+                                    class="border-t border-slate-200 bg-slate-100 font-bold dark:border-navy-600 dark:bg-navy-700/50">
+                                    <td colspan="3"
+                                        class="px-4 py-3 text-right text-slate-700 dark:text-navy-100 sm:px-5">
+                                        {{ __('Grand Total') }}</td>
+                                    <td class="whitespace-nowrap px-4 py-3 text-primary dark:text-accent-light sm:px-5">
+                                        {{ number_format($request->reserved_amount, 2) }} {{ __('SAR') }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -97,15 +155,18 @@
             {{-- Provider Info --}}
             <div class="h-fit">
                 <div class="card p-6">
-                    <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Provider Info') }}</h3>
+                    <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Provider Info') }}
+                    </h3>
                     <p class="font-medium text-slate-800 dark:text-navy-100">{{ $request->provider->name }}</p>
                     <p class="mt-1 text-sm text-slate-500 dark:text-navy-400">
                         {{ $request->provider->providerProfile->location ?? __('Location N/A') }}
                     </p>
 
                     <div class="mt-6 border-t border-slate-200 pt-6 dark:border-navy-600">
-                        <p class="text-xs text-slate-400 dark:text-navy-500">{{ __('Request ID') }}: {{ $request->id }}</p>
-                        <p class="text-xs text-slate-400 dark:text-navy-500">{{ __('Date') }}: {{ $request->created_at->format('Y-m-d H:i') }}</p>
+                        <p class="text-xs text-slate-400 dark:text-navy-500">{{ __('Request ID') }}: {{ $request->id }}
+                        </p>
+                        <p class="text-xs text-slate-400 dark:text-navy-500">{{ __('Date') }}:
+                            {{ $request->created_at->format('Y-m-d H:i') }}</p>
                     </div>
                 </div>
             </div>

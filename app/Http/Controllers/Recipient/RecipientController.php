@@ -83,7 +83,7 @@ class RecipientController extends Controller
      */
     public function providerMenu(Request $request, User $provider): View
     {
-        if ($provider->membership_type !== User::MEMBERSHIP_PROVIDER || ! $provider->providerProfile) {
+        if ($provider->membership_type !== User::MEMBERSHIP_PROVIDER || !$provider->providerProfile) {
             abort(404);
         }
 
