@@ -112,14 +112,6 @@ class SidebarPanel
                         'title' => __('Dashboard'),
                         'route_name' => 'donor.dashboard',
                     ],
-                    'donor_donations' => [
-                        'title' => __('My Donations'),
-                        'route_name' => '',
-                    ],
-                    'donor_history' => [
-                        'title' => __('Donation History'),
-                        'route_name' => '',
-                    ],
                     'donor_statistics' => [
                         'title' => __('Statistics'),
                         'route_name' => '',
