@@ -18,7 +18,8 @@ use App\Models\Request as RequestModel;
 class SystemWalletService
 {
     public function __construct(
-        private AuditService $auditService
+        private AuditService $auditService,
+        private AllocationService $allocationService
     ) {}
     /**
      * Add funds to the system wallet when a donor's payment is confirmed.
@@ -31,6 +32,11 @@ class SystemWalletService
      */
     public function addFundsFromDonation(float $amount, int $donorId, ?int $paymentId = null): void
     {
+        // Idempotency: do not create duplicate fund_transaction for same payment
+        if ($paymentId !== null && FundTransaction::where('payment_id', $paymentId)->exists()) {
+            return;
+        }
+
         // 1. Get the default system wallet
         $systemWallet = Ewallet::where('owner_type', 'SYSTEM')->firstOrFail();
 
@@ -97,6 +103,8 @@ class SystemWalletService
         if (! $this->hasSufficientBalance($amount)) {
             throw new \RuntimeException('City fund has insufficient balance for this request.');
         }
+
+        $this->allocationService->allocateToRequest($request->id, $amount);
 
         $systemWallet = $this->getSystemWallet();
 

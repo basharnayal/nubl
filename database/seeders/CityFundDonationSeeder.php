@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Http\Services\SystemWalletService;
 use App\Models\FundTransaction;
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -36,7 +37,14 @@ class CityFundDonationSeeder extends Seeder
             $donor->assignRole('donor');
         }
 
+        $payment = Payment::create([
+            'sponsor_id' => $donor->id,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'status' => Payment::STATUS_SUCCEEDED,
+            'amount' => 10000,
+        ]);
+
         $service = app(SystemWalletService::class);
-        $service->addFundsFromDonation(10000, (int) $donor->id, null);
+        $service->addFundsFromDonation(10000, (int) $donor->id, $payment->id);
     }
 }

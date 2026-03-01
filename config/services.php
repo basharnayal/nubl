@@ -40,4 +40,10 @@ return [
         'sender' => env('TAQNYAT_SENDER_NAME', 'NUBL'),
     ],
 
+    'myfatoorah' => [
+        'api_key' => env('MYFATOORAH_API_KEY'),
+        'country_code' => env('MYFATOORAH_COUNTRY_CODE', 'SAU'),
+        'is_test' => env('MYFATOORAH_IS_TEST', true),
+    ],
+
 ];

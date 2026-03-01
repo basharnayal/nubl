@@ -4,6 +4,7 @@ namespace Tests\Feature\Provider;
 
 use App\Models\Ewallet;
 use App\Models\FundTransaction;
+use App\Models\Payment;
 use App\Models\ProviderMenuItem;
 use App\Models\ProviderProfile;
 use App\Models\Request as RequestModel;
@@ -37,20 +38,27 @@ class ProviderRequestFlowTest extends TestCase
         $this->recipient = User::factory()->create(['status' => User::STATUS_ACTIVE]);
         $this->recipient->assignRole('recipient');
 
-        // System wallet (city fund) - balance calculated from fund_transactions (sum IN - sum OUT)
+        // System wallet (city fund) - balance from fund_transactions; allocation requires Payment records
         $systemWallet = Ewallet::create([
             'owner_type' => 'SYSTEM',
             'owner_id' => null,
             'balance' => 0,
             'status' => true,
         ]);
+        $donor = User::factory()->create();
+        $payment = Payment::create([
+            'sponsor_id' => $donor->id,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'status' => Payment::STATUS_SUCCEEDED,
+            'amount' => 100,
+        ]);
         FundTransaction::create([
             'wallet_id' => $systemWallet->id,
-            'sponsor_id' => null,
+            'sponsor_id' => $donor->id,
             'source' => FundTransaction::SOURCE_DONATION,
             'amount' => 100,
             'direction' => FundTransaction::DIRECTION_IN,
-            'payment_id' => null,
+            'payment_id' => $payment->id,
             'request_id' => null,
             'order_redemption_id' => null,
         ]);

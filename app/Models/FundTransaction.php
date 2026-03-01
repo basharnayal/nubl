@@ -47,4 +47,9 @@ class FundTransaction extends Model
     {
         return $this->belongsTo(Request::class);
     }
+
+    public function payment(): BelongsTo
+    {
+        return $this->belongsTo(Payment::class);
+    }
 }

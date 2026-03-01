@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "54bceb39a9785f64c9b99216186d9b15",
+    "content-hash": "dfb583c27fe6608158bf0115a3220196",
     "packages": [
         {
             "name": "archtechx/enums",
@@ -4216,6 +4216,67 @@
                 }
             ],
             "time": "2026-01-02T08:56:05+00:00"
+        },
+        {
+            "name": "myfatoorah/library",
+            "version": "2.1.4",
+            "source": {
+                "type": "git",
+                "url": "https://dev.azure.com/myfatoorahsc/Public-Repo/_git/Library",
+                "reference": "cfb0b664bf8a39c9de71b8e44574532bc479f395"
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "php": ">=7"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^9"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "autoload.php"
+                ],
+                "psr-4": {
+                    "MyFatoorah\\Library\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-only"
+            ],
+            "authors": [
+                {
+                    "name": "MyFatoorah Plugin Team",
+                    "email": "plugins@myfatoorah.com"
+                },
+                {
+                    "name": "Nermeen Shoman",
+                    "email": "nshoman@myfatoorah.com",
+                    "role": "Senior Software Engineer"
+                },
+                {
+                    "name": "Rasha Saeed",
+                    "email": "rsaeed@myfatoorah.com",
+                    "role": "Senior Software Engineer"
+                }
+            ],
+            "description": "MyFatoorah PHP Library",
+            "homepage": "https://myfatoorah.com/",
+            "keywords": [
+                "My Fatoorah",
+                "api",
+                "commerce",
+                "fatoorah",
+                "gateway",
+                "library",
+                "myfatoorah",
+                "payment",
+                "shipping"
+            ],
+            "time": "2024-12-02T13:34:57+00:00"
         },
         {
             "name": "nesbot/carbon",
@@ -11247,5 +11308,5 @@
         "php": "^8.2"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "plugin-api-version": "2.6.0"
 }

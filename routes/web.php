@@ -134,7 +134,16 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:recipi
 Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:donor']))->prefix('donor')->name('donor.')
     ->group(function () {
         Route::get('/dashboard', [\App\Http\Controllers\Donor\DonorDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/donations/new', [\App\Http\Controllers\Donor\DonationController::class, 'create'])->name('donations.new');
+        Route::get('/donations', [\App\Http\Controllers\Donor\DonationController::class, 'index'])->name('donations.index');
+        Route::post('/payments/initiate', [\App\Http\Controllers\Donor\DonationController::class, 'initiate'])->name('payments.initiate');
+        Route::get('/payments/success', [\App\Http\Controllers\PaymentCallbackController::class, 'success'])->name('payments.success');
+        Route::get('/payments/failed', [\App\Http\Controllers\PaymentCallbackController::class, 'failed'])->name('payments.failed');
     });
+
+// Payment callback (no auth — MyFatoorah redirects here)
+Route::get('/payments/callback', [\App\Http\Controllers\PaymentCallbackController::class, 'callback'])->name('payments.callback');
+Route::get('/payments/error', [\App\Http\Controllers\PaymentCallbackController::class, 'error'])->name('payments.error');
 
 
 

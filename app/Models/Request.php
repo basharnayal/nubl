@@ -46,6 +46,14 @@ class Request extends Model
         return $this->hasMany(RequestItem::class);
     }
 
+    /**
+     * Get the request payment links (allocation from payments to this request).
+     */
+    public function requestPaymentLinks(): HasMany
+    {
+        return $this->hasMany(RequestPaymentLink::class);
+    }
+
     // Scopes
     public function scopeForProvider($query, $providerId)
     {

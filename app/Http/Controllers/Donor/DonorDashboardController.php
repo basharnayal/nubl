@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Donor;
 
 use App\Http\Controllers\Controller;
+use App\Models\Payment;
 use App\Models\Request as RequestModel;
+use App\Models\RequestPaymentLink;
 use Carbon\Carbon;
 
 class DonorDashboardController extends Controller
@@ -15,13 +17,35 @@ class DonorDashboardController extends Controller
      */
     public function index()
     {
-        // Donor-specific impact (placeholder until donations table exists)
-        $donorTotalDonated = 0;
-        $donorRequestsFunded = 0;
-        $donorBeneficiariesHelped = 0;
-        $donorLastContribution = null;
-        $donorImpactTimeline = [];
-        $donorChartData = $this->donorImpactChartPlaceholder();
+        $sponsorId = auth()->id();
+
+        $donorTotalDonated = (float) Payment::where('sponsor_id', $sponsorId)
+            ->where('status', Payment::STATUS_SUCCEEDED)
+            ->sum('amount');
+
+        $donorPaymentIds = Payment::where('sponsor_id', $sponsorId)
+            ->where('status', Payment::STATUS_SUCCEEDED)
+            ->pluck('id');
+
+        $donorRequestsFunded = RequestPaymentLink::whereIn('payment_id', $donorPaymentIds)
+            ->distinct('request_id')
+            ->count('request_id');
+
+        $donorRequestIds = RequestPaymentLink::whereIn('payment_id', $donorPaymentIds)
+            ->pluck('request_id')
+            ->unique();
+
+        $donorBeneficiariesHelped = RequestModel::whereIn('id', $donorRequestIds)
+            ->distinct('recipient_id')
+            ->count('recipient_id');
+
+        $donorLastContribution = Payment::where('sponsor_id', $sponsorId)
+            ->where('status', Payment::STATUS_SUCCEEDED)
+            ->latest('created_at')
+            ->first()?->created_at;
+
+        $donorImpactTimeline = $this->donorImpactTimeline($donorPaymentIds);
+        $donorChartData = $this->donorImpactChartData($donorPaymentIds);
 
         // Platform need (real-time, encouraging)
         $pendingRequestsCount = RequestModel::whereIn('status', ['REQUESTED', 'APPROVED', 'REDEEMABLE'])
@@ -35,7 +59,6 @@ class DonorDashboardController extends Controller
             ? min(100, (int) (($fulfilledCount / max(1, $fulfilledCount + $pendingRequestsCount)) * 100))
             : 0;
 
-        // Transparency: how donor's amounts helped (placeholder - donor-specific when donations linked)
         $donorTransparency = [
             'requests_from_your_funds' => $donorRequestsFunded,
             'meals_items_delivered' => 0,
@@ -58,18 +81,46 @@ class DonorDashboardController extends Controller
         ));
     }
 
-    /**
-     * Placeholder chart data for last 24 months (donor impact).
-     */
-    private function donorImpactChartPlaceholder(): array
+    private function donorImpactTimeline($donorPaymentIds): array
+    {
+        if ($donorPaymentIds->isEmpty()) {
+            return [];
+        }
+
+        return RequestPaymentLink::whereIn('payment_id', $donorPaymentIds)
+            ->with('request')
+            ->latest()
+            ->limit(10)
+            ->get()
+            ->map(fn ($link) => [
+                'request_id' => $link->request_id,
+                'amount' => $link->amount,
+                'created_at' => $link->created_at,
+            ])
+            ->toArray();
+    }
+
+    private function donorImpactChartData($donorPaymentIds): array
     {
         $categories = [];
         $series = [];
+
         for ($i = 23; $i >= 0; $i--) {
             $date = Carbon::now()->subMonths($i);
             $categories[] = $date->translatedFormat('M Y');
-            $series[] = 0; // Replace with real donor data when donations linked
+
+            if ($donorPaymentIds->isEmpty()) {
+                $series[] = 0;
+            } else {
+                $monthTotal = Payment::whereIn('id', $donorPaymentIds)
+                    ->where('status', Payment::STATUS_SUCCEEDED)
+                    ->whereYear('created_at', $date->year)
+                    ->whereMonth('created_at', $date->month)
+                    ->sum('amount');
+                $series[] = (float) $monthTotal;
+            }
         }
+
         return [
             'categories' => $categories,
             'series' => $series,
