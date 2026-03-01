@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Request extends Model
 {
@@ -44,6 +45,14 @@ class Request extends Model
     public function items(): HasMany
     {
         return $this->hasMany(RequestItem::class);
+    }
+
+    /**
+     * Get the order redemption for the request.
+     */
+    public function redemption(): HasOne
+    {
+        return $this->hasOne(OrderRedemption::class, 'request_id');
     }
 
     // Scopes

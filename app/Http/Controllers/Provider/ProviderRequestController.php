@@ -12,7 +12,8 @@ class ProviderRequestController extends Controller
 {
     public function __construct(
         private SystemWalletService $systemWalletService
-    ) {}
+    ) {
+    }
 
     /**
      * Display a listing of the resource.
@@ -68,7 +69,7 @@ class ProviderRequestController extends Controller
             } elseif ($action === 'approve') {
                 // Provider accepts using City Fund = deducted from city fund, status REDEEMABLE (recipient can redeem)
                 $amount = (float) $requestModel->reserved_amount;
-                if (! $this->systemWalletService->hasSufficientBalance($amount)) {
+                if (!$this->systemWalletService->hasSufficientBalance($amount)) {
                     return back()->with('error', __('City fund has insufficient balance for this request.'));
                 }
                 $this->systemWalletService->transferToProviderForRequest($requestModel);
@@ -76,6 +77,7 @@ class ProviderRequestController extends Controller
                     'status' => 'REDEEMABLE',
                     'funding_source' => 'CITY_FUND',
                 ]);
+                \App\Http\Services\RedemptionService::generateForRequest($requestModel);
             } elseif ($action === 'reject') {
                 $requestModel->update([
                     'status' => 'REJECTED',

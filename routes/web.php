@@ -105,6 +105,13 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:provid
 
         Route::get('/profile/edit', [\App\Http\Controllers\Provider\ProviderProfileController::class, 'edit'])
             ->name('profile.edit');
+
+        // QR Redemption (ECS-111 & ECS-112)
+        Route::get('/qr/scan', [\App\Http\Controllers\Provider\ProviderQrController::class, 'scan'])->name('qr.scan');
+        Route::post('/qr/redeem', [\App\Http\Controllers\Provider\ProviderQrController::class, 'redeem'])->name('qr.redeem');
+
+        Route::get('/redemptions/{redemption}/proof', [\App\Http\Controllers\Provider\ProviderProofController::class, 'index'])->name('proof.index');
+        Route::post('/redemptions/{redemption}/proof', [\App\Http\Controllers\Provider\ProviderProofController::class, 'store'])->name('proof.store');
     });
 
 // Recipient routes
