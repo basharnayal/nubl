@@ -9,6 +9,7 @@ use App\Models\ProviderProfile;
 use App\Models\Request as RequestModel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -97,7 +98,7 @@ class ProviderRequestFlowTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function provider_can_view_incoming_requests()
     {
         $response = $this->actingAs($this->provider)
@@ -108,7 +109,7 @@ class ProviderRequestFlowTest extends TestCase
         $response->assertSee('50.00');
     }
 
-    /** @test */
+    #[Test]
     public function provider_can_adopt_request()
     {
         $response = $this->actingAs($this->provider)
@@ -126,7 +127,7 @@ class ProviderRequestFlowTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function provider_can_approve_request()
     {
         $response = $this->actingAs($this->provider)
@@ -144,7 +145,7 @@ class ProviderRequestFlowTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function provider_cannot_approve_when_city_fund_has_insufficient_balance()
     {
         // Drain system wallet to 10 SAR (insufficient for 50 SAR request)
@@ -176,7 +177,7 @@ class ProviderRequestFlowTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function provider_can_reject_request_with_reason()
     {
         $response = $this->actingAs($this->provider)
@@ -196,7 +197,7 @@ class ProviderRequestFlowTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function provider_cannot_act_on_non_pending_request()
     {
         $this->request->update(['status' => 'FULFILLED']);
@@ -216,7 +217,7 @@ class ProviderRequestFlowTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function provider_cannot_view_others_requests()
     {
         $otherProvider = User::factory()->create();

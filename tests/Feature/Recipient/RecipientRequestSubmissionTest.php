@@ -8,6 +8,7 @@ use App\Models\Request as RequestModel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -77,7 +78,7 @@ class RecipientRequestSubmissionTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function recipient_can_submit_multi_item_request_successfully()
     {
         $response = $this->actingAs($this->recipient)
@@ -119,7 +120,7 @@ class RecipientRequestSubmissionTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function weekly_allowance_exceeded_blocks_creation()
     {
         Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00')); // Wednesday
@@ -152,7 +153,7 @@ class RecipientRequestSubmissionTest extends TestCase
         $this->assertDatabaseCount('requests', 1); // Only the setup one
     }
 
-    /** @test */
+    #[Test]
     public function rejected_request_does_not_count_towards_allowance()
     {
         Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00'));
@@ -179,7 +180,7 @@ class RecipientRequestSubmissionTest extends TestCase
         $this->assertDatabaseCount('requests', 2);
     }
 
-    /** @test */
+    #[Test]
     public function adopted_request_does_not_count_towards_allowance()
     {
         Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00'));
@@ -206,7 +207,7 @@ class RecipientRequestSubmissionTest extends TestCase
         $this->assertDatabaseCount('requests', 2);
     }
 
-    /** @test */
+    #[Test]
     public function cannot_request_menu_item_not_belonging_to_provider()
     {
         $otherProvider = User::factory()->create(['status' => User::STATUS_ACTIVE, 'is_active' => true]);

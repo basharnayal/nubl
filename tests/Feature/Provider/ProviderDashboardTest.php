@@ -4,6 +4,7 @@ namespace Tests\Feature\Provider;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -25,7 +26,7 @@ class ProviderDashboardTest extends TestCase
         $this->provider->assignRole('provider');
     }
 
-    /** @test */
+    #[Test]
     public function provider_can_view_active_status_on_dashboard()
     {
         $response = $this->actingAs($this->provider)
@@ -37,7 +38,7 @@ class ProviderDashboardTest extends TestCase
         $response->assertSee('Pause Store');
     }
 
-    /** @test */
+    #[Test]
     public function provider_can_toggle_active_status()
     {
         // Initial state: Active

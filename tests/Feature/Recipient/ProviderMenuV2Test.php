@@ -7,6 +7,7 @@ use App\Models\Request as RequestModel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -63,7 +64,7 @@ class ProviderMenuV2Test extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function provider_menu_page_loads_with_correct_weekly_usage_v2()
     {
         Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00')); // Wednesday

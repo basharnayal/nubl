@@ -6,6 +6,7 @@ use App\Models\ProviderMenuItem;
 use App\Models\Request as RequestModel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -78,7 +79,7 @@ class RecipientInterfaceTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function recipient_can_view_requests_index()
     {
         $response = $this->actingAs($this->recipient)
@@ -91,7 +92,7 @@ class RecipientInterfaceTest extends TestCase
         $response->assertSee('SAR');
     }
 
-    /** @test */
+    #[Test]
     public function recipient_can_view_request_details()
     {
         $response = $this->actingAs($this->recipient)
@@ -103,7 +104,7 @@ class RecipientInterfaceTest extends TestCase
         $response->assertSee('50.00 SAR');
     }
 
-    /** @test */
+    #[Test]
     public function recipient_can_view_providers_list()
     {
         $response = $this->actingAs($this->recipient)

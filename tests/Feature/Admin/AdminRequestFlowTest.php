@@ -6,6 +6,7 @@ use App\Models\ProviderMenuItem;
 use App\Models\Request as RequestModel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -61,7 +62,7 @@ class AdminRequestFlowTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_view_request_queue()
     {
         $response = $this->actingAs($this->admin)
@@ -72,7 +73,7 @@ class AdminRequestFlowTest extends TestCase
         $response->assertSee($this->recipient->name);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_approve_request()
     {
         $response = $this->actingAs($this->admin)
@@ -88,7 +89,7 @@ class AdminRequestFlowTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_can_reject_request()
     {
         $response = $this->actingAs($this->admin)
@@ -107,7 +108,7 @@ class AdminRequestFlowTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function admin_cannot_act_on_non_admin_pending_request()
     {
         $this->request->update(['status' => 'REQUESTED']); // Provider level
