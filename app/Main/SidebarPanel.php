@@ -58,6 +58,10 @@ class SidebarPanel
                         'title' => __('Fulfillments'),
                         'route_name' => 'provider.requests.index',
                     ],
+                    'provider_qr' => [
+                        'title' => __('Scan QR'),
+                        'route_name' => 'provider.qr.scan',
+                    ],
                     'provider_menu' => [
                         'title' => __('Inventory'),
                         'route_name' => 'provider.menu-items.index',

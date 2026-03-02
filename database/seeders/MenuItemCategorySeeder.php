@@ -34,6 +34,7 @@ class MenuItemCategorySeeder extends Seeder
                 'Cold Drinks',
                 'Fresh Juices'
             ],
+
             'Catering' => [
                 'Platters',
                 'Party Trays',
