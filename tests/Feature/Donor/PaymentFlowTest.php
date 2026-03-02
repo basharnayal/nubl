@@ -7,6 +7,7 @@ use App\Models\Ewallet;
 use App\Models\FundTransaction;
 use App\Models\Payment;
 use App\Models\User;
+use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Role;
@@ -68,6 +69,14 @@ class PaymentFlowTest extends TestCase
         $this->assertTrue(
             FundTransaction::where('payment_id', $payment->id)->exists(),
             'FundTransaction IN should exist for succeeded payment'
+        );
+
+        $this->assertTrue(
+            DatabaseNotification::where('notifiable_id', $this->donor->id)
+                ->where('notifiable_type', User::class)
+                ->whereJsonContains('data->type', 'donation_receipt')
+                ->exists(),
+            'Donation receipt notification should be created for donor'
         );
     }
 

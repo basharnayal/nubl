@@ -1,24 +1,52 @@
 <x-app-layout title="{{ __('Payment Successful') }}" is-header-blur="true">
     <div class="pt-4">
         <div class="grid grid-cols-1 gap-4 sm:gap-5 lg:gap-6">
-            <div class="max-w-2xl">
-                <div class="card p-8 text-center">
-                    <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-success/10">
-                        <i class="fa-solid fa-circle-check text-3xl text-success"></i>
-                    </div>
-                    <h2 class="text-xl font-semibold text-slate-700 dark:text-navy-100">
-                        {{ __('Thank you! Your donation was successful.') }}
-                    </h2>
-                    @if ($payment)
-                        <p class="mt-2 text-slate-600 dark:text-navy-300">
-                            {{ __('Amount') }}: {{ number_format($payment->amount, 2) }} {{ __('SAR') }}
+            <div class="mx-auto max-w-2xl">
+                <div class="card overflow-hidden">
+                    {{-- Success header --}}
+                    <div class="border-b border-slate-200 bg-success/5 px-6 py-6 text-center dark:border-navy-600 dark:bg-success/10">
+                        <div class="mx-auto mb-4 flex size-16 items-center justify-center rounded-full bg-success/10">
+                            <i class="fa-solid fa-circle-check text-3xl text-success"></i>
+                        </div>
+                        <h2 class="text-xl font-semibold text-slate-700 dark:text-navy-100">
+                            {{ __('Thank you! Your donation was successful.') }}
+                        </h2>
+                        <p class="mt-2 text-sm text-slate-500 dark:text-navy-400">
+                            {{ __('Your contribution has been added to the city fund and will help those in need.') }}
                         </p>
+                    </div>
+
+                    {{-- Receipt summary --}}
+                    @if ($payment)
+                        <div class="border-b border-slate-200 px-6 py-5 dark:border-navy-600">
+                            <h3 class="mb-4 font-medium text-slate-700 dark:text-navy-100">{{ __('Donation Receipt') }}</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500 dark:text-navy-400">{{ __('Amount') }}</span>
+                                    <span class="font-semibold text-slate-700 dark:text-navy-100">{{ number_format($payment->amount, 2) }} {{ __('SAR') }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500 dark:text-navy-400">{{ __('Date') }}</span>
+                                    <span class="text-slate-700 dark:text-navy-100">{{ $payment->created_at->translatedFormat('M d, Y H:i') }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500 dark:text-navy-400">{{ __('Receipt No.') }}</span>
+                                    <span class="font-mono text-slate-700 dark:text-navy-100">#{{ $payment->id }}</span>
+                                </div>
+                            </div>
+                        </div>
                     @endif
-                    <p class="mt-4 text-sm text-slate-500 dark:text-navy-400">
-                        {{ __('Your contribution has been added to the city fund and will help those in need.') }}
-                    </p>
-                    <div class="mt-6">
-                        <x-lineone-button :href="route('donor.dashboard')" variant="primary">{{ __('Back to Dashboard') }}</x-lineone-button>
+
+                    {{-- Actions --}}
+                    <div class="flex flex-wrap justify-center gap-3 px-6 py-6">
+                        @if ($payment)
+                            <x-lineone-button :href="route('donor.donations.receipt', $payment)" variant="primary">
+                                <i class="fa-solid fa-receipt mr-2"></i>
+                                {{ __('View Full Receipt') }}
+                            </x-lineone-button>
+                        @endif
+                        <x-lineone-button :href="route('donor.donations.index')" variant="slate" outline>{{ __('My Donations') }}</x-lineone-button>
+                        <x-lineone-button :href="route('donor.dashboard')" variant="slate" outline>{{ __('Back to Dashboard') }}</x-lineone-button>
                     </div>
                 </div>
             </div>

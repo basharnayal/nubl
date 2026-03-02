@@ -4,6 +4,7 @@ namespace App\Http\Services;
 
 use App\Models\FundTransaction;
 use App\Models\Payment;
+use App\Notifications\DonationReceiptNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -139,6 +140,12 @@ class PaymentService
                     $payment->sponsor_id,
                     $payment->id
                 );
+
+                // FR-3.2: Generate receipt and send via internal notification and email
+                $donor = $payment->sponsor;
+                if ($donor) {
+                    $donor->notify(new DonationReceiptNotification($payment));
+                }
 
                 $this->auditService->log('payment', 'succeeded', [
                     'payment_id' => $payment->id,

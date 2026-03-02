@@ -143,10 +143,18 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:donor'
         Route::get('/dashboard', [\App\Http\Controllers\Donor\DonorDashboardController::class, 'index'])->name('dashboard');
         Route::get('/donations/new', [\App\Http\Controllers\Donor\DonationController::class, 'create'])->name('donations.new');
         Route::get('/donations', [\App\Http\Controllers\Donor\DonationController::class, 'index'])->name('donations.index');
+        Route::get('/donations/{payment}/receipt', [\App\Http\Controllers\Donor\DonationController::class, 'receipt'])->name('donations.receipt');
         Route::post('/payments/initiate', [\App\Http\Controllers\Donor\DonationController::class, 'initiate'])->name('payments.initiate');
         Route::get('/payments/success', [\App\Http\Controllers\PaymentCallbackController::class, 'success'])->name('payments.success');
         Route::get('/payments/failed', [\App\Http\Controllers\PaymentCallbackController::class, 'failed'])->name('payments.failed');
     });
+
+// Notifications (auth required — for real-time polling)
+Route::middleware($authMiddleware)->group(function () {
+    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{notification}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+});
 
 // Payment callback (no auth — MyFatoorah redirects here)
 Route::get('/payments/callback', [\App\Http\Controllers\PaymentCallbackController::class, 'callback'])->name('payments.callback');

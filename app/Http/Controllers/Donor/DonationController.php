@@ -24,6 +24,18 @@ class DonationController extends Controller
         return view('donor.donations.index', compact('payments'));
     }
 
+    public function receipt(Payment $payment)
+    {
+        if ($payment->sponsor_id !== auth()->id()) {
+            abort(403);
+        }
+        if ($payment->status !== Payment::STATUS_SUCCEEDED) {
+            abort(404);
+        }
+
+        return view('donor.donations.receipt', compact('payment'));
+    }
+
     public function create()
     {
         return view('donor.donations.new');

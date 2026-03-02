@@ -9,7 +9,7 @@
                 <div class="card mt-3 p-6">
                     @forelse ($payments as $payment)
                         <div class="border-b border-slate-200 py-4 last:border-0 dark:border-navy-600">
-                            <div class="flex items-center justify-between">
+                            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                                 <div>
                                     <p class="font-medium text-slate-700 dark:text-navy-100">
                                         {{ number_format($payment->amount, 2) }} {{ __('SAR') }}
@@ -17,14 +17,16 @@
                                     <p class="text-sm text-slate-500 dark:text-navy-400">
                                         {{ $payment->created_at->translatedFormat('M d, Y H:i') }}
                                     </p>
-                                </div>
-                                @if ($payment->requestPaymentLinks->isNotEmpty())
-                                    <div class="text-right">
-                                        <p class="text-sm font-medium text-slate-600 dark:text-navy-300">
+                                    @if ($payment->requestPaymentLinks->isNotEmpty())
+                                        <p class="mt-1 text-sm text-slate-600 dark:text-navy-300">
                                             {{ __('Contributed to') }} {{ $payment->requestPaymentLinks->count() }} {{ __('request(s)') }}
                                         </p>
-                                    </div>
-                                @endif
+                                    @endif
+                                </div>
+                                <a href="{{ route('donor.donations.receipt', $payment) }}" class="btn inline-flex shrink-0 items-center gap-2 border border-primary bg-transparent px-4 py-2 text-primary hover:bg-primary/10 dark:border-accent dark:text-accent dark:hover:bg-accent/10">
+                                    <i class="fa-solid fa-receipt"></i>
+                                    <span>{{ __('View Receipt') }}</span>
+                                </a>
                             </div>
                         </div>
                     @empty

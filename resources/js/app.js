@@ -28,6 +28,7 @@ import store from './store';
 import breakpoints from './utils/breakpoints';
 import usePopper from './components/usePopper';
 import accordionItem from './components/accordionItem';
+import notificationPanel from './components/notificationPanel';
 import tooltip from './directives/tooltip';
 import inputMask from './directives/inputMask';
 import notification from './magics/notification';
@@ -67,6 +68,7 @@ Alpine.store('sidebarAccordion', { expandedItem: null });
 
 Alpine.data('usePopper', usePopper);
 Alpine.data('accordionItem', accordionItem);
+Alpine.data('notificationPanel', notificationPanel);
 
 breakpoints.init();
 
