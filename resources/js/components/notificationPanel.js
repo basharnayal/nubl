@@ -28,24 +28,6 @@ export default function notificationPanel() {
       }
     },
 
-    async markRead(id) {
-      try {
-        await fetch(`/notifications/${id}/read`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Accept: 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
-            'X-Requested-With': 'XMLHttpRequest',
-          },
-          credentials: 'same-origin',
-        });
-        const n = this.notifications.find((x) => x.id === id);
-        if (n) n.read_at = new Date().toISOString();
-        if (this.unreadCount > 0) this.unreadCount--;
-      } catch (_) {}
-    },
-
     async markAllRead() {
       try {
         await fetch('/notifications/read-all', {

@@ -62,7 +62,7 @@
                 <div x-data="notificationPanel()" x-init="fetchNotifications(); setInterval(() => fetchNotifications(), 30000)"
                     class="flex" @click.outside="isShowPopper && (isShowPopper = false)">
                     <div class="flex">
-                        <button @click="isShowPopper = !isShowPopper; isShowPopper && fetchNotifications()" x-ref="popperRef"
+                        <button @click="isShowPopper = !isShowPopper; isShowPopper && fetchNotifications().then(() => markAllRead())" x-ref="popperRef"
                             class="btn relative size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
                             <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-slate-500 dark:text-navy-100"
                                 stroke="currentColor" fill="none" viewBox="0 0 24 24">
@@ -80,12 +80,10 @@
                                         <h3 class="font-medium text-slate-700 dark:text-navy-100">{{ __('Notifications') }}</h3>
                                         <span x-show="unreadCount > 0" class="badge h-5 rounded-full bg-primary/10 px-1.5 text-primary dark:bg-accent-light/15 dark:text-accent-light" x-text="unreadCount"></span>
                                     </div>
-                                    <button x-show="unreadCount > 0" @click="markAllRead()" class="text-xs text-primary hover:underline dark:text-accent-light">{{ __('Mark all as read') }}</button>
                                 </div>
                                 <div class="is-scrollbar-hidden max-h-64 space-y-4 overflow-y-auto px-4 py-4">
                                     <template x-for="n in notifications" :key="n.id">
-                                        <a :href="n.url" @click="markRead(n.id)" class="flex items-center space-x-3 rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-navy-600"
-                                            :class="!n.read_at && 'bg-primary/5 dark:bg-accent/5'">
+                                        <a :href="n.url" class="flex items-center space-x-3 rounded-lg transition-colors hover:bg-slate-100 dark:hover:bg-navy-600">
                                             <div class="flex size-10 shrink-0 items-center justify-center rounded-lg"
                                                 :class="{
                                                     'bg-success/10 dark:bg-success/15': n.icon === 'success',
