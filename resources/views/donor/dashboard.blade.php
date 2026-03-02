@@ -11,6 +11,10 @@
                         <p class="mt-2 max-w-xl text-base text-white/90">
                             {{ __('This is your impact — yours alone. See how your support has helped, with full transparency and complete privacy for those in need.') }}
                         </p>
+                        <a href="{{ route('donor.donations.new') }}" class="btn mt-4 inline-flex items-center gap-2 bg-white px-5 py-2.5 font-medium text-primary hover:bg-white/90 dark:bg-white dark:text-accent dark:hover:bg-white/90">
+                            <i class="fa-solid fa-heart"></i>
+                            <span>{{ __('Quick Donation') }}</span>
+                        </a>
                     </div>
                     <div class="flex size-16 shrink-0 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-sm">
                         <i class="fa-solid fa-heart-pulse text-3xl text-white"></i>
@@ -236,7 +240,7 @@
                         </p>
                     </div>
                     <div class="shrink-0">
-                        <a href="#" class="btn flex items-center gap-2 bg-primary px-6 py-3 text-white hover:bg-primary-focus dark:bg-accent dark:hover:bg-accent-focus">
+                        <a href="{{ route('donor.donations.new') }}" class="btn flex items-center gap-2 bg-primary px-6 py-3 text-white hover:bg-primary-focus dark:bg-accent dark:hover:bg-accent-focus">
                             <i class="fa-solid fa-heart"></i>
                             <span>{{ __('Donate Now') }}</span>
                         </a>

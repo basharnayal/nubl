@@ -32,7 +32,9 @@ class DonationController extends Controller
     public function initiate(Request $request)
     {
         $validated = $request->validate([
-            'amount' => ['required', 'numeric', 'min:1', 'max:999999.99'],
+            'amount' => ['required', 'numeric', 'min:10', 'max:999999.99'],
+        ], [
+            'amount.min' => __('The minimum donation amount is 10 SAR.'),
         ]);
 
         $payment = $this->paymentService->initiateSponsorPayment(

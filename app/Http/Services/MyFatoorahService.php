@@ -33,6 +33,7 @@ class MyFatoorahService
     ): array {
         $postFields = [
             'InvoiceValue' => (string) $amount,
+            'DisplayCurrencyIso' => 'SAR',
             'CustomerName' => $customerName ?? 'Donor',
             'NotificationOption' => 'LNK',
             'CallBackUrl' => $callbackUrl,

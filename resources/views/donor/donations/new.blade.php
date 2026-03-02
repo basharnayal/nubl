@@ -23,7 +23,7 @@
                         <div class="space-y-4">
                             <div>
                                 <label for="amount" class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Amount') }} ({{ __('SAR') }}) *</label>
-                                <input type="number" id="amount" name="amount" value="{{ old('amount') }}" step="0.01" min="1" max="999999.99" required
+                                <input type="number" id="amount" name="amount" value="{{ old('amount') }}" step="0.01" min="10" max="999999.99" required
                                     class="form-input form-input-lineone" placeholder="100">
                             </div>
                         </div>
