@@ -67,12 +67,12 @@ class ProviderRequestController extends Controller
                     'funding_source' => 'PROVIDER_ADOPTION',
                 ]);
             } elseif ($action === 'approve') {
-                // Provider accepts using City Fund = deducted from city fund, status REDEEMABLE (recipient can redeem)
+                // Provider accepts using City Fund — status REDEEMABLE (recipient can redeem)
+                // Transfer happens only at redemption (QR scan), not at approval
                 $amount = (float) $requestModel->reserved_amount;
                 if (!$this->systemWalletService->hasSufficientBalance($amount)) {
                     return back()->with('error', __('City fund has insufficient balance for this request.'));
                 }
-                $this->systemWalletService->transferToProviderForRequest($requestModel);
                 $requestModel->update([
                     'status' => 'REDEEMABLE',
                     'funding_source' => 'CITY_FUND',

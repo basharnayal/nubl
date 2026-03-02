@@ -88,7 +88,7 @@ return $paymentService->redirectToGateway($payment);
 | `addFundsFromDonation($amount, $donorId, $paymentId?)` | إضافة FundTransaction IN للمحفظة النظامية |
 | `getSystemWallet()` | إرجاع المحفظة النظامية |
 | `hasSufficientBalance($amount)` | التحقق من كفاية الرصيد |
-| `transferToProviderForRequest(Request $request)` | خصم من SYSTEM wallet، إضافة لمحفظة المزود، Allocation |
+| `transferToProviderForRequest(Request $request, ?int $orderRedemptionId)` | خصم من SYSTEM wallet، إضافة لمحفظة المزود (يُستدعى عند Redemption، وليس عند Approval) |
 
 ### 4.4 AllocationService
 
@@ -218,14 +218,18 @@ $donorRequestsFunded = RequestPaymentLink::whereIn('payment_id', $donorPaymentId
 
 ---
 
-## 11. تلبية الطلب (Provider Approve)
+## 11. تلبية الطلب (Provider Approve & Redemption)
 
-عند موافقة المزود على طلب من City Fund:
+**عند موافقة المزود (Approval):**
+- التحقق من كفاية الرصيد (`hasSufficientBalance`)
+- تحديث الطلب إلى REDEEMABLE و funding_source CITY_FUND
+- إنشاء OrderRedemption (رمز QR للمستلم)
+- **لا يحدث تحويل** في هذه المرحلة
 
+**عند الاستلام (Redemption — مسح QR من المستلم عند المزود):**
 1. `AllocationService::allocateToRequest` — توزيع المبلغ على Payments (FIFO)
-2. FundTransaction OUT من SYSTEM wallet
-3. FundTransaction IN لمحفظة المزود
-4. Audit: payout_to_provider
+2. `SystemWalletService::transferToProviderForRequest` — FundTransaction OUT من SYSTEM wallet و IN لمحفظة المزود (مع order_redemption_id)
+3. Audit: payout_to_provider
 
 ---
 

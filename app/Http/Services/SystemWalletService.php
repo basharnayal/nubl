@@ -13,7 +13,7 @@ use App\Models\Request as RequestModel;
  *
  * Integration points:
  * - addFundsFromDonation() after donor payment is successfully processed
- * - transferToProviderForRequest() when provider clicks "Approve (City Fund)"
+ * - transferToProviderForRequest() when recipient redeems (QR scan at provider)
  */
 class SystemWalletService
 {
@@ -84,15 +84,16 @@ class SystemWalletService
     }
 
     /**
-     * Transfer amount from city fund (system wallet) to provider wallet when provider
-     * clicks "Approve (City Fund)". Deducts from system wallet and credits provider wallet.
+     * Transfer amount from city fund (system wallet) to provider wallet.
+     * Called at redemption (QR scan), not at approval.
      *
-     * @param  RequestModel  $request  The request being approved (must have reserved_amount and provider_id)
+     * @param  RequestModel  $request  The request (must have reserved_amount and provider_id)
+     * @param  int|null  $orderRedemptionId  Optional OrderRedemption ID for audit trail
      * @return void
      *
      * @throws \RuntimeException If system wallet has insufficient balance or provider has no wallet
      */
-    public function transferToProviderForRequest(RequestModel $request): void
+    public function transferToProviderForRequest(RequestModel $request, ?int $orderRedemptionId = null): void
     {
         $amount = (float) $request->reserved_amount;
 
@@ -124,7 +125,7 @@ class SystemWalletService
             'direction' => FundTransaction::DIRECTION_OUT,
             'payment_id' => null,
             'request_id' => $request->id,
-            'order_redemption_id' => null,
+            'order_redemption_id' => $orderRedemptionId,
         ]);
 
         FundTransaction::create([
@@ -135,7 +136,7 @@ class SystemWalletService
             'direction' => FundTransaction::DIRECTION_IN,
             'payment_id' => null,
             'request_id' => $request->id,
-            'order_redemption_id' => null,
+            'order_redemption_id' => $orderRedemptionId,
         ]);
 
         $this->auditService->log('wallet', 'payout_to_provider', [

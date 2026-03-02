@@ -145,7 +145,7 @@ class ProviderRequestFlowTest extends TestCase
 
         $response->assertRedirect();
 
-        // approve = provider accepts with City Fund, deducted from city fund, status REDEEMABLE
+        // approve = provider accepts with City Fund, status REDEEMABLE (transfer happens at redemption, not here)
         $this->assertDatabaseHas('requests', [
             'id' => $this->request->id,
             'status' => 'REDEEMABLE',
