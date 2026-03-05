@@ -535,6 +535,12 @@
     "Redeemable": "قابل للاسترداد",
     "Fulfilled": "منفذ",
     "Rejected": "مرفوض",
+    "Cancelled": "ملغى",
+    "Cancel Request": "إلغاء الطلب",
+    "Request cancelled successfully.": "تم إلغاء الطلب بنجاح.",
+    "This request cannot be cancelled.": "لا يمكن إلغاء هذا الطلب.",
+    "Are you sure you want to cancel this request?": "هل أنت متأكد من إلغاء هذا الطلب؟",
+    "Yes, Cancel Request": "نعم، إلغاء الطلب",
     "QR Code generation coming soon!": "إنشاء رمز QR قريباً!",
     "View QR Code": "عرض رمز QR",
     "Reason for Rejection": "سبب الرفض",
@@ -718,5 +724,6 @@
     "entries": "إدخالات",
     "John Doe changed his avatar photo": "غيّر جون دو صورة حسابه",
     "Team completed the ER diagram app": "أكمل الفريق تطبيق مخطط ER",
-    "The weekly report was uploaded": "تم رفع التقرير الأسبوعي"
+    "The weekly report was uploaded": "تم رفع التقرير الأسبوعي",
+    "Amount Spent": "المبلغ المنفق"
 }

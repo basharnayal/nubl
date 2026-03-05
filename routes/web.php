@@ -135,6 +135,8 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:recipi
         // Recipient Request Submission
         Route::resource('requests', \App\Http\Controllers\Recipient\RecipientRequestController::class)
             ->only(['index', 'show', 'store']);
+        Route::post('requests/{id}/cancel', [\App\Http\Controllers\Recipient\RecipientRequestController::class, 'cancel'])
+            ->name('requests.cancel');
     });
 
 // Donor routes

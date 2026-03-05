@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Services\RecipientAllowanceService;
 use App\Models\Request as RequestModel;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -53,6 +54,8 @@ class RecipientController extends Controller
             ->take(5)
             ->get();
 
+        $activityChartData = $this->activityChartData($user->id);
+
         return view('recipient.dashboard', [
             'remainingLimit' => $remainingLimit,
             'weeklyLimit' => $weeklyLimit,
@@ -62,7 +65,35 @@ class RecipientController extends Controller
             'providersCount' => $providersCount,
             'recentRequests' => $recentRequests,
             'providers' => $providers,
+            'activityChartData' => $activityChartData,
         ]);
+    }
+
+    /**
+     * Build chart data for Activity Overview: amount spent (fulfilled) per month for the last 8 months.
+     */
+    private function activityChartData(int $recipientId): array
+    {
+        $categories = [];
+        $series = [];
+
+        for ($i = 7; $i >= 0; $i--) {
+            $date = Carbon::now()->subMonths($i);
+            $categories[] = $date->translatedFormat('M');
+
+            $amount = RequestModel::forRecipient($recipientId)
+                ->where('status', 'FULFILLED')
+                ->whereYear('created_at', $date->year)
+                ->whereMonth('created_at', $date->month)
+                ->sum('reserved_amount');
+
+            $series[] = (float) $amount;
+        }
+
+        return [
+            'categories' => $categories,
+            'series' => $series,
+        ];
     }
 
     public function providersList(): View

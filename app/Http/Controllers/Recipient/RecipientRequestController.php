@@ -8,6 +8,8 @@ use App\Http\Services\AuditService;
 use App\Http\Services\RecipientAllowanceService;
 use App\Models\ProviderMenuItem;
 use App\Models\Request as RequestModel;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 
 class RecipientRequestController extends Controller
 {
@@ -111,5 +113,29 @@ class RecipientRequestController extends Controller
         }
 
         return view('recipient.requests.show', compact('request'));
+    }
+
+    /**
+     * Cancel a pending request (FR-R-06).
+     * Recipients can cancel requests that are not yet redeemed or in a locked state.
+     */
+    public function cancel(Request $request, int $id): RedirectResponse
+    {
+        $requestModel = RequestModel::with('redemption')
+            ->where('recipient_id', auth()->id())
+            ->findOrFail($id);
+
+        if (!$requestModel->isCancellableByRecipient()) {
+            return back()->with('error', __('This request cannot be cancelled.'));
+        }
+
+        $requestModel->update(['status' => 'CANCELLED']);
+
+        $this->auditService->log('request', 'cancelled', [
+            'request_id' => $requestModel->id,
+            'recipient_id' => auth()->id(),
+        ]);
+
+        return back()->with('success', __('Request cancelled successfully.'));
     }
 }

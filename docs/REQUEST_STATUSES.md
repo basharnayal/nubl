@@ -13,6 +13,7 @@ Request statuses define the lifecycle of a recipient's order from creation to co
 | 3 | `REDEEMABLE` | Provider accepted with City Fund (`CITY_FUND`); deducted from city fund. Recipient sees QR code to redeem. |
 | 4 | `REJECTED` | Provider rejected the request |
 | 5 | `FULFILLED` | Order completed (no transition logic; status only) |
+| 6 | `CANCELLED` | Recipient cancelled the request (FR-R-06) |
 
 ## Flow
 
@@ -20,7 +21,8 @@ Request statuses define the lifecycle of a recipient's order from creation to co
 REQUESTED (recipient creates)
     ├── Adopt   → APPROVED (PROVIDER_ADOPTION)
     ├── Accept  → REDEEMABLE (CITY_FUND)
-    └── Reject  → REJECTED
+    ├── Reject  → REJECTED
+    └── Cancel  → CANCELLED (recipient withdraws; only REQUESTED)
 ```
 
 ## Weekly Allowance (Recipient)
