@@ -59,16 +59,39 @@
                                                         'FULFILLED' => ['class' => 'bg-slate-200/80 text-slate-600 dark:bg-navy-500 dark:text-navy-200', 'label' => __('Fulfilled')],
                                                         'REJECTED' => ['class' => 'bg-error/10 text-error dark:bg-error/15', 'label' => __('Rejected')],
                                                         'ADMIN_REJECTED' => ['class' => 'bg-error/10 text-error dark:bg-error/15', 'label' => __('Rejected')],
+                                                        'CANCELLED' => ['class' => 'bg-slate-200/80 text-slate-600 dark:bg-navy-500 dark:text-navy-200', 'label' => __('Cancelled')],
                                                     ];
                                                     $config = $statusConfig[$request->status] ?? ['class' => 'bg-slate-200/80 text-slate-600 dark:bg-navy-500 dark:text-navy-200', 'label' => str_replace('_', ' ', $request->status)];
                                                 @endphp
                                                 <span class="badge rounded-full {{ $config['class'] }}">{{ $config['label'] }}</span>
                                             </td>
                                             <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                                <a href="{{ route('recipient.requests.show', $request->id) }}"
-                                                    class="font-medium text-primary outline-hidden transition-colors hover:text-primary-focus dark:text-accent-light dark:hover:text-accent-light/80">
-                                                    {{ __('View') }}
-                                                </a>
+                                                <div class="flex items-center gap-2">
+                                                    <a href="{{ route('recipient.requests.show', $request->id) }}"
+                                                        class="font-medium text-primary outline-hidden transition-colors hover:text-primary-focus dark:text-accent-light dark:hover:text-accent-light/80">
+                                                        {{ __('View') }}
+                                                    </a>
+                                                    @if($request->isCancellableByRecipient())
+                                                        <button type="button"
+                                                            @click="$dispatch('open-modal', 'cancel-request-{{ $request->id }}')"
+                                                            class="font-medium text-error outline-hidden transition-colors hover:text-error-focus">
+                                                            {{ __('Cancel') }}
+                                                        </button>
+                                                        <x-lineone-modal id="cancel-request-{{ $request->id }}" :title="__('Cancel Request')" size="md">
+                                                            <p class="text-slate-600 dark:text-navy-300">{{ __('Are you sure you want to cancel this request?') }}</p>
+                                                            <form action="{{ route('recipient.requests.cancel', $request->id) }}" method="POST" class="mt-4 flex justify-end gap-2">
+                                                                @csrf
+                                                                <button type="button" @click="$dispatch('close-modal', 'cancel-request-{{ $request->id }}')"
+                                                                    class="btn border-slate-300 font-medium text-slate-700 hover:bg-slate-150 dark:border-navy-600 dark:text-navy-100 dark:hover:bg-navy-600">
+                                                                    {{ __('Cancel') }}
+                                                                </button>
+                                                                <button type="submit" class="btn bg-error font-medium text-white hover:bg-error-focus">
+                                                                    {{ __('Yes, Cancel Request') }}
+                                                                </button>
+                                                            </form>
+                                                        </x-lineone-modal>
+                                                    @endif
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach

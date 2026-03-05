@@ -12,8 +12,11 @@ class Request extends Model
 {
     use HasFactory;
 
-    /** Core request statuses: REQUESTED → APPROVED | REDEEMABLE | REJECTED → FULFILLED (no transition logic for FULFILLED) */
-    public const STATUSES = ['REQUESTED', 'APPROVED', 'REDEEMABLE', 'REJECTED', 'FULFILLED'];
+    /** Core request statuses: REQUESTED → APPROVED | REDEEMABLE | REJECTED | CANCELLED → FULFILLED (no transition logic for FULFILLED) */
+    public const STATUSES = ['REQUESTED', 'APPROVED', 'REDEEMABLE', 'REJECTED', 'CANCELLED', 'FULFILLED'];
+
+    /** Statuses that allow recipient to cancel (FR-R-06: only REQUESTED) */
+    public const CANCELLABLE_STATUSES = ['REQUESTED'];
 
     protected $guarded = ['id'];
 
@@ -77,6 +80,15 @@ class Request extends Model
     public function scopePendingAdmin($query)
     {
         return $query->where('status', 'ADMIN_PENDING');
+    }
+
+    /**
+     * Whether the recipient can cancel this request (FR-R-06).
+     * Only REQUESTED orders can be cancelled by the recipient.
+     */
+    public function isCancellableByRecipient(): bool
+    {
+        return $this->status === 'REQUESTED';
     }
 
     // Accessors
