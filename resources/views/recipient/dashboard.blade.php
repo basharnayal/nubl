@@ -248,12 +248,28 @@
                                 {{ __('Activity Overview') }}
                             </h2>
                         </div>
-                        <div class="ax-transparent-gridline pr-2">
-                            <div x-init="$nextTick(() => {
-                                $el._x_chart = new ApexCharts($el, pages.charts.incomePersonal);
-                                $el._x_chart.render()
-                            });"></div>
-                        </div>
+                        <div class="ax-transparent-gridline pr-2 min-h-[250px]"
+                             data-chart-series="{{ json_encode($activityChartData['series'] ?? []) }}"
+                             data-chart-categories="{{ json_encode($activityChartData['categories'] ?? []) }}"
+                             data-chart-label="{{ json_encode(__('Amount Spent')) }}"
+                             x-data="{
+                                init() {
+                                    $nextTick(() => {
+                                        if (this.$el._x_chart) return;
+                                        const config = { ...pages.charts.incomePersonal };
+                                        const series = JSON.parse(this.$el.dataset.chartSeries);
+                                        const categories = JSON.parse(this.$el.dataset.chartCategories);
+                                        const label = JSON.parse(this.$el.dataset.chartLabel);
+                                        config.series = [{ name: label, data: series }];
+                                        config.xaxis = { ...config.xaxis, categories };
+                                        if (series.every(v => v === 0)) {
+                                            config.yaxis = { ...config.yaxis, min: 0, max: 5, forceNiceScale: true };
+                                        }
+                                        this.$el._x_chart = new ApexCharts(this.$el, config);
+                                        this.$el._x_chart.render();
+                                    });
+                                }
+                             }" x-init="init()"></div>
                     </div>
                     <div class="card p-4">
                         <div class="space-y-1 text-center font-inter text-xs-plus">
