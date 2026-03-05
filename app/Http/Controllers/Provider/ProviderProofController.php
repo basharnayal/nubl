@@ -43,11 +43,41 @@ class ProviderProofController extends Controller
         }
 
         $request->validate([
-            'proof_file' => ['required', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'], // 5MB max
+            'proof_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'], // 5MB max
+            'proof_photo_base64' => ['nullable', 'string'],
         ]);
 
-        $file = $request->file('proof_file');
-        $path = $file->store("private/proofs/{$redemption->id}");
+        if (!$request->hasFile('proof_file') && empty($request->input('proof_photo_base64'))) {
+            return back()->with('error', __('You must either upload a file or capture a photo.'));
+        }
+
+        $path = null;
+
+        if ($request->hasFile('proof_file')) {
+            $file = $request->file('proof_file');
+            $path = $file->store("private/proofs/{$redemption->id}");
+        } elseif (!empty($request->input('proof_photo_base64'))) {
+            $base64Data = $request->input('proof_photo_base64');
+            if (preg_match('/^data:image\/(\w+);base64,/', $base64Data, $type)) {
+                $data = substr($base64Data, strpos($base64Data, ',') + 1);
+                $type = strtolower($type[1]); // jpg, png, etc.
+
+                if (!in_array($type, ['jpg', 'jpeg', 'png', 'webp'])) {
+                    return back()->with('error', __('Invalid image format captured.'));
+                }
+
+                $data = base64_decode($data);
+                if ($data === false) {
+                    return back()->with('error', __('Failed to decode captured image.'));
+                }
+
+                $fileName = 'capture_' . time() . '.' . $type;
+                $path = "private/proofs/{$redemption->id}/$fileName";
+                Storage::put($path, $data);
+            } else {
+                return back()->with('error', __('Invalid image data received.'));
+            }
+        }
 
         try {
             DB::beginTransaction();
