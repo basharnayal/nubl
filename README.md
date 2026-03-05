@@ -554,6 +554,15 @@ php artisan migrate:fresh --seed
 
 ## 📚 Documentation
 
+### Project Docs (`docs/`)
+
+- `docs/REQUEST_STATUSES.md` — Request lifecycle and statuses
+- `docs/QR_CODE_REDEMPTION.md` — QR code generation and redemption flow
+- `docs/CHANGELOG_REQUEST_AND_WALLET.md` — Request, allowance, and wallet changes
+- `docs/SYSTEM_WALLET_DONATION_FLOW.md` — City fund and donation flow
+
+### External
+
 - [Laravel Documentation](https://laravel.com/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
 - [Lineone Template](https://lineone.pixelcave.com) - UI reference

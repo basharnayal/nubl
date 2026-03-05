@@ -33,7 +33,7 @@
                     </div>
 
                     <div class="text-right">
-                        @if($request->status === 'REDEEMABLE')
+                        @if(in_array($request->status, ['APPROVED', 'REDEEMABLE']))
                             <span
                                 class="inline-block text-sm text-slate-600 dark:text-navy-300">{{ __('Show this QR code to the provider to redeem') }}</span>
                         @endif
@@ -51,7 +51,7 @@
                     </div>
                 @endif
 
-                @if($request->status === 'REDEEMABLE')
+                @if(in_array($request->status, ['APPROVED', 'REDEEMABLE']))
                     <div class="mt-6 flex flex-col items-center border-t border-slate-200 pt-6 dark:border-navy-600">
                         @if($request->redemption)
                             @if($request->redemption->status === 'REDEEMED')

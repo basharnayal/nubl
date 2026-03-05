@@ -11,11 +11,11 @@ class RedemptionService
 {
     /**
      * Idempotently generate a redemption token for a request.
-     * Only executes if the request is REDEEMABLE and doesn't already have one.
+     * Only executes if the request is APPROVED or REDEEMABLE and doesn't already have one.
      */
     public static function generateForRequest(RequestModel $request): ?OrderRedemption
     {
-        if ($request->status !== 'REDEEMABLE') {
+        if (!in_array($request->status, ['APPROVED', 'REDEEMABLE'])) {
             return null;
         }
 

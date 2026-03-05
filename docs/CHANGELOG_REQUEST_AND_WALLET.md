@@ -75,7 +75,25 @@ Seeds:
 
 ---
 
-## 7. Missing / TODO
+## 7. QR Code for APPROVED Orders
+
+**Change:** QR code now appears for both **APPROVED** (provider adopted) and **REDEEMABLE** (City Fund) requests.
+
+| Before | After |
+|--------|-------|
+| QR code only for REDEEMABLE | QR code for APPROVED and REDEEMABLE |
+
+**Implementation:**
+- `RedemptionService::generateForRequest()` — now accepts both APPROVED and REDEEMABLE
+- `ProviderRequestController` — calls `generateForRequest` when provider **adopts** (not just when approving with City Fund)
+- `RecipientRequestController::show` — ensures redemption exists for legacy APPROVED/REDEEMABLE requests (backfill on first view)
+- `recipient/requests/show.blade.php` — displays QR section for both statuses
+
+See `docs/QR_CODE_REDEMPTION.md` for full QR flow documentation.
+
+---
+
+## 8. Missing / TODO
 
 | Item | Description |
 |------|--------------|

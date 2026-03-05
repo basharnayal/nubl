@@ -66,6 +66,7 @@ class ProviderRequestController extends Controller
                     'status' => 'APPROVED',
                     'funding_source' => 'PROVIDER_ADOPTION',
                 ]);
+                \App\Http\Services\RedemptionService::generateForRequest($requestModel);
             } elseif ($action === 'approve') {
                 // Provider accepts using City Fund — status REDEEMABLE (recipient can redeem)
                 // Transfer happens only at redemption (QR scan), not at approval

@@ -9,8 +9,8 @@ Request statuses define the lifecycle of a recipient's order from creation to co
 | # | Status | Description |
 |---|--------|--------------|
 | 1 | `REQUESTED` | Recipient created the request |
-| 2 | `APPROVED` | Provider adopted (funding_source `PROVIDER_ADOPTION`); City Fund not affected |
-| 3 | `REDEEMABLE` | Provider accepted with City Fund (`CITY_FUND`); deducted from city fund |
+| 2 | `APPROVED` | Provider adopted (funding_source `PROVIDER_ADOPTION`); City Fund not affected. Recipient sees QR code to redeem. |
+| 3 | `REDEEMABLE` | Provider accepted with City Fund (`CITY_FUND`); deducted from city fund. Recipient sees QR code to redeem. |
 | 4 | `REJECTED` | Provider rejected the request |
 | 5 | `FULFILLED` | Order completed (no transition logic; status only) |
 

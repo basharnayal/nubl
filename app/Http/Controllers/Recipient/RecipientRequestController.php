@@ -100,9 +100,15 @@ class RecipientRequestController extends Controller
      */
     public function show($id)
     {
-        $request = RequestModel::with(['provider', 'items.menuItem'])
+        $request = RequestModel::with(['provider', 'items.menuItem', 'redemption'])
             ->where('recipient_id', auth()->id())
             ->findOrFail($id);
+
+        // Ensure redemption token exists for APPROVED/REDEEMABLE (e.g. legacy APPROVED orders)
+        if (in_array($request->status, ['APPROVED', 'REDEEMABLE']) && !$request->redemption) {
+            \App\Http\Services\RedemptionService::generateForRequest($request);
+            $request->load('redemption');
+        }
 
         return view('recipient.requests.show', compact('request'));
     }
