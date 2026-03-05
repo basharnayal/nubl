@@ -25,14 +25,19 @@ class RedemptionService
             return $existing;
         }
 
+        // Generate a 32-character secure random QR token
+        $rawToken = Str::random(32);
+
         // Generate a 9-character human-typable token combining letters and numbers
-        $rawToken = strtoupper(Str::random(9));
+        $shortToken = strtoupper(Str::random(9));
 
-        // Hash for strict lookup constraint
+        // Hash for strict lookup constraints
         $tokenCode = hash('sha256', $rawToken);
+        $shortCodeHash = hash('sha256', $shortToken);
 
-        // Encrypt for retrieving and displaying securely later
+        // Encrypt safe copies
         $tokenCiphertext = Crypt::encryptString($rawToken);
+        $shortCodeCiphertext = Crypt::encryptString($shortToken);
 
         // Define TTL
         $ttlMinutes = config('qr.ttl_minutes', 180);
@@ -40,7 +45,9 @@ class RedemptionService
         return $request->redemption()->create([
             'provider_id' => $request->provider_id,
             'token_code' => $tokenCode,
+            'short_code_hash' => $shortCodeHash,
             'token_ciphertext' => $tokenCiphertext,
+            'short_code_ciphertext' => $shortCodeCiphertext,
             'ttl_minutes' => $ttlMinutes,
             'redeem_expires_at' => now()->addMinutes($ttlMinutes),
             'status' => 'PENDING',

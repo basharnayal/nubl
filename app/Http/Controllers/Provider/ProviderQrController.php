@@ -49,11 +49,13 @@ class ProviderQrController extends Controller
             DB::beginTransaction();
 
             // Atomic validation & locks
-            $redemption = OrderRedemption::where('token_code', $tokenHash)->lockForUpdate()->first();
+            $redemption = OrderRedemption::where(function ($query) use ($tokenHash) {
+                $query->where('token_code', $tokenHash)
+                    ->orWhere('short_code_hash', $tokenHash);
+            })->lockForUpdate()->first();
 
             if (!$redemption) {
-                // Return generic error but clearly distinguish invalid
-                return response()->json(['error' => __('Invalid token.')], 422);
+                return response()->json(['error' => __('Invalid token.')], 404);
             }
 
             if ($redemption->provider_id !== $providerId) {
@@ -61,7 +63,7 @@ class ProviderQrController extends Controller
             }
 
             if ($redemption->status === 'REDEEMED') {
-                return response()->json(['error' => __('This code has already been used.')], 422);
+                return response()->json(['error' => __('This code has already been used.')], 409);
             }
 
             if ($redemption->status === 'EXPIRED' || $redemption->redeem_expires_at->isPast()) {
@@ -104,9 +106,16 @@ class ProviderQrController extends Controller
                 'redirect_url' => route('provider.proof.index', $redemption->id)
             ]);
 
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
-            return response()->json(['error' => __('A server error occurred during redemption.')], 500);
+            \Illuminate\Support\Facades\Log::error('Redemption error: ' . $e->getMessage(), ['exception' => $e]);
+
+            // Expose the real error safely to diagnose the silent 500
+            $errorMsg = $e instanceof \RuntimeException || $e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException
+                ? $e->getMessage()
+                : __('A server error occurred during redemption.') . ' : ' . $e->getMessage();
+
+            return response()->json(['error' => $errorMsg], 500);
         }
     }
 }
