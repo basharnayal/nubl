@@ -51,10 +51,12 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             let isRedeeming = false;
+            let lastToken = null;
 
             function processRedemption(token) {
                 if (isRedeeming) return;
                 isRedeeming = true;
+                lastToken = token;
 
                 const errorBox = document.getElementById('scan-error');
                 const successBox = document.getElementById('scan-result');
@@ -85,6 +87,16 @@
                             isRedeeming = false;
                             btn.innerText = originalText;
                             btn.disabled = false;
+
+                            // Resume scanner after failure so they can try again or scan a different code
+                            if (typeof html5QrcodeScanner !== 'undefined') {
+                                setTimeout(() => {
+                                    // By intentionally NOT clearing lastToken here, the camera 
+                                    // will safely ignore the identical physical QR code if it 
+                                    // remains on screen, preventing the API flooding loop.
+                                    html5QrcodeScanner.resume();
+                                }, 2000);
+                            }
                         }
                     })
                     .catch(err => {
@@ -93,27 +105,37 @@
                         isRedeeming = false;
                         btn.innerText = originalText;
                         btn.disabled = false;
+
+                        if (typeof html5QrcodeScanner !== 'undefined') {
+                            setTimeout(() => {
+                                html5QrcodeScanner.resume();
+                            }, 2000);
+                        }
                     });
             }
 
             // HTML5 QR Code Scanner
             function onScanSuccess(decodedText, decodedResult) {
-                if (!isRedeeming) {
-                    processRedemption(decodedText);
-                    if (typeof html5QrcodeScanner !== 'undefined') {
-                        html5QrcodeScanner.pause();
-                        setTimeout(() => html5QrcodeScanner.resume(), 3000); // Resume scanning after 3 sec if failed
-                    }
+                if (isRedeeming) return;
+                if (decodedText === lastToken) return;
+
+                if (typeof html5QrcodeScanner !== 'undefined') {
+                    html5QrcodeScanner.pause();
                 }
+                processRedemption(decodedText);
             }
 
             try {
                 let html5QrcodeScanner = new Html5QrcodeScanner(
                     "qr-reader",
-                    { fps: 10, qrbox: { width: 250, height: 250 } },
+                    {
+                        fps: 10,
+                        qrbox: { width: 250, height: 250 },
+                        videoConstraints: { facingMode: "environment" }
+                    },
                     /* verbose= */ false
                 );
-                html5QrcodeScanner.render(onScanSuccess, function(error) {
+                html5QrcodeScanner.render(onScanSuccess, function (error) {
                     // Ignore regular scan failures
                 });
             } catch (e) {

@@ -87,9 +87,11 @@
                             @elseif($request->redemption->status === 'PENDING')
                                 @php
                                     $rawTokenDecrypted = Illuminate\Support\Facades\Crypt::decryptString($request->redemption->token_ciphertext);
+                                    $shortTokenDecrypted = Illuminate\Support\Facades\Crypt::decryptString($request->redemption->short_code_ciphertext);
                                 @endphp
                                 <p class="mb-4 text-sm font-medium text-slate-700 dark:text-navy-100">
-                                    {{ __('Show this QR code to the provider to redeem your order') }}</p>
+                                    {{ __('Show this QR code to the provider to redeem your order') }}
+                                </p>
                                 <div class="flex flex-col items-center justify-center space-y-3">
                                     <div
                                         class="rounded-lg border-2 border-slate-200 bg-white p-4 dark:border-navy-600 dark:bg-navy-800">
@@ -98,10 +100,12 @@
                                     <div
                                         class="bg-slate-100 px-4 py-2 rounded-lg border border-slate-200 text-center dark:bg-navy-700 dark:border-navy-600 w-full max-w-[240px]">
                                         <p class="text-xs text-slate-500 uppercase tracking-wider mb-1 dark:text-navy-300">
-                                            {{ __('Manual Code') }}</p>
+                                            {{ __('Manual Code') }}
+                                        </p>
                                         <p
                                             class="text-lg font-mono font-bold tracking-widest text-slate-800 select-all dark:text-navy-100">
-                                            {{ $rawTokenDecrypted }}</p>
+                                            {{ $shortTokenDecrypted }}
+                                        </p>
                                     </div>
                                 </div>
                                 <p class="mt-4 text-sm font-bold text-error">
@@ -132,26 +136,32 @@
                                 <tr>
                                     <th
                                         class="whitespace-nowrap rounded-tl-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
-                                        {{ __('Item') }}</th>
+                                        {{ __('Item') }}
+                                    </th>
                                     <th
                                         class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
-                                        {{ __('Quantity') }}</th>
+                                        {{ __('Quantity') }}
+                                    </th>
                                     <th
                                         class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
-                                        {{ __('Price') }}</th>
+                                        {{ __('Price') }}
+                                    </th>
                                     <th
                                         class="whitespace-nowrap rounded-tr-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
-                                        {{ __('Total') }}</th>
+                                        {{ __('Total') }}
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($request->items as $item)
                                     <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
                                         <td class="px-4 py-3 font-medium text-slate-700 dark:text-navy-100 sm:px-5">
-                                            {{ $item->menuItem->name ?? __('Unknown Item') }}</td>
+                                            {{ $item->menuItem->name ?? __('Unknown Item') }}
+                                        </td>
                                         <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $item->quantity }}</td>
                                         <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $item->price_snapshot }}
-                                            {{ __('SAR') }}</td>
+                                            {{ __('SAR') }}
+                                        </td>
                                         <td
                                             class="whitespace-nowrap px-4 py-3 font-bold text-slate-700 dark:text-navy-100 sm:px-5">
                                             {{ number_format($item->price_snapshot * $item->quantity, 2) }} {{ __('SAR') }}
@@ -162,9 +172,11 @@
                                     class="border-t border-slate-200 bg-slate-100 font-bold dark:border-navy-600 dark:bg-navy-700/50">
                                     <td colspan="3"
                                         class="px-4 py-3 text-right text-slate-700 dark:text-navy-100 sm:px-5">
-                                        {{ __('Grand Total') }}</td>
+                                        {{ __('Grand Total') }}
+                                    </td>
                                     <td class="whitespace-nowrap px-4 py-3 text-primary dark:text-accent-light sm:px-5">
-                                        {{ number_format($request->reserved_amount, 2) }} {{ __('SAR') }}</td>
+                                        {{ number_format($request->reserved_amount, 2) }} {{ __('SAR') }}
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -186,7 +198,8 @@
                         <p class="text-xs text-slate-400 dark:text-navy-500">{{ __('Request ID') }}: {{ $request->id }}
                         </p>
                         <p class="text-xs text-slate-400 dark:text-navy-500">{{ __('Date') }}:
-                            {{ $request->created_at->format('Y-m-d H:i') }}</p>
+                            {{ $request->created_at->format('Y-m-d H:i') }}
+                        </p>
                     </div>
                 </div>
             </div>
