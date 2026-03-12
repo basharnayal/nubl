@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Models\Request as RequestModel;
 use App\Models\RequestPaymentLink;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class DonorDashboardController extends Controller
 {
@@ -27,22 +28,37 @@ class DonorDashboardController extends Controller
             ->where('status', Payment::STATUS_SUCCEEDED)
             ->pluck('id');
 
-        $donorRequestsFunded = RequestPaymentLink::whereIn('payment_id', $donorPaymentIds)
-            ->distinct('request_id')
-            ->count('request_id');
+        $donorDonationCount = Payment::where('sponsor_id', $sponsorId)
+            ->where('status', Payment::STATUS_SUCCEEDED)
+            ->count();
+
+        $donorRequestsFunded = (int) DB::table('request_payment_links')
+            ->whereIn('payment_id', $donorPaymentIds)
+            ->selectRaw('COUNT(DISTINCT request_id) as cnt')
+            ->value('cnt');
 
         $donorRequestIds = RequestPaymentLink::whereIn('payment_id', $donorPaymentIds)
             ->pluck('request_id')
-            ->unique();
+            ->unique()
+            ->filter();
 
-        $donorBeneficiariesHelped = RequestModel::whereIn('id', $donorRequestIds)
-            ->distinct('recipient_id')
-            ->count('recipient_id');
+        // Requests funded by donor that reached REDEEMABLE (code scanned) or FULFILLED (delivered)
+        $donorRequestsDelivered = $donorRequestIds->isNotEmpty()
+            ? (int) RequestModel::whereIn('id', $donorRequestIds)
+                ->whereIn('status', ['REDEEMABLE', 'FULFILLED'])
+                ->count()
+            : 0;
+
+        $donorAmountAllocated = (float) RequestPaymentLink::whereIn('payment_id', $donorPaymentIds)
+            ->sum('amount');
 
         $donorLastContribution = Payment::where('sponsor_id', $sponsorId)
             ->where('status', Payment::STATUS_SUCCEEDED)
             ->latest('created_at')
             ->first()?->created_at;
+        $donorLastContributionHuman = $donorLastContribution
+            ? ($donorLastContribution->isPast() ? $donorLastContribution->diffForHumans() : $donorLastContribution->translatedFormat('M d, Y'))
+            : null;
 
         $donorImpactTimeline = $this->donorImpactTimeline($donorPaymentIds);
         $donorChartData = $this->donorImpactChartData($donorPaymentIds);
@@ -60,17 +76,19 @@ class DonorDashboardController extends Controller
             : 0;
 
         $donorTransparency = [
-            'requests_from_your_funds' => $donorRequestsFunded,
-            'meals_items_delivered' => 0,
-            'meals_percent' => 65,
-            'baskets_percent' => 35,
+            'requests_from_your_funds' => $donorRequestsFunded,  // Unique requests funded by donor
+            'requests_delivered' => $donorRequestsDelivered,     // Those with REDEEMABLE or FULFILLED
+            'amount_allocated' => $donorAmountAllocated,          // Sum from request_payment_links
         ];
 
         return view('donor.dashboard', compact(
             'donorTotalDonated',
+            'donorDonationCount',
             'donorRequestsFunded',
-            'donorBeneficiariesHelped',
+            'donorRequestsDelivered',
+            'donorAmountAllocated',
             'donorLastContribution',
+            'donorLastContributionHuman',
             'donorImpactTimeline',
             'donorChartData',
             'pendingRequestsCount',
@@ -81,44 +99,130 @@ class DonorDashboardController extends Controller
         ));
     }
 
+    /**
+     * Fulfilled and ongoing requests supported by the donor.
+     * FR-25.2: Pseudonymous IDs.
+     * No PII — only dates, amounts, type, status.
+     */
     private function donorImpactTimeline($donorPaymentIds): array
     {
         if ($donorPaymentIds->isEmpty()) {
             return [];
         }
 
-        return RequestPaymentLink::whereIn('payment_id', $donorPaymentIds)
-            ->with('request')
-            ->latest()
-            ->limit(10)
-            ->get()
-            ->map(fn ($link) => [
-                'request_id' => $link->request_id,
-                'amount' => $link->amount,
-                'created_at' => $link->created_at,
+        $links = RequestPaymentLink::whereIn('payment_id', $donorPaymentIds)
+            ->with([
+                'request:id,status',
+                'request.items.menuItem.menuItemCategory:id,name',
+                'request.redemption.proof:id,order_redemption_id,fulfilled_at',
             ])
-            ->toArray();
+            ->latest()
+            ->limit(25)
+            ->get();
+
+        return $links->map(function ($link) {
+            $request = $link->request;
+            if (! $request) {
+                return null;
+            }
+
+            $proof = $request->redemption?->proof;
+            $fulfilledAt = $proof?->fulfilled_at;
+            $displayAt = $fulfilledAt ?? $link->created_at;
+
+            $type = $this->resolveRequestTypeLabel($request);
+
+            return [
+                'pseudonymous_id' => $this->pseudonymousRequestId($request->id),
+                'date' => $displayAt->translatedFormat('M d, Y'),
+                'time' => $displayAt->translatedFormat('H:i'),
+                'amount' => (float) $link->amount,
+                'type' => $type,
+                'status' => $this->mapRequestStatusForDonor($request->status),
+                'status_key' => $request->status,
+            ];
+        })->filter()->sortByDesc(fn ($r) => $r['date'] . ' ' . $r['time'])->values()->take(15)->toArray();
     }
 
+    /** FR-25.2: Pseudonymous ID instead of real request ID. */
+    private function pseudonymousRequestId(int $requestId): string
+    {
+        return 'R-' . strtoupper(substr(hash('sha256', 'req_' . $requestId . config('app.key')), 0, 8));
+    }
+
+    private function mapRequestStatusForDonor(?string $status): string
+    {
+        return match ($status) {
+            'FULFILLED' => __('Delivered'),
+            'REDEEMABLE' => __('Code scanned at provider'),
+            'APPROVED' => __('Request approved'),
+            'REQUESTED' => __('Allocated'),
+            default => __('Allocated'),
+        };
+    }
+
+    /**
+     * Resolve human-readable type label. Avoids showing IDs (e.g. "213") or invalid data.
+     */
+    private function resolveRequestTypeLabel(RequestModel $request): string
+    {
+        $firstItem = $request->items->first();
+        if (! $firstItem?->menuItem) {
+            return __('Request');
+        }
+
+        $menuItem = $firstItem->menuItem;
+
+        // Prefer category name (e.g. "Bread", "Rice Dishes") — must be non-numeric
+        $categoryName = $menuItem->menuItemCategory?->name;
+        if ($categoryName && ! preg_match('/^\d+$/', (string) $categoryName)) {
+            return $categoryName;
+        }
+
+        // Fallback: menu item name (e.g. "Family meal package") — more descriptive
+        $itemName = $menuItem->name;
+        if ($itemName && ! preg_match('/^\d+$/', (string) $itemName)) {
+            return $itemName;
+        }
+
+        // Legacy: map category slug to human-readable
+        $legacyCategory = $menuItem->category;
+        if ($legacyCategory && ! preg_match('/^\d+$/', (string) $legacyCategory)) {
+            return match (strtolower((string) $legacyCategory)) {
+                'meal', 'meals' => __('Meals'),
+                'bakery' => __('Bakery'),
+                'basket' => __('Food basket'),
+                'catering' => __('Catering'),
+                'grocery' => __('Grocery'),
+                default => ucfirst((string) $legacyCategory),
+            };
+        }
+
+        return __('Request');
+    }
+
+    /**
+     * Chart data: only periods (months) where the donor had donations.
+     * Sparse display — no empty months. Chronological order.
+     */
     private function donorImpactChartData($donorPaymentIds): array
     {
+        if ($donorPaymentIds->isEmpty()) {
+            return ['categories' => [], 'series' => []];
+        }
+
+        $payments = Payment::whereIn('id', $donorPaymentIds)
+            ->where('status', Payment::STATUS_SUCCEEDED)
+            ->get(['created_at', 'amount']);
+
+        $grouped = $payments->groupBy(fn ($p) => $p->created_at->format('Y-m'));
+
         $categories = [];
         $series = [];
-
-        for ($i = 23; $i >= 0; $i--) {
-            $date = Carbon::now()->subMonths($i);
+        foreach ($grouped->sortKeys() as $monthKey => $items) {
+            $date = Carbon::parse($monthKey . '-01');
             $categories[] = $date->translatedFormat('M Y');
-
-            if ($donorPaymentIds->isEmpty()) {
-                $series[] = 0;
-            } else {
-                $monthTotal = Payment::whereIn('id', $donorPaymentIds)
-                    ->where('status', Payment::STATUS_SUCCEEDED)
-                    ->whereYear('created_at', $date->year)
-                    ->whereMonth('created_at', $date->month)
-                    ->sum('amount');
-                $series[] = (float) $monthTotal;
-            }
+            $series[] = (float) $items->sum('amount');
         }
 
         return [
