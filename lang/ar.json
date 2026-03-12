@@ -1,4 +1,4 @@
-{
+﻿{
     "(and :count more error)": "(و :count خطأ إضافي)",
     "(and :count more errors)": "(و :count خطأ إضافي)|(و :count أخطاء إضافية)|(و :count أخطاء إضافية)",
     "A decryption key is required.": "مطلوب مفتاح فك التشفير.",
