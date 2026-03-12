@@ -56,7 +56,7 @@
 | الدالة | الوظيفة |
 |--------|---------|
 | `initiateSponsorPayment($sponsorId, $amount, $idempotencyKey?)` | إنشاء Payment بـ status=INITIATED، Audit، إرجاع Payment |
-| `redirectToGateway(Payment $payment)` | إنشاء فاتورة MyFatoorah، تحديث Payment، redirect لصفحة الدفع |
+| `redirectToGateway(Payment $payment)` | إنشاء فاتورة MyFatoorah، تحديث Payment، redirect لصفحة الدفع. **FR-3.4:** عند فشل API يُعاد للمستخدم مع رسالة إعادة المحاولة |
 | `handleCallback(Request $request)` | معالجة callback، التحقق عبر API، تحديث Payment، إدخال أموال أو redirect فشل |
 | `handleError(Request $request)` | معالجة ErrorUrl، تحديث Payment إلى FAILED إن وُجد |
 

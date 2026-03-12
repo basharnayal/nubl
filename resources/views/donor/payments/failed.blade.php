@@ -1,3 +1,11 @@
+@php
+    $reason = session('payment_reason');
+    $retryMessage = match ($reason) {
+        'api_unavailable' => __('The payment service is temporarily unavailable. Please try again in a few moments.'),
+        'ambiguous' => __('We received an unclear response from the payment service. Please try again.'),
+        default => __('Your payment could not be processed. Please try again or contact support if the problem persists.'),
+    };
+@endphp
 <x-app-layout title="{{ __('Payment Failed') }}" is-header-blur="true">
     <div class="pt-4">
         <div class="grid grid-cols-1 gap-4 sm:gap-5 lg:gap-6">
@@ -10,7 +18,7 @@
                         {{ __('Payment was not completed') }}
                     </h2>
                     <p class="mt-4 text-sm text-slate-500 dark:text-navy-400">
-                        {{ __('Your payment could not be processed. Please try again or contact support if the problem persists.') }}
+                        {{ $retryMessage }}
                     </p>
                     <div class="mt-6 flex justify-center gap-4">
                         <x-lineone-button :href="route('donor.donations.new')" variant="primary">{{ __('Try Again') }}</x-lineone-button>

@@ -1,4 +1,4 @@
-﻿{
+{
     "(and :count more error)": "(و :count خطأ إضافي)",
     "(and :count more errors)": "(و :count خطأ إضافي)|(و :count أخطاء إضافية)|(و :count أخطاء إضافية)",
     "A decryption key is required.": "مطلوب مفتاح فك التشفير.",
@@ -401,8 +401,10 @@
     "Back to Dashboard": "العودة للوحة التحكم",
     "Payment was not completed": "لم تكتمل عملية الدفع",
     "Your payment could not be processed. Please try again or contact support if the problem persists.": "تعذر معالجة الدفع. يرجى المحاولة مرة أخرى أو التواصل مع الدعم إذا استمرت المشكلة.",
+    "The payment service is temporarily unavailable. Please try again in a few moments.": "خدمة الدفع غير متوفرة مؤقتاً. يرجى المحاولة مرة أخرى بعد قليل.",
+    "We received an unclear response from the payment service. Please try again.": "تلقينا استجابة غير واضحة من خدمة الدفع. يرجى المحاولة مرة أخرى.",
     "Try Again": "حاول مرة أخرى",
-    "The minimum donation amount is 10 SAR.": "الحد الأدنى للتبرع هو 10 ريال.",
+    "The minimum donation amount is 1 SAR.": "الحد الأدنى للتبرع هو 1 ريال.",
     "Users": "المستخدمون",
     "Pending Approvals": "الموافقات المعلقة",
     "User Management": "إدارة المستخدمين",

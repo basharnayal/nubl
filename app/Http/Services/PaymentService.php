@@ -8,6 +8,7 @@ use App\Notifications\DonationReceiptNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class PaymentService
@@ -51,14 +52,34 @@ class PaymentService
         $errorUrl = route('payments.error');
         $user = $payment->sponsor;
 
-        $result = $this->myFatoorah->createInvoice(
-            (float) $payment->amount,
-            (string) $payment->id,
-            $callbackUrl,
-            $errorUrl,
-            $user?->email,
-            $user?->name
-        );
+        try {
+            $result = $this->myFatoorah->createInvoice(
+                (float) $payment->amount,
+                (string) $payment->id,
+                $callbackUrl,
+                $errorUrl,
+                $user?->email,
+                $user?->name
+            );
+        } catch (\Throwable $e) {
+            $this->auditService->log('payment', 'gateway_api_error', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
+            ], $payment->sponsor_id);
+
+            Log::critical('Payment critical failure: gateway API error', [
+                'payment_id' => $payment->id,
+                'sponsor_id' => $payment->sponsor_id,
+                'amount' => $payment->amount,
+                'error' => $e->getMessage(),
+            ]);
+
+            $payment->update(['status' => Payment::STATUS_FAILED]);
+
+            return redirect()
+                ->route('donor.payments.failed', ['payment_id' => $payment->id])
+                ->with('payment_reason', 'api_unavailable');
+        }
 
         $payment->update([
             'status' => Payment::STATUS_PENDING,
@@ -84,6 +105,10 @@ class PaymentService
                 'query' => $request->query(),
             ], null);
 
+            Log::critical('Payment critical failure: missing payment ID in callback', [
+                'query' => $request->query(),
+            ]);
+
             return redirect()->route('donor.payments.failed');
         }
 
@@ -100,7 +125,14 @@ class PaymentService
                 'external_id' => $paymentId,
             ], null);
 
-            return redirect()->route('donor.payments.failed');
+            Log::critical('Payment critical failure: callback verification failed', [
+                'external_id' => $paymentId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()
+                ->route('donor.payments.failed')
+                ->with('payment_reason', 'api_unavailable');
         }
 
         $invoiceId = (string) ($statusResult['invoice_id'] ?? $paymentId);
@@ -110,6 +142,10 @@ class PaymentService
             $this->auditService->log('payment', 'callback_payment_not_found', [
                 'invoice_id' => $invoiceId,
             ], null);
+
+            Log::critical('Payment critical failure: payment not found for callback', [
+                'invoice_id' => $invoiceId,
+            ]);
 
             return redirect()->route('donor.payments.failed');
         }
@@ -166,7 +202,19 @@ class PaymentService
             'status' => $status,
         ], $payment->sponsor_id);
 
-        return redirect()->route('donor.payments.failed', ['payment_id' => $payment->id]);
+        Log::critical('Payment critical failure: payment did not succeed', [
+            'payment_id' => $payment->id,
+            'sponsor_id' => $payment->sponsor_id,
+            'amount' => $payment->amount,
+            'gateway_status' => $status,
+        ]);
+
+        $redirect = redirect()->route('donor.payments.failed', ['payment_id' => $payment->id]);
+        if (in_array($status, ['Unknown', '']) || ! $status) {
+            $redirect = $redirect->with('payment_reason', 'ambiguous');
+        }
+
+        return $redirect;
     }
 
     public function handleError(Request $request): RedirectResponse
@@ -196,6 +244,12 @@ class PaymentService
                         'payment_id' => $payment->id,
                         'source' => 'error_url',
                     ], $payment->sponsor_id);
+
+                    Log::critical('Payment critical failure: error URL received', [
+                        'payment_id' => $payment->id,
+                        'sponsor_id' => $payment->sponsor_id,
+                        'amount' => $payment->amount,
+                    ]);
                 }
             } catch (\Throwable $e) {
                 // Ignore — payment may not exist

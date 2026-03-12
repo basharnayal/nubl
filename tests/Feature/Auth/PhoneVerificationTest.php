@@ -125,4 +125,48 @@ class PhoneVerificationTest extends TestCase
         $this->assertAuthenticated();
         $response->assertRedirect(route('verification.phone'));
     }
+
+    public function test_resend_otp_succeeds_and_updates_cache(): void
+    {
+        $this->mock(\App\Http\Services\SmsService::class, function ($mock) {
+            $mock->shouldReceive('send')->once()->andReturn(true);
+        });
+
+        $user = User::factory()->create([
+            'phone_number' => '966501234567',
+            'phone_verified_at' => null,
+        ]);
+        $user->assignRole('donor');
+
+        $otp1 = '111111';
+        Cache::put('otp:user:' . $user->id, $otp1, now()->addMinutes(5));
+
+        $response = $this->actingAs($user)->post(route('verification.phone.resend'));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('status');
+
+        $newOtp = Cache::get('otp:user:' . $user->id);
+        $this->assertNotNull($newOtp);
+        $this->assertNotSame($otp1, $newOtp);
+    }
+
+    public function test_resend_otp_fails_when_rate_limit_exceeded(): void
+    {
+        $this->mock(\App\Http\Services\SmsService::class, function ($mock) {
+            $mock->shouldNotReceive('send');
+        });
+
+        $user = User::factory()->create([
+            'phone_number' => '966501234567',
+            'phone_verified_at' => null,
+        ]);
+        $user->assignRole('donor');
+
+        Cache::put('otp:resend:' . $user->id, 6, now()->addMinutes(60));
+
+        $response = $this->actingAs($user)->post(route('verification.phone.resend'));
+
+        $response->assertSessionHasErrors('otp');
+    }
 }
