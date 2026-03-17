@@ -1,10 +1,10 @@
 # نظام الإشعارات — Notifications
 
-دليل استخدام نظام الإشعارات في NUBL.
+دليل مبسط لإرسال وعرض الإشعارات في NUBL.
 
 ---
 
-## 1. نظرة عامة
+## نظرة عامة
 
 | المكون | الوظيفة |
 |--------|---------|
@@ -13,64 +13,117 @@
 | **NotificationController** | API لجلب الإشعارات وتحديد المقروء |
 | **notificationPanel** | مكوّن Alpine.js لعرض الإشعارات في الهيدر |
 
+**شرط:** النموذج `User` يجب أن يستخدم الـ trait `Notifiable` (موجود افتراضياً في `App\Models\User`).
+
 ---
 
-## 2. إرسال إشعار للمستخدم
-
-### الطريقة الأساسية
+## إرسال إشعار (سطر واحد)
 
 ```php
-use App\Notifications\DonationReceiptNotification;
-
-$user = User::find(1);
 $user->notify(new DonationReceiptNotification($payment));
 ```
 
-### شروط النموذج (User)
+أو عبر NotificationService (للخدمات):
 
-- يجب أن يستخدم الـ User الـ trait `Notifiable` (موجود افتراضياً في `App\Models\User`)
+```php
+$this->notificationService->sendDonationReceipt($payment);
+```
 
 ---
 
-## 3. إنشاء إشعار جديد
+## تنبيه هندسي (إلزامي)
 
-### الخطوة 1: إنشاء كلاس الإشعار
+لتوحيد التصميم ورفع الـ SOLID: أي كود يتعامل مع الإشعارات يجب أن يلتزم باستخدام الواجهة.
+
+1. داخل الـ `Services` أو الـ `Controllers` لا تستخدم `\$user->notify(...)` مباشرة.
+2. بدلاً من ذلك حقن واستخدام `App\Contracts\NotificationServiceInterface` (مثل `$this->notificationService->sendDonationReceipt(...)`).
+3. الهدف: فصل منطق الإشعارات عن منطق الدفع/التسجيل وتقليل الاقتران (SRP/DIP).
+
+---
+
+## إضافة إشعار جديد — 3 خطوات
+
+### 1. إنشاء كلاس الإشعار
 
 ```bash
-php artisan make:notification MyCustomNotification
+php artisan make:notification RequestApprovedNotification
 ```
 
-### الخطوة 2: تعريف القنوات (Channels)
+### 2. تعريف الإشعار (يجب أن يحتوي `type` في toArray)
 
 ```php
-public function via(object $notifiable): array
-{
-    $channels = ['database'];  // للتخزين في جدول notifications
-    if (!empty($notifiable->email)) {
-        $channels[] = 'mail';   // للإرسال بالبريد
-    }
-    return $channels;
-}
-```
-
-### الخطوة 3: تعريف محتوى قاعدة البيانات (toArray)
-
-```php
+// app/Notifications/RequestApprovedNotification.php
 public function toArray(object $notifiable): array
 {
     return [
-        'type' => 'my_custom_type',      // مطلوب — يُستخدم في NotificationController
-        'message' => __('Your message'),
-        'subtitle' => __('Optional subtitle'),
-        'url' => route('some.route'),
-        // أي حقول إضافية حسب الحاجة
+        'type' => 'request_approved',   // ← مطلوب
+        'message' => __('Your request was approved'),
+        'url' => route('recipient.requests.index'),
+        // 'subtitle' => __('Optional') — اختياري، إن وُجد ي override القيمة في config
     ];
 }
 ```
 
-### الخطوة 4: تعريف البريد (toMail) — اختياري
+### 3. إضافة في config
 
 ```php
+// config/notifications.php — داخل مصفوفة 'types'
+'request_approved' => [
+    'icon' => 'success',
+    'icon_svg' => 'check-circle',
+    'subtitle' => 'Your request was approved',
+],
+```
+
+**انتهى.** لا حاجة لتعديل NotificationController.
+
+---
+
+## مرجع سريع — الأيقونات
+
+| العنصر | القيم |
+|--------|-------|
+| **icon** | `success` \| `warning` \| `info` \| `primary` |
+| **icon_svg** | `check-circle` \| `bell` \| `clock` \| `users` |
+
+| icon_svg | اللون | الاستخدام |
+|----------|-------|-----------|
+| `check-circle` | success (أخضر) | نجاح، إكمال |
+| `bell` | info (أزرق) | تنبيه عام |
+| `clock` | warning (أصفر) | معلق، انتظار |
+| `users` | primary | مستخدمون، مجموعات |
+
+---
+
+## المسارات (Routes)
+
+جميع المسارات تتطلب تسجيل الدخول (`auth` middleware).
+
+| المسار | الطريقة | الوظيفة |
+|--------|---------|---------|
+| `GET /notifications` | GET | جلب الإشعارات (JSON) |
+| `POST /notifications/{id}/read` | POST | تحديد إشعار كمقروء |
+| `POST /notifications/read-all` | POST | تحديد الكل كمقروء |
+
+---
+
+## القنوات والبريد
+
+- **database:** تخزين الإشعار في جدول `notifications` (مطلوب لعرضه في الواجهة).
+- **mail:** إرسال بريد إلكتروني (اختياري).
+
+إذا أردت إرسال بريد مع الإشعار، عرّف القنوات و`toMail`:
+
+```php
+public function via(object $notifiable): array
+{
+    $channels = ['database'];
+    if (!empty($notifiable->email)) {
+        $channels[] = 'mail';
+    }
+    return $channels;
+}
+
 public function toMail(object $notifiable): MailMessage
 {
     return (new MailMessage)
@@ -80,37 +133,9 @@ public function toMail(object $notifiable): MailMessage
 }
 ```
 
-### الخطوة 5: إضافة النوع في NotificationController
-
-في `formatNotification()` أضف حالة جديدة في `match`:
-
-```php
-'my_custom_type' => [
-    'icon' => 'success',        // success | warning | info | primary
-    'icon_svg' => 'check-circle',  // check-circle | bell | clock | users
-    'title' => $data['message'] ?? __('Default title'),
-    'subtitle' => $data['subtitle'] ?? '',
-    'url' => $data['url'] ?? '#',
-],
-```
-
 ---
 
-## 4. المسارات (Routes)
-
-| المسار | الطريقة | الوظيفة |
-|--------|---------|---------|
-| `GET /notifications` | GET | جلب الإشعارات (JSON) |
-| `POST /notifications/{id}/read` | POST | تحديد إشعار كمقروء |
-| `POST /notifications/read-all` | POST | تحديد الكل كمقروء |
-
-**ملاحظة:** جميع المسارات تتطلب تسجيل الدخول (`auth` middleware).
-
----
-
-## 5. API الاستجابة
-
-### GET /notifications
+## API الاستجابة (GET /notifications)
 
 ```json
 {
@@ -133,15 +158,12 @@ public function toMail(object $notifiable): MailMessage
 
 ---
 
-## 6. الواجهة الأمامية (Frontend)
+## الواجهة الأمامية (Frontend)
 
-### آلية التحديث (Polling)
+- جلب الإشعارات عند فتح القائمة، وتحديث تلقائي كل **30 ثانية** (polling).
+- المكوّن: `resources/js/components/notificationPanel.js`.
 
-- يتم جلب الإشعارات عند فتح القائمة
-- يتم التحديث تلقائياً كل **30 ثانية**
-- المكوّن: `resources/js/components/notificationPanel.js`
-
-### استخدام الـ API من JavaScript
+استخدام الـ API من JavaScript:
 
 ```javascript
 // جلب الإشعارات
@@ -164,30 +186,19 @@ await fetch(`/notifications/${id}/read`, {
 
 ---
 
-## 7. الأيقونات المتاحة
+## التنفيذ المتزامن vs قائمة الانتظار
 
-| icon_svg | اللون | الاستخدام |
-|----------|-------|-----------|
-| `check-circle` | success (أخضر) | نجاح، إكمال |
-| `bell` | info (أزرق) | تنبيه عام |
-| `clock` | warning (أصفر) | معلق، انتظار |
-| `users` | primary | مستخدمون، مجموعات |
-
----
-
-## 8. التنفيذ المتزامن vs قائمة الانتظار
-
-- **DonationReceiptNotification** يعمل **مباشرة** (بدون Queue) حتى يظهر الإشعار فوراً
-- إذا أردت استخدام `ShouldQueue` لإشعارات أخرى، يجب تشغيل:
+- **DonationReceiptNotification** يعمل **مباشرة** (بدون Queue) حتى يظهر الإشعار فوراً.
+- إذا أردت استخدام `ShouldQueue` لإشعارات أخرى، شغّل:
   ```bash
   php artisan queue:work
   ```
 
 ---
 
-## 9. الترجمات
+## الترجمات
 
-أضف النصوص في `lang/ar.json`:
+أضف نصوص الإشعارات في `lang/ar.json` (أو الملف المناسب للغة):
 
 ```json
 "Your notification message": "رسالة الإشعار بالعربية"
@@ -195,12 +206,32 @@ await fetch(`/notifications/${id}/read`, {
 
 ---
 
-## 10. الملفات المرجعية
+## التوافق
+
+بعد إضافة **NotificationService** و **config/notifications.php**:
+
+| المكون | الحالة |
+|--------|--------|
+| **DonationReceiptNotification** | لم يتغير — يعمل كما هو (database + mail) |
+| **NotificationController** و **formatNotification()** | يقرأ من الـ config بدلاً من `match` ثابت — السلوك نفسه |
+| **notificationPanel.js** | لم يتغير — يعرض الإشعارات كما قبل |
+| **PaymentFlowTest** | تعمل كما هي — NotificationService يُحقَن تلقائياً من الحاوية |
+| **PaymentService** | يعتمد على `NotificationServiceInterface` بدلاً من `DonationReceiptNotification` مباشرة |
+
+التطبيق يعمل بشكل طبيعي؛ الإرسال يتم عبر NotificationService من الخدمات، والعرض والـ API كما كان.
+
+---
+
+## الملفات المرجعية
 
 | الملف | الوظيفة |
 |-------|---------|
-| `app/Notifications/DonationReceiptNotification.php` | إشعار إيصال التبرع |
+| `config/notifications.php` | تسجيل أنواع الإشعارات (icon, icon_svg, subtitle) |
+| `app/Notifications/*.php` | كلاسات الإشعارات |
+| `app/Contracts/NotificationServiceInterface.php` | واجهة خدمة الإشعارات |
+| `app/Http/Services/NotificationService.php` | إرسال الإشعارات من الخدمات |
 | `app/Http/Controllers/NotificationController.php` | API الإشعارات |
-| `resources/js/components/notificationPanel.js` | مكوّن العرض |
-| `resources/views/components/app-partials/header.blade.php` | مكان عرض الإشعارات |
+| `resources/js/components/notificationPanel.js` | عرض الإشعارات (polling كل 30 ثانية) |
+| `resources/views/components/app-partials/header.blade.php` | مكان عرض قائمة الإشعارات في الهيدر |
 | `database/migrations/*_create_notifications_table.php` | جدول الإشعارات |
+| `lang/ar.json` (أو ملفات اللغة) | ترجمة نصوص الإشعارات |

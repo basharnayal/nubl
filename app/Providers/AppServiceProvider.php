@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Contracts\NotificationServiceInterface;
+use App\Http\Services\NotificationService;
 use App\Http\View\Composers\SidebarComposer;
 use App\Models\FundTransaction;
 use App\Observers\FundTransactionObserver;
@@ -15,7 +17,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(NotificationServiceInterface::class, NotificationService::class);
     }
 
     /**

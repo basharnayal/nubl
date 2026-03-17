@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Helpers\PhoneHelper;
 use App\Http\Controllers\Controller;
+use App\Contracts\NotificationServiceInterface;
 use App\Http\Services\OtpService;
 use App\Models\RecipientKycDetails;
 use App\Models\RecipientProfile;
@@ -27,7 +28,8 @@ use Illuminate\View\View;
 class RegisteredUserController extends Controller
 {
     public function __construct(
-        private OtpService $otpService
+        private OtpService $otpService,
+        private NotificationServiceInterface $notificationService
     ) {}
 
     public function create(): View
@@ -77,6 +79,8 @@ class RegisteredUserController extends Controller
         $user->assignRole('donor');
 
         event(new Registered($user));
+
+        $this->notificationService->sendNewUserRegisteredToAdmins($user);
 
         Auth::login($user);
 
@@ -146,6 +150,8 @@ class RegisteredUserController extends Controller
 
                 event(new Registered($user));
 
+                $this->notificationService->sendNewUserRegisteredToAdmins($user);
+
                 Auth::login($user);
 
                 if (config('app.phone_verification_enabled', true)) {
@@ -184,4 +190,5 @@ class RegisteredUserController extends Controller
 
         return $path;
     }
+
 }

@@ -59,33 +59,19 @@ class NotificationController extends Controller
         $data = $notification->data;
         $type = $data['type'] ?? 'unknown';
 
-        $config = match ($type) {
-            'donation_receipt' => [
-                'icon' => 'success',
-                'icon_svg' => 'check-circle',
-                'title' => $data['message'] ?? __('Your donation was successful'),
-                'subtitle' => __('Receipt has been sent to your email'),
-                'url' => $data['url'] ?? route('donor.donations.index'),
-            ],
-            default => [
-                'icon' => 'info',
-                'icon_svg' => 'bell',
-                'title' => $data['message'] ?? $data['title'] ?? __('Notification'),
-                'subtitle' => $data['subtitle'] ?? '',
-                'url' => $data['url'] ?? '#',
-            ],
-        };
+        $typeConfig = config("notifications.types.{$type}", config('notifications.default'));
+        $subtitle = $data['subtitle'] ?? ($typeConfig['subtitle'] ?? '');
 
         return [
             'id' => $notification->id,
             'type' => $type,
             'read_at' => $notification->read_at?->toIso8601String(),
             'created_at' => $notification->created_at->toIso8601String(),
-            'title' => $config['title'],
-            'subtitle' => $config['subtitle'],
-            'url' => $config['url'],
-            'icon' => $config['icon'],
-            'icon_svg' => $config['icon_svg'],
+            'title' => $data['message'] ?? $data['title'] ?? __('Notification'),
+            'subtitle' => $subtitle ? __($subtitle) : '',
+            'url' => $data['url'] ?? '#',
+            'icon' => $typeConfig['icon'] ?? 'info',
+            'icon_svg' => $typeConfig['icon_svg'] ?? 'bell',
         ];
     }
 }

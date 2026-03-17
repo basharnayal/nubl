@@ -9,6 +9,7 @@ use App\Models\ProviderDocuments;
 use App\Models\ProviderFinancialInfo;
 use App\Models\ProviderOperatingInfo;
 use App\Models\ProviderProfile;
+use App\Contracts\NotificationServiceInterface;
 use App\Models\User;
 use App\Rules\SaudiPhoneNumber;
 use App\Rules\SaudiPhoneUnique;
@@ -29,7 +30,8 @@ use Illuminate\View\View;
 class ProviderRegistrationController extends Controller
 {
     public function __construct(
-        private OtpService $otpService
+        private OtpService $otpService,
+        private NotificationServiceInterface $notificationService
     ) {}
 
     public function create(Request $request): View|RedirectResponse
@@ -186,6 +188,9 @@ class ProviderRegistrationController extends Controller
                 ]);
 
                 event(new Registered($user));
+
+                $this->notificationService->sendNewUserRegisteredToAdmins($user);
+
                 Auth::login($user);
 
                 if (config('app.phone_verification_enabled', true)) {

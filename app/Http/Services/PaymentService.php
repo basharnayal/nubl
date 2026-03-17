@@ -2,9 +2,9 @@
 
 namespace App\Http\Services;
 
+use App\Contracts\NotificationServiceInterface;
 use App\Models\FundTransaction;
 use App\Models\Payment;
-use App\Notifications\DonationReceiptNotification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +16,8 @@ class PaymentService
     public function __construct(
         private MyFatoorahService $myFatoorah,
         private SystemWalletService $systemWallet,
-        private AuditService $auditService
+        private AuditService $auditService,
+        private NotificationServiceInterface $notificationService
     ) {}
 
     public function initiateSponsorPayment(int $sponsorId, float $amount, ?string $idempotencyKey = null): Payment
@@ -177,11 +178,7 @@ class PaymentService
                     $payment->id
                 );
 
-                // FR-3.2: Generate receipt and send via internal notification and email
-                $donor = $payment->sponsor;
-                if ($donor) {
-                    $donor->notify(new DonationReceiptNotification($payment));
-                }
+                $this->notificationService->sendDonationReceipt($payment);
 
                 $this->auditService->log('payment', 'succeeded', [
                     'payment_id' => $payment->id,
