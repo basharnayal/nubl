@@ -6,8 +6,8 @@ A digital platform for neighborhood-based food assistance (sadaqah) that connect
 
 ## 🛠️ Technology Stack
 
-- **Backend**: Laravel 12 (PHP 8.2+)
-- **Frontend**: Blade Templates (Server-Side Rendering)
+- **Backend**: Laravel 12 (PHP 8.2+) latest version
+- **Frontend**: Blade Templates 
 - **CSS Framework**: Tailwind CSS v4
 - **UI Components**: Lineone (Alpine.js + Tailwind)
 - **JavaScript**: Alpine.js
@@ -16,8 +16,6 @@ A digital platform for neighborhood-based food assistance (sadaqah) that connect
 - **Authorization**: Spatie Laravel Permission
 - **Audit Logging**: Spatie Laravel Activity Log
 - **Database**: MySQL
-
-**Note**: This project explicitly does NOT use Vue, React, Livewire, or SPA frontend.
 
 ---
 
