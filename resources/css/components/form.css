@@ -39,9 +39,17 @@
 .form-select {
   @apply bg-center bg-no-repeat;
   background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewbox='0 0 20 20'%3e%3cpath stroke='%235C6B8A' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  /* Chevron sits on inline-end; padding reserves space in both LTR and RTL */
   background-position: right 0.5rem center;
   background-size: 1.5em 1.5em;
+  padding-inline-start: 0.75rem;
+  padding-inline-end: 2.5rem;
   print-color-adjust: exact;
+}
+
+[dir='rtl'] .form-select {
+  /* Physical left = inline-end in RTL (matches padding-inline-end) */
+  background-position: left 0.5rem center;
 }
 
 .form-multiselect {

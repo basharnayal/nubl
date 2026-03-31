@@ -9,9 +9,23 @@ use App\Http\Services\SystemWalletService;
 use App\Models\Request as RequestModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class ProviderRequestController extends Controller
 {
+    /** Status values allowed in the incoming-requests filter (matches provider UI). */
+    private const FILTER_STATUSES = [
+        'REQUESTED',
+        'APPROVED',
+        'ADMIN_PENDING',
+        'ADMIN_APPROVED',
+        'REDEEMABLE',
+        'FULFILLED',
+        'REJECTED',
+        'CANCELLED',
+        'ADMIN_REJECTED',
+    ];
+
     public function __construct(
         private SystemWalletService $systemWalletService,
         private AuditService $auditService,
@@ -21,14 +35,112 @@ class ProviderRequestController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $httpRequest)
     {
-        $requests = RequestModel::forProvider(auth()->id())
-            ->with(['items.menuItem.menuItemCategory', 'redemption.proof'])
-            ->latest()
-            ->paginate(15);
+        $validated = $httpRequest->validate([
+            'from' => ['nullable', 'date'],
+            'to' => ['nullable', 'date'],
+            'status' => ['nullable', 'string', Rule::in(self::FILTER_STATUSES)],
+            'needs_proof' => ['nullable', 'in:1'],
+            'q' => ['nullable', 'string', 'max:40'],
+            'per_page' => ['nullable', 'integer', Rule::in([15, 25, 50])],
+        ]);
 
-        return view('provider.requests.index', compact('requests'));
+        $dateRangeInvalid = ! empty($validated['from']) && ! empty($validated['to'])
+            && $validated['to'] < $validated['from'];
+
+        $providerId = auth()->id();
+        $perPage = $validated['per_page'] ?? 15;
+
+        $query = RequestModel::forProvider($providerId)
+            ->with(['items.menuItem.menuItemCategory', 'redemption.proof']);
+
+        if (! $dateRangeInvalid) {
+            if (! empty($validated['from'])) {
+                $query->whereDate('created_at', '>=', $validated['from']);
+            }
+            if (! empty($validated['to'])) {
+                $query->whereDate('created_at', '<=', $validated['to']);
+            }
+        }
+        if (! empty($validated['status'])) {
+            $query->where('status', $validated['status']);
+        }
+        if (($validated['needs_proof'] ?? null) === '1') {
+            $query->whereHas('redemption', function ($q) {
+                $q->where('status', 'REDEEMED')
+                    ->whereDoesntHave('proof');
+            });
+        }
+
+        if (! empty($validated['q'])) {
+            $idQuery = ltrim(trim($validated['q']), '#');
+            if ($idQuery !== '' && ctype_digit($idQuery)) {
+                $query->where('id', (int) $idQuery);
+            }
+        }
+
+        $requests = $query->latest()
+            ->paginate($perPage)
+            ->withQueryString();
+
+        $pendingProofCount = RequestModel::forProvider($providerId)
+            ->whereHas('redemption', function ($query) {
+                $query->where('status', 'REDEEMED')
+                    ->whereDoesntHave('proof');
+            })
+            ->count();
+
+        $filters = [
+            'from' => $validated['from'] ?? null,
+            'to' => $validated['to'] ?? null,
+            'status' => $validated['status'] ?? null,
+            'needs_proof' => $validated['needs_proof'] ?? null,
+            'q' => $validated['q'] ?? null,
+            'per_page' => $perPage,
+        ];
+
+        $hasActiveFilters = filled($filters['from'])
+            || filled($filters['to'])
+            || filled($filters['status'])
+            || filled($filters['needs_proof'])
+            || filled($filters['q']);
+
+        $filterStatuses = self::FILTER_STATUSES;
+
+        $thisWeekFrom = now()->startOfWeek()->toDateString();
+        $thisWeekTo = now()->toDateString();
+
+        $statusFilterLabels = [
+            'REQUESTED' => __('Requested'),
+            'APPROVED' => __('Approved'),
+            'ADMIN_PENDING' => __('Admin Pending'),
+            'ADMIN_APPROVED' => __('Admin Approved'),
+            'REDEEMABLE' => __('Redeemable'),
+            'FULFILLED' => __('Fulfilled'),
+            'REJECTED' => __('Rejected by provider'),
+            'CANCELLED' => __('Cancelled'),
+            'ADMIN_REJECTED' => __('Rejected by admin'),
+        ];
+
+        $view = view('provider.requests.index', compact(
+            'requests',
+            'pendingProofCount',
+            'filters',
+            'hasActiveFilters',
+            'filterStatuses',
+            'thisWeekFrom',
+            'thisWeekTo',
+            'statusFilterLabels'
+        ));
+
+        if ($dateRangeInvalid) {
+            return $view->withErrors([
+                'to' => __('The end date must be on or after the start date.'),
+            ]);
+        }
+
+        return $view;
     }
 
     /**

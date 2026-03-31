@@ -2,8 +2,15 @@
 @php
     $qty = (int) $request->items->sum('quantity');
     $amount = number_format((float) $request->reserved_amount, 2);
+    $refLabel = \App\Support\PseudonymousRequestId::make($request->id);
+    $typeLabel = \App\Support\RequestTypeLabel::forRequest($request);
+    $proofPending = $request->needsProviderFulfillmentProof();
 @endphp
-<div class="card border border-slate-200/90 p-4 shadow-sm dark:border-navy-500 dark:bg-navy-700/30">
+<div @class([
+    'card border p-4 shadow-sm dark:bg-navy-700/30',
+    'border-slate-200/90 dark:border-navy-500' => ! $proofPending,
+    'border-warning/40 bg-warning/[0.06] ring-2 ring-warning/20 dark:border-warning/50 dark:bg-warning/10 dark:ring-warning/25' => $proofPending,
+])>
     <div class="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-3 dark:border-navy-600">
         <div>
             <p class="text-lg font-semibold text-primary dark:text-accent-light">#{{ $request->id }}</p>
@@ -17,8 +24,8 @@
             <i class="fa-solid fa-fingerprint text-sm text-slate-600 dark:text-navy-200"></i>
         </div>
         <div class="min-w-0 flex-1 text-start" dir="ltr">
-            <span class="font-mono text-sm font-medium text-slate-700 dark:text-navy-100">{{ \App\Support\PseudonymousRequestId::make($request->id) }}</span>
-            <p class="mt-0.5 text-xs text-slate-500 dark:text-navy-400">{{ \App\Support\RequestTypeLabel::forRequest($request) }}</p>
+            <span class="block truncate font-mono text-sm font-medium text-slate-700 dark:text-navy-100" title="{{ $refLabel }}">{{ $refLabel }}</span>
+            <p class="mt-0.5 truncate text-xs text-slate-500 dark:text-navy-400" title="{{ $typeLabel }}">{{ $typeLabel }}</p>
         </div>
     </div>
 
