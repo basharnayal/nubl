@@ -91,6 +91,19 @@ class Request extends Model
         return $this->status === 'REQUESTED';
     }
 
+    /**
+     * QR was scanned at the provider (redemption REDEEMED) but fulfillment proof not uploaded yet.
+     */
+    public function needsProviderFulfillmentProof(): bool
+    {
+        $redemption = $this->redemption;
+        if (! $redemption || $redemption->status !== 'REDEEMED') {
+            return false;
+        }
+
+        return $redemption->proof === null;
+    }
+
     // Accessors
     public function getIsReservationActiveAttribute()
     {
@@ -101,7 +114,7 @@ class Request extends Model
             'ADMIN_PENDING',
             'ADMIN_APPROVED',
             'REDEEMABLE',
-            'FULFILLED'
+            'FULFILLED',
         ]);
     }
 }

@@ -4,11 +4,13 @@ namespace Tests\Feature\Provider;
 
 use App\Models\Ewallet;
 use App\Models\FundTransaction;
+use App\Models\OrderProof;
 use App\Models\Payment;
 use App\Models\ProviderMenuItem;
 use App\Models\ProviderProfile;
 use App\Models\Request as RequestModel;
 use App\Models\User;
+use App\Support\PseudonymousRequestId;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Role;
@@ -19,8 +21,11 @@ class ProviderRequestFlowTest extends TestCase
     use RefreshDatabase;
 
     protected $provider;
+
     protected $recipient;
+
     protected $menuItem;
+
     protected $request;
 
     protected function setUp(): void
@@ -113,7 +118,8 @@ class ProviderRequestFlowTest extends TestCase
             ->get(route('provider.requests.index'));
 
         $response->assertStatus(200);
-        $response->assertSee($this->recipient->name);
+        $response->assertSee(PseudonymousRequestId::make($this->request->id), false);
+        $response->assertDontSee($this->recipient->name);
         $response->assertSee('50.00');
     }
 
@@ -235,5 +241,59 @@ class ProviderRequestFlowTest extends TestCase
             ->get(route('provider.requests.show', $this->request->id));
 
         $response->assertStatus(404); // Scoped query should not find it
+    }
+
+    #[Test]
+    public function provider_sees_upload_proof_link_when_order_scanned_without_proof()
+    {
+        $this->actingAs($this->provider)
+            ->put(route('provider.requests.update', $this->request->id), [
+                'action' => 'approve',
+            ]);
+
+        $this->request->refresh();
+        $redemption = $this->request->redemption;
+        $this->assertNotNull($redemption);
+        $redemption->update(['status' => 'REDEEMED']);
+
+        $show = $this->actingAs($this->provider)
+            ->get(route('provider.requests.show', $this->request->id));
+
+        $show->assertStatus(200);
+        $show->assertSee(__('Upload fulfillment proof'), false);
+        $show->assertSee(route('provider.proof.index', $redemption->id), false);
+
+        $index = $this->actingAs($this->provider)
+            ->get(route('provider.requests.index'));
+
+        $index->assertStatus(200);
+        $index->assertSee(__('Upload proof'), false);
+    }
+
+    #[Test]
+    public function provider_does_not_see_upload_proof_link_after_proof_exists()
+    {
+        $this->actingAs($this->provider)
+            ->put(route('provider.requests.update', $this->request->id), [
+                'action' => 'approve',
+            ]);
+
+        $this->request->refresh();
+        $redemption = $this->request->redemption;
+        $this->assertNotNull($redemption);
+        $redemption->update(['status' => 'REDEEMED']);
+
+        OrderProof::create([
+            'order_redemption_id' => $redemption->id,
+            'proof_url' => 'private/proofs/test-placeholder',
+            'is_provider_donation' => false,
+            'fulfilled_at' => now(),
+        ]);
+
+        $show = $this->actingAs($this->provider)
+            ->get(route('provider.requests.show', $this->request->id));
+
+        $show->assertStatus(200);
+        $show->assertDontSee(__('Upload fulfillment proof'));
     }
 }

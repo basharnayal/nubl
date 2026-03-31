@@ -41,11 +41,13 @@
                 </div>
 
                 <div class="card p-6">
-                    <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Recipient Information') }}</h3>
+                    <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Request reference') }}</h3>
+                    <p class="mb-4 text-xs text-slate-500 dark:text-navy-400">{{ __('Anonymous neighbor — no personal data.') }}</p>
                     <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <span class="block text-xs uppercase text-slate-500 dark:text-navy-400">{{ __('Name') }}</span>
-                            <span class="font-medium text-slate-700 dark:text-navy-100">{{ $request->recipient->name }}</span>
+                        <div dir="ltr" class="text-start">
+                            <span class="block text-xs uppercase text-slate-500 dark:text-navy-400">{{ __('Reference') }}</span>
+                            <span class="font-mono text-sm font-medium text-slate-700 dark:text-navy-100">{{ \App\Support\PseudonymousRequestId::make($request->id) }}</span>
+                            <p class="mt-1 text-xs text-slate-500 dark:text-navy-400">{{ \App\Support\RequestTypeLabel::forRequest($request) }}</p>
                         </div>
                         <div>
                             <span class="block text-xs uppercase text-slate-500 dark:text-navy-400">{{ __('Request Date') }}</span>
@@ -122,6 +124,17 @@
                                     {{ __('Confirm Rejection') }}
                                 </button>
                             </form>
+                        </div>
+                    @elseif($request->needsProviderFulfillmentProof())
+                        <div class="space-y-4">
+                            <p class="text-sm text-slate-600 dark:text-navy-300">
+                                {{ __('The order was scanned. Upload fulfillment proof to complete this request.') }}
+                            </p>
+                            <a href="{{ route('provider.proof.index', $request->redemption->id) }}"
+                                class="btn flex w-full items-center justify-center bg-primary text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus">
+                                <i class="fa-solid fa-camera me-2"></i>
+                                {{ __('Upload fulfillment proof') }}
+                            </a>
                         </div>
                     @else
                         <div class="rounded-lg bg-slate-100 p-4 text-center dark:bg-navy-700/50">

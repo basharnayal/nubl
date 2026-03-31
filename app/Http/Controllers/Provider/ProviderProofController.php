@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Provider;
 
 use App\Http\Controllers\Controller;
+use App\Http\Services\AuditService;
 use App\Models\OrderProof;
 use App\Models\OrderRedemption;
-use App\Http\Services\AuditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -14,13 +14,12 @@ class ProviderProofController extends Controller
 {
     public function __construct(
         private AuditService $auditService
-    ) {
-    }
+    ) {}
 
     public function index($redemptionId)
     {
         $redemption = OrderRedemption::where('provider_id', auth()->id())
-            ->with(['request.recipient'])
+            ->with(['request.items.menuItem.menuItemCategory'])
             ->findOrFail($redemptionId);
 
         if ($redemption->status !== 'REDEEMED') {
@@ -47,7 +46,7 @@ class ProviderProofController extends Controller
             'proof_photo_base64' => ['nullable', 'string'],
         ]);
 
-        if (!$request->hasFile('proof_file') && empty($request->input('proof_photo_base64'))) {
+        if (! $request->hasFile('proof_file') && empty($request->input('proof_photo_base64'))) {
             return back()->with('error', __('You must either upload a file or capture a photo.'));
         }
 
@@ -56,13 +55,13 @@ class ProviderProofController extends Controller
         if ($request->hasFile('proof_file')) {
             $file = $request->file('proof_file');
             $path = $file->store("private/proofs/{$redemption->id}");
-        } elseif (!empty($request->input('proof_photo_base64'))) {
+        } elseif (! empty($request->input('proof_photo_base64'))) {
             $base64Data = $request->input('proof_photo_base64');
             if (preg_match('/^data:image\/(\w+);base64,/', $base64Data, $type)) {
                 $data = substr($base64Data, strpos($base64Data, ',') + 1);
                 $type = strtolower($type[1]); // jpg, png, etc.
 
-                if (!in_array($type, ['jpg', 'jpeg', 'png', 'webp'])) {
+                if (! in_array($type, ['jpg', 'jpeg', 'png', 'webp'])) {
                     return back()->with('error', __('Invalid image format captured.'));
                 }
 
@@ -71,7 +70,7 @@ class ProviderProofController extends Controller
                     return back()->with('error', __('Failed to decode captured image.'));
                 }
 
-                $fileName = 'capture_' . time() . '.' . $type;
+                $fileName = 'capture_'.time().'.'.$type;
                 $path = "private/proofs/{$redemption->id}/$fileName";
                 Storage::put($path, $data);
             } else {
@@ -85,6 +84,7 @@ class ProviderProofController extends Controller
             $redemption->refresh();
             if ($redemption->proof) {
                 DB::rollBack();
+
                 return redirect()->route('provider.requests.index')->with('success', __('Proof already exists.'));
             }
 
@@ -113,6 +113,7 @@ class ProviderProofController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Storage::delete($path); // clean up file
+
             return back()->with('error', __('Failed to upload proof. Please try again.'));
         }
     }

@@ -1,4 +1,10 @@
 {
+    "Incoming Requests": "Incoming Requests",
+    "No requests found.": "No requests found.",
+    "Provider requests page subtitle": "Review incoming orders, accept or reject them, and upload proof after the QR code is scanned.",
+    "Proof pending": "Proof pending",
+    "provider_items_line": "{0} No items|{1} :count item|[2,*] :count items",
+    "SAR": "SAR",
     "finance.nav.module": "Finance",
     "finance.nav.overview": "Overview",
     "finance.nav.payments": "Payments",
