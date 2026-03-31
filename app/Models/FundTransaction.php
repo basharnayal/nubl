@@ -24,13 +24,19 @@ class FundTransaction extends Model
     ];
 
     public const SOURCE_DONATION = 'DONATION';
+
     public const SOURCE_REDEMPTION = 'REDEMPTION';
+
     public const SOURCE_REFUND = 'REFUND';
+
     public const SOURCE_EXPIRY_ROLLBACK = 'EXPIRY_ROLLBACK';
+
     public const SOURCE_CANCELLED = 'CANCELLED';
+
     public const SOURCE_PAYOUT = 'PAYOUT';
 
     public const DIRECTION_IN = 'IN';
+
     public const DIRECTION_OUT = 'OUT';
 
     public function wallet(): BelongsTo
@@ -51,5 +57,13 @@ class FundTransaction extends Model
     public function payment(): BelongsTo
     {
         return $this->belongsTo(Payment::class);
+    }
+
+    /**
+     * Optional link when payout was triggered at QR redemption (FK not enforced in DB).
+     */
+    public function orderRedemption(): BelongsTo
+    {
+        return $this->belongsTo(OrderRedemption::class, 'order_redemption_id');
     }
 }

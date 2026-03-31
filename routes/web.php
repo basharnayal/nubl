@@ -7,12 +7,16 @@
  * auth → (email.verified if enabled) → account.approved → role-specific
  */
 
+use App\Http\Controllers\Admin\AccountApprovalController;
+use App\Http\Controllers\Admin\AdminFundTransactionController;
+use App\Http\Controllers\Admin\AdminPaymentController;
+use App\Http\Controllers\Admin\FinancialOverviewController;
+use App\Http\Controllers\Admin\FinancialReportController;
+use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\ProviderRegistrationController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Admin\AccountApprovalController;
 use App\Http\Controllers\Recipient\RecipientController;
-use App\Http\Controllers\Admin\UserManagementController;
+use Illuminate\Support\Facades\Route;
 
 // Auth middleware: phone OTP is primary verification; email remains optional
 $authMiddleware = config('app.phone_verification_enabled', true)
@@ -29,6 +33,7 @@ Route::get('/locale/{locale}', function (string $locale) {
     if (in_array($locale, $allowed)) {
         session(['locale' => $locale]);
     }
+
     return redirect()->back();
 })->name('locale.switch');
 
@@ -42,11 +47,6 @@ Route::middleware(array_merge($authMiddleware, ['account.approved']))->group(fun
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
-
-
-
-
-
 
 // $$ Role-specific dashboards $$
 // Admin routes
@@ -77,6 +77,18 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin'
         // Admin Request Management (ECS-63)
         Route::get('/requests', [\App\Http\Controllers\Admin\AdminRequestController::class, 'index'])->name('requests.index');
         Route::put('/requests/{request}', [\App\Http\Controllers\Admin\AdminRequestController::class, 'update'])->name('requests.update');
+
+        // Fund management & payment monitoring (gateway vs internal ledger)
+        Route::prefix('finances')->name('finances.')->group(function () {
+            Route::get('/', [FinancialOverviewController::class, 'index'])->name('overview');
+            Route::get('/payments/export', [AdminPaymentController::class, 'export'])->name('payments.export');
+            Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
+            Route::get('/payments/{payment}', [AdminPaymentController::class, 'show'])->name('payments.show');
+            Route::get('/fund-transactions/export', [AdminFundTransactionController::class, 'export'])->name('fund-transactions.export');
+            Route::get('/fund-transactions', [AdminFundTransactionController::class, 'index'])->name('fund-transactions.index');
+            Route::get('/fund-transactions/{fund_transaction}', [AdminFundTransactionController::class, 'show'])->name('fund-transactions.show');
+            Route::get('/reports', [FinancialReportController::class, 'index'])->name('reports.index');
+        });
     });
 
 // Provider routes
@@ -90,7 +102,7 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:provid
             ->withoutMiddleware('account.approved')
             ->name('application');
 
-        Route::get('/dashboard', fn() => view('provider.dashboard'))->name('dashboard');
+        Route::get('/dashboard', fn () => view('provider.dashboard'))->name('dashboard');
 
         // Provider Menu Management (ECS-62)
         Route::resource('menu-items', \App\Http\Controllers\Provider\MenuItemController::class);
@@ -162,8 +174,6 @@ Route::middleware($authMiddleware)->group(function () {
 Route::get('/payments/callback', [\App\Http\Controllers\PaymentCallbackController::class, 'callback'])->name('payments.callback');
 Route::get('/payments/error', [\App\Http\Controllers\PaymentCallbackController::class, 'error'])->name('payments.error');
 
-
-
 // General routes //
 // Pending approval: recipient or provider (blocked from dashboard by EnsureAccountApproved)
 // Provider registration: GET allows guest + auth (auth with profile sees read-only)
@@ -173,27 +183,24 @@ Route::get('/approval-pending', function () {
     return view('auth.approval-pending');
 })->middleware($authMiddleware)->name('approval.pending');
 
-
-
 // Test: debug roles (admin only - remove in production)
 Route::get('/test-roles', function () {
-    if (!auth()->user()->hasRole('admin')) {
+    if (! auth()->user()->hasRole('admin')) {
         abort(403);
     }
+
     return view('test-roles', ['roles' => auth()->user()->roles->pluck('name')->toArray()]);
 })->middleware(['auth', 'role:admin'])->name('test-roles');
 
 // Dev helper: assign admin role (remove in production)
 Route::get('/make-me-admin', function () {
     $user = auth()->user();
-    if (!\Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
+    if (! \Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
         \Spatie\Permission\Models\Role::create(['name' => 'admin']);
     }
     $user->assignRole('admin');
+
     return 'تم تعيينك كـ admin بنجاح!';
 });
 
-
-
-
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

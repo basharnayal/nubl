@@ -31,9 +31,26 @@ class SidebarPanel
                         'title' => __('Requests'),
                         'route_name' => 'admin.requests.index',
                     ],
-                    'admin_reports' => [
-                        'title' => __('Reports'),
-                        'route_name' => '',
+                    'admin_finances' => [
+                        'title' => __('finance.nav.module'),
+                        'submenu' => [
+                            'admin_finances_overview' => [
+                                'title' => __('finance.nav.overview'),
+                                'route_name' => 'admin.finances.overview',
+                            ],
+                            'admin_finances_payments' => [
+                                'title' => __('finance.nav.payments'),
+                                'route_name' => 'admin.finances.payments.index',
+                            ],
+                            'admin_finances_ledger' => [
+                                'title' => __('finance.nav.fund_ledger'),
+                                'route_name' => 'admin.finances.fund-transactions.index',
+                            ],
+                            'admin_finances_reports' => [
+                                'title' => __('finance.nav.reports'),
+                                'route_name' => 'admin.finances.reports.index',
+                            ],
+                        ],
                     ],
                     'admin_settings' => [
                         'title' => __('Settings'),
