@@ -6,6 +6,10 @@ return [
         // Add more cities later: 'riyadh' => 'الرياض', etc.
     ],
 
+    'recipient' => [
+        'weekly_allowance_limit' => 400,
+    ],
+
     'regions' => [
         'western' => 'المنطقة الغربية', // Western Region (fixed)
     ],

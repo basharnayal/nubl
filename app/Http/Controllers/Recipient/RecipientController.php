@@ -16,7 +16,7 @@ class RecipientController extends Controller
     {
         $user = $request->user();
         $remainingLimit = RecipientAllowanceService::getRemainingLimit($user->id);
-        $weeklyLimit = RecipientAllowanceService::WEEKLY_LIMIT;
+        $weeklyLimit = RecipientAllowanceService::weeklyLimit();
 
         $activeStatuses = ['REQUESTED', 'APPROVED', 'REDEEMABLE']; // APPROVED = provider adopted, REDEEMABLE = accepted with City Fund
         $pendingStatuses = ['REQUESTED', 'APPROVED'];

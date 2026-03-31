@@ -7,7 +7,10 @@ use Illuminate\Support\Facades\DB;
 
 class RecipientAllowanceService
 {
-    public const WEEKLY_LIMIT = 400;
+    public static function weeklyLimit(): float
+    {
+        return (float) config('recipient.weekly_allowance_limit', 400);
+    }
 
     /**
      * Week definition: Sunday 00:00 – Saturday 23:59:59.
@@ -24,8 +27,9 @@ class RecipientAllowanceService
 
     /**
      * Sum of (price_snapshot * quantity) for this recipient this week
-     * where request status IN ('REQUESTED', 'REDEEMABLE', 'FULFILLED').
-     * remaining_limit = 400 - getWeeklyUsed().
+     * where request status IN ('REQUESTED', 'REDEEMABLE', 'FULFILLED')
+     * and the order consumes the city weekly allowance (not provider adoption).
+     * Matches order_proofs.is_provider_donation: when true, the amount must not count here.
      */
     public static function getWeeklyUsed(int $recipientId): float
     {
@@ -36,6 +40,10 @@ class RecipientAllowanceService
             ->where('requests.recipient_id', $recipientId)
             ->whereBetween('requests.created_at', [$weekStart, $weekEnd])
             ->whereIn('requests.status', ['REQUESTED', 'REDEEMABLE', 'FULFILLED'])
+            ->where(function ($q) {
+                $q->whereNull('requests.funding_source')
+                    ->orWhere('requests.funding_source', '!=', 'PROVIDER_ADOPTION');
+            })
             ->selectRaw('COALESCE(SUM(request_items.price_snapshot * request_items.quantity), 0) as total')
             ->value('total');
 
@@ -48,7 +56,7 @@ class RecipientAllowanceService
     public static function getRemainingLimit(int $recipientId): float
     {
         $weeklyUsed = self::getWeeklyUsed($recipientId);
-        return max(0, self::WEEKLY_LIMIT - $weeklyUsed);
+        return max(0, self::weeklyLimit() - $weeklyUsed);
     }
 
     /**
@@ -57,6 +65,6 @@ class RecipientAllowanceService
     public static function wouldExceedAllowance(int $recipientId, float $amount): bool
     {
         $weeklyUsed = self::getWeeklyUsed($recipientId);
-        return ($weeklyUsed + $amount) > self::WEEKLY_LIMIT;
+        return ($weeklyUsed + $amount) > self::weeklyLimit();
     }
 }
