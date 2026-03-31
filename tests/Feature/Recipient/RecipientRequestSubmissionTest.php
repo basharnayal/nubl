@@ -208,6 +208,36 @@ class RecipientRequestSubmissionTest extends TestCase
     }
 
     #[Test]
+    public function fulfilled_provider_adopted_request_does_not_count_towards_allowance()
+    {
+        Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00'));
+
+        $adopted = RequestModel::create([
+            'recipient_id' => $this->recipient->id,
+            'provider_id' => $this->provider->id,
+            'reserved_amount' => 350.00,
+            'status' => 'FULFILLED',
+            'funding_source' => 'PROVIDER_ADOPTION',
+        ]);
+        $adopted->items()->create([
+            'menu_item_id' => $this->menuItem1->id,
+            'quantity' => 7,
+            'price_snapshot' => 50.00,
+        ]);
+
+        $response = $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 2],
+                ],
+            ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('requests', 2);
+    }
+
+    #[Test]
     public function cannot_request_menu_item_not_belonging_to_provider()
     {
         $otherProvider = User::factory()->create(['status' => User::STATUS_ACTIVE, 'is_active' => true]);
