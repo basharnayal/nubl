@@ -12,8 +12,7 @@ class ProviderRequestController extends Controller
 {
     public function __construct(
         private SystemWalletService $systemWalletService
-    ) {
-    }
+    ) {}
 
     /**
      * Display a listing of the resource.
@@ -21,7 +20,7 @@ class ProviderRequestController extends Controller
     public function index()
     {
         $requests = RequestModel::forProvider(auth()->id())
-            ->with(['recipient', 'items'])
+            ->with(['items.menuItem.menuItemCategory'])
             ->latest()
             ->paginate(15);
 
@@ -34,7 +33,7 @@ class ProviderRequestController extends Controller
     public function show(string $id)
     {
         $request = RequestModel::forProvider(auth()->id())
-            ->with(['items.menuItem', 'recipient'])
+            ->with(['items.menuItem.menuItemCategory'])
             ->findOrFail($id);
 
         return view('provider.requests.show', compact('request'));
@@ -71,7 +70,7 @@ class ProviderRequestController extends Controller
                 // Provider accepts using City Fund — status REDEEMABLE (recipient can redeem)
                 // Transfer happens only at redemption (QR scan), not at approval
                 $amount = (float) $requestModel->reserved_amount;
-                if (!$this->systemWalletService->hasSufficientBalance($amount)) {
+                if (! $this->systemWalletService->hasSufficientBalance($amount)) {
                     return back()->with('error', __('City fund has insufficient balance for this request.'));
                 }
                 $requestModel->update([

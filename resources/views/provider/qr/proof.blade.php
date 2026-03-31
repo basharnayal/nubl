@@ -10,8 +10,8 @@
             <div class="border-b border-slate-200 pb-4 mb-4 dark:border-navy-600">
                 <h3 class="font-bold text-lg text-slate-700 dark:text-navy-100">{{ __('Order Details') }}</h3>
                 <p class="text-sm text-slate-500 dark:text-navy-400">
-                    {{ __('Request #') }}{{ $redemption->request->id }} &bull; {{ __('Recipient') }}:
-                    {{ $redemption->request->recipient->name }}
+                    {{ __('Request #') }}{{ $redemption->request->id }} &bull; {{ __('Reference') }}:
+                    <span class="font-mono">{{ \App\Support\PseudonymousRequestId::make($redemption->request->id) }}</span>
                 </p>
                 <p class="text-sm font-semibold text-primary mt-2">
                     {{ __('Reserved Amount') }}: {{ number_format($redemption->request->reserved_amount, 2) }}

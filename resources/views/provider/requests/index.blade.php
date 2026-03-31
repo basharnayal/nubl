@@ -14,17 +14,17 @@
                             {{ __('No requests found.') }}
                         </div>
                     @else
-                        <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
-                            <table class="is-hoverable w-full text-left">
+                        <div class="is-scrollbar-hidden min-w-full overflow-x-auto rounded-lg">
+                            <table class="is-hoverable w-full text-start">
                                 <thead>
                                     <tr>
-                                        <th class="whitespace-nowrap rounded-tl-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Request') }}</th>
-                                        <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Recipient') }}</th>
+                                        <th class="whitespace-nowrap rounded-ss-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Request') }}</th>
+                                        <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Reference') }}</th>
                                         <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Items') }}</th>
                                         <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Total') }}</th>
                                         <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Date') }}</th>
                                         <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Status') }}</th>
-                                        <th class="whitespace-nowrap rounded-tr-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Actions') }}</th>
+                                        <th class="whitespace-nowrap rounded-se-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -34,11 +34,14 @@
                                                 <p class="font-medium text-primary dark:text-accent-light">#{{ $request->id }}</p>
                                             </td>
                                             <td class="px-4 py-3 sm:px-5">
-                                                <div class="flex items-center space-x-4">
-                                                    <div class="avatar size-9">
-                                                        <img class="mask is-squircle" src="{{ asset('images/200x200.png') }}" alt="avatar" />
+                                                <div class="flex items-center gap-3">
+                                                    <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-slate-200/90 dark:bg-navy-600" title="{{ __('Anonymous reference') }}" aria-hidden="true">
+                                                        <i class="fa-solid fa-fingerprint text-sm text-slate-600 dark:text-navy-200"></i>
                                                     </div>
-                                                    <span class="font-medium text-slate-700 dark:text-navy-100">{{ $request->recipient->name }}</span>
+                                                    <div class="min-w-0 text-start" dir="ltr">
+                                                        <span class="font-mono text-xs font-medium text-slate-700 dark:text-navy-100">{{ \App\Support\PseudonymousRequestId::make($request->id) }}</span>
+                                                        <p class="mt-0.5 text-xs text-slate-500 dark:text-navy-400">{{ \App\Support\RequestTypeLabel::forRequest($request) }}</p>
+                                                    </div>
                                                 </div>
                                             </td>
                                             <td class="whitespace-nowrap px-4 py-3 sm:px-5">

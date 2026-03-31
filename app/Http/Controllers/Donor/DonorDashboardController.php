@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Request as RequestModel;
 use App\Models\RequestPaymentLink;
+use App\Support\PseudonymousRequestId;
+use App\Support\RequestTypeLabel;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -130,10 +132,10 @@ class DonorDashboardController extends Controller
             $fulfilledAt = $proof?->fulfilled_at;
             $displayAt = $fulfilledAt ?? $link->created_at;
 
-            $type = $this->resolveRequestTypeLabel($request);
+            $type = RequestTypeLabel::forRequest($request);
 
             return [
-                'pseudonymous_id' => $this->pseudonymousRequestId($request->id),
+                'pseudonymous_id' => PseudonymousRequestId::make($request->id),
                 'date' => $displayAt->translatedFormat('M d, Y'),
                 'time' => $displayAt->translatedFormat('H:i'),
                 'amount' => (float) $link->amount,
@@ -141,13 +143,7 @@ class DonorDashboardController extends Controller
                 'status' => $this->mapRequestStatusForDonor($request->status),
                 'status_key' => $request->status,
             ];
-        })->filter()->sortByDesc(fn ($r) => $r['date'] . ' ' . $r['time'])->values()->take(15)->toArray();
-    }
-
-    /** FR-25.2: Pseudonymous ID instead of real request ID. */
-    private function pseudonymousRequestId(int $requestId): string
-    {
-        return 'R-' . strtoupper(substr(hash('sha256', 'req_' . $requestId . config('app.key')), 0, 8));
+        })->filter()->sortByDesc(fn ($r) => $r['date'].' '.$r['time'])->values()->take(15)->toArray();
     }
 
     private function mapRequestStatusForDonor(?string $status): string
@@ -159,46 +155,6 @@ class DonorDashboardController extends Controller
             'REQUESTED' => __('Allocated'),
             default => __('Allocated'),
         };
-    }
-
-    /**
-     * Resolve human-readable type label. Avoids showing IDs (e.g. "213") or invalid data.
-     */
-    private function resolveRequestTypeLabel(RequestModel $request): string
-    {
-        $firstItem = $request->items->first();
-        if (! $firstItem?->menuItem) {
-            return __('Request');
-        }
-
-        $menuItem = $firstItem->menuItem;
-
-        // Prefer category name (e.g. "Bread", "Rice Dishes") — must be non-numeric
-        $categoryName = $menuItem->menuItemCategory?->name;
-        if ($categoryName && ! preg_match('/^\d+$/', (string) $categoryName)) {
-            return $categoryName;
-        }
-
-        // Fallback: menu item name (e.g. "Family meal package") — more descriptive
-        $itemName = $menuItem->name;
-        if ($itemName && ! preg_match('/^\d+$/', (string) $itemName)) {
-            return $itemName;
-        }
-
-        // Legacy: map category slug to human-readable
-        $legacyCategory = $menuItem->category;
-        if ($legacyCategory && ! preg_match('/^\d+$/', (string) $legacyCategory)) {
-            return match (strtolower((string) $legacyCategory)) {
-                'meal', 'meals' => __('Meals'),
-                'bakery' => __('Bakery'),
-                'basket' => __('Food basket'),
-                'catering' => __('Catering'),
-                'grocery' => __('Grocery'),
-                default => ucfirst((string) $legacyCategory),
-            };
-        }
-
-        return __('Request');
     }
 
     /**
@@ -220,7 +176,7 @@ class DonorDashboardController extends Controller
         $categories = [];
         $series = [];
         foreach ($grouped->sortKeys() as $monthKey => $items) {
-            $date = Carbon::parse($monthKey . '-01');
+            $date = Carbon::parse($monthKey.'-01');
             $categories[] = $date->translatedFormat('M Y');
             $series[] = (float) $items->sum('amount');
         }

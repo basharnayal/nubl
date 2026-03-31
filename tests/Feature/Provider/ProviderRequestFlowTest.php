@@ -9,6 +9,7 @@ use App\Models\ProviderMenuItem;
 use App\Models\ProviderProfile;
 use App\Models\Request as RequestModel;
 use App\Models\User;
+use App\Support\PseudonymousRequestId;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Role;
@@ -19,8 +20,11 @@ class ProviderRequestFlowTest extends TestCase
     use RefreshDatabase;
 
     protected $provider;
+
     protected $recipient;
+
     protected $menuItem;
+
     protected $request;
 
     protected function setUp(): void
@@ -113,7 +117,8 @@ class ProviderRequestFlowTest extends TestCase
             ->get(route('provider.requests.index'));
 
         $response->assertStatus(200);
-        $response->assertSee($this->recipient->name);
+        $response->assertSee(PseudonymousRequestId::make($this->request->id), false);
+        $response->assertDontSee($this->recipient->name);
         $response->assertSee('50.00');
     }
 
