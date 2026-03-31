@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Provider;
 
+use App\Contracts\NotificationServiceInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Services\AuditService;
 use App\Models\OrderProof;
@@ -13,7 +14,8 @@ use Illuminate\Support\Facades\Storage;
 class ProviderProofController extends Controller
 {
     public function __construct(
-        private AuditService $auditService
+        private AuditService $auditService,
+        private NotificationServiceInterface $notificationService
     ) {}
 
     public function index($redemptionId)
@@ -105,6 +107,13 @@ class ProviderProofController extends Controller
                 'request_id' => $requestModel->id,
                 'redemption_id' => $redemption->id,
                 'proof_url' => $path,
+            ]);
+            $this->notificationService->sendRequestStatusChanged($requestModel->load('recipient'), 'FULFILLED');
+            $this->auditService->log('notification', 'sent', [
+                'type' => 'request_status_changed',
+                'recipient_user_id' => $requestModel->recipient_id,
+                'request_id' => $requestModel->id,
+                'status' => 'FULFILLED',
             ]);
 
             DB::commit();

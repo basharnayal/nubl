@@ -4,11 +4,14 @@ namespace App\Http\Services;
 
 use App\Contracts\NotificationServiceInterface;
 use App\Models\Payment;
+use App\Models\Request as RequestModel;
 use App\Models\User;
 use App\Notifications\AccountApprovalPendingNotification;
+use App\Notifications\AccountStatusUpdatedNotification;
 use App\Notifications\DocumentsResubmittedForReviewNotification;
 use App\Notifications\DonationReceiptNotification;
 use App\Notifications\NewUserRegisteredNotification;
+use App\Notifications\RequestStatusChangedNotification;
 
 class NotificationService implements NotificationServiceInterface
 {
@@ -39,5 +42,20 @@ class NotificationService implements NotificationServiceInterface
         User::role('admin')->get()->each(
             fn ($admin) => $admin->notify(new DocumentsResubmittedForReviewNotification($user))
         );
+    }
+
+    public function sendAccountStatusUpdated(User $user, bool $isApproved, ?string $rejectionReason = null): void
+    {
+        $user->notify(new AccountStatusUpdatedNotification($user, $isApproved, $rejectionReason));
+    }
+
+    public function sendRequestStatusChanged(RequestModel $request, string $status): void
+    {
+        $recipient = $request->recipient;
+        if (! $recipient) {
+            return;
+        }
+
+        $recipient->notify(new RequestStatusChangedNotification($request, $status));
     }
 }

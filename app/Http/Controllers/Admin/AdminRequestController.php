@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Contracts\NotificationServiceInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Services\AuditService;
 use App\Models\Request as RequestModel;
@@ -10,7 +11,8 @@ use Illuminate\Http\Request;
 class AdminRequestController extends Controller
 {
     public function __construct(
-        private AuditService $auditService
+        private AuditService $auditService,
+        private NotificationServiceInterface $notificationService
     ) {}
 
     public function index()
@@ -49,8 +51,15 @@ class AdminRequestController extends Controller
                 'decision' => 'approve',
                 'recipient_id' => $requestModel->recipient_id,
                 'provider_id' => $requestModel->provider_id,
+                'admin_id' => auth()->id(),
             ]);
-            // Here we might trigger notification to Recipient "Your request is approved!"
+            $this->notificationService->sendRequestStatusChanged($requestModel->load('recipient'), 'ADMIN_APPROVED');
+            $this->auditService->log('notification', 'sent', [
+                'type' => 'request_status_changed',
+                'recipient_user_id' => $requestModel->recipient_id,
+                'request_id' => $requestModel->id,
+                'status' => 'ADMIN_APPROVED',
+            ]);
         } elseif ($validated['action'] === 'reject') {
             $requestModel->update([
                 'status' => 'ADMIN_REJECTED',
@@ -64,6 +73,14 @@ class AdminRequestController extends Controller
                 'provider_id' => $requestModel->provider_id,
                 'rejection_reason_code' => $validated['rejection_reason_code'],
                 'rejection_reason_note' => $validated['rejection_reason_note'] ?? null,
+                'admin_id' => auth()->id(),
+            ]);
+            $this->notificationService->sendRequestStatusChanged($requestModel->load('recipient'), 'ADMIN_REJECTED');
+            $this->auditService->log('notification', 'sent', [
+                'type' => 'request_status_changed',
+                'recipient_user_id' => $requestModel->recipient_id,
+                'request_id' => $requestModel->id,
+                'status' => 'ADMIN_REJECTED',
             ]);
         }
 

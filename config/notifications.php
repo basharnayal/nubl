@@ -37,6 +37,21 @@ return [
             'icon_svg' => 'users',
             'subtitle' => 'notifications.documents_resubmitted_subtitle',
         ],
+        'account_approved' => [
+            'icon' => 'success',
+            'icon_svg' => 'check-circle',
+            'subtitle' => 'Account approval update',
+        ],
+        'account_rejected' => [
+            'icon' => 'warning',
+            'icon_svg' => 'clock',
+            'subtitle' => 'Account approval update',
+        ],
+        'request_status_changed' => [
+            'icon' => 'info',
+            'icon_svg' => 'bell',
+            'subtitle' => 'Request status update',
+        ],
     ],
 
     /*

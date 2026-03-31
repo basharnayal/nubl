@@ -3,6 +3,7 @@
 namespace App\Contracts;
 
 use App\Models\Payment;
+use App\Models\Request as RequestModel;
 use App\Models\User;
 
 interface NotificationServiceInterface
@@ -12,4 +13,8 @@ interface NotificationServiceInterface
     public function sendNewUserRegisteredToAdmins(User $user): void;
 
     public function sendDocumentsResubmittedForReviewToAdmins(User $user): void;
+
+    public function sendAccountStatusUpdated(User $user, bool $isApproved, ?string $rejectionReason = null): void;
+
+    public function sendRequestStatusChanged(RequestModel $request, string $status): void;
 }

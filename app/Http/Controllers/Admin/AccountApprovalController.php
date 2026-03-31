@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Contracts\NotificationServiceInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Services\AuditService;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -14,7 +15,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class AccountApprovalController extends Controller
 {
     public function __construct(
-        private AuditService $auditService
+        private AuditService $auditService,
+        private NotificationServiceInterface $notificationService
     ) {}
 
     public function index(): View
@@ -22,7 +24,7 @@ class AccountApprovalController extends Controller
         $pendingUsers = User::whereIn('status', [User::STATUS_PENDING_APPROVAL, User::STATUS_REJECTED])
             ->whereIn('membership_type', [User::MEMBERSHIP_RECIPIENT, User::MEMBERSHIP_PROVIDER])
             ->with(['recipientProfile', 'recipientKycDetails', 'providerProfile', 'providerDocuments'])
-            ->orderByRaw("CASE WHEN status = ? THEN 0 ELSE 1 END", [User::STATUS_PENDING_APPROVAL])
+            ->orderByRaw('CASE WHEN status = ? THEN 0 ELSE 1 END', [User::STATUS_PENDING_APPROVAL])
             ->orderBy('created_at', 'desc')
             ->get();
 
@@ -31,7 +33,7 @@ class AccountApprovalController extends Controller
 
     public function approve(User $user): RedirectResponse
     {
-        if (!in_array($user->status, [User::STATUS_PENDING_APPROVAL, User::STATUS_REJECTED])) {
+        if (! in_array($user->status, [User::STATUS_PENDING_APPROVAL, User::STATUS_REJECTED])) {
             return redirect()->route('admin.users.pending')->with('error', __('Invalid request.'));
         }
 
@@ -42,6 +44,13 @@ class AccountApprovalController extends Controller
             'email' => $user->email,
             'membership_type' => $user->membership_type,
         ]);
+        if ($user->membership_type === User::MEMBERSHIP_RECIPIENT) {
+            $this->notificationService->sendAccountStatusUpdated($user, true);
+            $this->auditService->log('notification', 'sent', [
+                'type' => 'account_approved',
+                'recipient_user_id' => $user->id,
+            ]);
+        }
 
         return redirect()->route('admin.users.pending')->with('success', __('Account approved successfully.'));
     }
@@ -75,6 +84,13 @@ class AccountApprovalController extends Controller
             'email' => $user->email,
             'rejection_reason' => $validated['rejection_reason'],
         ]);
+        if ($user->membership_type === User::MEMBERSHIP_RECIPIENT) {
+            $this->notificationService->sendAccountStatusUpdated($user, false, $validated['rejection_reason']);
+            $this->auditService->log('notification', 'sent', [
+                'type' => 'account_rejected',
+                'recipient_user_id' => $user->id,
+            ]);
+        }
 
         return redirect()->route('admin.users.pending')->with('success', __('Account rejected.'));
     }
@@ -93,7 +109,7 @@ class AccountApprovalController extends Controller
 
     public function showProviderApplication(User $user): View|RedirectResponse
     {
-        if (!$user->providerProfile) {
+        if (! $user->providerProfile) {
             return redirect()->route('admin.users.pending')->with('error', __('No provider application found.'));
         }
 
@@ -110,7 +126,7 @@ class AccountApprovalController extends Controller
 
     public function showRecipientApplication(User $user): View|RedirectResponse
     {
-        if (!$user->recipientProfile) {
+        if (! $user->recipientProfile) {
             return redirect()->route('admin.users.pending')->with('error', __('No recipient application found.'));
         }
 
@@ -137,7 +153,7 @@ class AccountApprovalController extends Controller
             }
         }
 
-        if (!$path || !Storage::disk('local')->exists($path)) {
+        if (! $path || ! Storage::disk('local')->exists($path)) {
             abort(404);
         }
 
