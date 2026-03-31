@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Contracts\NotificationServiceInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Services\AuditService;
 use App\Models\User;
@@ -14,7 +15,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class AccountApprovalController extends Controller
 {
     public function __construct(
-        private AuditService $auditService
+        private AuditService $auditService,
+        private NotificationServiceInterface $notificationService
     ) {}
 
     public function index(): View
@@ -42,6 +44,13 @@ class AccountApprovalController extends Controller
             'email' => $user->email,
             'membership_type' => $user->membership_type,
         ]);
+        if ($user->membership_type === User::MEMBERSHIP_RECIPIENT) {
+            $this->notificationService->sendAccountStatusUpdated($user, true);
+            $this->auditService->log('notification', 'sent', [
+                'type' => 'account_approved',
+                'recipient_user_id' => $user->id,
+            ]);
+        }
 
         return redirect()->route('admin.users.pending')->with('success', __('Account approved successfully.'));
     }
@@ -75,6 +84,13 @@ class AccountApprovalController extends Controller
             'email' => $user->email,
             'rejection_reason' => $validated['rejection_reason'],
         ]);
+        if ($user->membership_type === User::MEMBERSHIP_RECIPIENT) {
+            $this->notificationService->sendAccountStatusUpdated($user, false, $validated['rejection_reason']);
+            $this->auditService->log('notification', 'sent', [
+                'type' => 'account_rejected',
+                'recipient_user_id' => $user->id,
+            ]);
+        }
 
         return redirect()->route('admin.users.pending')->with('success', __('Account rejected.'));
     }

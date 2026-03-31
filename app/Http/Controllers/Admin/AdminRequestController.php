@@ -2,12 +2,19 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Contracts\NotificationServiceInterface;
 use App\Http\Controllers\Controller;
+use App\Http\Services\AuditService;
 use App\Models\Request as RequestModel;
 use Illuminate\Http\Request;
 
 class AdminRequestController extends Controller
 {
+    public function __construct(
+        private AuditService $auditService,
+        private NotificationServiceInterface $notificationService
+    ) {}
+
     public function index()
     {
         $requests = RequestModel::pendingAdmin()
@@ -39,12 +46,34 @@ class AdminRequestController extends Controller
                 'status' => 'ADMIN_APPROVED', // or REDEEMABLE immediately?
                 'funding_source' => 'CITY_FUND', // Confirming source
             ]);
-            // Here we might trigger notification to Recipient "Your request is approved!"
+            $this->auditService->log('request', 'admin_approved', [
+                'request_id' => $requestModel->id,
+                'admin_id' => auth()->id(),
+            ]);
+            $this->notificationService->sendRequestStatusChanged($requestModel->load('recipient'), 'ADMIN_APPROVED');
+            $this->auditService->log('notification', 'sent', [
+                'type' => 'request_status_changed',
+                'recipient_user_id' => $requestModel->recipient_id,
+                'request_id' => $requestModel->id,
+                'status' => 'ADMIN_APPROVED',
+            ]);
         } elseif ($validated['action'] === 'reject') {
             $requestModel->update([
                 'status' => 'ADMIN_REJECTED',
                 'rejection_reason_code' => $validated['rejection_reason_code'],
                 'rejection_reason_note' => $validated['rejection_reason_note'] ?? null,
+            ]);
+            $this->auditService->log('request', 'admin_rejected', [
+                'request_id' => $requestModel->id,
+                'admin_id' => auth()->id(),
+                'rejection_reason_code' => $validated['rejection_reason_code'],
+            ]);
+            $this->notificationService->sendRequestStatusChanged($requestModel->load('recipient'), 'ADMIN_REJECTED');
+            $this->auditService->log('notification', 'sent', [
+                'type' => 'request_status_changed',
+                'recipient_user_id' => $requestModel->recipient_id,
+                'request_id' => $requestModel->id,
+                'status' => 'ADMIN_REJECTED',
             ]);
         }
 
