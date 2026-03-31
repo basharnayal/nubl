@@ -296,4 +296,44 @@ class ProviderRequestFlowTest extends TestCase
         $show->assertStatus(200);
         $show->assertDontSee(__('Upload fulfillment proof'));
     }
+
+    #[Test]
+    public function provider_can_filter_incoming_requests_by_status()
+    {
+        $response = $this->actingAs($this->provider)
+            ->get(route('provider.requests.index', ['status' => 'REQUESTED']));
+
+        $response->assertStatus(200);
+        $response->assertSee('#'.$this->request->id, false);
+    }
+
+    #[Test]
+    public function provider_can_filter_incoming_requests_by_request_number()
+    {
+        $response = $this->actingAs($this->provider)
+            ->get(route('provider.requests.index', ['q' => (string) $this->request->id]));
+
+        $response->assertStatus(200);
+        $response->assertSee('#'.$this->request->id, false);
+    }
+
+    #[Test]
+    public function provider_can_filter_needs_proof_only_on_index()
+    {
+        $this->actingAs($this->provider)
+            ->put(route('provider.requests.update', $this->request->id), [
+                'action' => 'approve',
+            ]);
+
+        $this->request->refresh();
+        $redemption = $this->request->redemption;
+        $this->assertNotNull($redemption);
+        $redemption->update(['status' => 'REDEEMED']);
+
+        $response = $this->actingAs($this->provider)
+            ->get(route('provider.requests.index', ['needs_proof' => '1']));
+
+        $response->assertStatus(200);
+        $response->assertSee(__('Upload proof'), false);
+    }
 }
