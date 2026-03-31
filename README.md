@@ -533,6 +533,15 @@ php artisan migrate:fresh --seed
 
 ---
 
+## 💳 Recipient Weekly Allowance Limit
+
+- **Config key**: `recipient.weekly_allowance_limit` (default: `400`)
+- **Where to change it**: `config/provider.php` → `recipient.weekly_allowance_limit`
+- **Where it’s used**: `App\Http\Services\RecipientAllowanceService` reads it via `config('recipient.weekly_allowance_limit', 400)`
+- **After changing**: clear cache with `php artisan optimize:clear`
+
+---
+
 ## 📦 Installed Packages
 
 ### PHP Packages (Composer)

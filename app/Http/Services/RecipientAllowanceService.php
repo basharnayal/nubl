@@ -7,7 +7,10 @@ use Illuminate\Support\Facades\DB;
 
 class RecipientAllowanceService
 {
-    public const WEEKLY_LIMIT = 400;
+    public static function weeklyLimit(): float
+    {
+        return (float) config('recipient.weekly_allowance_limit', 400);
+    }
 
     /**
      * Week definition: Sunday 00:00 – Saturday 23:59:59.
@@ -53,7 +56,7 @@ class RecipientAllowanceService
     public static function getRemainingLimit(int $recipientId): float
     {
         $weeklyUsed = self::getWeeklyUsed($recipientId);
-        return max(0, self::WEEKLY_LIMIT - $weeklyUsed);
+        return max(0, self::weeklyLimit() - $weeklyUsed);
     }
 
     /**
@@ -62,6 +65,6 @@ class RecipientAllowanceService
     public static function wouldExceedAllowance(int $recipientId, float $amount): bool
     {
         $weeklyUsed = self::getWeeklyUsed($recipientId);
-        return ($weeklyUsed + $amount) > self::WEEKLY_LIMIT;
+        return ($weeklyUsed + $amount) > self::weeklyLimit();
     }
 }

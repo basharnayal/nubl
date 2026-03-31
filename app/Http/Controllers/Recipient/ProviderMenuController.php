@@ -86,7 +86,7 @@ class ProviderMenuController extends Controller
         $categories = $categoriesQuery->orderBy('name')->get();
 
         $weeklyUsed = RecipientAllowanceService::getWeeklyUsed(auth()->id());
-        $weeklyLimit = RecipientAllowanceService::WEEKLY_LIMIT;
+        $weeklyLimit = RecipientAllowanceService::weeklyLimit();
 
         return view('recipient.providers.show', compact('provider', 'menuItems', 'categories', 'weeklyUsed', 'weeklyLimit'));
     }
