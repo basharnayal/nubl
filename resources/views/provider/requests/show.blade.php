@@ -125,6 +125,17 @@
                                 </button>
                             </form>
                         </div>
+                    @elseif($request->needsProviderFulfillmentProof())
+                        <div class="space-y-4">
+                            <p class="text-sm text-slate-600 dark:text-navy-300">
+                                {{ __('The order was scanned. Upload fulfillment proof to complete this request.') }}
+                            </p>
+                            <a href="{{ route('provider.proof.index', $request->redemption->id) }}"
+                                class="btn flex w-full items-center justify-center bg-primary text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus">
+                                <i class="fa-solid fa-camera me-2"></i>
+                                {{ __('Upload fulfillment proof') }}
+                            </a>
+                        </div>
                     @else
                         <div class="rounded-lg bg-slate-100 p-4 text-center dark:bg-navy-700/50">
                             <span class="block font-bold text-slate-700 dark:text-navy-100">{{ __('Request') }} {{ $request->status }}</span>

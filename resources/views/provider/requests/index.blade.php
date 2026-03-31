@@ -71,10 +71,18 @@
                                                 <span class="badge rounded-full {{ $config['class'] }}">{{ $config['label'] }}</span>
                                             </td>
                                             <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                                <a href="{{ route('provider.requests.show', $request) }}"
-                                                    class="font-medium text-primary outline-hidden transition-colors hover:text-primary-focus dark:text-accent-light dark:hover:text-accent-light/80">
-                                                    {{ __('Review') }}
-                                                </a>
+                                                <div class="flex flex-col gap-1.5">
+                                                    <a href="{{ route('provider.requests.show', $request) }}"
+                                                        class="font-medium text-primary outline-hidden transition-colors hover:text-primary-focus dark:text-accent-light dark:hover:text-accent-light/80">
+                                                        {{ __('Review') }}
+                                                    </a>
+                                                    @if($request->needsProviderFulfillmentProof())
+                                                        <a href="{{ route('provider.proof.index', $request->redemption->id) }}"
+                                                            class="text-sm font-medium text-primary hover:underline dark:text-accent-light">
+                                                            {{ __('Upload proof') }}
+                                                        </a>
+                                                    @endif
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach

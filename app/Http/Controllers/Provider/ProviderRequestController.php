@@ -20,7 +20,7 @@ class ProviderRequestController extends Controller
     public function index()
     {
         $requests = RequestModel::forProvider(auth()->id())
-            ->with(['items.menuItem.menuItemCategory'])
+            ->with(['items.menuItem.menuItemCategory', 'redemption.proof'])
             ->latest()
             ->paginate(15);
 
@@ -33,7 +33,7 @@ class ProviderRequestController extends Controller
     public function show(string $id)
     {
         $request = RequestModel::forProvider(auth()->id())
-            ->with(['items.menuItem.menuItemCategory'])
+            ->with(['items.menuItem.menuItemCategory', 'redemption.proof'])
             ->findOrFail($id);
 
         return view('provider.requests.show', compact('request'));
