@@ -46,5 +46,10 @@
     "Stop scanning": "Stop scanning",
     "Request camera permission": "Request camera permission",
     "Scan image file": "Scan image file",
+    "Choose one option below: upload a file from your device or capture a photo with your camera.": "Choose one option below: upload a file from your device or capture a photo with your camera.",
+    "JPG, PNG, WEBP, or PDF up to 5MB": "JPG, PNG, WEBP, or PDF up to 5MB",
+    "Choose file": "Choose file",
+    "Use your device camera to take proof": "Use your device camera to take proof",
+    "Request successfully fulfilled!": "Request successfully fulfilled!",
     "SAR": "SAR"
 }

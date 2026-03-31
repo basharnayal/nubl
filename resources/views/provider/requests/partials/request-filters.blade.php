@@ -11,6 +11,12 @@
     $thisWeekParams = array_merge($queryExceptPage, ['from' => $thisWeekFrom, 'to' => $thisWeekTo]);
     $needsProofParams = array_merge($queryExceptPage, ['needs_proof' => '1']);
     $perPageValue = (int) old('per_page', $filters['per_page'] ?? 15);
+    // Status quick filters: drop status + needs_proof so we don’t combine incompatible filters.
+    $statusQuickBase = array_merge(request()->except(['page', 'status', 'needs_proof']), ['per_page' => $perPageValue]);
+    $requestedParams = array_merge($statusQuickBase, ['status' => 'REQUESTED']);
+    $approvedParams = array_merge($statusQuickBase, ['status' => 'APPROVED']);
+    $redeemableParams = array_merge($statusQuickBase, ['status' => 'REDEEMABLE']);
+    $fulfilledParams = array_merge($statusQuickBase, ['status' => 'FULFILLED']);
 @endphp
 
 <div class="border-b border-slate-200/90 bg-gradient-to-b from-slate-50 to-white px-4 py-5 dark:border-navy-600 dark:from-navy-900/40 dark:to-navy-900/20 sm:px-6">
@@ -125,10 +131,30 @@
             class="flex flex-col gap-4 border-t border-slate-200/90 pt-4 dark:border-navy-600 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
             <div class="flex flex-wrap items-center gap-2">
                 <span class="text-sm font-semibold text-slate-600 dark:text-navy-300">{{ __('Quick filters') }}</span>
+                <a href="{{ route('provider.requests.index', $requestedParams) }}"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-success/40 bg-success/10 px-3 py-1.5 text-xs font-bold text-success shadow-sm transition hover:bg-success/20 dark:border-emerald-500/45 dark:bg-emerald-500/15 dark:text-emerald-200 dark:hover:bg-emerald-500/25">
+                    <i class="fa-solid fa-inbox text-[0.7rem]" aria-hidden="true"></i>
+                    {{ __('Requested') }}
+                </a>
+                <a href="{{ route('provider.requests.index', $approvedParams) }}"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary shadow-sm transition hover:bg-primary/20 dark:border-accent/45 dark:bg-accent/15 dark:text-accent-light dark:hover:bg-accent/25">
+                    <i class="fa-solid fa-circle-check text-[0.7rem]" aria-hidden="true"></i>
+                    {{ __('Approved') }}
+                </a>
+                <a href="{{ route('provider.requests.index', $redeemableParams) }}"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-violet-500/40 bg-violet-500/10 px-3 py-1.5 text-xs font-bold text-violet-700 shadow-sm transition hover:bg-violet-500/20 dark:border-violet-400/45 dark:bg-violet-500/15 dark:text-violet-200 dark:hover:bg-violet-500/25">
+                    <i class="fa-solid fa-qrcode text-[0.7rem]" aria-hidden="true"></i>
+                    {{ __('Redeemable') }}
+                </a>
                 <a href="{{ route('provider.requests.index', $needsProofParams) }}"
                     class="inline-flex items-center gap-1.5 rounded-full border border-warning/40 bg-warning/15 px-3 py-1.5 text-xs font-bold text-warning shadow-sm transition hover:bg-warning/25 dark:border-warning/45 dark:bg-warning/20 dark:text-amber-200 dark:hover:bg-warning/30">
                     <i class="fa-solid fa-clock text-[0.7rem]" aria-hidden="true"></i>
                     {{ __('Needs proof') }}
+                </a>
+                <a href="{{ route('provider.requests.index', $fulfilledParams) }}"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-slate-400/50 bg-slate-200/60 px-3 py-1.5 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-300/70 dark:border-navy-500 dark:bg-navy-700/80 dark:text-navy-100 dark:hover:bg-navy-600">
+                    <i class="fa-solid fa-flag-checkered text-[0.7rem]" aria-hidden="true"></i>
+                    {{ __('Fulfilled') }}
                 </a>
                 <a href="{{ route('provider.requests.index', $thisWeekParams) }}"
                     class="inline-flex items-center gap-1.5 rounded-full border border-info/35 bg-info/10 px-3 py-1.5 text-xs font-bold text-info shadow-sm transition hover:bg-info/20 dark:border-sky-500/40 dark:bg-sky-500/15 dark:text-sky-200 dark:hover:bg-sky-500/25">
