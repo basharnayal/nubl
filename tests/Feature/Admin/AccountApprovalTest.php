@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -67,6 +68,13 @@ class AccountApprovalTest extends TestCase
         $provider->refresh();
         $this->assertSame(User::STATUS_ACTIVE, $provider->status);
         $this->assertNull($provider->rejection_reason);
+
+        $activity = Activity::where('causer_id', $this->admin->id)
+            ->where('description', 'account_approval.approved')
+            ->first();
+        $this->assertNotNull($activity);
+        $this->assertSame($provider->id, $activity->properties->get('user_id'));
+        $this->assertNotNull($activity->created_at);
     }
 
     #[Test]
@@ -87,6 +95,13 @@ class AccountApprovalTest extends TestCase
         $recipient->refresh();
         $this->assertSame(User::STATUS_REJECTED, $recipient->status);
         $this->assertSame('Incomplete documents', $recipient->rejection_reason);
+
+        $activity = Activity::where('causer_id', $this->admin->id)
+            ->where('description', 'account_approval.rejected')
+            ->first();
+        $this->assertNotNull($activity);
+        $this->assertSame($recipient->id, $activity->properties->get('user_id'));
+        $this->assertSame('Incomplete documents', $activity->properties->get('rejection_reason'));
     }
 
     #[Test]

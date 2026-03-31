@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Queries\Admin\AdminPaymentIndexQuery;
+use App\Http\Services\AuditService;
 use App\Models\Payment;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -13,7 +14,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class AdminPaymentController extends Controller
 {
     public function __construct(
-        private AdminPaymentIndexQuery $paymentIndexQuery
+        private AdminPaymentIndexQuery $paymentIndexQuery,
+        private AuditService $auditService
     ) {}
 
     public function index(Request $request): View
@@ -46,6 +48,12 @@ class AdminPaymentController extends Controller
         $query->with('sponsor')->reorder()->orderBy('id');
 
         $filename = 'payments-'.now()->format('Y-m-d-His').'.csv';
+
+        $this->auditService->log('finance', 'payments_exported', [
+            'decision' => 'export',
+            'export_type' => 'payments_csv',
+            'filters' => $request->query(),
+        ]);
 
         return response()->streamDownload(function () use ($query) {
             $out = fopen('php://output', 'w');

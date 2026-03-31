@@ -1,6 +1,16 @@
 {{-- Recipients & Providers with status=pending_approval or rejected --}}
 <x-register-layout :title="__('Approval Pending')" :heading="__('Approval Pending')" :subheading="auth()->user()?->status === 'rejected' ? __('Your application was reviewed and was not approved.') : __('Your account is awaiting review by our team.')">
     <div class="w-full">
+        @if (session('success'))
+            <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200">
+                {{ session('success') }}
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-200">
+                {{ session('error') }}
+            </div>
+        @endif
         <div class="flex items-start gap-4">
             <div class="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center {{ auth()->user()?->status === 'rejected' ? 'bg-red-100' : 'bg-primary/10 dark:bg-accent/10' }}">
                     @if(auth()->user()?->status === 'rejected')
@@ -28,6 +38,9 @@
                         <p class="text-sm text-slate-500 mb-6">
                             {{ __('You may contact support if you have questions or wish to reapply.') }}
                         </p>
+                        <a href="{{ route('application.resubmit.edit') }}" class="inline-flex items-center justify-center px-4 py-2.5 mb-4 text-sm font-medium rounded-lg bg-primary text-white hover:bg-primary-focus dark:bg-accent dark:hover:bg-accent-focus">
+                            {{ __('Resubmit documents') }}
+                        </a>
                     @else
                         <h1 class="text-xl font-semibold text-slate-900 dark:text-navy-100 mb-2">{{ __('Your account is under review') }}</h1>
                         <p class="text-slate-600 dark:text-navy-300 mb-4">

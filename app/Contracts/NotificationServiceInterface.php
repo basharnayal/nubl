@@ -10,4 +10,6 @@ interface NotificationServiceInterface
     public function sendDonationReceipt(Payment $payment): void;
 
     public function sendNewUserRegisteredToAdmins(User $user): void;
+
+    public function sendDocumentsResubmittedForReviewToAdmins(User $user): void;
 }

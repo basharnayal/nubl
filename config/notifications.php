@@ -27,6 +27,16 @@ return [
             'icon_svg' => 'users',
             'subtitle' => 'New user registration',
         ],
+        'account_approval_pending' => [
+            'icon' => 'warning',
+            'icon_svg' => 'clock',
+            'subtitle' => 'notifications.account_approval_pending_subtitle',
+        ],
+        'documents_resubmitted_for_review' => [
+            'icon' => 'info',
+            'icon_svg' => 'users',
+            'subtitle' => 'notifications.documents_resubmitted_subtitle',
+        ],
     ],
 
     /*

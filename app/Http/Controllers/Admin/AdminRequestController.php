@@ -3,11 +3,16 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Services\AuditService;
 use App\Models\Request as RequestModel;
 use Illuminate\Http\Request;
 
 class AdminRequestController extends Controller
 {
+    public function __construct(
+        private AuditService $auditService
+    ) {}
+
     public function index()
     {
         $requests = RequestModel::pendingAdmin()
@@ -39,10 +44,24 @@ class AdminRequestController extends Controller
                 'status' => 'ADMIN_APPROVED', // or REDEEMABLE immediately?
                 'funding_source' => 'CITY_FUND', // Confirming source
             ]);
+            $this->auditService->log('request', 'admin_approved', [
+                'request_id' => $requestModel->id,
+                'decision' => 'approve',
+                'recipient_id' => $requestModel->recipient_id,
+                'provider_id' => $requestModel->provider_id,
+            ]);
             // Here we might trigger notification to Recipient "Your request is approved!"
         } elseif ($validated['action'] === 'reject') {
             $requestModel->update([
                 'status' => 'ADMIN_REJECTED',
+                'rejection_reason_code' => $validated['rejection_reason_code'],
+                'rejection_reason_note' => $validated['rejection_reason_note'] ?? null,
+            ]);
+            $this->auditService->log('request', 'admin_rejected', [
+                'request_id' => $requestModel->id,
+                'decision' => 'reject',
+                'recipient_id' => $requestModel->recipient_id,
+                'provider_id' => $requestModel->provider_id,
                 'rejection_reason_code' => $validated['rejection_reason_code'],
                 'rejection_reason_note' => $validated['rejection_reason_note'] ?? null,
             ]);

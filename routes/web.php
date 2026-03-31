@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\FinancialOverviewController;
 use App\Http\Controllers\Admin\FinancialReportController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\ProviderRegistrationController;
+use App\Http\Controllers\Auth\ResubmitApplicationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Recipient\RecipientController;
 use Illuminate\Support\Facades\Route;
@@ -179,9 +180,15 @@ Route::get('/payments/error', [\App\Http\Controllers\PaymentCallbackController::
 // Provider registration: GET allows guest + auth (auth with profile sees read-only)
 Route::get('/register/provider', [ProviderRegistrationController::class, 'create'])->name('register.provider');
 
-Route::get('/approval-pending', function () {
-    return view('auth.approval-pending');
-})->middleware($authMiddleware)->name('approval.pending');
+Route::middleware($authMiddleware)->group(function () {
+    Route::get('/approval-pending', function () {
+        return view('auth.approval-pending');
+    })->name('approval.pending');
+
+    Route::get('/application/resubmit', [ResubmitApplicationController::class, 'edit'])->name('application.resubmit.edit');
+    Route::post('/application/resubmit', [ResubmitApplicationController::class, 'update'])->name('application.resubmit.update');
+    Route::get('/application/my-file/{type}', [ResubmitApplicationController::class, 'serveFile'])->name('application.my-file');
+});
 
 // Test: debug roles (admin only - remove in production)
 Route::get('/test-roles', function () {

@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -169,5 +170,54 @@ class AdminFinancialManagementTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('75.00', false);
+    }
+
+    #[Test]
+    public function admin_payments_export_is_audited(): void
+    {
+        Payment::factory()->for($this->donor, 'sponsor')->succeeded()->create(['amount' => 10]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.finances.payments.export', [
+            'status' => Payment::STATUS_SUCCEEDED,
+        ]));
+
+        $response->assertOk();
+        $response->assertHeader('content-disposition');
+
+        $activity = Activity::where('causer_id', $this->admin->id)
+            ->where('description', 'finance.payments_exported')
+            ->first();
+        $this->assertNotNull($activity);
+        $this->assertSame('export', $activity->properties->get('decision'));
+        $this->assertSame(Payment::STATUS_SUCCEEDED, $activity->properties->get('filters')['status'] ?? null);
+        $this->assertNotNull($activity->created_at);
+    }
+
+    #[Test]
+    public function admin_fund_transactions_export_is_audited(): void
+    {
+        $payment = Payment::factory()->for($this->donor, 'sponsor')->succeeded()->create(['amount' => 15]);
+        FundTransaction::create([
+            'wallet_id' => $this->systemWallet->id,
+            'sponsor_id' => $this->donor->id,
+            'source' => FundTransaction::SOURCE_DONATION,
+            'amount' => 15,
+            'direction' => FundTransaction::DIRECTION_IN,
+            'payment_id' => $payment->id,
+            'request_id' => null,
+            'order_redemption_id' => null,
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.finances.fund-transactions.export'));
+
+        $response->assertOk();
+        $response->assertHeader('content-disposition');
+
+        $activity = Activity::where('causer_id', $this->admin->id)
+            ->where('description', 'finance.fund_transactions_exported')
+            ->first();
+        $this->assertNotNull($activity);
+        $this->assertSame('export', $activity->properties->get('decision'));
+        $this->assertNotNull($activity->created_at);
     }
 }

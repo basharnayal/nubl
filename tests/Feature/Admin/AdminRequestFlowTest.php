@@ -7,6 +7,7 @@ use App\Models\Request as RequestModel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -87,6 +88,14 @@ class AdminRequestFlowTest extends TestCase
             'id' => $this->request->id,
             'status' => 'ADMIN_APPROVED',
         ]);
+
+        $activity = Activity::where('causer_id', $this->admin->id)
+            ->where('description', 'request.admin_approved')
+            ->first();
+        $this->assertNotNull($activity);
+        $this->assertSame('approve', $activity->properties->get('decision'));
+        $this->assertSame($this->request->id, $activity->properties->get('request_id'));
+        $this->assertNotNull($activity->created_at);
     }
 
     #[Test]
@@ -106,6 +115,14 @@ class AdminRequestFlowTest extends TestCase
             'status' => 'ADMIN_REJECTED',
             'rejection_reason_code' => 'Policy Violation',
         ]);
+
+        $activity = Activity::where('causer_id', $this->admin->id)
+            ->where('description', 'request.admin_rejected')
+            ->first();
+        $this->assertNotNull($activity);
+        $this->assertSame('reject', $activity->properties->get('decision'));
+        $this->assertSame('Policy Violation', $activity->properties->get('rejection_reason_code'));
+        $this->assertNotNull($activity->created_at);
     }
 
     #[Test]

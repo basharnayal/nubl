@@ -4,6 +4,7 @@ namespace Tests\Feature\Admin;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
 
 class UserManagementTest extends TestCase
@@ -95,6 +96,15 @@ class UserManagementTest extends TestCase
             'membership_type' => 'donor',
             'is_active' => true,
         ]);
+
+        $created = User::where('email', 'donor@example.com')->first();
+        $this->assertNotNull($created);
+        $activity = Activity::where('causer_id', $admin->id)
+            ->where('description', 'user.created')
+            ->where('properties->user_id', $created->id)
+            ->first();
+        $this->assertNotNull($activity);
+        $this->assertNotNull($activity->created_at);
     }
 
     public function test_admin_can_update_user(): void
@@ -117,6 +127,12 @@ class UserManagementTest extends TestCase
         $user->refresh();
         $this->assertSame('Updated Name', $user->name);
         $this->assertSame('966509876543', $user->phone_number);
+
+        $activity = Activity::where('causer_id', $admin->id)
+            ->where('description', 'user.updated')
+            ->where('properties->user_id', $user->id)
+            ->first();
+        $this->assertNotNull($activity);
     }
 
     public function test_admin_can_delete_user(): void
@@ -129,6 +145,12 @@ class UserManagementTest extends TestCase
         $response->assertRedirect(route('admin.manage.users.index'));
         $response->assertSessionHas('success');
         $this->assertDatabaseMissing('users', ['id' => $user->id]);
+
+        $activity = Activity::where('causer_id', $admin->id)
+            ->where('description', 'user.deleted')
+            ->where('properties->deleted_user_id', $user->id)
+            ->first();
+        $this->assertNotNull($activity);
     }
 
     public function test_admin_cannot_delete_self(): void
@@ -154,6 +176,12 @@ class UserManagementTest extends TestCase
 
         $user->refresh();
         $this->assertFalse($user->is_active);
+
+        $activity = Activity::where('causer_id', $admin->id)
+            ->where('description', 'user.deactivated')
+            ->where('properties->user_id', $user->id)
+            ->first();
+        $this->assertNotNull($activity);
     }
 
     public function test_admin_can_reactivate_user(): void
@@ -168,6 +196,12 @@ class UserManagementTest extends TestCase
 
         $user->refresh();
         $this->assertTrue($user->is_active);
+
+        $activity = Activity::where('causer_id', $admin->id)
+            ->where('description', 'user.reactivated')
+            ->where('properties->user_id', $user->id)
+            ->first();
+        $this->assertNotNull($activity);
     }
 
     public function test_admin_cannot_deactivate_self(): void

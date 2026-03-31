@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Queries\Admin\AdminFundTransactionIndexQuery;
+use App\Http\Services\AuditService;
 use App\Models\FundTransaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -14,7 +15,8 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class AdminFundTransactionController extends Controller
 {
     public function __construct(
-        private AdminFundTransactionIndexQuery $fundTransactionIndexQuery
+        private AdminFundTransactionIndexQuery $fundTransactionIndexQuery,
+        private AuditService $auditService
     ) {}
 
     public function index(Request $request): View
@@ -71,6 +73,12 @@ class AdminFundTransactionController extends Controller
         $query->with('wallet')->reorder()->orderBy('id');
 
         $filename = 'fund-transactions-'.now()->format('Y-m-d-His').'.csv';
+
+        $this->auditService->log('finance', 'fund_transactions_exported', [
+            'decision' => 'export',
+            'export_type' => 'fund_transactions_csv',
+            'filters' => $request->query(),
+        ]);
 
         return response()->streamDownload(function () use ($query) {
             $out = fopen('php://output', 'w');
