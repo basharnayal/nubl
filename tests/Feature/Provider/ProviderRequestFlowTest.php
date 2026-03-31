@@ -318,6 +318,19 @@ class ProviderRequestFlowTest extends TestCase
     }
 
     #[Test]
+    public function provider_sees_error_when_filter_end_date_is_before_start_date()
+    {
+        $response = $this->actingAs($this->provider)
+            ->get(route('provider.requests.index', [
+                'from' => '2026-03-31',
+                'to' => '2026-03-01',
+            ]));
+
+        $response->assertStatus(200);
+        $response->assertSee(__('The end date must be on or after the start date.'), false);
+    }
+
+    #[Test]
     public function provider_can_filter_needs_proof_only_on_index()
     {
         $this->actingAs($this->provider)

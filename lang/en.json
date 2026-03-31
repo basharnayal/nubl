@@ -23,5 +23,10 @@
     "Quick filters": "Quick filters",
     "Needs proof": "Needs proof",
     "This week": "This week",
+    "The end date must be on or after the start date.": "The end date must be on or after the start date.",
+    "Requested": "Requested",
+    "Approved": "Approved",
+    "Rejected by provider": "Rejected by provider",
+    "Rejected by admin": "Rejected by admin",
     "SAR": "SAR"
 }

@@ -19,8 +19,11 @@
 
         <div class="grid gap-4 lg:grid-cols-12 lg:items-stretch lg:gap-4">
             {{-- Date range: info tint --}}
-            <div
-                class="flex flex-col rounded-xl border border-info/30 bg-info/[0.07] p-4 shadow-sm dark:border-info/35 dark:bg-info/10 lg:col-span-4">
+            <div @class([
+                'flex flex-col rounded-xl border p-4 shadow-sm lg:col-span-4',
+                'border-error/50 bg-error/[0.06] dark:border-error/40 dark:bg-error/10' => $errors->has('to'),
+                'border-info/30 bg-info/[0.07] dark:border-info/35 dark:bg-info/10' => ! $errors->has('to'),
+            ])>
                 <p
                     class="mb-3 flex items-center gap-2 text-sm font-bold text-info dark:text-sky-300 [&_i]:text-info [&_i]:opacity-90">
                     <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-info/15 text-info dark:bg-info/25 dark:text-sky-200">
@@ -33,15 +36,32 @@
                         <label for="filter-from"
                             class="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-navy-200">{{ __('From date') }}</label>
                         <input id="filter-from" type="date" name="from" value="{{ old('from', $filters['from']) }}"
-                            class="form-input w-full rounded-lg border border-info/25 bg-white text-sm shadow-sm focus:border-info focus:ring-2 focus:ring-info/30 dark:border-info/40 dark:bg-navy-800 dark:focus:border-info dark:focus:ring-info/25">
+                            aria-invalid="{{ $errors->has('to') ? 'true' : 'false' }}"
+                            @class([
+                                'form-input w-full rounded-lg bg-white text-sm shadow-sm dark:bg-navy-800',
+                                'border border-error/60 focus:border-error focus:ring-2 focus:ring-error/30 dark:border-error/50' => $errors->has('to'),
+                                'border border-info/25 focus:border-info focus:ring-2 focus:ring-info/30 dark:border-info/40 dark:focus:border-info dark:focus:ring-info/25' => ! $errors->has('to'),
+                            ])>
                     </div>
                     <div>
                         <label for="filter-to"
                             class="mb-1.5 block text-xs font-semibold text-slate-700 dark:text-navy-200">{{ __('To date') }}</label>
                         <input id="filter-to" type="date" name="to" value="{{ old('to', $filters['to']) }}"
-                            class="form-input w-full rounded-lg border border-info/25 bg-white text-sm shadow-sm focus:border-info focus:ring-2 focus:ring-info/30 dark:border-info/40 dark:bg-navy-800 dark:focus:border-info dark:focus:ring-info/25">
+                            aria-invalid="{{ $errors->has('to') ? 'true' : 'false' }}"
+                            @class([
+                                'form-input w-full rounded-lg bg-white text-sm shadow-sm dark:bg-navy-800',
+                                'border-2 border-error focus:border-error focus:ring-2 focus:ring-error/35 dark:border-error dark:focus:border-error' => $errors->has('to'),
+                                'border border-info/25 focus:border-info focus:ring-2 focus:ring-info/30 dark:border-info/40 dark:focus:border-info dark:focus:ring-info/25' => ! $errors->has('to'),
+                            ])>
                     </div>
                 </div>
+                @error('to')
+                    <div class="mt-3 flex gap-2 rounded-lg border border-error/40 bg-error/10 px-3 py-2 text-sm font-semibold text-error dark:border-error/50 dark:bg-error/15 dark:text-red-200"
+                        role="alert">
+                        <i class="fa-solid fa-circle-exclamation mt-0.5 shrink-0" aria-hidden="true"></i>
+                        <span>{{ $message }}</span>
+                    </div>
+                @enderror
             </div>
 
             {{-- Status + proof: primary tint --}}
@@ -94,7 +114,7 @@
                     <label for="filter-q"
                         class="mb-1.5 block text-xs font-semibold text-amber-950/90 dark:text-amber-100/90">{{ __('Request number') }}</label>
                     <input id="filter-q" type="search" name="q" value="{{ old('q', $filters['q']) }}" inputmode="numeric"
-                        autocomplete="off" dir="ltr" placeholder="{{ __('e.g. 17 or #17') }}"
+                        autocomplete="off" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" placeholder="{{ __('e.g. 17 or #17') }}"
                         class="form-input w-full rounded-lg border border-amber-300/80 bg-white text-sm shadow-sm placeholder:text-amber-800/40 focus:border-amber-500 focus:ring-2 focus:ring-amber-400/40 dark:border-amber-500/40 dark:bg-navy-800 dark:placeholder:text-navy-400 dark:focus:border-amber-400 dark:focus:ring-amber-500/30">
                 </div>
             </div>

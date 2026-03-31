@@ -42,10 +42,8 @@ class ProviderRequestController extends Controller
             'per_page' => ['nullable', 'integer', Rule::in([15, 25, 50])],
         ]);
 
-        // GET filters: avoid invalid date order (swap) instead of error redirects that can loop on reload.
-        if (! empty($validated['from']) && ! empty($validated['to']) && $validated['to'] < $validated['from']) {
-            [$validated['from'], $validated['to']] = [$validated['to'], $validated['from']];
-        }
+        $dateRangeInvalid = ! empty($validated['from']) && ! empty($validated['to'])
+            && $validated['to'] < $validated['from'];
 
         $providerId = auth()->id();
         $perPage = $validated['per_page'] ?? 15;
@@ -53,11 +51,13 @@ class ProviderRequestController extends Controller
         $query = RequestModel::forProvider($providerId)
             ->with(['items.menuItem.menuItemCategory', 'redemption.proof']);
 
-        if (! empty($validated['from'])) {
-            $query->whereDate('created_at', '>=', $validated['from']);
-        }
-        if (! empty($validated['to'])) {
-            $query->whereDate('created_at', '<=', $validated['to']);
+        if (! $dateRangeInvalid) {
+            if (! empty($validated['from'])) {
+                $query->whereDate('created_at', '>=', $validated['from']);
+            }
+            if (! empty($validated['to'])) {
+                $query->whereDate('created_at', '<=', $validated['to']);
+            }
         }
         if (! empty($validated['status'])) {
             $query->where('status', $validated['status']);
@@ -114,12 +114,12 @@ class ProviderRequestController extends Controller
             'ADMIN_APPROVED' => __('Admin Approved'),
             'REDEEMABLE' => __('Redeemable'),
             'FULFILLED' => __('Fulfilled'),
-            'REJECTED' => __('Rejected'),
+            'REJECTED' => __('Rejected by provider'),
             'CANCELLED' => __('Cancelled'),
-            'ADMIN_REJECTED' => __('Rejected'),
+            'ADMIN_REJECTED' => __('Rejected by admin'),
         ];
 
-        return view('provider.requests.index', compact(
+        $view = view('provider.requests.index', compact(
             'requests',
             'pendingProofCount',
             'filters',
@@ -129,6 +129,14 @@ class ProviderRequestController extends Controller
             'thisWeekTo',
             'statusFilterLabels'
         ));
+
+        if ($dateRangeInvalid) {
+            return $view->withErrors([
+                'to' => __('The end date must be on or after the start date.'),
+            ]);
+        }
+
+        return $view;
     }
 
     /**
