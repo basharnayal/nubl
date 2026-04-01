@@ -76,7 +76,7 @@ class SidebarPanel
                         'route_name' => 'provider.requests.index',
                     ],
                     'provider_qr' => [
-                        'title' => __('Scan QR'),
+                        'title' => __('Scan QR Code'),
                         'route_name' => 'provider.qr.scan',
                     ],
                     'provider_menu' => [
