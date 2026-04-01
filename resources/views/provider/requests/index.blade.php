@@ -12,9 +12,11 @@
                 </div>
                 @if ($pendingProofCount > 0)
                     <div
-                        class="inline-flex shrink-0 items-center gap-2 rounded-full border border-warning/35 bg-warning/10 px-4 py-2.5 text-sm font-semibold text-warning shadow-sm dark:border-warning/40 dark:bg-warning/15 dark:text-amber-200"
+                        class="inline-flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm dark:border-navy-600 dark:bg-navy-800/60 dark:text-navy-100"
                         role="status">
-                        <i class="fa-solid fa-clock text-[0.9em]" aria-hidden="true"></i>
+                        <span class="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 dark:bg-accent/10">
+                            <i class="fa-solid fa-clock text-[0.85em] text-primary dark:text-accent" aria-hidden="true"></i>
+                        </span>
                         <span>{{ trans_choice('provider_requests_awaiting_proof_summary', $pendingProofCount, ['count' => $pendingProofCount]) }}</span>
                     </div>
                 @endif
