@@ -42,27 +42,30 @@ class StoreRecipientRequest extends FormRequest
             $providerId = $data['provider_id'] ?? null;
             $items = $data['items'] ?? [];
 
-            if (!$providerId) {
+            if (! $providerId) {
                 return;
             }
 
             // 1. Validate Provider
             $provider = User::find($providerId);
-            if (!$provider || !$provider->hasRole('provider')) {
+            if (! $provider || ! $provider->hasRole('provider')) {
                 $validator->errors()->add('provider_id', 'Invalid provider selected.');
+
                 return;
             }
 
-            // Check Provider Active
-            if (!$provider->is_active || $provider->status !== User::STATUS_ACTIVE) {
-                $validator->errors()->add('provider_id', 'This provider is currently inactive.');
+            // Account active + shop open (accepting orders)
+            if (! $provider->isOpenForRecipients()) {
+                $validator->errors()->add('provider_id', 'This provider is currently inactive or not accepting orders.');
+
                 return;
             }
 
             // Check Capacity
             $operatingInfo = $provider->providerOperatingInfo;
-            if (!$operatingInfo || $operatingInfo->daily_capacity <= 0) {
+            if (! $operatingInfo || $operatingInfo->daily_capacity <= 0) {
                 $validator->errors()->add('provider_id', 'This provider is currently not accepting orders (Capacity Full/Off).');
+
                 return;
             }
 
@@ -79,8 +82,9 @@ class StoreRecipientRequest extends FormRequest
                 $itemId = $itemData['id'] ?? null;
                 $quantity = $itemData['quantity'] ?? 0;
 
-                if (!$itemId || !isset($dbItems[$itemId])) {
+                if (! $itemId || ! isset($dbItems[$itemId])) {
                     $validator->errors()->add("items.{$index}.id", 'Invalid menu item selected.');
+
                     continue;
                 }
 
@@ -92,7 +96,7 @@ class StoreRecipientRequest extends FormRequest
                 }
 
                 // Check Active
-                if (!$menuItem->is_active) {
+                if (! $menuItem->is_active) {
                     $validator->errors()->add("items.{$index}.id", "Item '{$menuItem->name}' is currently unavailable.");
                 }
 

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Provider;
 
+use App\Models\Activity;
 use App\Models\Ewallet;
 use App\Models\FundTransaction;
 use App\Models\OrderProof;
@@ -139,6 +140,14 @@ class ProviderRequestFlowTest extends TestCase
             'status' => 'APPROVED',
             'funding_source' => 'PROVIDER_ADOPTION',
         ]);
+
+        $this->assertTrue(
+            Activity::query()
+                ->where('description', 'request.provider_credited_as_donor')
+                ->where('causer_id', $this->provider->id)
+                ->exists(),
+            'FR-22.2: audit log must record provider credited as donor'
+        );
     }
 
     #[Test]

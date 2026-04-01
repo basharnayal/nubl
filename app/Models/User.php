@@ -13,19 +13,24 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * Membership types. Extensible for future provider type.
      */
     public const MEMBERSHIP_DONOR = 'donor';
+
     public const MEMBERSHIP_RECIPIENT = 'recipient';
+
     public const MEMBERSHIP_PROVIDER = 'provider';
 
     /** active = full access. pending_approval = recipient awaiting admin approval */
     public const STATUS_ACTIVE = 'active';
+
     public const STATUS_PENDING_APPROVAL = 'pending_approval';
+
     public const STATUS_REJECTED = 'rejected';
+
     /**
      * The attributes that are mass assignable.
      *
@@ -41,6 +46,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone_verified_at',
         'rejection_reason',
         'is_active',
+        'accepting_orders',
     ];
 
     /**
@@ -117,7 +123,29 @@ class User extends Authenticatable implements MustVerifyEmail
             'phone_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'accepting_orders' => 'boolean',
         ];
+    }
+
+    /**
+     * Provider is visible to recipients (shop open): account active, not admin-deactivated, accepting orders.
+     */
+    public function isOpenForRecipients(): bool
+    {
+        return $this->is_active
+            && $this->accepting_orders
+            && $this->status === self::STATUS_ACTIVE;
+    }
+
+    /**
+     * @param  \Illuminate\Database\Eloquent\Builder<\App\Models\User>  $query
+     * @return \Illuminate\Database\Eloquent\Builder<\App\Models\User>
+     */
+    public function scopeOpenForRecipients($query)
+    {
+        return $query->where('is_active', true)
+            ->where('accepting_orders', true)
+            ->where('status', self::STATUS_ACTIVE);
     }
 
     /**
@@ -129,6 +157,7 @@ class User extends Authenticatable implements MustVerifyEmail
         if ($user) {
             return $user;
         }
+
         return static::whereHas('providerProfile', fn ($q) => $q->where('phone_number', $normalizedPhone))->first();
     }
 
@@ -169,10 +198,11 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function canLogin(): bool
     {
-        if (!$this->is_active) {
+        if (! $this->is_active) {
             return false;
         }
-        return !in_array($this->status, [self::STATUS_PENDING_APPROVAL, self::STATUS_REJECTED]);
+
+        return ! in_array($this->status, [self::STATUS_PENDING_APPROVAL, self::STATUS_REJECTED]);
     }
 
     /**
@@ -197,8 +227,6 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Check if email verification is required (based on config).
-     *
-     * @return bool
      */
     public static function emailVerificationRequired(): bool
     {
@@ -207,13 +235,11 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Check if user's email is verified (or if verification is disabled).
-     *
-     * @return bool
      */
     public function isEmailVerified(): bool
     {
         // If email verification is disabled, consider all users as verified
-        if (!self::emailVerificationRequired()) {
+        if (! self::emailVerificationRequired()) {
             return true;
         }
 

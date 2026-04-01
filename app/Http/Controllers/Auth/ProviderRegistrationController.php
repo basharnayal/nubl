@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Contracts\NotificationServiceInterface;
 use App\Helpers\PhoneHelper;
 use App\Http\Controllers\Controller;
 use App\Http\Services\OtpService;
@@ -9,7 +10,6 @@ use App\Models\ProviderDocuments;
 use App\Models\ProviderFinancialInfo;
 use App\Models\ProviderOperatingInfo;
 use App\Models\ProviderProfile;
-use App\Contracts\NotificationServiceInterface;
 use App\Models\User;
 use App\Rules\SaudiPhoneNumber;
 use App\Rules\SaudiPhoneUnique;
@@ -54,7 +54,7 @@ class ProviderRegistrationController extends Controller
     public function showApplication(Request $request): View|RedirectResponse
     {
         $user = $request->user();
-        if (!$user?->providerProfile) {
+        if (! $user?->providerProfile) {
             return redirect()->route('register.provider');
         }
 
@@ -121,7 +121,7 @@ class ProviderRegistrationController extends Controller
             } else {
                 $open = trim($dayData['open'] ?? '');
                 $close = trim($dayData['close'] ?? '');
-                if (!$open || !$close) {
+                if (! $open || ! $close) {
                     throw \Illuminate\Validation\ValidationException::withMessages([
                         "operating_hours.{$day}" => [__('Set opening and closing time, or mark as closed.')],
                     ]);
@@ -144,6 +144,7 @@ class ProviderRegistrationController extends Controller
                     'membership_type' => User::MEMBERSHIP_PROVIDER,
                     'status' => User::STATUS_PENDING_APPROVAL,
                     'phone_number' => $phoneNormalized,
+                    'accepting_orders' => true,
                 ]);
 
                 $user->assignRole('provider');
@@ -209,6 +210,7 @@ class ProviderRegistrationController extends Controller
         if (config('app.email_verification_enabled', true) && ! Auth::user()->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');
         }
+
         return redirect()->route('approval.pending');
     }
 }

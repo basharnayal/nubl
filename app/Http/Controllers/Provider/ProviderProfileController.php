@@ -3,44 +3,80 @@
 namespace App\Http\Controllers\Provider;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Provider\UpdateProviderProfileRequest;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class ProviderProfileController extends Controller
 {
     /**
-     * Show the form for editing the specified resource.
+     * Show the form for editing operating profile (hours, capacity, pickup notes).
      */
-    public function edit()
+    public function edit(): View
     {
         $user = auth()->user();
         $profile = $user->providerProfile;
         $operatingInfo = $user->providerOperatingInfo;
 
-        return view('provider.profile.edit', compact('user', 'profile', 'operatingInfo'));
+        abort_unless($profile && $operatingInfo, 404);
+
+        $adoptionSupportOptions = collect(config('provider.adoption_support_options', []))
+            ->keys()
+            ->mapWithKeys(fn (string $key) => [$key => __('provider.adoption.'.$key)])
+            ->all();
+
+        return view('provider.profile.edit', [
+            'user' => $user,
+            'profile' => $profile,
+            'operatingInfo' => $operatingInfo,
+            'serviceTypes' => config('provider.service_types'),
+            'weekdayKeys' => array_keys(config('provider.weekdays')),
+            'adoptionSupportOptions' => $adoptionSupportOptions,
+        ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update operating hours, capacity, service options, and pickup notes.
      */
-    public function update(Request $request)
-    {
-        // ... (Usually handles profile updates, skip for now unless requested)
-    }
-
-    /**
-     * Toggle the provider's active status.
-     */
-    public function toggleActive(Request $request)
+    public function update(UpdateProviderProfileRequest $request): RedirectResponse
     {
         $user = auth()->user();
+        $operatingInfo = $user->providerOperatingInfo;
+        abort_unless($operatingInfo, 404);
 
-        // Toggle
-        $user->is_active = !$user->is_active;
+        $operatingHours = $request->buildOperatingHours();
+
+        DB::transaction(function () use ($request, $operatingInfo, $operatingHours) {
+            $validated = $request->validated();
+            $operatingInfo->update([
+                'operating_hours' => $operatingHours,
+                'daily_capacity' => $validated['daily_capacity'],
+                'service_type' => $validated['service_type'],
+                'estimated_preparation_order_time' => $validated['estimated_preparation_order_time'],
+                'adoption_support' => $validated['adoption_support'],
+                'pickup_notes' => $validated['pickup_notes'] ?? null,
+            ]);
+        });
+
+        return redirect()->route('provider.profile.edit')->with('success', __('Profile updated.'));
+    }
+
+    /**
+     * Toggle whether the provider shop is open to recipients (accepting orders).
+     * Does not change admin-controlled account activation (is_active).
+     */
+    public function toggleActive(Request $request): RedirectResponse
+    {
+        $user = auth()->user();
+        $user->accepting_orders = ! $user->accepting_orders;
         $user->save();
 
-        $status = $user->is_active ? 'active' : 'inactive';
+        $open = $user->accepting_orders;
 
-        return back()->with('success', "You are now {$status}. Recipients " . ($user->is_active ? "can" : "cannot") . " see your menu.");
+        return back()->with('success', $open
+            ? __('Your store is now open. Recipients can see your menu.')
+            : __('Your store is paused. Recipients cannot see your menu until you reopen.'));
     }
 }

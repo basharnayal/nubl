@@ -15,6 +15,7 @@ class ProviderOperatingInfo extends Model
         'daily_capacity',
         'service_type',
         'estimated_preparation_order_time',
+        'pickup_notes',
         'adoption_support',
     ];
 

@@ -20,6 +20,7 @@ class UserService
     public function __construct(
         private AuditService $auditService
     ) {}
+
     /**
      * Create user with role and type-specific profiles.
      *
@@ -150,6 +151,7 @@ class UserService
             'status' => User::STATUS_ACTIVE,
             'phone_number' => isset($data['phone_number']) ? PhoneHelper::normalize($data['phone_number']) : null,
             'is_active' => true,
+            'accepting_orders' => true,
         ]);
 
         $role = match ($data['membership_type']) {

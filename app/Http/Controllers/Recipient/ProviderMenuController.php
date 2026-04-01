@@ -15,8 +15,8 @@ class ProviderMenuController extends Controller
      */
     public function index(Request $request)
     {
-        // Providers are users with role 'provider' and status 'active'
-        $query = User::role('provider')->active();
+        // Providers: account active + shop open (accepting_orders), not admin-deactivated
+        $query = User::role('provider')->openForRecipients();
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -41,12 +41,11 @@ class ProviderMenuController extends Controller
     public function show(User $provider, Request $request)
     {
         // Ensure user is actually a provider
-        if (!$provider->hasRole('provider')) {
+        if (! $provider->hasRole('provider')) {
             abort(404);
         }
 
-        // Must be active
-        if (!$provider->is_active || $provider->status !== User::STATUS_ACTIVE) {
+        if (! $provider->isOpenForRecipients()) {
             abort(404);
         }
 
@@ -70,7 +69,7 @@ class ProviderMenuController extends Controller
         }
 
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%'.$request->search.'%');
         }
 
         $menuItems = $query->latest()->get();

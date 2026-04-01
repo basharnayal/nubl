@@ -187,6 +187,13 @@ class ProviderRequestController extends Controller
                     'provider_id' => auth()->id(),
                     'funding_source' => 'PROVIDER_ADOPTION',
                 ]);
+                // FR-22.2: explicit audit — adopting provider is credited as donor for this request
+                $this->auditService->log('request', 'provider_credited_as_donor', [
+                    'request_id' => $requestModel->id,
+                    'provider_user_id' => auth()->id(),
+                    'funding_source' => 'PROVIDER_ADOPTION',
+                    'attribution' => 'provider_as_donor',
+                ]);
                 $this->notificationService->sendRequestStatusChanged($requestModel->load('recipient'), 'APPROVED');
                 $this->auditService->log('notification', 'sent', [
                     'type' => 'request_status_changed',

@@ -88,9 +88,9 @@ class SidebarPanel
                         'title' => __('Inventory'),
                         'route_name' => 'provider.menu-items.index',
                     ],
-                    'provider_schedule' => [
-                        'title' => __('Pickup Schedule'),
-                        'route_name' => '',
+                    'provider_profile_edit' => [
+                        'title' => __('provider.sidebar.hours_notes'),
+                        'route_name' => 'provider.profile.edit',
                     ],
                     'provider_analytics' => [
                         'title' => __('Analytics'),

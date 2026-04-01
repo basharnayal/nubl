@@ -17,52 +17,53 @@ class ProviderDashboardTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        app()->setLocale('en');
+
         Role::firstOrCreate(['name' => 'provider', 'guard_name' => 'web']);
 
         $this->provider = User::factory()->create([
             'status' => User::STATUS_ACTIVE,
             'is_active' => true,
+            'accepting_orders' => true,
         ]);
         $this->provider->assignRole('provider');
     }
 
     #[Test]
-    public function provider_can_view_active_status_on_dashboard()
+    public function provider_can_view_store_status_on_dashboard()
     {
         $response = $this->actingAs($this->provider)
             ->get(route('provider.dashboard'));
 
         $response->assertStatus(200);
         $response->assertSee('Store Status');
-        $response->assertSee('ACTIVE'); // Currently true
+        $response->assertSee('OPEN');
         $response->assertSee('Pause Store');
     }
 
     #[Test]
-    public function provider_can_toggle_active_status()
+    public function provider_can_toggle_accepting_orders_without_changing_account_active_flag()
     {
-        // Initial state: Active
+        $this->assertTrue($this->provider->accepting_orders);
         $this->assertTrue($this->provider->is_active);
 
-        // Toggle to Inactive
         $response = $this->actingAs($this->provider)
             ->post(route('provider.profile.toggle-active'));
 
         $response->assertRedirect();
         $this->provider->refresh();
-        $this->assertFalse($this->provider->is_active);
+        $this->assertFalse($this->provider->accepting_orders);
+        $this->assertTrue($this->provider->is_active, 'Admin account flag is_active must stay unchanged when pausing store');
 
-        // Check Dashboard reflects Inactive
         $response = $this->actingAs($this->provider->fresh())
             ->get(route('provider.dashboard'));
-        $response->assertSee('INACTIVE');
-        $response->assertSee('Activate Store');
+        $response->assertSee('PAUSED');
+        $response->assertSee('Open Store');
 
-        // Toggle back to Active
         $this->actingAs($this->provider->fresh())
             ->post(route('provider.profile.toggle-active'));
 
         $this->provider->refresh();
-        $this->assertTrue($this->provider->is_active);
+        $this->assertTrue($this->provider->accepting_orders);
     }
 }

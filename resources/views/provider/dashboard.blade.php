@@ -6,21 +6,30 @@
                 <h3 class="text-lg font-bold">{{ __('Store Status') }}</h3>
                 <p class="text-sm text-slate-500 dark:text-navy-300">
                     {{ __('Current Status:') }}
-                    <span class="font-bold {{ auth()->user()->is_active ? 'text-success' : 'text-error' }}">
-                        {{ auth()->user()->is_active ? 'ACTIVE' : 'INACTIVE' }}
+                    <span class="font-bold {{ auth()->user()->accepting_orders ? 'text-success' : 'text-error' }}">
+                        {{ auth()->user()->accepting_orders ? __('OPEN') : __('PAUSED') }}
                     </span>
                 </p>
                 <p class="text-xs text-slate-400 dark:text-navy-400 mt-1">
-                    {{ auth()->user()->is_active ? 'Your menu is visible to recipients.' : 'Your menu is hidden from recipients.' }}
+                    {{ auth()->user()->accepting_orders ? __('Your menu is visible to recipients.') : __('Your menu is hidden from recipients until you reopen.') }}
                 </p>
+                @if (! auth()->user()->is_active)
+                    <p class="text-xs text-error mt-2">{{ __('Your account is deactivated by an administrator. Contact support.') }}</p>
+                @endif
             </div>
 
-            <form method="POST" action="{{ route('provider.profile.toggle-active') }}">
-                @csrf
-                <button type="submit" class="btn bg-slate-150 text-slate-800 hover:bg-slate-200 dark:bg-navy-500 dark:text-navy-50 dark:hover:bg-navy-450">
-                    {{ auth()->user()->is_active ? __('Pause Store') : __('Activate Store') }}
-                </button>
-            </form>
+            <div class="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+                <a href="{{ route('provider.profile.edit') }}"
+                    class="btn border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 dark:border-navy-500 dark:bg-navy-700 dark:text-navy-100 dark:hover:bg-navy-600">
+                    {{ __('provider.sidebar.hours_notes') }}
+                </a>
+                <form method="POST" action="{{ route('provider.profile.toggle-active') }}">
+                    @csrf
+                    <button type="submit" class="btn bg-slate-150 text-slate-800 hover:bg-slate-200 dark:bg-navy-500 dark:text-navy-50 dark:hover:bg-navy-450">
+                        {{ auth()->user()->accepting_orders ? __('Pause Store') : __('Open Store') }}
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
     <!-- END Status Card -->

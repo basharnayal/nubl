@@ -17,7 +17,9 @@
                                 </p>
                             </div>
                             @php
-                                $capacityOn = $provider->providerOperatingInfo && $provider->providerOperatingInfo->daily_capacity > 0;
+                                $capacityOn = $provider->accepting_orders
+                                    && $provider->providerOperatingInfo
+                                    && $provider->providerOperatingInfo->daily_capacity > 0;
                             @endphp
                             <div>
                                 @if($capacityOn)
@@ -68,6 +70,12 @@
                                     N/A
                                 @endif
                             </p>
+                            @if($provider->providerOperatingInfo && filled($provider->providerOperatingInfo->pickup_notes))
+                                <p class="col-span-full mt-2 rounded-lg border border-primary/20 bg-primary/[0.06] p-3 text-sm text-slate-700 dark:border-accent/30 dark:bg-accent/10 dark:text-navy-100">
+                                    <span class="font-semibold">{{ __('Pickup / delivery notes') }}:</span>
+                                    {{ $provider->providerOperatingInfo->pickup_notes }}
+                                </p>
+                            @endif
                         </div>
                     </div>
 
