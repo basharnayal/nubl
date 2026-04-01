@@ -33,6 +33,7 @@ class AppServiceProvider extends ServiceProvider
 
         config([
             'recipient.weekly_allowance_limit' => config('provider.recipient.weekly_allowance_limit', 400),
+            'recipient.allowance_retry_delay_seconds' => config('provider.recipient.allowance_retry_delay_seconds', 60),
         ]);
     }
 }

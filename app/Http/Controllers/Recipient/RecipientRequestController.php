@@ -6,16 +6,20 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Recipient\StoreRecipientRequest;
 use App\Http\Services\AuditService;
 use App\Http\Services\RecipientAllowanceService;
-use App\Models\ProviderMenuItem;
+use App\Http\Services\RecipientRequestSubmissionService;
+use App\Jobs\ProcessRecipientAllowanceRetryJob;
 use App\Models\Request as RequestModel;
+use App\Support\RecipientAllowanceRetryCache;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
 class RecipientRequestController extends Controller
 {
     public function __construct(
-        private AuditService $auditService
+        private AuditService $auditService,
+        private RecipientRequestSubmissionService $submissionService
     ) {}
+
     /**
      * Store a newly created resource in storage.
      */
@@ -27,61 +31,38 @@ class RecipientRequestController extends Controller
         $providerId = $validated['provider_id'];
         $itemsData = $validated['items'];
 
-        // Calculate Total Amount
-        $totalAmount = 0;
-        $requestItemsPayload = [];
+        $computed = $this->submissionService->computeLineItems($providerId, $itemsData);
+        $totalAmount = $computed['total'];
 
-        // Fetch fresh prices to avoid client tampering (already validated existence)
-        $itemIds = array_column($itemsData, 'id');
-        $dbItems = ProviderMenuItem::whereIn('id', $itemIds)->get()->keyBy('id');
-
-        foreach ($itemsData as $item) {
-            $menuItem = $dbItems[$item['id']];
-            $qty = (int) $item['quantity'];
-            $price = $menuItem->price; // Snapshot
-            $lineTotal = $price * $qty;
-
-            $totalAmount += $lineTotal;
-
-            $requestItemsPayload[] = [
-                'menu_item_id' => $menuItem->id,
-                'quantity' => $qty,
-                'price_snapshot' => $price,
-                // 'line_total' calculated in DB or accessor
-            ];
-        }
-
-        // --- Weekly Allowance Logic ---
-        // weekly_used = sum(price_snapshot * quantity) for REDEEMABLE/FULFILLED this week
-        // If weekly_used + A > 400 → reject
+        // --- Weekly allowance (FR-6.1 / FR-6.3): if over limit, queue retry (FR-6.4) ---
         if (RecipientAllowanceService::wouldExceedAllowance($user->id, $totalAmount)) {
-            return back()->withErrors(['allowance' => __('Weekly allowance exceeded.')])
+            RecipientAllowanceRetryCache::storePayload($user->id, [
+                'provider_id' => $providerId,
+                'items' => $itemsData,
+            ]);
+
+            $delaySeconds = (int) config('recipient.allowance_retry_delay_seconds', 60);
+            if (RecipientAllowanceRetryCache::tryScheduleJobLock($user->id, $delaySeconds + 10)) {
+                ProcessRecipientAllowanceRetryJob::dispatch($user->id)
+                    ->delay(now()->addSeconds($delaySeconds));
+            }
+
+            $this->auditService->log('request', 'allowance_retry_queued', [
+                'recipient_id' => $user->id,
+                'provider_id' => $providerId,
+                'amount' => $totalAmount,
+            ], $user->id);
+
+            return back()
+                ->with('info', __('Your request could not be placed now due to your weekly allowance. It has been queued and will be retried automatically within :seconds seconds.', ['seconds' => $delaySeconds]))
                 ->withInput();
         }
 
-        // Create Request Header
-        $req = RequestModel::create([
-            'recipient_id' => $user->id,
-            'provider_id' => $providerId,
-            'reserved_amount' => $totalAmount,
-            'funding_source' => 'CITY_FUND', // Default
-            'status' => 'REQUESTED',
-            'is_flagged' => false,
-        ]);
+        RecipientAllowanceRetryCache::clear($user->id);
 
-        // Create Request Items
-        foreach ($requestItemsPayload as $payload) {
-            $req->items()->create($payload);
-        }
+        $this->submissionService->createRequest($user, $providerId, $itemsData);
 
-        $this->auditService->log('request', 'created', [
-            'request_id' => $req->id,
-            'recipient_id' => $user->id,
-            'provider_id' => $providerId,
-            'amount' => $totalAmount,
-        ]);
-
-        return back()->with('success', 'Request submitted successfully!');
+        return back()->with('success', __('Request submitted successfully!'));
     }
 
     /**
@@ -107,7 +88,7 @@ class RecipientRequestController extends Controller
             ->findOrFail($id);
 
         // Ensure redemption token exists for APPROVED/REDEEMABLE (e.g. legacy APPROVED orders)
-        if (in_array($request->status, ['APPROVED', 'REDEEMABLE']) && !$request->redemption) {
+        if (in_array($request->status, ['APPROVED', 'REDEEMABLE']) && ! $request->redemption) {
             \App\Http\Services\RedemptionService::generateForRequest($request);
             $request->load('redemption');
         }
@@ -125,7 +106,7 @@ class RecipientRequestController extends Controller
             ->where('recipient_id', auth()->id())
             ->findOrFail($id);
 
-        if (!$requestModel->isCancellableByRecipient()) {
+        if (! $requestModel->isCancellableByRecipient()) {
             return back()->with('error', __('This request cannot be cancelled.'));
         }
 

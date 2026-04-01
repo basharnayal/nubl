@@ -258,7 +258,7 @@
                                         <span id="cart-projected-week" class="font-medium"></span>
                                     </div>
                                     <p id="allowance-warning" class="mt-2 hidden text-xs font-bold text-error">
-                                        {{ __('Exceeds weekly allowance!') }}
+                                        {{ __('Your request exceeds your available allowance for this period.') }}
                                     </p>
                                 </div>
 
@@ -431,8 +431,8 @@
 
             if (exceeds) {
                 warningEl.classList.remove('hidden');
-                submitBtn.disabled = true;
-                mobileSubmitBtn.disabled = true;
+                submitBtn.disabled = false;
+                mobileSubmitBtn.disabled = false;
             } else if (cart.length === 0) {
                 warningEl.classList.add('hidden');
                 submitBtn.disabled = true;

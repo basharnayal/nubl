@@ -8,6 +8,8 @@ return [
 
     'recipient' => [
         'weekly_allowance_limit' => 400,
+        /** FR-6.4: delayed job retries submit when weekly allowance was temporarily exceeded */
+        'allowance_retry_delay_seconds' => 60,
     ],
 
     'regions' => [

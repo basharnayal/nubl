@@ -1085,5 +1085,8 @@
     "Submit Proof and Fulfill Order": "إرسال الإثبات وإتمام الطلب",
     "Camera access is required to capture the proof photo. Please allow camera permission.": "يلزم السماح بالكاميرا لالتقاط صورة الإثبات. يرجى منح الإذن للكاميرا.",
     "You must provide proof by either uploading a file or capturing a photo.": "يجب تقديم إثبات برفع ملف أو بالتقاط صورة.",
-    "Request successfully fulfilled!": "تم إتمام الطلب بنجاح!"
+    "Request successfully fulfilled!": "تم إتمام الطلب بنجاح!",
+    "Your request exceeds your available allowance for this period.": "طلبك يتجاوز البدل المتاح لك في هذه الفترة.",
+    "Your request could not be placed now due to your weekly allowance. It has been queued and will be retried automatically within :seconds seconds.": "لا يمكن تنفيذ طلبك الآن بسبب البدل الأسبوعي. تم وضعه في قائمة الانتظار وسُيعاد المحاولة تلقائياً خلال :seconds ثانية.",
+    "Request submitted successfully!": "تم إرسال الطلب بنجاح!"
 }

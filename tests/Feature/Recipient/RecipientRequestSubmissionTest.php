@@ -2,12 +2,14 @@
 
 namespace Tests\Feature\Recipient;
 
+use App\Jobs\ProcessRecipientAllowanceRetryJob;
 use App\Models\ProviderMenuItem;
 use App\Models\ProviderOperatingInfo;
 use App\Models\Request as RequestModel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Queue;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -17,8 +19,11 @@ class RecipientRequestSubmissionTest extends TestCase
     use RefreshDatabase;
 
     protected $recipient;
+
     protected $provider;
+
     protected $menuItem1;
+
     protected $menuItem2;
 
     protected function setUp(): void
@@ -87,7 +92,7 @@ class RecipientRequestSubmissionTest extends TestCase
                 'items' => [
                     ['id' => $this->menuItem1->id, 'quantity' => 2], // 100
                     ['id' => $this->menuItem2->id, 'quantity' => 1], // 20
-                ]
+                ],
             ]);
 
         $response->assertSessionHasNoErrors();
@@ -121,11 +126,49 @@ class RecipientRequestSubmissionTest extends TestCase
     }
 
     #[Test]
-    public function weekly_allowance_exceeded_blocks_creation()
+    public function weekly_allowance_exceeded_queues_retry_job_fr_6_4()
     {
+        Queue::fake();
+
         Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00')); // Wednesday
 
         // Existing REDEEMABLE request: 300 SAR (counts towards allowance)
+        RequestModel::create([
+            'recipient_id' => $this->recipient->id,
+            'provider_id' => $this->provider->id,
+            'reserved_amount' => 300.00,
+            'status' => 'REDEEMABLE',
+            'funding_source' => 'CITY_FUND',
+        ])->items()->create([
+            'menu_item_id' => $this->menuItem1->id,
+            'quantity' => 6,
+            'price_snapshot' => 50.00,
+        ]);
+
+        // Try to add 120 SAR (300 + 120 = 420 > 400)
+        $response = $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 2], // 100
+                    ['id' => $this->menuItem2->id, 'quantity' => 1], // 20
+                ],
+            ]);
+
+        $response->assertSessionHas('info');
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('requests', 1); // Only the setup one — no immediate row
+
+        Queue::assertPushed(ProcessRecipientAllowanceRetryJob::class, function (ProcessRecipientAllowanceRetryJob $job) {
+            return $job->userId === $this->recipient->id;
+        });
+    }
+
+    #[Test]
+    public function allowance_retry_job_creates_request_when_weekly_allowance_frees()
+    {
+        Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00'));
+
         $existingReq = RequestModel::create([
             'recipient_id' => $this->recipient->id,
             'provider_id' => $this->provider->id,
@@ -139,18 +182,32 @@ class RecipientRequestSubmissionTest extends TestCase
             'price_snapshot' => 50.00,
         ]);
 
-        // Try to add 120 SAR (300 + 120 = 420 > 400)
-        $response = $this->actingAs($this->recipient)
+        Queue::fake();
+
+        $this->actingAs($this->recipient)
             ->post(route('recipient.requests.store'), [
                 'provider_id' => $this->provider->id,
                 'items' => [
-                    ['id' => $this->menuItem1->id, 'quantity' => 2], // 100
-                    ['id' => $this->menuItem2->id, 'quantity' => 1], // 20
-                ]
+                    ['id' => $this->menuItem1->id, 'quantity' => 2],
+                    ['id' => $this->menuItem2->id, 'quantity' => 1],
+                ],
             ]);
 
-        $response->assertSessionHasErrors(['allowance']);
-        $this->assertDatabaseCount('requests', 1); // Only the setup one
+        Queue::assertPushed(ProcessRecipientAllowanceRetryJob::class);
+
+        // Free allowance (e.g. prior order cancelled) before retry runs
+        $existingReq->update(['status' => 'CANCELLED']);
+
+        $job = new ProcessRecipientAllowanceRetryJob($this->recipient->id);
+        $job->handle(
+            app(\App\Http\Services\RecipientRequestSubmissionService::class),
+            app(\App\Http\Services\AuditService::class)
+        );
+
+        $this->assertDatabaseCount('requests', 2);
+        $new = RequestModel::where('recipient_id', $this->recipient->id)->orderByDesc('id')->first();
+        $this->assertSame('REQUESTED', $new->status);
+        $this->assertEquals(120.00, (float) $new->reserved_amount);
     }
 
     #[Test]
@@ -173,7 +230,7 @@ class RecipientRequestSubmissionTest extends TestCase
                 'provider_id' => $this->provider->id,
                 'items' => [
                     ['id' => $this->menuItem1->id, 'quantity' => 3], // 150
-                ]
+                ],
             ]);
 
         $response->assertSessionHasNoErrors();
@@ -200,7 +257,7 @@ class RecipientRequestSubmissionTest extends TestCase
                 'provider_id' => $this->provider->id,
                 'items' => [
                     ['id' => $this->menuItem1->id, 'quantity' => 2], // 100
-                ]
+                ],
             ]);
 
         $response->assertSessionHasNoErrors();
@@ -257,7 +314,7 @@ class RecipientRequestSubmissionTest extends TestCase
                 'provider_id' => $otherProvider->id,
                 'items' => [
                     ['id' => $this->menuItem1->id, 'quantity' => 1], // Belongs to Provider A
-                ]
+                ],
             ]);
 
         $response->assertSessionHasErrors(['items.0.id']);
