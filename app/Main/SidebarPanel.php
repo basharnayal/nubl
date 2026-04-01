@@ -54,7 +54,12 @@ class SidebarPanel
                     ],
                     'admin_settings' => [
                         'title' => __('Settings'),
-                        'route_name' => '',
+                        'submenu' => [
+                            'admin_settings_qr' => [
+                                'title' => __('QR code validity'),
+                                'route_name' => 'admin.settings.qr.edit',
+                            ],
+                        ],
                     ],
                 ],
             ],

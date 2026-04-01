@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Provider;
 
 use App\Http\Controllers\Controller;
-use App\Models\FundTransaction;
-use App\Models\OrderRedemption;
 use App\Http\Services\AuditService;
 use App\Http\Services\SystemWalletService;
+use App\Models\FundTransaction;
+use App\Models\OrderRedemption;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 
@@ -17,8 +16,7 @@ class ProviderQrController extends Controller
     public function __construct(
         private AuditService $auditService,
         private SystemWalletService $systemWalletService
-    ) {
-    }
+    ) {}
 
     public function scan()
     {
@@ -34,11 +32,11 @@ class ProviderQrController extends Controller
         $rawToken = $request->input('token');
         $providerId = auth()->id();
 
-        // Retry requirement (FR-9.3): max 3 attempts per provider+token within 30 seconds
-        $cacheKey = "qr_redeem_attempts:{$providerId}:" . md5($rawToken);
-        if (RateLimiter::tooManyAttempts($cacheKey, 3)) {
+        // FR-9.3: max 2 redemption attempts per provider+token within 30 seconds (SRS: two attempts)
+        $cacheKey = "qr_redeem_attempts:{$providerId}:".md5($rawToken);
+        if (RateLimiter::tooManyAttempts($cacheKey, 2)) {
             return response()->json([
-                'error' => __('Too many attempts, wait 30 seconds.')
+                'error' => __('Too many attempts, wait 30 seconds.'),
             ], 429);
         }
         RateLimiter::hit($cacheKey, 30);
@@ -54,23 +52,33 @@ class ProviderQrController extends Controller
                     ->orWhere('short_code_hash', $tokenHash);
             })->lockForUpdate()->first();
 
-            if (!$redemption) {
+            if (! $redemption) {
+                DB::rollBack();
+
                 return response()->json(['error' => __('Invalid token.')], 404);
             }
 
             if ($redemption->provider_id !== $providerId) {
+                DB::rollBack();
+
                 return response()->json(['error' => __('This code is not valid for your account.')], 403);
             }
 
             if ($redemption->status === 'REDEEMED') {
+                DB::rollBack();
+
                 return response()->json(['error' => __('This code has already been used.')], 409);
             }
 
             if ($redemption->status === 'EXPIRED' || $redemption->redeem_expires_at->isPast()) {
+                DB::rollBack();
+
                 return response()->json(['error' => __('This QR code has expired.')], 422);
             }
 
             if ($redemption->status !== 'PENDING') {
+                DB::rollBack();
+
                 return response()->json(['error' => __('This code cannot be redeemed.')], 422);
             }
 
@@ -85,7 +93,7 @@ class ProviderQrController extends Controller
                 ->where('source', FundTransaction::SOURCE_PAYOUT)
                 ->exists();
 
-            if (!$alreadyTransferred && $requestModel->funding_source === 'CITY_FUND') {
+            if (! $alreadyTransferred && $requestModel->funding_source === 'CITY_FUND') {
                 $this->systemWalletService->transferToProviderForRequest($requestModel, $redemption->id);
             }
 
@@ -103,17 +111,17 @@ class ProviderQrController extends Controller
             return response()->json([
                 'success' => __('Successfully redeemed!'),
                 'order_redemption_id' => $redemption->id,
-                'redirect_url' => route('provider.proof.index', $redemption->id)
+                'redirect_url' => route('provider.proof.index', $redemption->id),
             ]);
 
         } catch (\Throwable $e) {
             DB::rollBack();
-            \Illuminate\Support\Facades\Log::error('Redemption error: ' . $e->getMessage(), ['exception' => $e]);
+            \Illuminate\Support\Facades\Log::error('Redemption error: '.$e->getMessage(), ['exception' => $e]);
 
             // Expose the real error safely to diagnose the silent 500
             $errorMsg = $e instanceof \RuntimeException || $e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException
                 ? $e->getMessage()
-                : __('A server error occurred during redemption.') . ' : ' . $e->getMessage();
+                : __('A server error occurred during redemption.').' : '.$e->getMessage();
 
             return response()->json(['error' => $errorMsg], 500);
         }

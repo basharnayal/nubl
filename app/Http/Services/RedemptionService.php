@@ -4,6 +4,7 @@ namespace App\Http\Services;
 
 use App\Models\OrderRedemption;
 use App\Models\Request as RequestModel;
+use App\Support\QrTtl;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 
@@ -15,7 +16,7 @@ class RedemptionService
      */
     public static function generateForRequest(RequestModel $request): ?OrderRedemption
     {
-        if (!in_array($request->status, ['APPROVED', 'REDEEMABLE'])) {
+        if (! in_array($request->status, ['APPROVED', 'REDEEMABLE'])) {
             return null;
         }
 
@@ -39,8 +40,8 @@ class RedemptionService
         $tokenCiphertext = Crypt::encryptString($rawToken);
         $shortCodeCiphertext = Crypt::encryptString($shortToken);
 
-        // Define TTL
-        $ttlMinutes = config('qr.ttl_minutes', 180);
+        // TTL: admin override (FR-8.3) or default 3h (FR-8.2)
+        $ttlMinutes = QrTtl::currentMinutes();
 
         return $request->redemption()->create([
             'provider_id' => $request->provider_id,

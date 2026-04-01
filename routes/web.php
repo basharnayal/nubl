@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\AdminFundTransactionController;
 use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\FinancialOverviewController;
 use App\Http\Controllers\Admin\FinancialReportController;
+use App\Http\Controllers\Admin\QrSettingsController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\ProviderRegistrationController;
 use App\Http\Controllers\Auth\ResubmitApplicationController;
@@ -78,6 +79,10 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin'
         // Admin Request Management (ECS-63)
         Route::get('/requests', [\App\Http\Controllers\Admin\AdminRequestController::class, 'index'])->name('requests.index');
         Route::put('/requests/{request}', [\App\Http\Controllers\Admin\AdminRequestController::class, 'update'])->name('requests.update');
+
+        // FR-8.3: QR token TTL (admin)
+        Route::get('/settings/qr', [QrSettingsController::class, 'edit'])->name('settings.qr.edit');
+        Route::put('/settings/qr', [QrSettingsController::class, 'update'])->name('settings.qr.update');
 
         // Fund management & payment monitoring (gateway vs internal ledger)
         Route::prefix('finances')->name('finances.')->group(function () {
