@@ -102,12 +102,13 @@ class ProviderProofController extends Controller
             $requestModel->status = 'FULFILLED';
             $requestModel->save();
 
-            // Log fulfillment
-            $this->auditService->log('request', 'fulfilled', [
+            // Supplement RequestObserver status_changed: keep proof/redemption context for audit trail
+            $this->auditService->log('request', 'fulfillment_proof_uploaded', [
                 'request_id' => $requestModel->id,
                 'redemption_id' => $redemption->id,
                 'proof_url' => $path,
-            ]);
+            ], auth()->id());
+
             $this->notificationService->sendRequestStatusChanged($requestModel->load('recipient'), 'FULFILLED');
             $this->auditService->log('notification', 'sent', [
                 'type' => 'request_status_changed',

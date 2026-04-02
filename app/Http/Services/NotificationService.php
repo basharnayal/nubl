@@ -11,6 +11,8 @@ use App\Notifications\AccountStatusUpdatedNotification;
 use App\Notifications\DocumentsResubmittedForReviewNotification;
 use App\Notifications\DonationReceiptNotification;
 use App\Notifications\NewUserRegisteredNotification;
+use App\Notifications\ProviderNewRequestNotification;
+use App\Notifications\ProviderRequestStatusChangedNotification;
 use App\Notifications\RequestStatusChangedNotification;
 
 class NotificationService implements NotificationServiceInterface
@@ -57,5 +59,29 @@ class NotificationService implements NotificationServiceInterface
         }
 
         $recipient->notify(new RequestStatusChangedNotification($request, $status));
+    }
+
+    public function sendNewRequestToProvider(RequestModel $request): void
+    {
+        $provider = $request->provider;
+        if (! $provider) {
+            return;
+        }
+
+        $provider->notify(new ProviderNewRequestNotification($request));
+    }
+
+    public function sendRequestStatusChangedToProvider(RequestModel $request, string $status): void
+    {
+        if (! in_array($status, ['CANCELLED', 'ADMIN_APPROVED', 'ADMIN_REJECTED'], true)) {
+            return;
+        }
+
+        $provider = $request->provider;
+        if (! $provider) {
+            return;
+        }
+
+        $provider->notify(new ProviderRequestStatusChangedNotification($request, $status));
     }
 }

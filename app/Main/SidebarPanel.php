@@ -50,6 +50,10 @@ class SidebarPanel
                                 'title' => __('finance.nav.reports'),
                                 'route_name' => 'admin.finances.reports.index',
                             ],
+                            'admin_finances_summary_reports' => [
+                                'title' => __('finance.nav.summary_reports'),
+                                'route_name' => 'admin.finances.summary-reports.index',
+                            ],
                         ],
                     ],
                     'admin_settings' => [

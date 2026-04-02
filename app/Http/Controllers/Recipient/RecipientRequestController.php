@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Recipient;
 
+use App\Contracts\NotificationServiceInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Recipient\StoreRecipientRequest;
 use App\Http\Services\AuditService;
@@ -17,7 +18,8 @@ class RecipientRequestController extends Controller
 {
     public function __construct(
         private AuditService $auditService,
-        private RecipientRequestSubmissionService $submissionService
+        private RecipientRequestSubmissionService $submissionService,
+        private NotificationServiceInterface $notificationService
     ) {}
 
     /**
@@ -112,10 +114,10 @@ class RecipientRequestController extends Controller
 
         $requestModel->update(['status' => 'CANCELLED']);
 
-        $this->auditService->log('request', 'cancelled', [
-            'request_id' => $requestModel->id,
-            'recipient_id' => auth()->id(),
-        ]);
+        $this->notificationService->sendRequestStatusChangedToProvider(
+            $requestModel->load('provider'),
+            'CANCELLED'
+        );
 
         return back()->with('success', __('Request cancelled successfully.'));
     }

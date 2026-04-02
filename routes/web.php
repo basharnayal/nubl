@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\FinancialOverviewController;
 use App\Http\Controllers\Admin\FinancialReportController;
 use App\Http\Controllers\Admin\QrSettingsController;
+use App\Http\Controllers\Admin\SummaryReportController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\ProviderRegistrationController;
 use App\Http\Controllers\Auth\ResubmitApplicationController;
@@ -94,6 +95,9 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin'
             Route::get('/fund-transactions', [AdminFundTransactionController::class, 'index'])->name('fund-transactions.index');
             Route::get('/fund-transactions/{fund_transaction}', [AdminFundTransactionController::class, 'show'])->name('fund-transactions.show');
             Route::get('/reports', [FinancialReportController::class, 'index'])->name('reports.index');
+            // FR-19.1: auto-generated weekly / monthly summary reports
+            Route::get('/summary-reports', [SummaryReportController::class, 'index'])->name('summary-reports.index');
+            Route::get('/summary-reports/{summaryReport}/download', [SummaryReportController::class, 'download'])->name('summary-reports.download');
         });
     });
 

@@ -17,4 +17,8 @@ interface NotificationServiceInterface
     public function sendAccountStatusUpdated(User $user, bool $isApproved, ?string $rejectionReason = null): void;
 
     public function sendRequestStatusChanged(RequestModel $request, string $status): void;
+
+    public function sendNewRequestToProvider(RequestModel $request): void;
+
+    public function sendRequestStatusChangedToProvider(RequestModel $request, string $status): void;
 }

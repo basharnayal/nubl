@@ -52,6 +52,16 @@ return [
             'icon_svg' => 'bell',
             'subtitle' => 'Request status update',
         ],
+        'provider_new_request' => [
+            'icon' => 'info',
+            'icon_svg' => 'bell',
+            'subtitle' => 'New request',
+        ],
+        'provider_request_status_changed' => [
+            'icon' => 'info',
+            'icon_svg' => 'bell',
+            'subtitle' => 'Request status update',
+        ],
     ],
 
     /*

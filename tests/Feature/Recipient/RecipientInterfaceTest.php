@@ -131,13 +131,21 @@ class RecipientInterfaceTest extends TestCase
         $this->assertSame('CANCELLED', $this->request->status);
 
         $activity = Activity::query()
-            ->where('description', 'request.cancelled')
+            ->where('description', 'request.status_changed')
             ->latest('id')
             ->first();
 
         $this->assertNotNull($activity);
         $this->assertSame($this->recipient->id, $activity->causer_id);
-        $this->assertSame($this->request->id, $activity->properties['request_id']);
-        $this->assertSame($this->recipient->id, $activity->properties['recipient_id']);
+        $this->assertSame('status_changed', $activity->properties->get('action'));
+        $this->assertSame($this->request->id, $activity->properties->get('request_id'));
+        $this->assertSame($this->recipient->id, $activity->properties->get('recipient_id'));
+        $this->assertSame('REQUESTED', $activity->properties->get('from'));
+        $this->assertSame('CANCELLED', $activity->properties->get('to'));
+
+        $this->provider->refresh();
+        $this->assertCount(1, $this->provider->notifications);
+        $this->assertSame('provider_request_status_changed', $this->provider->notifications->first()->data['type']);
+        $this->assertSame('CANCELLED', $this->provider->notifications->first()->data['status']);
     }
 }

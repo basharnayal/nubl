@@ -2,6 +2,7 @@
 
 namespace App\Http\Services;
 
+use App\Contracts\NotificationServiceInterface;
 use App\Models\ProviderMenuItem;
 use App\Models\Request as RequestModel;
 use App\Models\User;
@@ -10,7 +11,8 @@ use RuntimeException;
 class RecipientRequestSubmissionService
 {
     public function __construct(
-        private AuditService $auditService
+        private AuditService $auditService,
+        private NotificationServiceInterface $notificationService
     ) {}
 
     /**
@@ -83,6 +85,8 @@ class RecipientRequestSubmissionService
             'provider_id' => $providerId,
             'amount' => $totalAmount,
         ]);
+
+        $this->notificationService->sendNewRequestToProvider($req->load('provider'));
 
         return $req;
     }
