@@ -7,6 +7,7 @@ use App\Models\Request as RequestModel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -82,7 +83,8 @@ class RecipientInterfaceTest extends TestCase
     #[Test]
     public function recipient_can_view_requests_index()
     {
-        $response = $this->actingAs($this->recipient)
+        $response = $this->withSession(['locale' => 'en'])
+            ->actingAs($this->recipient)
             ->get(route('recipient.requests.index'));
 
         $response->assertStatus(200);
@@ -95,7 +97,8 @@ class RecipientInterfaceTest extends TestCase
     #[Test]
     public function recipient_can_view_request_details()
     {
-        $response = $this->actingAs($this->recipient)
+        $response = $this->withSession(['locale' => 'en'])
+            ->actingAs($this->recipient)
             ->get(route('recipient.requests.show', $this->request->id));
 
         $response->assertStatus(200);
@@ -112,5 +115,29 @@ class RecipientInterfaceTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Test Provider Business');
+    }
+
+    #[Test]
+    public function recipient_can_cancel_requested_request()
+    {
+        $response = $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.cancel', $this->request->id));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $this->request->refresh();
+
+        $this->assertSame('CANCELLED', $this->request->status);
+
+        $activity = Activity::query()
+            ->where('description', 'request.cancelled')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($activity);
+        $this->assertSame($this->recipient->id, $activity->causer_id);
+        $this->assertSame($this->request->id, $activity->properties['request_id']);
+        $this->assertSame($this->recipient->id, $activity->properties['recipient_id']);
     }
 }

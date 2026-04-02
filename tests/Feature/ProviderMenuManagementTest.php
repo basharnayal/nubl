@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\MenuItemCategory;
 use App\Models\ProviderMenuItem;
 use App\Models\ProviderProfile;
 use App\Models\User;
@@ -16,6 +17,8 @@ class ProviderMenuManagementTest extends TestCase
 {
     use RefreshDatabase;
 
+    protected MenuItemCategory $menuItemCategory;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -24,6 +27,13 @@ class ProviderMenuManagementTest extends TestCase
 
         $this->seed(\Database\Seeders\PermissionSeeder::class);
         $this->seed(\Database\Seeders\RoleSeeder::class);
+
+        $this->menuItemCategory = MenuItemCategory::create([
+            'business_category' => 'Other',
+            'name' => 'Test Category',
+            'slug' => 'test-cat',
+            'is_active' => true,
+        ]);
     }
 
     public function test_provider_can_create_menu_item()
@@ -56,7 +66,7 @@ class ProviderMenuManagementTest extends TestCase
             'name' => 'Cheeseburger',
             'description' => 'Delicious cheese burger',
             'price' => 25.50,
-            'category' => 'Main',
+            'category_id' => $this->menuItemCategory->id,
             'is_active' => true,
         ]);
 
@@ -78,13 +88,14 @@ class ProviderMenuManagementTest extends TestCase
             'name' => 'Old Name',
             'price' => 10.00,
             'category' => 'Test',
+            'category_id' => $this->menuItemCategory->id,
             'is_active' => true,
         ]);
 
         $response = $this->actingAs($provider)->put(route('provider.menu-items.update', $item->id), [
             'name' => 'New Name',
             'price' => 15.00,
-            'category' => 'Test',
+            'category_id' => $this->menuItemCategory->id,
             'description' => 'Updated desc',
             'is_active' => true,
         ]);
@@ -110,13 +121,14 @@ class ProviderMenuManagementTest extends TestCase
             'name' => 'Provider B Item',
             'price' => 10.00,
             'category' => 'Test',
+            'category_id' => $this->menuItemCategory->id,
             'is_active' => true,
         ]);
 
         $response = $this->actingAs($providerA)->put(route('provider.menu-items.update', $itemB->id), [
             'name' => 'Hacked Name',
             'price' => 0.00,
-            'category' => 'Test',
+            'category_id' => $this->menuItemCategory->id,
             'is_active' => true,
         ]);
 
@@ -248,7 +260,7 @@ class ProviderMenuManagementTest extends TestCase
         $response = $this->actingAs($provider)->post(route('provider.menu-items.store'), [
             'name' => 'Burger with Image',
             'price' => 50.00,
-            'category' => 'Main',
+            'category_id' => $this->menuItemCategory->id,
             'is_active' => true,
             'image' => $file,
         ]);
