@@ -44,6 +44,7 @@
      * NUBL tokens aligned with Bootstrap theme (same anchors as :root [data-bs-theme=light])
      * nubl-navy* = secondary blue #003f6a + tints
      * nubl-gold* = brand gold #f0aa1f + tints (primary)
+     * nubl-spot* = accent rose #e0305e + tints (warning / secondary garnish)
      * nubl-coral* = danger #dc3545 + tints
      */
     --color-nubl-navy-50: #e8f1f8;
@@ -66,6 +67,17 @@
     --color-nubl-gold-600: #c9940b;
     --color-nubl-gold-700: #a37a08;
 
+    /* nubl-spot* =  هو لون ثانوي لاستخدام للتطعيم وهو الاحمر*/
+    /* مع --color-nubl-spot-500 */
+    --color-nubl-spot-50: #fff7f9;
+    --color-nubl-spot-100: #fce8ed;
+    --color-nubl-spot-200: #f9c9d6;
+    --color-nubl-spot-300: #f399b3;
+    --color-nubl-spot-400: #e86588;
+    --color-nubl-spot-500: #e0305e;
+    --color-nubl-spot-600: #c42a52;
+    --color-nubl-spot-700: #a12342;
+
     --color-nubl-coral-50: #f8d7da;
     --color-nubl-coral-100: #f1aeb5;
     --color-nubl-coral-200: #ea868f;
@@ -81,7 +93,7 @@
     --color-nubl-success-500: #198754;
     --color-nubl-success-700: #146c43;
 
-    /* Semantic: primary = brand gold #f0aa1f; warning = amber (distinct from primary) */
+    /* Semantic: primary = brand gold #f0aa1f; warning = rose accent (distinct from primary gold) */
     --color-primary: var(--color-nubl-gold-500);
     --color-primary-focus: var(--color-nubl-gold-600);
     --color-secondary-light: var(--color-nubl-navy-100);
@@ -94,8 +106,8 @@
     --color-info-focus: #31d2f2;
     --color-success: var(--color-nubl-success-500);
     --color-success-focus: var(--color-nubl-success-700);
-    --color-warning: #f59e0b;
-    --color-warning-focus: #d97706;
+    --color-warning: var(--color-nubl-spot-500);
+    --color-warning-focus: var(--color-nubl-spot-600);
     --color-error: var(--color-nubl-coral-500);
     --color-error-focus: var(--color-nubl-coral-600);
 
