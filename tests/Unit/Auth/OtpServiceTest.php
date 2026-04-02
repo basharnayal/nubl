@@ -1,0 +1,78 @@
+<?php
+
+namespace Tests\Unit\Auth;
+
+use App\Http\Services\OtpService;
+use App\Http\Services\SmsService;
+use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Cache;
+use Mockery;
+use PHPUnit\Framework\Attributes\Test;
+use Tests\TestCase;
+
+class OtpServiceTest extends TestCase
+{
+    use RefreshDatabase;
+
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        parent::tearDown();
+    }
+
+    #[Test]
+    public function generate_returns_six_digit_numeric_string(): void
+    {
+        $sms = Mockery::mock(SmsService::class);
+        $service = new OtpService($sms);
+
+        $otp = $service->generate();
+
+        $this->assertSame(6, strlen($otp));
+        $this->assertMatchesRegularExpression('/^\d{6}$/', $otp);
+    }
+
+    #[Test]
+    public function verify_otp_returns_false_for_wrong_code(): void
+    {
+        Cache::flush();
+
+        $sms = Mockery::mock(SmsService::class);
+        $service = new OtpService($sms);
+        $user = User::factory()->create();
+
+        Cache::put('otp:user:'.$user->id, '123456', now()->addMinutes(5));
+
+        $this->assertFalse($service->verifyOtp($user, '000000'));
+        $this->assertNotNull(Cache::get('otp:user:'.$user->id));
+    }
+
+    #[Test]
+    public function verify_otp_returns_true_and_clears_cache_on_match(): void
+    {
+        Cache::flush();
+
+        $sms = Mockery::mock(SmsService::class);
+        $service = new OtpService($sms);
+        $user = User::factory()->create();
+
+        Cache::put('otp:user:'.$user->id, '654321', now()->addMinutes(5));
+
+        $this->assertTrue($service->verifyOtp($user, '654321'));
+        $this->assertNull(Cache::get('otp:user:'.$user->id));
+    }
+
+    #[Test]
+    public function send_otp_fails_when_user_has_no_phone(): void
+    {
+        $sms = Mockery::mock(SmsService::class);
+        $sms->shouldNotReceive('send');
+        $service = new OtpService($sms);
+        $user = User::factory()->create(['phone_number' => null]);
+
+        $result = $service->sendOtp($user);
+
+        $this->assertFalse($result['success']);
+    }
+}

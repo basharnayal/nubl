@@ -82,7 +82,8 @@ class RecipientInterfaceTest extends TestCase
     #[Test]
     public function recipient_can_view_requests_index()
     {
-        $response = $this->actingAs($this->recipient)
+        $response = $this->withSession(['locale' => 'en'])
+            ->actingAs($this->recipient)
             ->get(route('recipient.requests.index'));
 
         $response->assertStatus(200);
@@ -95,7 +96,8 @@ class RecipientInterfaceTest extends TestCase
     #[Test]
     public function recipient_can_view_request_details()
     {
-        $response = $this->actingAs($this->recipient)
+        $response = $this->withSession(['locale' => 'en'])
+            ->actingAs($this->recipient)
             ->get(route('recipient.requests.show', $this->request->id));
 
         $response->assertStatus(200);
