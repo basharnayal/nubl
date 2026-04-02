@@ -24,4 +24,8 @@
         class="btn shrink-0 rounded-none border-b-2 px-3 py-2.5 text-sm font-medium sm:px-4 {{ $linkClass('admin.finances.reports.*') }}">
         {{ __('finance.nav.reports') }}
     </a>
+    <a href="{{ route('admin.finances.summary-reports.index') }}"
+        class="btn shrink-0 rounded-none border-b-2 px-3 py-2.5 text-sm font-medium sm:px-4 {{ $linkClass('admin.finances.summary-reports.*') }}">
+        {{ __('finance.nav.summary_reports') }}
+    </a>
 </div>

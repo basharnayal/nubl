@@ -27,7 +27,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        FundTransaction::observe(FundTransactionObserver::class);
+        FundTransaction::observe(app(FundTransactionObserver::class));
         User::observe(UserObserver::class);
         View::composer('*', SidebarComposer::class);
 
