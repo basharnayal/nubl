@@ -24,59 +24,80 @@
         "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
         "Noto Color Emoji";
 
-    --color-navy-50: #e7e9ef;
-    --color-navy-100: #c2c9d6;
-    --color-navy-200: #a3adc2;
-    --color-navy-300: #697a9b;
-    --color-navy-400: #5c6b8a;
-    --color-navy-450: #465675;
-    --color-navy-500: #384766;
-    --color-navy-600: #313e59;
-    --color-navy-700: #26334d;
-    --color-navy-750: #222e45;
-    --color-navy-800: #202b40;
-    --color-navy-900: #192132;
+    /* UI navy = Bootstrap gray scale (--bs-gray-100 … --bs-gray-900) */
+    --color-navy-50: #f8f9fa;
+    --color-navy-100: #e9ecef;
+    --color-navy-200: #dee2e6;
+    --color-navy-300: #ced4da;
+    --color-navy-400: #adb5bd;
+    --color-navy-450: #9aa0a6;
+    --color-navy-500: #6c757d;
+    --color-navy-600: #495057;
+    --color-navy-700: #343a40;
+    --color-navy-750: #3d4449;
+    --color-navy-800: #212529;
+    --color-navy-900: #181b1d;
 
-    --color-slate-150: #e9eef5;
+    --color-slate-150: #e9ecef;
 
-    --color-primary: #4f46e5;
-    --color-primary-focus: #4338ca;
-    --color-secondary-light: #ff57d8;
-    --color-secondary: #f000b9;
-    --color-secondary-focus: #bd0090;
-    --color-accent-light: #818cf8;
-    --color-accent: #5f5af6;
-    --color-accent-focus: #4d47f5;
-    --color-info: #0ea5e9;
-    --color-info-focus: #0284c7;
-    --color-success: #10b981;
-    --color-success-focus: #059669;
-    --color-warning: #ff9800;
-    --color-warning-focus: #e68200;
-    --color-error: #ff5724;
-    --color-error-focus: #f03000;
+    /*
+     * NUBL tokens aligned with Bootstrap theme (same anchors as :root [data-bs-theme=light])
+     * nubl-navy* = secondary blue #003f6a + tints
+     * nubl-gold* = brand gold #f0aa1f + tints (primary)
+     * nubl-coral* = danger #dc3545 + tints
+     */
+    --color-nubl-navy-50: #e8f1f8;
+    --color-nubl-navy-100: #d0e3f1;
+    --color-nubl-navy-200: #a8c9e0;
+    --color-nubl-navy-300: #6a9fc4;
+    --color-nubl-navy-400: #3d7ba8;
+    --color-nubl-navy-500: #005a8f;
+    --color-nubl-navy-600: #003f6a;
+    --color-nubl-navy-700: #00335a;
+    --color-nubl-navy-800: #002a4a;
+    --color-nubl-navy-900: #001f38;
 
-    /* NUBL brand colors */
-    --color-nubl-teal-50: #f0fdfa;
-    --color-nubl-teal-100: #ccfbf1;
-    --color-nubl-teal-200: #99f6e4;
-    --color-nubl-teal-300: #5eead4;
-    --color-nubl-teal-400: #2dd4bf;
-    --color-nubl-teal-500: #14b8a6;
-    --color-nubl-teal-600: #0d9488;
-    --color-nubl-teal-700: #0f766e;
-    --color-nubl-teal-800: #115e59;
-    --color-nubl-teal-900: #134e4a;
-    --color-nubl-blue-50: #eff6ff;
-    --color-nubl-blue-100: #dbeafe;
-    --color-nubl-blue-200: #bfdbfe;
-    --color-nubl-blue-500: #3b82f6;
-    --color-nubl-blue-600: #2563eb;
-    --color-nubl-blue-700: #1d4ed8;
-    --color-nubl-gold-500: #eab308;
-    --color-nubl-gold-600: #ca8a04;
-    --color-nubl-dark: #1e293b;
-    --color-nubl-bg: #f8fafc;
+    --color-nubl-gold-50: #fffbeb;
+    --color-nubl-gold-100: #fef3c7;
+    --color-nubl-gold-200: #fde68a;
+    --color-nubl-gold-300: #fcd34d;
+    --color-nubl-gold-400: #f5c02e;
+    --color-nubl-gold-500: #f0aa1f;
+    --color-nubl-gold-600: #c9940b;
+    --color-nubl-gold-700: #a37a08;
+
+    --color-nubl-coral-50: #f8d7da;
+    --color-nubl-coral-100: #f1aeb5;
+    --color-nubl-coral-200: #ea868f;
+    --color-nubl-coral-300: #e35d6b;
+    --color-nubl-coral-400: #e4606d;
+    --color-nubl-coral-500: #dc3545;
+    --color-nubl-coral-600: #b02a37;
+    --color-nubl-coral-700: #842029;
+
+    --color-nubl-dark: #212529;
+    --color-nubl-bg: #ffffff;
+
+    --color-nubl-success-500: #198754;
+    --color-nubl-success-700: #146c43;
+
+    /* Semantic: primary = brand gold #f0aa1f; warning = amber (distinct from primary) */
+    --color-primary: var(--color-nubl-gold-500);
+    --color-primary-focus: var(--color-nubl-gold-600);
+    --color-secondary-light: var(--color-nubl-navy-100);
+    --color-secondary: var(--color-nubl-navy-600);
+    --color-secondary-focus: var(--color-nubl-navy-800);
+    --color-accent-light: var(--color-nubl-gold-200);
+    --color-accent: var(--color-nubl-gold-400);
+    --color-accent-focus: var(--color-nubl-gold-600);
+    --color-info: #0dcaf0;
+    --color-info-focus: #31d2f2;
+    --color-success: var(--color-nubl-success-500);
+    --color-success-focus: var(--color-nubl-success-700);
+    --color-warning: #f59e0b;
+    --color-warning-focus: #d97706;
+    --color-error: var(--color-nubl-coral-500);
+    --color-error-focus: var(--color-nubl-coral-600);
 
     --shadow-soft: 0 3px 10px 0 rgb(48 46 56 / 6%);
     --shadow-soft-dark: 0 3px 10px 0 rgb(25 33 50 / 30%);
