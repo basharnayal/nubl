@@ -345,5 +345,13 @@
     "provider.adoption.yes": "Yes",
     "provider.adoption.partially": "Partially",
     "provider.adoption.no": "No",
-    "provider.profile.save_hint": "Changes apply to your public menu for recipients."
+    "provider.profile.save_hint": "Changes apply to your public menu for recipients.",
+    "New request": "New request",
+    "New request received": "New request received",
+    "You have a new request (#:id) for :amount SAR.": "You have a new request (#:id) for :amount SAR.",
+    "Request cancelled by recipient": "Request cancelled by recipient",
+    "Request #:id was cancelled by the recipient.": "Request #:id was cancelled by the recipient.",
+    "Request #:id was approved by admin and is ready for your action.": "Request #:id was approved by admin and is ready for your action.",
+    "Request #:id was rejected by admin.": "Request #:id was rejected by admin.",
+    "Request #:id status is now :status.": "Request #:id status is now :status."
 }

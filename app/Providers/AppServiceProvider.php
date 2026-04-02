@@ -6,8 +6,10 @@ use App\Contracts\NotificationServiceInterface;
 use App\Http\Services\NotificationService;
 use App\Http\View\Composers\SidebarComposer;
 use App\Models\FundTransaction;
+use App\Models\Request as RequestModel;
 use App\Models\User;
 use App\Observers\FundTransactionObserver;
+use App\Observers\RequestObserver;
 use App\Observers\UserObserver;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -28,6 +30,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         FundTransaction::observe(app(FundTransactionObserver::class));
+        RequestModel::observe(app(RequestObserver::class));
         User::observe(UserObserver::class);
         View::composer('*', SidebarComposer::class);
 

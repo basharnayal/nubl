@@ -123,6 +123,11 @@ class RecipientRequestSubmissionTest extends TestCase
             'quantity' => 1,
             'price_snapshot' => 20.00,
         ]);
+
+        $this->provider->refresh();
+        $this->assertCount(1, $this->provider->notifications);
+        $this->assertSame('provider_new_request', $this->provider->notifications->first()->data['type'] ?? null);
+        $this->assertSame($request->id, $this->provider->notifications->first()->data['request_id'] ?? null);
     }
 
     #[Test]
@@ -208,6 +213,10 @@ class RecipientRequestSubmissionTest extends TestCase
         $new = RequestModel::where('recipient_id', $this->recipient->id)->orderByDesc('id')->first();
         $this->assertSame('REQUESTED', $new->status);
         $this->assertEquals(120.00, (float) $new->reserved_amount);
+
+        $this->provider->refresh();
+        $this->assertCount(1, $this->provider->notifications);
+        $this->assertSame('provider_new_request', $this->provider->notifications->first()->data['type'] ?? null);
     }
 
     #[Test]

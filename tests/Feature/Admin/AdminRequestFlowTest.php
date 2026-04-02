@@ -90,12 +90,20 @@ class AdminRequestFlowTest extends TestCase
         ]);
 
         $activity = Activity::where('causer_id', $this->admin->id)
-            ->where('description', 'request.admin_approved')
+            ->where('description', 'request.status_changed')
             ->first();
         $this->assertNotNull($activity);
-        $this->assertSame('approve', $activity->properties->get('decision'));
+        $this->assertSame('status_changed', $activity->properties->get('action'));
         $this->assertSame($this->request->id, $activity->properties->get('request_id'));
+        $this->assertSame('ADMIN_PENDING', $activity->properties->get('from'));
+        $this->assertSame('ADMIN_APPROVED', $activity->properties->get('to'));
+        $this->assertSame('CITY_FUND', $activity->properties->get('funding_source'));
         $this->assertNotNull($activity->created_at);
+
+        $this->provider->refresh();
+        $this->assertCount(1, $this->provider->notifications);
+        $this->assertSame('provider_request_status_changed', $this->provider->notifications->first()->data['type']);
+        $this->assertSame('ADMIN_APPROVED', $this->provider->notifications->first()->data['status']);
     }
 
     #[Test]
@@ -117,12 +125,19 @@ class AdminRequestFlowTest extends TestCase
         ]);
 
         $activity = Activity::where('causer_id', $this->admin->id)
-            ->where('description', 'request.admin_rejected')
+            ->where('description', 'request.status_changed')
             ->first();
         $this->assertNotNull($activity);
-        $this->assertSame('reject', $activity->properties->get('decision'));
+        $this->assertSame('status_changed', $activity->properties->get('action'));
+        $this->assertSame('ADMIN_PENDING', $activity->properties->get('from'));
+        $this->assertSame('ADMIN_REJECTED', $activity->properties->get('to'));
         $this->assertSame('Policy Violation', $activity->properties->get('rejection_reason_code'));
         $this->assertNotNull($activity->created_at);
+
+        $this->provider->refresh();
+        $this->assertCount(1, $this->provider->notifications);
+        $this->assertSame('provider_request_status_changed', $this->provider->notifications->first()->data['type']);
+        $this->assertSame('ADMIN_REJECTED', $this->provider->notifications->first()->data['status']);
     }
 
     #[Test]

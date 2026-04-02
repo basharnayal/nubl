@@ -1164,5 +1164,13 @@
     "Applies to new QR codes when a request becomes redeemable. Codes already issued keep their original expiry.": "يُطبَّق على رموز QR الجديدة عندما يصبح الطلب قابلاً للاسترداد. الرموز الصادرة مسبقاً تحتفظ بتاريخ انتهائها الأصلي.",
     "Quick presets": "إعدادات سريعة",
     "Changes take effect for newly generated QR codes.": "تُطبَّق التغييرات على رموز QR المُنشأة حديثاً.",
-    "Settings saved.": "تم حفظ الإعدادات."
+    "Settings saved.": "تم حفظ الإعدادات.",
+    "New request": "طلب جديد",
+    "New request received": "طلب جديد وارد",
+    "You have a new request (#:id) for :amount SAR.": "لديك طلب جديد (#:id) بقيمة :amount ريال.",
+    "Request cancelled by recipient": "إلغاء الطلب من المستفيد",
+    "Request #:id was cancelled by the recipient.": "تم إلغاء الطلب رقم #:id من المستفيد.",
+    "Request #:id was approved by admin and is ready for your action.": "تمت الموافقة على الطلب رقم #:id من الإدارة وهو جاهٍ لإجرائك.",
+    "Request #:id was rejected by admin.": "تم رفض الطلب رقم #:id من الإدارة.",
+    "Request #:id status is now :status.": "حالة الطلب رقم #:id أصبحت :status."
 }
