@@ -4,14 +4,17 @@ namespace Tests\Unit\Recipient;
 
 use App\Http\Services\RecipientAllowanceService;
 use Carbon\Carbon;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 /**
- * Config and date math only (no database — avoids nested transactions with SQLite).
+ * Config and date math; RefreshDatabase needed because weeklyLimit() reads system_settings.
  */
 class RecipientAllowanceServiceConfigTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected function tearDown(): void
     {
         Carbon::setTestNow();

@@ -67,6 +67,11 @@ return [
             'icon_svg' => 'clock',
             'subtitle' => 'Allocation engine update',
         ],
+        'weekly_allowance_changed' => [
+            'icon' => 'info',
+            'icon_svg' => 'bell',
+            'subtitle' => 'Weekly allowance',
+        ],
     ],
 
     /*

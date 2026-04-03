@@ -10,6 +10,7 @@
 use App\Http\Controllers\Admin\AccountApprovalController;
 use App\Http\Controllers\Admin\AdminFundTransactionController;
 use App\Http\Controllers\Admin\AdminPaymentController;
+use App\Http\Controllers\Admin\AllowanceSettingsController;
 use App\Http\Controllers\Admin\FinancialOverviewController;
 use App\Http\Controllers\Admin\FinancialReportController;
 use App\Http\Controllers\Admin\QrSettingsController;
@@ -84,6 +85,10 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin'
         // FR-8.3: QR token TTL (admin)
         Route::get('/settings/qr', [QrSettingsController::class, 'edit'])->name('settings.qr.edit');
         Route::put('/settings/qr', [QrSettingsController::class, 'update'])->name('settings.qr.update');
+
+        // FR-17.1: Weekly beneficiary allowance (scheduled next week)
+        Route::get('/settings/allowances', [AllowanceSettingsController::class, 'edit'])->name('settings.allowances.edit');
+        Route::put('/settings/allowances', [AllowanceSettingsController::class, 'update'])->name('settings.allowances.update');
 
         // FR-24.1: Allocation engine pause/resume (global + per-provider)
         Route::get('/allocation/status', [\App\Http\Controllers\Admin\AdminAllocationController::class, 'status'])->name('allocation.status');

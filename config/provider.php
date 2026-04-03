@@ -8,6 +8,9 @@ return [
 
     'recipient' => [
         'weekly_allowance_limit' => 400,
+        /** FR-17.1: bounds for admin-configured weekly limit (SAR) */
+        'weekly_allowance_limit_min' => 1,
+        'weekly_allowance_limit_max' => 100_000,
         /** FR-6.4: delayed job retries submit when weekly allowance was temporarily exceeded */
         'allowance_retry_delay_seconds' => 60,
     ],

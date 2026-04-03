@@ -67,6 +67,10 @@ class SidebarPanel
                                 'title' => __('Allocation Engine'),
                                 'route_name' => 'admin.allocation.status',
                             ],
+                            'admin_settings_allowances' => [
+                                'title' => __('Weekly allowance'),
+                                'route_name' => 'admin.settings.allowances.edit',
+                            ],
                         ],
                     ],
                 ],
