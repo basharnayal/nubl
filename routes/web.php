@@ -85,6 +85,13 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin'
         Route::get('/settings/qr', [QrSettingsController::class, 'edit'])->name('settings.qr.edit');
         Route::put('/settings/qr', [QrSettingsController::class, 'update'])->name('settings.qr.update');
 
+        // FR-24.1: Allocation engine pause/resume (global + per-provider)
+        Route::get('/allocation/status', [\App\Http\Controllers\Admin\AdminAllocationController::class, 'status'])->name('allocation.status');
+        Route::post('/allocation/pause', [\App\Http\Controllers\Admin\AdminAllocationController::class, 'pauseGlobal'])->name('allocation.pause');
+        Route::post('/allocation/resume', [\App\Http\Controllers\Admin\AdminAllocationController::class, 'resumeGlobal'])->name('allocation.resume');
+        Route::post('/allocation/providers/{provider}/pause', [\App\Http\Controllers\Admin\AdminAllocationController::class, 'pauseProvider'])->name('allocation.provider.pause');
+        Route::post('/allocation/providers/{provider}/resume', [\App\Http\Controllers\Admin\AdminAllocationController::class, 'resumeProvider'])->name('allocation.provider.resume');
+
         // Fund management & payment monitoring (gateway vs internal ledger)
         Route::prefix('finances')->name('finances.')->group(function () {
             Route::get('/', [FinancialOverviewController::class, 'index'])->name('overview');

@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Contracts\AllocationEngineServiceInterface;
 use App\Contracts\NotificationServiceInterface;
+use App\Http\Services\AllocationEngineService;
 use App\Http\Services\NotificationService;
 use App\Http\View\Composers\SidebarComposer;
 use App\Models\FundTransaction;
@@ -22,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(NotificationServiceInterface::class, NotificationService::class);
+        $this->app->bind(AllocationEngineServiceInterface::class, AllocationEngineService::class);
     }
 
     /**

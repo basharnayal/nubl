@@ -47,6 +47,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'rejection_reason',
         'is_active',
         'accepting_orders',
+        'allocation_paused',
     ];
 
     /**
@@ -124,6 +125,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'is_active' => 'boolean',
             'accepting_orders' => 'boolean',
+            'allocation_paused' => 'boolean',
         ];
     }
 

@@ -28,10 +28,13 @@
                     @forelse($providers as $provider)
                         <div class="card p-5 transition-colors hover:border-primary/30 dark:hover:border-accent/30">
                             <h5 class="mb-2 text-lg font-bold tracking-tight text-slate-800 dark:text-navy-100">
-                                {{ $provider->providerProfile->business_name_en ?? $provider->name }}
+                                {{ $provider->providerProfile?->business_name_en ?? $provider->name }}
                             </h5>
                             <p class="mb-2 truncate text-sm text-slate-600 dark:text-navy-300">
-                                {{ $provider->providerProfile->business_category ? implode(', ', array_map(fn($c) => ucfirst(str_replace('_', ' ', $c)), $provider->providerProfile->business_category)) : __('General Provider') }}
+                                @php
+                                    $categories = $provider->providerProfile?->business_category;
+                                @endphp
+                                {{ $categories ? implode(', ', array_map(fn ($c) => ucfirst(str_replace('_', ' ', $c)), $categories)) : __('General Provider') }}
                             </p>
                             @if($provider->providerOperatingInfo && !empty($provider->providerOperatingInfo->service_type))
                             <p class="mb-3 flex items-center text-xs text-slate-500 dark:text-navy-400">
@@ -49,7 +52,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
-                                {{ $provider->providerProfile->city ?? __('Unknown City') }}
+                                {{ $provider->providerProfile?->city ?? __('Unknown City') }}
                             </div>
 
                             <a href="{{ route('recipient.providers.show', $provider->id) }}"

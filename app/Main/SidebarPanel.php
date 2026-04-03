@@ -63,6 +63,10 @@ class SidebarPanel
                                 'title' => __('QR code validity'),
                                 'route_name' => 'admin.settings.qr.edit',
                             ],
+                            'admin_settings_allocation' => [
+                                'title' => __('Allocation Engine'),
+                                'route_name' => 'admin.allocation.status',
+                            ],
                         ],
                     ],
                 ],

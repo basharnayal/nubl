@@ -62,6 +62,11 @@ return [
             'icon_svg' => 'bell',
             'subtitle' => 'Request status update',
         ],
+        'allocation_engine_status_changed' => [
+            'icon' => 'warning',
+            'icon_svg' => 'clock',
+            'subtitle' => 'Allocation engine update',
+        ],
     ],
 
     /*
