@@ -13,6 +13,8 @@ return [
         'weekly_allowance_limit_max' => 100_000,
         /** FR-6.4: delayed job retries submit when weekly allowance was temporarily exceeded */
         'allowance_retry_delay_seconds' => 60,
+        /** FR-6.4: delayed job retries submit when city fund (payment pool) is temporarily insufficient */
+        'fund_retry_delay_seconds' => 60,
     ],
 
     'regions' => [

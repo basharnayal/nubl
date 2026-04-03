@@ -3,6 +3,8 @@
 namespace Tests\Feature\Recipient;
 
 use App\Jobs\ProcessRecipientAllowanceRetryJob;
+use App\Jobs\ProcessRecipientFundRetryJob;
+use App\Models\Payment;
 use App\Models\ProviderMenuItem;
 use App\Models\ProviderOperatingInfo;
 use App\Models\Request as RequestModel;
@@ -80,6 +82,12 @@ class RecipientRequestSubmissionTest extends TestCase
             'price' => 20.00,
             'category' => 'Sides',
             'is_active' => true,
+        ]);
+
+        // FR-6.2: pooled donor payments must cover city-fund requests at submit time
+        Payment::factory()->create([
+            'amount' => 100_000.00,
+            'status' => Payment::STATUS_SUCCEEDED,
         ]);
     }
 
@@ -170,6 +178,95 @@ class RecipientRequestSubmissionTest extends TestCase
     }
 
     #[Test]
+    public function submit_cooldown_blocks_new_request_after_allowance_retry_queued(): void
+    {
+        config(['recipient.allowance_retry_delay_seconds' => 2]);
+        config(['recipient.fund_retry_delay_seconds' => 2]);
+        Queue::fake();
+
+        Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00'));
+
+        RequestModel::create([
+            'recipient_id' => $this->recipient->id,
+            'provider_id' => $this->provider->id,
+            'reserved_amount' => 300.00,
+            'status' => 'REDEEMABLE',
+            'funding_source' => 'CITY_FUND',
+        ])->items()->create([
+            'menu_item_id' => $this->menuItem1->id,
+            'quantity' => 6,
+            'price_snapshot' => 50.00,
+        ]);
+
+        $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 2],
+                    ['id' => $this->menuItem2->id, 'quantity' => 1],
+                ],
+            ])
+            ->assertSessionHas('info');
+
+        $this->assertDatabaseCount('requests', 1);
+
+        $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem2->id, 'quantity' => 1],
+                ],
+            ])
+            ->assertSessionHas('error');
+
+        $this->assertDatabaseCount('requests', 1);
+
+        $this->travel(3)->seconds();
+
+        $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem2->id, 'quantity' => 1],
+                ],
+            ])
+            ->assertSessionHasNoErrors()
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseCount('requests', 2);
+
+        Carbon::setTestNow();
+        $this->travelBack();
+    }
+
+    #[Test]
+    public function city_fund_insufficient_queues_fund_retry_job_fr_6_4(): void
+    {
+        Queue::fake();
+        Payment::query()->delete();
+
+        Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00'));
+
+        $response = $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 1],
+                ],
+            ]);
+
+        $response->assertSessionHas('info');
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseCount('requests', 0);
+
+        Queue::assertPushed(ProcessRecipientFundRetryJob::class, function (ProcessRecipientFundRetryJob $job) {
+            return $job->userId === $this->recipient->id;
+        });
+
+        Carbon::setTestNow();
+    }
+
+    #[Test]
     public function allowance_retry_job_creates_request_when_weekly_allowance_frees()
     {
         Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00'));
@@ -206,6 +303,7 @@ class RecipientRequestSubmissionTest extends TestCase
         $job = new ProcessRecipientAllowanceRetryJob($this->recipient->id);
         $job->handle(
             app(\App\Http\Services\RecipientRequestSubmissionService::class),
+            app(\App\Http\Services\AllocationService::class),
             app(\App\Http\Services\AuditService::class)
         );
 

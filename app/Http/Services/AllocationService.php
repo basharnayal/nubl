@@ -17,6 +17,42 @@ class AllocationService
     ) {}
 
     /**
+     * Total unallocated SAR across succeeded donor payments (FIFO pool for city fund).
+     * Matches the pool used by allocateToRequest before links are created.
+     */
+    public function availableCityFundAmount(): float
+    {
+        $payments = Payment::where('status', Payment::STATUS_SUCCEEDED)
+            ->orderBy('created_at')
+            ->get();
+
+        $total = 0.0;
+
+        foreach ($payments as $payment) {
+            $used = (float) RequestPaymentLink::where('payment_id', $payment->id)->sum('amount');
+            $available = (float) $payment->amount - $used;
+
+            if ($available > 0) {
+                $total += $available;
+            }
+        }
+
+        return $total;
+    }
+
+    /**
+     * Whether the pooled city fund can cover this amount (FR-6.2 at submit time).
+     */
+    public function canCoverRequestAmount(float $amount): bool
+    {
+        if ($amount <= 0) {
+            return true;
+        }
+
+        return $this->availableCityFundAmount() + 0.001 >= $amount;
+    }
+
+    /**
      * Allocate amount to a request from available payments (FIFO).
      * Creates request_payment_links rows. Must be called inside DB::transaction.
      * If the engine is paused (globally or per-provider), queues into pending_allocations (FR-24.2).

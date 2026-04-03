@@ -1154,6 +1154,8 @@
     "Request successfully fulfilled!": "تم إتمام الطلب بنجاح!",
     "Your request exceeds your available allowance for this period.": "طلبك يتجاوز البدل المتاح لك في هذه الفترة.",
     "Your request could not be placed now due to your weekly allowance. It has been queued and will be retried automatically within :seconds seconds.": "لا يمكن تنفيذ طلبك الآن بسبب البدل الأسبوعي. تم وضعه في قائمة الانتظار وسُيعاد المحاولة تلقائياً خلال :seconds ثانية.",
+    "Your request could not be placed now because the city fund is temporarily insufficient. It has been queued and will be retried automatically within :seconds seconds.": "لا يمكن تنفيذ طلبك الآن لعدم كفاية صندوق المدينة مؤقتاً. تم وضعه في قائمة الانتظار وسُيعاد المحاولة تلقائياً خلال :seconds ثانية.",
+    "You must wait :seconds seconds before submitting another request while a previous attempt is being retried.": "يجب الانتظار :seconds ثانية قبل إرسال طلب جديد أثناء إعادة محاولة المحاولة السابقة.",
     "Request submitted successfully!": "تم إرسال الطلب بنجاح!",
     "QR code validity": "صلاحية رمز الاسترداد",
     "Back to admin dashboard": "العودة إلى لوحة الإدارة",

@@ -156,4 +156,28 @@ class AllocationServiceTest extends TestCase
 
         $service->allocateToRequest($request->id, 100.0);
     }
+
+    #[Test]
+    public function can_cover_request_amount_matches_unallocated_pool(): void
+    {
+        $donor = User::factory()->create();
+        Payment::create([
+            'sponsor_id' => $donor->id,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'status' => Payment::STATUS_SUCCEEDED,
+            'amount' => 40,
+        ]);
+        Payment::create([
+            'sponsor_id' => $donor->id,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'status' => Payment::STATUS_SUCCEEDED,
+            'amount' => 60,
+        ]);
+
+        $service = app(AllocationService::class);
+
+        $this->assertSame(100.0, $service->availableCityFundAmount());
+        $this->assertTrue($service->canCoverRequestAmount(100.0));
+        $this->assertFalse($service->canCoverRequestAmount(100.01));
+    }
 }

@@ -42,6 +42,7 @@ class AppServiceProvider extends ServiceProvider
             'recipient.weekly_allowance_limit_min' => config('provider.recipient.weekly_allowance_limit_min', 1),
             'recipient.weekly_allowance_limit_max' => config('provider.recipient.weekly_allowance_limit_max', 100_000),
             'recipient.allowance_retry_delay_seconds' => config('provider.recipient.allowance_retry_delay_seconds', 60),
+            'recipient.fund_retry_delay_seconds' => config('provider.recipient.fund_retry_delay_seconds', 60),
         ]);
     }
 }
