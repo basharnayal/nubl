@@ -32,7 +32,16 @@ class ProviderMenuItem extends Model
 
     public function getImageUrlAttribute(): ?string
     {
-        return $this->image_path ? asset('storage/' . $this->image_path) : null;
+        $path = $this->image_path;
+        if ($path === null || $path === '') {
+            return null;
+        }
+
+        $normalized = str_replace('\\', '/', $path);
+        $segments = array_values(array_filter(explode('/', $normalized), static fn ($s) => $s !== ''));
+        $encoded = array_map(static fn (string $segment): string => rawurlencode($segment), $segments);
+
+        return asset('storage/'.implode('/', $encoded));
     }
 
     public function provider(): BelongsTo

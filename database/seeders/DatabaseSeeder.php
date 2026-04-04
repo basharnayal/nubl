@@ -29,8 +29,9 @@ class DatabaseSeeder extends Seeder
         // Step 4: Create recipient user
         $this->call(RecipientSeeder::class);
 
-        // Step 5: Create providers and menu items
+        // Step 5: Create providers and menu items (menu categories before menu items)
         $this->call(ProviderSeeder::class);
+        $this->call(MenuItemCategorySeeder::class);
         $this->call(ProviderMenuItemSeeder::class);
 
         // Step 6: Create allowance test data (REDEEMABLE + FULFILLED requests)
