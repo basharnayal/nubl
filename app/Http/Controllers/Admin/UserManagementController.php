@@ -11,6 +11,7 @@ use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Spatie\Permission\Models\Role;
 
 /**
  * Admin full CRUD for users + deactivate/reactivate (FR-12.1, FR-20.1).
@@ -48,6 +49,7 @@ class UserManagementController extends Controller
     public function create(): View
     {
         return view('admin.manage.users.create', [
+            'allRoles' => $this->rolesForUserForms(),
             'businessCategories' => config('provider.business_categories'),
             'serviceTypes' => config('provider.service_types'),
             'weekdays' => config('provider.weekdays'),
@@ -69,20 +71,35 @@ class UserManagementController extends Controller
     public function edit(User $user): View
     {
         $user->load([
+            'roles',
             'recipientProfile',
             'recipientKycDetails',
             'providerProfile',
             'providerOperatingInfo',
             'providerFinancialInfo',
+            'providerDocuments',
         ]);
 
         return view('admin.manage.users.edit', [
             'user' => $user,
+            'allRoles' => $this->rolesForUserForms(),
             'businessCategories' => config('provider.business_categories'),
             'serviceTypes' => config('provider.service_types'),
             'weekdays' => config('provider.weekdays'),
+            'weekdayKeys' => array_keys(config('provider.weekdays')),
             'nationalities' => config('nationalities', []),
         ]);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Role>
+     */
+    private function rolesForUserForms(): \Illuminate\Database\Eloquent\Collection
+    {
+        return Role::query()
+            ->where('guard_name', config('auth.defaults.guard', 'web'))
+            ->orderBy('name')
+            ->get();
     }
 
     public function update(UpdateUserRequest $request, User $user): RedirectResponse

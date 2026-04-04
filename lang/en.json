@@ -485,5 +485,18 @@
     "rbac.permission.fulfillment_proof.upload": "Upload fulfillment proof",
     "rbac.permission.requests.adopt": "Adopt requests for fulfillment",
     "rbac.permission.provider.capacity.toggle": "Toggle provider service capacity",
-    "rbac.permission.provider.pickup_notes_and_hours.update": "Update pickup notes and operating hours"
+    "rbac.permission.provider.pickup_notes_and_hours.update": "Update pickup notes and operating hours",
+    "Roles": "Roles",
+    "roles_assignment_help": "Spatie roles control access (which dashboards and routes apply). You can assign one or more. This is separate from User Type below.",
+    "membership_type_hint": "Registration profile only (what the user chose at signup). It does not grant access by itself.",
+    "You cannot remove your own admin role.": "You cannot remove your own admin role.",
+    "Cannot remove the last active administrator role.": "Cannot remove the last active administrator role.",
+    "View application": "View application",
+    "Phone and email are edited in Account Information above.": "Phone and email are edited in Account Information above.",
+    "Upload a new file to replace the current document.": "Upload a new file to replace the current document.",
+    "Set open/close times or mark each day as closed.": "Set open/close times or mark each day as closed.",
+    "Personal Information": "Personal Information",
+    "KYC Details": "KYC Details",
+    "Address Confirmation": "Address Confirmation",
+    "Estimated Preparation Time": "Estimated Preparation Time"
 }

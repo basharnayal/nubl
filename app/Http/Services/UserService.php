@@ -10,15 +10,18 @@ use App\Models\ProviderProfile;
 use App\Models\RecipientKycDetails;
 use App\Models\RecipientProfile;
 use App\Models\User;
+use App\Support\OperatingHoursNormalizer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\PermissionRegistrar;
 
 class UserService
 {
     public function __construct(
-        private AuditService $auditService
+        private AuditService $auditService,
+        private PermissionRegistrar $permissionRegistrar
     ) {}
 
     /**
@@ -29,13 +32,14 @@ class UserService
     public function createUser(array $data, Request $request): User
     {
         return DB::transaction(function () use ($data, $request) {
-            $user = $this->createUserRecord($data);
+            $user = $this->createUserRecord($data, $request->user());
             $this->createProfileByType($user, $data, $request);
 
             $this->auditService->log('user', 'created', [
                 'user_id' => $user->id,
                 'email' => $user->email,
                 'membership_type' => $user->membership_type,
+                'roles' => $data['roles'] ?? [],
             ]);
 
             return $user;
@@ -50,12 +54,13 @@ class UserService
     public function updateUser(User $user, array $data, Request $request): void
     {
         DB::transaction(function () use ($user, $data, $request) {
-            $this->updateUserRecord($user, $data);
+            $this->updateUserRecord($user, $data, $request->user());
             $this->updateProfileByType($user, $data, $request);
 
             $this->auditService->log('user', 'updated', [
                 'user_id' => $user->id,
                 'email' => $user->email,
+                'roles' => $data['roles'] ?? [],
             ]);
         });
     }
@@ -141,7 +146,7 @@ class UserService
         }
     }
 
-    protected function createUserRecord(array $data): User
+    protected function createUserRecord(array $data, ?User $actor): User
     {
         $user = User::create([
             'name' => $data['name'],
@@ -154,15 +159,31 @@ class UserService
             'accepting_orders' => true,
         ]);
 
-        $role = match ($data['membership_type']) {
-            'donor' => 'donor',
-            'recipient' => 'recipient',
-            'provider' => 'provider',
-            default => 'donor',
-        };
-        $user->assignRole($role);
+        $this->syncUserRoles($user, $data['roles'], $actor);
 
         return $user;
+    }
+
+    /**
+     * @param  list<string>  $roleNames
+     */
+    protected function syncUserRoles(User $user, array $roleNames, ?User $actor): void
+    {
+        $roleNames = array_values(array_unique($roleNames));
+        sort($roleNames);
+
+        if ($user->exists && $user->hasRole('admin') && ! in_array('admin', $roleNames, true)) {
+            if ($actor && $actor->id === $user->id) {
+                throw new \InvalidArgumentException(__('You cannot remove your own admin role.'));
+            }
+            $activeAdminCount = User::role('admin')->where('is_active', true)->count();
+            if ($activeAdminCount <= 1) {
+                throw new \InvalidArgumentException(__('Cannot remove the last active administrator role.'));
+            }
+        }
+
+        $user->syncRoles($roleNames);
+        $this->permissionRegistrar->forgetCachedPermissions();
     }
 
     protected function createProfileByType(User $user, array $data, Request $request): void
@@ -239,7 +260,7 @@ class UserService
         }
     }
 
-    protected function updateUserRecord(User $user, array $data): void
+    protected function updateUserRecord(User $user, array $data, User $actor): void
     {
         $updateData = [
             'name' => $data['name'],
@@ -253,7 +274,7 @@ class UserService
         }
 
         $user->update($updateData);
-        $user->syncRoles([$data['membership_type']]);
+        $this->syncUserRoles($user, $data['roles'], $actor);
     }
 
     protected function updateProfileByType(User $user, array $data, Request $request): void
@@ -283,7 +304,11 @@ class UserService
                 Storage::disk('local')->delete($kyc->address_confirmation ?? '');
                 $kycData['address_confirmation'] = $request->file('address_confirmation')->store('recipient_address_photos', 'local');
             }
-            $kyc->update($kycData);
+            if ($kyc) {
+                $kyc->update($kycData);
+            } else {
+                RecipientKycDetails::create(array_merge($kycData, ['user_id' => $user->id]));
+            }
         }
 
         if ($user->membership_type === User::MEMBERSHIP_PROVIDER && $user->providerProfile) {
@@ -308,26 +333,33 @@ class UserService
                 'location' => $data['location'] ?? null,
             ]);
 
-            $operating->update([
-                'daily_capacity' => $data['daily_capacity'],
-                'service_type' => $data['service_type'],
-                'estimated_preparation_order_time' => $data['estimated_preparation_order_time'],
-                'adoption_support' => $data['adoption_support'],
-            ]);
-
-            $financial->update([
-                'bank_name' => $data['bank_name'],
-                'iban' => $data['iban'],
-                'account_holder_name' => $data['account_holder_name'],
-            ]);
-
-            if ($request->hasFile('business_license')) {
-                Storage::disk('local')->delete($docs->business_license_path ?? '');
-                $docs->update(['business_license_path' => $request->file('business_license')->store('provider_documents', 'local')]);
+            if ($operating) {
+                $operating->update([
+                    'operating_hours' => OperatingHoursNormalizer::fromRequest($request),
+                    'daily_capacity' => $data['daily_capacity'],
+                    'service_type' => $data['service_type'],
+                    'estimated_preparation_order_time' => $data['estimated_preparation_order_time'],
+                    'adoption_support' => $data['adoption_support'],
+                ]);
             }
-            if ($request->hasFile('id_or_iqama')) {
-                Storage::disk('local')->delete($docs->id_or_iqama_path ?? '');
-                $docs->update(['id_or_iqama_path' => $request->file('id_or_iqama')->store('provider_documents', 'local')]);
+
+            if ($financial) {
+                $financial->update([
+                    'bank_name' => $data['bank_name'],
+                    'iban' => $data['iban'],
+                    'account_holder_name' => $data['account_holder_name'],
+                ]);
+            }
+
+            if ($docs) {
+                if ($request->hasFile('business_license')) {
+                    Storage::disk('local')->delete($docs->business_license_path ?? '');
+                    $docs->update(['business_license_path' => $request->file('business_license')->store('provider_documents', 'local')]);
+                }
+                if ($request->hasFile('id_or_iqama')) {
+                    Storage::disk('local')->delete($docs->id_or_iqama_path ?? '');
+                    $docs->update(['id_or_iqama_path' => $request->file('id_or_iqama')->store('provider_documents', 'local')]);
+                }
             }
         }
     }

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Rules\SaudiPhoneNumber;
 use App\Rules\SaudiPhoneUnique;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
 class StoreUserRequest extends FormRequest
@@ -19,11 +20,15 @@ class StoreUserRequest extends FormRequest
 
     public function rules(): array
     {
+        $guard = config('auth.defaults.guard', 'web');
+
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
             'membership_type' => ['required', 'in:donor,recipient,provider'],
+            'roles' => ['required', 'array', 'min:1'],
+            'roles.*' => ['string', Rule::exists('roles', 'name')->where('guard_name', $guard)],
         ];
 
         if (in_array($this->membership_type, ['donor', 'recipient', 'provider'])) {

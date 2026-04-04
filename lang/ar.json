@@ -1304,5 +1304,18 @@
     "rbac.permission.fulfillment_proof.upload": "رفع إثبات التنفيذ",
     "rbac.permission.requests.adopt": "تبنّي الطلبات للتنفيذ",
     "rbac.permission.provider.capacity.toggle": "تشغيل/إيقاف الطاقة الاستيعابية للمزوّد",
-    "rbac.permission.provider.pickup_notes_and_hours.update": "تحديث ملاحظات الاستلام وساعات العمل"
+    "rbac.permission.provider.pickup_notes_and_hours.update": "تحديث ملاحظات الاستلام وساعات العمل",
+    "Roles": "الأدوار",
+    "roles_assignment_help": "أدوار Spatie تحدد من يصل لأي لوحة ومسارات. يمكن اختيار دور واحد أو أكثر. هذا منفصل عن «نوع المستخدم» أدناه.",
+    "membership_type_hint": "نوع التسجيل فقط (ما اختاره المستخدم عند التسجيل). لا يمنح صلاحية دخول بحد ذاته.",
+    "You cannot remove your own admin role.": "لا يمكنك إزالة دور المدير عن حسابك.",
+    "Cannot remove the last active administrator role.": "لا يمكن إزالة دور المدير عن آخر مدير نشط في النظام.",
+    "View application": "عرض الطلب",
+    "Phone and email are edited in Account Information above.": "رقم الجوال والبريد يُعدَّلان من قسم معلومات الحساب أعلاه.",
+    "Upload a new file to replace the current document.": "ارفع ملفاً جديداً لاستبدال المستند الحالي.",
+    "Set open/close times or mark each day as closed.": "حدّد أوقات الفتح والإغلاق أو علّم اليوم كمغلق.",
+    "Address Confirmation": "تأكيد العنوان",
+    "Estimated Preparation Time": "وقت التحضير المتوقع",
+    "Personal Information": "المعلومات الشخصية",
+    "KYC Details": "تفاصيل اعرف عميلك"
 }

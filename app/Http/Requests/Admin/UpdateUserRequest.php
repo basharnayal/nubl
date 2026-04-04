@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Rules\SaudiPhoneNumber;
 use App\Rules\SaudiPhoneUnique;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
 class UpdateUserRequest extends FormRequest
@@ -20,11 +21,16 @@ class UpdateUserRequest extends FormRequest
     public function rules(): array
     {
         $user = $this->route('user');
+        $user->loadMissing(['recipientProfile', 'providerProfile']);
+
+        $guard = config('auth.defaults.guard', 'web');
 
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class.',email,'.$user->id],
             'membership_type' => ['required', 'in:'.$user->membership_type],
+            'roles' => ['required', 'array', 'min:1'],
+            'roles.*' => ['string', Rule::exists('roles', 'name')->where('guard_name', $guard)],
         ];
 
         if ($this->filled('password')) {
@@ -35,7 +41,7 @@ class UpdateUserRequest extends FormRequest
             $rules['phone_number'] = ['required', 'string', new SaudiPhoneNumber, new SaudiPhoneUnique($user->id)];
         }
 
-        if ($user->membership_type === 'recipient') {
+        if ($user->membership_type === 'recipient' && $user->recipientProfile) {
             $rules = array_merge($rules, [
                 'nationality' => ['required', 'string', 'in:'.implode(',', config('nationalities', []))],
                 'short_address' => ['required', 'string', 'max:500'],
@@ -49,7 +55,8 @@ class UpdateUserRequest extends FormRequest
             ]);
         }
 
-        if ($user->membership_type === 'provider') {
+        if ($user->membership_type === 'provider' && $user->providerProfile) {
+            $weekdays = array_keys(config('provider.weekdays'));
             $rules = array_merge($rules, [
                 'full_name_ar' => ['required', 'string', 'max:255'],
                 'full_name_en' => ['required', 'string', 'max:255'],
@@ -73,6 +80,8 @@ class UpdateUserRequest extends FormRequest
                 'account_holder_name' => ['required', 'string', 'max:255'],
                 'business_license' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
                 'id_or_iqama' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:5120'],
+                'operating_hours' => ['required', 'array'],
+                ...collect($weekdays)->mapWithKeys(fn ($d) => ["operating_hours.{$d}" => ['required', 'array']])->all(),
             ]);
         }
 

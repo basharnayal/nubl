@@ -41,6 +41,7 @@
                                             <option value="recipient">{{ __('Recipient') }}</option>
                                             <option value="provider">{{ __('Provider') }}</option>
                                         </select>
+                                        <p class="mt-1 text-xs text-slate-500 dark:text-navy-400">{{ __('membership_type_hint') }}</p>
                                     </div>
                                     <div>
                                         <x-input-label for="name" :value="__('Name')" required />
@@ -71,6 +72,11 @@
                                         <x-text-input id="password_confirmation" name="password_confirmation" type="password" class="mt-1.5 w-full" required />
                                     </div>
                                 </div>
+
+                                @include('admin.manage.users._roles-fields', [
+                                    'allRoles' => $allRoles,
+                                    'selected' => old('roles', [old('membership_type', 'donor')]),
+                                ])
                             </div>
 
                             {{-- Recipient fields --}}

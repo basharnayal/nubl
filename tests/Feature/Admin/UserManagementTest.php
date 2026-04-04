@@ -5,6 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Activitylog\Models\Activity;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class UserManagementTest extends TestCase
@@ -14,11 +15,10 @@ class UserManagementTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        if (!\Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
-            \Spatie\Permission\Models\Role::create(['name' => 'admin']);
-        }
-        if (!\Spatie\Permission\Models\Role::where('name', 'donor')->exists()) {
-            \Spatie\Permission\Models\Role::create(['name' => 'donor']);
+        foreach (['admin', 'donor', 'recipient', 'provider'] as $name) {
+            Role::firstOrCreate(
+                ['name' => $name, 'guard_name' => 'web'],
+            );
         }
     }
 
@@ -85,6 +85,7 @@ class UserManagementTest extends TestCase
             'password_confirmation' => 'password123',
             'membership_type' => 'donor',
             'phone_number' => '966501234567',
+            'roles' => ['donor'],
         ]);
 
         $response->assertRedirect(route('admin.manage.users.index'));
@@ -119,6 +120,7 @@ class UserManagementTest extends TestCase
             'membership_type' => 'donor',
             'phone_number' => '966509876543',
             'password' => '',
+            'roles' => ['donor'],
         ]);
 
         $response->assertRedirect(route('admin.manage.users.show', $user));
