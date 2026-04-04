@@ -558,16 +558,6 @@ php artisan migrate:fresh --seed
 - `vite` ^7.0.7 - Build Tool
 
 ---
-
-## 📚 Documentation
-
-### Project Docs (`docs/`)
-
-- `docs/REQUEST_STATUSES.md` — Request lifecycle and statuses
-- `docs/QR_CODE_REDEMPTION.md` — QR code generation and redemption flow
-- `docs/CHANGELOG_REQUEST_AND_WALLET.md` — Request, allowance, and wallet changes
-- `docs/SYSTEM_WALLET_DONATION_FLOW.md` — City fund and donation flow
-
 ### External
 
 - [Laravel Documentation](https://laravel.com/docs)
