@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Provider;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Provider\RedeemProviderQrRequest;
 use App\Http\Services\AuditService;
 use App\Http\Services\SystemWalletService;
 use App\Models\FundTransaction;
 use App\Models\OrderRedemption;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
 
@@ -23,12 +23,8 @@ class ProviderQrController extends Controller
         return view('provider.qr.scan');
     }
 
-    public function redeem(Request $request)
+    public function redeem(RedeemProviderQrRequest $request)
     {
-        $request->validate([
-            'token' => 'required|string',
-        ]);
-
         $rawToken = $request->input('token');
         $providerId = auth()->id();
 

@@ -4,10 +4,10 @@ namespace App\Http\Controllers\Provider;
 
 use App\Contracts\NotificationServiceInterface;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Provider\StoreProviderProofRequest;
 use App\Http\Services\AuditService;
 use App\Models\OrderProof;
 use App\Models\OrderRedemption;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -35,18 +35,13 @@ class ProviderProofController extends Controller
         return view('provider.qr.proof', compact('redemption'));
     }
 
-    public function store(Request $request, $redemptionId)
+    public function store(StoreProviderProofRequest $request, $redemptionId)
     {
         $redemption = OrderRedemption::where('provider_id', auth()->id())->findOrFail($redemptionId);
 
         if ($redemption->status !== 'REDEEMED') {
             return back()->with('error', __('You can only upload proof for redeemed tokens.'));
         }
-
-        $request->validate([
-            'proof_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:5120'], // 5MB max
-            'proof_photo_base64' => ['nullable', 'string'],
-        ]);
 
         if (! $request->hasFile('proof_file') && empty($request->input('proof_photo_base64'))) {
             return back()->with('error', __('You must either upload a file or capture a photo.'));
