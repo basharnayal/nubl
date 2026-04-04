@@ -39,6 +39,11 @@ class ProviderDashboardTest extends TestCase
         $response->assertSee('Store Status');
         $response->assertSee('OPEN');
         $response->assertSee('Pause Store');
+        $response->assertSee('Awaiting your response', false);
+        $response->assertSee('Fulfilled (30 days)', false);
+        $response->assertSee('Fulfilled orders by week', false);
+        $response->assertSee('Recent requests', false);
+        $response->assertSee('View all', false);
     }
 
     #[Test]

@@ -1,8 +1,8 @@
 <x-app-layout title="{{ __('Provider Dashboard') }}" is-header-blur="true">
-    <!-- Status Card -->
+    {{-- 1. Store status --}}
     <div class="card overflow-hidden mt-4">
-        <div class="p-6 text-slate-800 dark:text-navy-100 flex justify-between items-center">
-            <div>
+        <div class="p-6 text-slate-800 dark:text-navy-100 flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
+            <div class="min-w-0">
                 <h3 class="text-lg font-bold">{{ __('Store Status') }}</h3>
                 <p class="text-sm text-slate-500 dark:text-navy-300">
                     {{ __('Current Status:') }}
@@ -18,1725 +18,236 @@
                 @endif
             </div>
 
-            <div class="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+            <div class="flex flex-col items-stretch gap-2 sm:flex-row sm:items-center sm:shrink-0">
                 <a href="{{ route('provider.profile.edit') }}"
                     class="btn border border-slate-200 bg-white text-sm text-slate-700 hover:bg-slate-50 dark:border-navy-500 dark:bg-navy-700 dark:text-navy-100 dark:hover:bg-navy-600">
                     {{ __('provider.sidebar.hours_notes') }}
                 </a>
                 <form method="POST" action="{{ route('provider.profile.toggle-active') }}">
                     @csrf
-                    <button type="submit" class="btn bg-slate-150 text-slate-800 hover:bg-slate-200 dark:bg-navy-500 dark:text-navy-50 dark:hover:bg-navy-450">
+                    <button type="submit" class="btn bg-slate-150 text-slate-800 hover:bg-slate-200 dark:bg-navy-500 dark:text-navy-50 dark:hover:bg-navy-450 w-full sm:w-auto">
                         {{ auth()->user()->accepting_orders ? __('Pause Store') : __('Open Store') }}
                     </button>
                 </form>
             </div>
         </div>
     </div>
-    <!-- END Status Card -->
-    <div class="mt-4 grid grid-cols-12 gap-4 sm:mt-5 sm:gap-5 lg:mt-6 lg:gap-6">
-            <div class="card col-span-12 lg:col-span-8">
-                <div class="mt-3 flex flex-col justify-between px-4 sm:flex-row sm:items-center sm:px-5">
-                    <div class="flex flex-1 items-center justify-between space-x-2 sm:flex-initial">
-                        <h2 class="text-sm-plus font-medium tracking-wide text-slate-700 dark:text-navy-100">
-                            {{ __('Requests Overview') }}
-                        </h2>
-                        <div x-data="usePopper({ placement: 'bottom-start', offset: 4 })" @click.outside="if(isShowPopper) isShowPopper = false"
-                            class="inline-flex">
-                            <button x-ref="popperRef" @click="isShowPopper = !isShowPopper"
-                                class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                </svg>
-                            </button>
 
-                            <div x-ref="popperRoot" class="popper-root" :class="isShowPopper && 'show'">
-                                <div
-                                    class="popper-box rounded-md border border-slate-150 bg-white py-1.5 font-inter dark:border-navy-500 dark:bg-navy-700">
-                                    <ul>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
-                                        </li>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Another
-                                                Action</a>
-                                        </li>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Something
-                                                else</a>
-                                        </li>
-                                    </ul>
-                                    <div class="my-1 h-px bg-slate-150 dark:bg-navy-500"></div>
-                                    <ul>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Separated
-                                                Link</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="hidden space-x-2 sm:flex" x-data="{ activeTab: 'tabYearly' }">
-                        <button @click="activeTab = 'tabMonthly'" class="btn h-8 rounded-full text-xs font-medium"
-                            :class="activeTab === 'tabMonthly' ?
-                                'bg-primary/10 text-primary dark:bg-accent-light/10 dark:text-accent-light' :
-                                'hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 hover:text-slate-800 focus:text-slate-800 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25 dark:hover:text-navy-100 dark:focus:text-navy-100'">
-                            Monthly
-                        </button>
-                        <button @click="activeTab = 'tabYearly'" class="btn h-8 rounded-full text-xs-plus font-medium"
-                            :class="activeTab === 'tabYearly' ?
-                                'bg-primary/10 text-primary dark:bg-accent-light/10 dark:text-accent-light' :
-                                'hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 hover:text-slate-800 focus:text-slate-800 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25 dark:hover:text-navy-100 dark:focus:text-navy-100'">
-                            Yearly
-                        </button>
-                    </div>
-                </div>
-
-                <div class="mt-4 grid grid-cols-2 gap-3 px-4 sm:mt-5 sm:grid-cols-4 sm:gap-5 sm:px-5 lg:mt-6">
-                    <div class="rounded-lg bg-slate-100 p-4 dark:bg-navy-600">
-                        <div class="flex justify-between space-x-1">
-                            <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
-                                $67.6k
-                            </p>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary dark:text-accent"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <p class="mt-1 text-xs-plus">{{ __('Income') }}</p>
-                    </div>
-                    <div class="rounded-lg bg-slate-100 p-4 dark:bg-navy-600">
-                        <div class="flex justify-between">
-                            <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
-                                12.6K
-                            </p>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-success" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-                            </svg>
-                        </div>
-                        <p class="mt-1 text-xs-plus">{{ __('Completed') }}</p>
-                    </div>
-                    <div class="rounded-lg bg-slate-100 p-4 dark:bg-navy-600">
-                        <div class="flex justify-between">
-                            <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
-                                143
-                            </p>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-warning" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <p class="mt-1 text-xs-plus">{{ __('Pending') }}</p>
-                    </div>
-                    <div class="rounded-lg bg-slate-100 p-4 dark:bg-navy-600">
-                        <div class="flex justify-between">
-                            <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
-                                651
-                            </p>
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-info" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
-                            </svg>
-                        </div>
-                        <p class="mt-1 text-xs-plus">{{ __('Requests') }}</p>
-                    </div>
-                </div>
-
-                <div class="ax-transparent-gridline mt-2 px-2">
-                    <div x-init="$nextTick(() => {
-                        $el._x_chart = new ApexCharts($el, pages.charts.ordersOverview);
-                        $el._x_chart.render()
-                    });"></div>
-                </div>
-            </div>
-            <div
-                class="col-span-12 grid grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-5 lg:col-span-4 lg:grid-cols-2 lg:gap-6">
-                <div class="card col-span-2 px-4 pb-5 sm:px-5">
-                    <div class="flex items-center justify-between py-3">
-                        <h2 class="font-medium tracking-wide text-slate-700 dark:text-navy-100">
-                            Budget
-                        </h2>
-                        <div x-data="usePopper({ placement: 'bottom-end', offset: 4 })" @click.outside="if(isShowPopper) isShowPopper = false"
-                            class="inline-flex">
-                            <button x-ref="popperRef" @click="isShowPopper = !isShowPopper"
-                                class="btn -mr-1.5 size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                </svg>
-                            </button>
-
-                            <div x-ref="popperRoot" class="popper-root" :class="isShowPopper && 'show'">
-                                <div
-                                    class="popper-box rounded-md border border-slate-150 bg-white py-1.5 font-inter dark:border-navy-500 dark:bg-navy-700">
-                                    <ul>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
-                                        </li>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Another
-                                                Action</a>
-                                        </li>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Something
-                                                else</a>
-                                        </li>
-                                    </ul>
-                                    <div class="my-1 h-px bg-slate-150 dark:bg-navy-500"></div>
-                                    <ul>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Separated
-                                                Link</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex grow space-x-5">
-                        <div class="flex w-1/2 flex-col">
-                            <div class="grow">
-                                <p class="text-2xl font-semibold text-slate-700 dark:text-navy-100">
-                                    $67.4k
-                                </p>
-                                <a href="#"
-                                    class="border-b border-dotted border-current pb-0.5 text-tiny font-medium uppercase text-primary outline-hidden transition-colors duration-300 hover:text-primary/70 focus:text-primary/70 dark:text-accent-light dark:hover:text-accent-light/70 dark:focus:text-accent-light/70">
-                                    Yearly Budget
-                                </a>
-                            </div>
-                            <p class="mt-2 text-xs leading-normal line-clamp-3">
-                                You have spent about 25% of your annual budget.
+    {{-- 2. Alerts (needs attention) --}}
+    @if (($pendingProofCount ?? 0) > 0 || ($pendingRequestsCount ?? 0) > 0)
+        <div class="mt-4 space-y-3">
+            @if (($pendingRequestsCount ?? 0) > 0)
+                <div class="card border border-warning/30 bg-warning/5 p-4 dark:bg-warning/10">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex gap-3 items-start">
+                            <span class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-warning/20 text-warning" aria-hidden="true">
+                                <i class="fa-solid fa-inbox text-lg"></i>
+                            </span>
+                            <p class="text-sm text-slate-700 dark:text-navy-100 pt-0.5 text-start">
+                                {{ __('provider.dashboard.awaiting_alert', ['count' => $pendingRequestsCount]) }}
                             </p>
                         </div>
-
-                        <div class="ax-transparent-gridline flex w-1/2 items-end">
-                            <div x-init="$nextTick(() => {
-                                $el._x_chart = new ApexCharts($el, pages.charts.orderBudget);
-                                $el._x_chart.render()
-                            });"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="mt-3 flex items-center justify-between px-4 sm:px-5">
-                        <h2 class="font-medium tracking-wide text-slate-700 dark:text-navy-100">
-                            {{ __('Income') }}
-                        </h2>
-
-                        <div x-data="usePopper({ placement: 'bottom-end', offset: 4 })" @click.outside="if(isShowPopper) isShowPopper = false"
-                            class="inline-flex">
-                            <button x-ref="popperRef" @click="isShowPopper = !isShowPopper"
-                                class="btn -mr-2 size-7 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                </svg>
-                            </button>
-
-                            <div x-ref="popperRoot" class="popper-root" :class="isShowPopper && 'show'">
-                                <div
-                                    class="popper-box rounded-md border border-slate-150 bg-white py-1.5 font-inter dark:border-navy-500 dark:bg-navy-700">
-                                    <ul>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
-                                        </li>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Another
-                                                Action</a>
-                                        </li>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Something
-                                                else</a>
-                                        </li>
-                                    </ul>
-                                    <div class="my-1 h-px bg-slate-150 dark:bg-navy-500"></div>
-                                    <ul>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Separated
-                                                Link</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="grow px-4 text-xl font-semibold text-slate-700 dark:text-navy-100 sm:px-5">
-                        $169.6k
-                    </p>
-                    <div class="ax-transparent-gridline">
-                        <div x-init="$nextTick(() => {
-                            $el._x_chart = new ApexCharts($el, pages.charts.orderIncome);
-                            $el._x_chart.render()
-                        });"></div>
-                    </div>
-                </div>
-                <div class="card">
-                    <div class="mt-3 flex items-center justify-between px-4 sm:px-5">
-                        <h2 class="font-medium tracking-wide text-slate-700 dark:text-navy-100">
-                            Expense
-                        </h2>
-
-                        <div x-data="usePopper({ placement: 'bottom-end', offset: 4 })" @click.outside="if(isShowPopper) isShowPopper = false"
-                            class="inline-flex">
-                            <button x-ref="popperRef" @click="isShowPopper = !isShowPopper"
-                                class="btn -mr-2 size-7 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                </svg>
-                            </button>
-
-                            <div x-ref="popperRoot" class="popper-root" :class="isShowPopper && 'show'">
-                                <div
-                                    class="popper-box rounded-md border border-slate-150 bg-white py-1.5 font-inter dark:border-navy-500 dark:bg-navy-700">
-                                    <ul>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
-                                        </li>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Another
-                                                Action</a>
-                                        </li>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Something
-                                                else</a>
-                                        </li>
-                                    </ul>
-                                    <div class="my-1 h-px bg-slate-150 dark:bg-navy-500"></div>
-                                    <ul>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Separated
-                                                Link</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="grow px-4 text-xl font-semibold text-slate-700 dark:text-navy-100 sm:px-5">
-                        $34.6k
-                    </p>
-                    <div class="ax-transparent-gridline">
-                        <div x-init="$nextTick(() => {
-                            $el._x_chart = new ApexCharts($el, pages.charts.orderExpense);
-                            $el._x_chart.render()
-                        });"></div>
-                    </div>
-                </div>
-            </div>
-            <div class="card col-span-12 pb-2 lg:col-span-5 xl:col-span-6">
-                <div class="my-3 flex items-center justify-between px-4 sm:px-5">
-                    <h2 class="font-medium tracking-wide text-slate-700 dark:text-navy-100">
-                        Top Recipients
-                    </h2>
-                    <div x-data="usePopper({ placement: 'bottom-end', offset: 4 })" @click.outside="if(isShowPopper) isShowPopper = false"
-                        class="inline-flex">
-                        <button x-ref="popperRef" @click="isShowPopper = !isShowPopper"
-                            class="btn -mr-1.5 size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                            </svg>
-                        </button>
-
-                        <div x-ref="popperRoot" class="popper-root" :class="isShowPopper && 'show'">
-                            <div
-                                class="popper-box rounded-md border border-slate-150 bg-white py-1.5 font-inter dark:border-navy-500 dark:bg-navy-700">
-                                <ul>
-                                    <li>
-                                        <a href="#"
-                                            class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
-                                    </li>
-                                    <li>
-                                        <a href="#"
-                                            class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Another
-                                            Action</a>
-                                    </li>
-                                    <li>
-                                        <a href="#"
-                                            class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Something
-                                            else</a>
-                                    </li>
-                                </ul>
-                                <div class="my-1 h-px bg-slate-150 dark:bg-navy-500"></div>
-                                <ul>
-                                    <li>
-                                        <a href="#"
-                                            class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Separated
-                                            Link</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="scrollbar-sm flex space-x-3 overflow-x-auto px-4 pb-3 sm:px-5">
-                    <div class="w-56 shrink-0 rounded-xl bg-slate-50 p-4 dark:bg-navy-600">
-                        <div class="flex flex-col items-center space-y-3 text-center">
-                            <div class="size-16 rounded-full bg-linear-to-r from-sky-400 to-blue-600 p-0.5">
-                                <img class="h-full w-full rounded-full border-2 border-white object-cover object-center dark:border-navy-700"
-                                    src="{{ asset('images/200x200.png') }}" alt="image" />
-                            </div>
-                            <div>
-                                <p class="text-base font-medium text-slate-700 dark:text-navy-100">
-                                    Travis Fuller
-                                </p>
-                                <p class="text-xs-plus text-slate-400 dark:text-navy-300">
-                                    {{ __('Salesman') }}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="mt-5">
-                            <div>
-                                <p>{{ __('Sales') }}</p>
-                                <div class="mt-0.5 flex space-x-2">
-                                    <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
-                                        2 348
-                                    </p>
-                                    <p class="flex items-center space-x-0.5 text-xs text-success">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                        </svg>
-                                        <span>4.3%</span>
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="ax-transparent-gridline">
-                                <div x-init="$nextTick(() => {
-                                    $el._x_chart = new ApexCharts($el, pages.charts.topSeller1);
-                                    $el._x_chart.render()
-                                });"></div>
-                            </div>
-                        </div>
-                        <div class="mt-5 flex justify-center space-x-2">
-                            <button
-                                class="btn size-8 rounded-full bg-primary/10 p-0 text-primary hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-accent-light/10 dark:text-accent-light dark:hover:bg-accent-light/20 dark:focus:bg-accent-light/20 dark:active:bg-accent-light/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                </svg>
-                            </button>
-                            <button
-                                class="btn size-8 rounded-full bg-primary/10 p-0 text-primary hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-accent-light/10 dark:text-accent-light dark:hover:bg-accent-light/20 dark:focus:bg-accent-light/20 dark:active:bg-accent-light/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                            </button>
-                            <button
-                                class="btn size-8 rounded-full bg-primary/10 p-0 text-primary hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-accent-light/10 dark:text-accent-light dark:hover:bg-accent-light/20 dark:focus:bg-accent-light/20 dark:active:bg-accent-light/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="w-56 shrink-0 rounded-xl bg-slate-50 p-4 dark:bg-navy-600">
-                        <div class="flex flex-col items-center space-y-3 text-center">
-                            <div class="size-16 rounded-full bg-linear-to-r from-sky-400 to-blue-600 p-0.5">
-                                <img class="h-full w-full rounded-full border-2 border-white object-cover object-center dark:border-navy-700"
-                                    src="{{ asset('images/200x200.png') }}" alt="image" />
-                            </div>
-                            <div>
-                                <p class="text-base font-medium text-slate-700 dark:text-navy-100">
-                                    Konnor Guzman
-                                </p>
-                                <p class="text-xs-plus text-slate-400 dark:text-navy-300">
-                                    {{ __('Salesman') }}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="mt-5">
-                            <div>
-                                <p>{{ __('Sales') }}</p>
-                                <div class="mt-0.5 flex space-x-2">
-                                    <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
-                                        6 052
-                                    </p>
-                                    <p class="flex items-center space-x-0.5 text-xs text-error">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M17 13l-5 5m0 0l-5-5m5 5V6" />
-                                        </svg>
-                                        <span>2.33%</span>
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="ax-transparent-gridline">
-                                <div x-init="$nextTick(() => {
-                                    $el._x_chart = new ApexCharts($el, pages.charts.topSeller2);
-                                    $el._x_chart.render()
-                                });"></div>
-                            </div>
-                        </div>
-                        <div class="mt-5 flex justify-center space-x-2">
-                            <button
-                                class="btn size-8 rounded-full bg-primary/10 p-0 text-primary hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-accent-light/10 dark:text-accent-light dark:hover:bg-accent-light/20 dark:focus:bg-accent-light/20 dark:active:bg-accent-light/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                </svg>
-                            </button>
-                            <button
-                                class="btn size-8 rounded-full bg-primary/10 p-0 text-primary hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-accent-light/10 dark:text-accent-light dark:hover:bg-accent-light/20 dark:focus:bg-accent-light/20 dark:active:bg-accent-light/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                            </button>
-                            <button
-                                class="btn size-8 rounded-full bg-primary/10 p-0 text-primary hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-accent-light/10 dark:text-accent-light dark:hover:bg-accent-light/20 dark:focus:bg-accent-light/20 dark:active:bg-accent-light/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="w-56 shrink-0 rounded-xl bg-slate-50 p-4 dark:bg-navy-600">
-                        <div class="flex flex-col items-center space-y-3 text-center">
-                            <div class="size-16 rounded-full bg-linear-to-r from-sky-400 to-blue-600 p-0.5">
-                                <img class="h-full w-full rounded-full border-2 border-white object-cover object-center dark:border-navy-700"
-                                    src="{{ asset('images/200x200.png') }}" alt="image" />
-                            </div>
-                            <div>
-                                <p class="text-base font-medium text-slate-700 dark:text-navy-100">
-                                    Katrina West
-                                </p>
-                                <p class="text-xs-plus text-slate-400 dark:text-navy-300">
-                                    {{ __('Saleswoman') }}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="mt-5">
-                            <div>
-                                <p>{{ __('Sales') }}</p>
-                                <div class="mt-0.5 flex space-x-2">
-                                    <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
-                                        2 348
-                                    </p>
-                                    <p class="flex items-center space-x-0.5 text-xs text-success">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                                        </svg>
-                                        <span>3.33%</span>
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="ax-transparent-gridline">
-                                <div x-init="$nextTick(() => {
-                                    $el._x_chart = new ApexCharts($el, pages.charts.topSeller3);
-                                    $el._x_chart.render()
-                                });"></div>
-                            </div>
-                        </div>
-                        <div class="mt-5 flex justify-center space-x-2">
-                            <button
-                                class="btn size-8 rounded-full bg-primary/10 p-0 text-primary hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-accent-light/10 dark:text-accent-light dark:hover:bg-accent-light/20 dark:focus:bg-accent-light/20 dark:active:bg-accent-light/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                </svg>
-                            </button>
-                            <button
-                                class="btn size-8 rounded-full bg-primary/10 p-0 text-primary hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-accent-light/10 dark:text-accent-light dark:hover:bg-accent-light/20 dark:focus:bg-accent-light/20 dark:active:bg-accent-light/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                            </button>
-                            <button
-                                class="btn size-8 rounded-full bg-primary/10 p-0 text-primary hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-accent-light/10 dark:text-accent-light dark:hover:bg-accent-light/20 dark:focus:bg-accent-light/20 dark:active:bg-accent-light/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="w-56 shrink-0 rounded-xl bg-slate-50 p-4 dark:bg-navy-600">
-                        <div class="flex flex-col items-center space-y-3 text-center">
-                            <div class="size-16 rounded-full bg-linear-to-r from-sky-400 to-blue-600 p-0.5">
-                                <img class="h-full w-full rounded-full border-2 border-white object-cover object-center dark:border-navy-700"
-                                    src="{{ asset('images/200x200.png') }}" alt="image" />
-                            </div>
-                            <div>
-                                <p class="text-base font-medium text-slate-700 dark:text-navy-100">
-                                    Henry Curtis
-                                </p>
-                                <p class="text-xs-plus text-slate-400 dark:text-navy-300">
-                                    {{ __('Salesman') }}
-                                </p>
-                            </div>
-                        </div>
-                        <div class="mt-5">
-                            <div>
-                                <p>{{ __('Sales') }}</p>
-                                <div class="mt-0.5 flex space-x-2">
-                                    <p class="text-xl font-semibold text-slate-700 dark:text-navy-100">
-                                        4 574
-                                    </p>
-                                    <p class="flex items-center space-x-0.5 text-xs text-success">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3" fill="none"
-                                            viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                                        </svg>
-                                        <span>1.2%</span>
-                                    </p>
-                                </div>
-                            </div>
-                            <div class="ax-transparent-gridline">
-                                <div x-init="$nextTick(() => {
-                                    $el._x_chart = new ApexCharts($el, pages.charts.topSeller4);
-                                    $el._x_chart.render()
-                                });"></div>
-                            </div>
-                        </div>
-                        <div class="mt-5 flex justify-center space-x-2">
-                            <button
-                                class="btn size-8 rounded-full bg-primary/10 p-0 text-primary hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-accent-light/10 dark:text-accent-light dark:hover:bg-accent-light/20 dark:focus:bg-accent-light/20 dark:active:bg-accent-light/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                                </svg>
-                            </button>
-                            <button
-                                class="btn size-8 rounded-full bg-primary/10 p-0 text-primary hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-accent-light/10 dark:text-accent-light dark:hover:bg-accent-light/20 dark:focus:bg-accent-light/20 dark:active:bg-accent-light/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                                </svg>
-                            </button>
-                            <button
-                                class="btn size-8 rounded-full bg-primary/10 p-0 text-primary hover:bg-primary/20 focus:bg-primary/20 active:bg-primary/25 dark:bg-accent-light/10 dark:text-accent-light dark:hover:bg-accent-light/20 dark:focus:bg-accent-light/20 dark:active:bg-accent-light/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div
-                class="col-span-12 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:col-span-7 lg:gap-6 xl:col-span-6">
-                <div class="card px-4 pb-5 sm:px-5">
-                    <div class="flex items-center justify-between py-3">
-                        <h2 class="font-medium tracking-wide text-slate-700 dark:text-navy-100">
-                            Social Traffic
-                        </h2>
-                        <div x-data="usePopper({ placement: 'bottom-end', offset: 4 })" @click.outside="if(isShowPopper) isShowPopper = false"
-                            class="inline-flex">
-                            <button x-ref="popperRef" @click="isShowPopper = !isShowPopper"
-                                class="btn -mr-1.5 size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                </svg>
-                            </button>
-
-                            <div x-ref="popperRoot" class="popper-root" :class="isShowPopper && 'show'">
-                                <div
-                                    class="popper-box rounded-md border border-slate-150 bg-white py-1.5 font-inter dark:border-navy-500 dark:bg-navy-700">
-                                    <ul>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
-                                        </li>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Another
-                                                Action</a>
-                                        </li>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Something
-                                                else</a>
-                                        </li>
-                                    </ul>
-                                    <div class="my-1 h-px bg-slate-150 dark:bg-navy-500"></div>
-                                    <ul>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Separated
-                                                Link</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <p>
-                            <span class="text-2xl text-slate-700 dark:text-navy-100">135K</span>
-                            <span class="text-xs text-success">+3.1%</span>
-                        </p>
-                        <p class="text-xs-plus">{{ __('View in this month') }}</p>
-                    </div>
-                    <div class="mt-5 space-y-4">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/100x100.png') }}"
-                                    alt="flag" />
-                                <p>{{ __('Instagram') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    34.3k
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-success" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/100x100.png') }}"
-                                    alt="flag" />
-                                <p>{{ __('Facebook') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    17.72k
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-success" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/100x100.png') }}"
-                                    alt="flag" />
-                                <p>{{ __('Youtube') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    12.41k
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-error" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 13l-5 5m0 0l-5-5m5 5V6" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/100x100.png') }}"
-                                    alt="flag" />
-                                <p>{{ __('Pinterest') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    11.89k
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-success" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/100x100.png') }}"
-                                    alt="flag" />
-                                <p>{{ __('Discord') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    9.47k
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-success" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/100x100.png') }}"
-                                    alt="flag" />
-                                <p>{{ __('TikTok') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    8.11k
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-error" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 13l-5 5m0 0l-5-5m5 5V6" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/100x100.png') }}"
-                                    alt="flag" />
-                                <p>{{ __('Twitter') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    5.98k
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-success" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/100x100.png') }}"
-                                    alt="flag" />
-                                <p>{{ __('Tumblr') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    2.7k
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-success" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card px-4 pb-5 sm:px-5">
-                    <div class="my-3 flex h-8 items-center justify-between">
-                        <h2 class="font-medium tracking-wide text-slate-700 dark:text-navy-100">
-                            Top Countries
-                        </h2>
-                        <a href="#"
-                            class="border-b border-dotted border-current pb-0.5 text-xs-plus font-medium text-primary outline-hidden transition-colors duration-300 hover:text-primary/70 focus:text-primary/70 dark:text-accent-light dark:hover:text-accent-light/70 dark:focus:text-accent-light/70">
-                            View All
+                        <a href="{{ route('provider.requests.index', ['status' => 'REQUESTED']) }}"
+                            class="btn bg-warning/15 text-warning hover:bg-warning/25 text-sm shrink-0 w-full sm:w-auto">
+                            {{ __('provider.dashboard.review_requests') }}
                         </a>
                     </div>
-                    <div>
-                        <p>
-                            <span class="text-2xl text-slate-700 dark:text-navy-100">64</span>
-                        </p>
-                        <p class="text-xs-plus">{{ __('Countries') }}</p>
+                </div>
+            @endif
+            @if (($pendingProofCount ?? 0) > 0)
+                <div class="card border border-error/30 bg-error/5 p-4 dark:bg-error/10">
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="flex gap-3 items-start">
+                            <span class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-error/20 text-error" aria-hidden="true">
+                                <i class="fa-solid fa-image text-lg"></i>
+                            </span>
+                            <p class="text-sm text-slate-700 dark:text-navy-100 pt-0.5 text-start">
+                                {{ __('provider.dashboard.proof_alert', ['count' => $pendingProofCount]) }}
+                            </p>
+                        </div>
+                        <a href="{{ route('provider.requests.index', ['needs_proof' => '1']) }}"
+                            class="btn bg-error/15 text-error hover:bg-error/25 text-sm shrink-0 w-full sm:w-auto">
+                            {{ __('provider.dashboard.upload_proof') }}
+                        </a>
                     </div>
-                    <div class="mt-5 space-y-4">
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/flags/australia-round.svg') }}"
-                                    alt="flag" />
-                                <p>{{ __('Australia') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    $6.41k
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-success" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/flags/brazil-round.svg') }}"
-                                    alt="flag" />
-                                <p>{{ __('Brazil') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    $2.33k
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-success" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/flags/china-round.svg') }}"
-                                    alt="flag" />
-                                <p>{{ __('China') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    $7.21k
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-success" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/flags/india-round.svg') }}"
-                                    alt="flag" />
-                                <p>{{ __('India') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    $754
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-error" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 13l-5 5m0 0l-5-5m5 5V6" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/flags/italy-round.svg') }}"
-                                    alt="flag" />
-                                <p>{{ __('Italy') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    $699
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-success" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/flags/japan-round.svg') }}"
-                                    alt="flag" />
-                                <p>{{ __('Japan') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    $624
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-success" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/flags/russia-round.svg') }}"
-                                    alt="flag" />
-                                <p>{{ __('Russia') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    $574
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-error" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17 13l-5 5m0 0l-5-5m5 5V6" />
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2">
-                                <img class="size-6" src="{{ asset('images/flags/spain-round.svg') }}"
-                                    alt="flag" />
-                                <p>{{ __('Spain') }}</p>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <p class="text-sm-plus text-slate-800 dark:text-navy-100">
-                                    $506
-                                </p>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4 text-success" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M7 11l5-5m0 0l5 5m-5-5v12" />
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
+                </div>
+            @endif
+        </div>
+    @endif
+
+    {{-- 3. KPI cards --}}
+    <div class="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 sm:gap-5 lg:gap-6">
+        <div class="card justify-center p-4.5">
+            <div class="flex items-center justify-between gap-3">
+                <div class="min-w-0 flex-1 text-start">
+                    <p class="text-base font-semibold text-slate-700 dark:text-navy-100 tabular-nums" dir="ltr">{{ $pendingRequestsCount ?? 0 }}</p>
+                    <p class="text-xs-plus line-clamp-2">{{ __('provider.dashboard.awaiting_response') }}</p>
+                </div>
+                <div class="mask is-star flex size-10 shrink-0 items-center justify-center bg-warning">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
                 </div>
             </div>
-            <div class="col-span-12">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-base font-medium tracking-wide text-slate-700 line-clamp-1 dark:text-navy-100">
-                        {{ __('Latest Requests') }}
-                    </h2>
-                    <a href="{{ route('provider.requests.index') }}"
-                        class="border-b border-dotted border-current pb-0.5 text-xs-plus font-medium text-primary outline-hidden transition-colors duration-300 hover:text-primary/70 focus:text-primary/70 dark:text-accent-light dark:hover:text-accent-light/70 dark:focus:text-accent-light/70 mr-2">
-                        View All
-                    </a>
-                    <div class="flex">
-                        <div class="flex items-center" x-data="{ isInputActive: false }">
-                            <label class="block">
-                                <input x-effect="isInputActive === true && $nextTick(() => { $el.focus()});"
-                                    :class="isInputActive ? 'w-32 lg:w-48' : 'w-0'"
-                                    class="form-input bg-transparent px-1 text-right transition-all duration-100 placeholder:text-slate-500 dark:placeholder:text-navy-200"
-                                    placeholder="{{ __('Search here...') }}" type="text" />
-                            </label>
-                            <button @click="isInputActive = !isInputActive"
-                                class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </button>
-                        </div>
-                        <div x-data="usePopper({ placement: 'bottom-end', offset: 4 })" @click.outside="if(isShowPopper) isShowPopper = false"
-                            class="inline-flex">
-                            <button x-ref="popperRef" @click="isShowPopper = !isShowPopper"
-                                class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                                </svg>
-                            </button>
-                            <div x-ref="popperRoot" class="popper-root" :class="isShowPopper && 'show'">
-                                <div
-                                    class="popper-box rounded-md border border-slate-150 bg-white py-1.5 font-inter dark:border-navy-500 dark:bg-navy-700">
-                                    <ul>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Action') }}</a>
-                                        </li>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Another
-                                                Action</a>
-                                        </li>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Something
-                                                else</a>
-                                        </li>
-                                    </ul>
-                                    <div class="my-1 h-px bg-slate-150 dark:bg-navy-500"></div>
-                                    <ul>
-                                        <li>
-                                            <a href="#"
-                                                class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">Separated
-                                                Link</a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+            <a href="{{ route('provider.requests.index', ['status' => 'REQUESTED']) }}" class="badge mt-2 inline-flex bg-warning/10 py-1 px-1.5 text-warning dark:bg-warning/15 hover:bg-warning/20">
+                {{ __('finance.common.view') }}
+            </a>
+        </div>
+        <div class="card justify-center p-4.5">
+            <div class="flex items-center justify-between gap-3">
+                <div class="min-w-0 flex-1 text-start">
+                    <p class="text-base font-semibold text-slate-700 dark:text-navy-100 tabular-nums" dir="ltr">{{ $pendingProofCount ?? 0 }}</p>
+                    <p class="text-xs-plus line-clamp-2">{{ __('Proof pending') }}</p>
                 </div>
-                <div class="card mt-3">
-                    <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
-                        <table class="is-hoverable w-full text-left">
-                            <thead>
-                                <tr>
-                                    <th
-                                        class="whitespace-nowrap rounded-tl-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
-                                        Request
-                                    </th>
-                                    <th
-                                        class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
-                                        Date
-                                    </th>
-                                    <th
-                                        class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
-                                        Recipient
-                                    </th>
-                                    <th
-                                        class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
-                                        Address
-                                    </th>
-                                    <th
-                                        class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
-                                        Request Status
-                                    </th>
-                                    <th
-                                        class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
-                                        Payment
-                                    </th>
-                                    <th
-                                        class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
-                                        Total
-                                    </th>
-
-                                    <th
-                                        class="whitespace-nowrap rounded-tr-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
-                                    </th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium text-primary dark:text-accent-light">
-                                            #95647
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium">25 May 2021</p>
-                                        <p class="mt-0.5 text-xs">01:25 AM</p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="flex items-center space-x-4">
-                                            <div class="avatar size-9">
-                                                <img class="mask is-squircle"
-                                                    src="{{ asset('images/200x200.png') }}"
-                                                    alt="avatar" />
-                                            </div>
-
-                                            <span class="font-medium text-slate-700 dark:text-navy-100">Anthony Jensen
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="w-48 overflow-hidden text-ellipsis text-xs-plus">
-                                            260 W. Storm Street New York, NY 10025.
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge bg-warning/10 text-warning dark:bg-warning/15">
-                                            Unconfirmed
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge space-x-2.5 text-xs-plus text-warning">
-                                            <div class="size-2 rounded-full bg-current"></div>
-                                            <span>{{ __('Await Auth') }}</span>
-                                        </div>
-                                    </td>
-
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100">
-                                            $2 654
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <button
-                                            class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium text-primary dark:text-accent-light">
-                                            #84895
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium">03 May 2021</p>
-                                        <p class="mt-0.5 text-xs">09:44 AM</p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="flex items-center space-x-4">
-                                            <div class="avatar size-9">
-                                                <img class="mask is-squircle"
-                                                    src="{{ asset('images/200x200.png') }}"
-                                                    alt="avatar" />
-                                            </div>
-
-                                            <span class="font-medium text-slate-700 dark:text-navy-100">John Due
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="w-48 overflow-hidden text-ellipsis text-xs-plus">
-                                            13811 Gimbert Ln Santa Ana, California(CA), 92705
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge bg-success/10 text-success dark:bg-success/15">
-                                            Completed
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge space-x-2.5 text-xs-plus text-success">
-                                            <div class="size-2 rounded-full bg-current"></div>
-                                            <span>{{ __('Paid') }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100">
-                                            $3 654
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <button
-                                            class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium text-primary dark:text-accent-light">
-                                            #49756
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium">19 Jun 2021</p>
-                                        <p class="mt-0.5 text-xs">5:43 AM</p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="flex items-center space-x-4">
-                                            <div class="avatar size-9">
-                                                <img class="mask is-squircle"
-                                                    src="{{ asset('images/200x200.png') }}"
-                                                    alt="avatar" />
-                                            </div>
-
-                                            <span class="font-medium text-slate-700 dark:text-navy-100">Tom Robert
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="w-48 overflow-hidden text-ellipsis text-xs-plus">
-                                            3803 Fox Rd Huron, Ohio(OH), 44839
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge bg-info/10 text-info dark:bg-info/15">
-                                            Shipped
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge space-x-2.5 text-xs-plus text-success">
-                                            <div class="size-2 rounded-full bg-current"></div>
-                                            <span>{{ __('Paid') }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100">
-                                            $6 156
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <button
-                                            class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium text-primary dark:text-accent-light">
-                                            #79632
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium">03 Jun 2021</p>
-                                        <p class="mt-0.5 text-xs">4:54 AM</p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="flex items-center space-x-4">
-                                            <div class="avatar size-9">
-                                                <img class="mask is-squircle"
-                                                    src="{{ asset('images/200x200.png') }}"
-                                                    alt="avatar" />
-                                            </div>
-
-                                            <span class="font-medium text-slate-700 dark:text-navy-100">Nolan Doe
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="w-48 overflow-hidden text-ellipsis text-xs-plus">
-                                            1805 Jackson Ave Seaford, New York(NY), 11783
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div
-                                            class="badge bg-primary/10 text-primary dark:bg-accent-light/15 dark:text-accent-light">
-                                            Processing
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge space-x-2.5 text-xs-plus text-success">
-                                            <div class="size-2 rounded-full bg-current"></div>
-                                            <span>{{ __('Paid') }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100">
-                                            $7 621
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <button
-                                            class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium text-primary dark:text-accent-light">
-                                            #12668
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium">09 Jun 2021</p>
-                                        <p class="mt-0.5 text-xs">2:03 AM</p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="flex items-center space-x-4">
-                                            <div class="avatar size-9">
-                                                <img class="mask is-squircle"
-                                                    src="{{ asset('images/200x200.png') }}"
-                                                    alt="avatar" />
-                                            </div>
-
-                                            <span class="font-medium text-slate-700 dark:text-navy-100">Henry Curtis
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="w-48 overflow-hidden text-ellipsis text-xs-plus">
-                                            421 Basswood Ln Haysville, Kansas(KS), 67060
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge bg-error/10 text-error dark:bg-error/15">
-                                            Cancelled
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge space-x-2.5 text-xs-plus text-error">
-                                            <div class="size-2 rounded-full bg-current"></div>
-                                            <span>{{ __('Failed') }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100">
-                                            $456
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <button
-                                            class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium text-primary dark:text-accent-light">
-                                            #66463
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium">23 Jul 2021</p>
-                                        <p class="mt-0.5 text-xs">9:11 AM</p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="flex items-center space-x-4">
-                                            <div class="avatar size-9">
-                                                <img class="mask is-squircle"
-                                                    src="{{ asset('images/200x200.png') }}"
-                                                    alt="avatar" />
-                                            </div>
-
-                                            <span class="font-medium text-slate-700 dark:text-navy-100">Katrina West
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="w-48 overflow-hidden text-ellipsis text-xs-plus">
-                                            205 Hope Rd Helena, Montana(MT), 59602
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge bg-warning/10 text-warning dark:bg-warning/15">
-                                            Unconfirmed
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge space-x-2.5 text-xs-plus text-warning">
-                                            <div class="size-2 rounded-full bg-current"></div>
-                                            <span>{{ __('Await Auth') }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100">
-                                            $5 116
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <button
-                                            class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium text-primary dark:text-accent-light">
-                                            #53133
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium">11 Aug 2021</p>
-                                        <p class="mt-0.5 text-xs">12:11 AM</p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="flex items-center space-x-4">
-                                            <div class="avatar size-9">
-                                                <img class="mask is-squircle"
-                                                    src="{{ asset('images/200x200.png') }}"
-                                                    alt="avatar" />
-                                            </div>
-
-                                            <span class="font-medium text-slate-700 dark:text-navy-100">Lance Tucker
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="w-48 overflow-hidden text-ellipsis text-xs-plus">
-                                            1805 Jackson Ave Seaford, New York(NY), 11783
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge bg-warning/10 text-warning dark:bg-warning/15">
-                                            Unconfirmed
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge space-x-2.5 text-xs-plus text-warning">
-                                            <div class="size-2 rounded-full bg-current"></div>
-                                            <span>{{ __('Await Auth') }}</span>
-                                        </div>
-                                    </td>
-
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100">
-                                            $4 952
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <button
-                                            class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium text-primary dark:text-accent-light">
-                                            #5684
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium">11 May 2021</p>
-                                        <p class="mt-0.5 text-xs">07:55 AM</p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="flex items-center space-x-4">
-                                            <div class="avatar size-9">
-                                                <img class="mask is-squircle"
-                                                    src="{{ asset('images/200x200.png') }}"
-                                                    alt="avatar" />
-                                            </div>
-
-                                            <span class="font-medium text-slate-700 dark:text-navy-100">Raul Bradley
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="w-48 overflow-hidden text-ellipsis text-xs-plus">
-                                            13811 Gimbert Ln Santa Ana, California(CA), 92705
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge bg-success/10 text-success dark:bg-success/15">
-                                            Completed
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge space-x-2.5 text-xs-plus text-success">
-                                            <div class="size-2 rounded-full bg-current"></div>
-                                            <span>{{ __('Paid') }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100">
-                                            $5 137
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <button
-                                            class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium text-primary dark:text-accent-light">
-                                            #64669
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium">29 Jun 2021</p>
-                                        <p class="mt-0.5 text-xs">1:54 AM</p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="flex items-center space-x-4">
-                                            <div class="avatar size-9">
-                                                <img class="mask is-squircle"
-                                                    src="{{ asset('images/200x200.png') }}"
-                                                    alt="avatar" />
-                                            </div>
-
-                                            <span class="font-medium text-slate-700 dark:text-navy-100">Derrick
-                                                Simmons
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="w-48 overflow-hidden text-ellipsis text-xs-plus">
-                                            3803 Fox Rd Huron, Ohio(OH), 44839
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge bg-info/10 text-info dark:bg-info/15">
-                                            Shipped
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge space-x-2.5 text-xs-plus text-success">
-                                            <div class="size-2 rounded-full bg-current"></div>
-                                            <span>{{ __('Paid') }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100">
-                                            $2 566
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <button
-                                            class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium text-primary dark:text-accent-light">
-                                            #31669
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="font-medium">08 Jun 2021</p>
-                                        <p class="mt-0.5 text-xs">7:36 AM</p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="flex items-center space-x-4">
-                                            <div class="avatar size-9">
-                                                <img class="mask is-squircle"
-                                                    src="{{ asset('images/200x200.png') }}"
-                                                    alt="avatar" />
-                                            </div>
-
-                                            <span class="font-medium text-slate-700 dark:text-navy-100">Samantha
-                                                Shelton
-                                            </span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="w-48 overflow-hidden text-ellipsis text-xs-plus">
-                                            1805 Jackson Ave Seaford, New York(NY), 11783
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div
-                                            class="badge bg-primary/10 text-primary dark:bg-accent-light/15 dark:text-accent-light">
-                                            Processing
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="badge space-x-2.5 text-xs-plus text-success">
-                                            <div class="size-2 rounded-full bg-current"></div>
-                                            <span>{{ __('Paid') }}</span>
-                                        </div>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100">
-                                            $9 665
-                                        </p>
-                                    </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <button
-                                            class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none"
-                                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z" />
-                                            </svg>
-                                        </button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div
-                        class="flex flex-col justify-between space-y-4 px-4 py-4 sm:flex-row sm:items-center sm:space-y-0 sm:px-5">
-                        <div class="flex items-center space-x-2 text-xs-plus">
-                            <span>{{ __('Show') }}</span>
-                            <label class="block">
-                                <select
-                                    class="form-select rounded-full border border-slate-300 bg-white px-2 py-1 pr-6 hover:border-slate-400 focus:border-primary dark:border-navy-450 dark:bg-navy-700 dark:hover:border-navy-400 dark:focus:border-accent">
-                                    <option>10</option>
-                                    <option>30</option>
-                                    <option>50</option>
-                                </select>
-                            </label>
-                            <span>{{ __('entries') }}</span>
-                        </div>
-
-                        <ol class="pagination">
-                            <li class="rounded-l-lg bg-slate-150 dark:bg-navy-500">
-                                <a href="#"
-                                    class="flex size-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-300 focus:bg-slate-300 active:bg-slate-300/80 dark:text-navy-200 dark:hover:bg-navy-450 dark:focus:bg-navy-450 dark:active:bg-navy-450/90">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                        <path stroke-linecap="round" stroke-linejoin="round"
-                                            d="M15 19l-7-7 7-7" />
-                                    </svg>
-                                </a>
-                            </li>
-                            <li class="bg-slate-150 dark:bg-navy-500">
-                                <a href="#"
-                                    class="flex h-8 min-w-[2rem] items-center justify-center rounded-lg px-3 leading-tight transition-colors hover:bg-slate-300 focus:bg-slate-300 active:bg-slate-300/80 dark:hover:bg-navy-450 dark:focus:bg-navy-450 dark:active:bg-navy-450/90">1</a>
-                            </li>
-                            <li class="bg-slate-150 dark:bg-navy-500">
-                                <a href="#"
-                                    class="flex h-8 min-w-[2rem] items-center justify-center rounded-lg bg-primary px-3 leading-tight text-white transition-colors hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90">2</a>
-                            </li>
-                            <li class="bg-slate-150 dark:bg-navy-500">
-                                <a href="#"
-                                    class="flex h-8 min-w-[2rem] items-center justify-center rounded-lg px-3 leading-tight transition-colors hover:bg-slate-300 focus:bg-slate-300 active:bg-slate-300/80 dark:hover:bg-navy-450 dark:focus:bg-navy-450 dark:active:bg-navy-450/90">3</a>
-                            </li>
-                            <li class="bg-slate-150 dark:bg-navy-500">
-                                <a href="#"
-                                    class="flex h-8 min-w-[2rem] items-center justify-center rounded-lg px-3 leading-tight transition-colors hover:bg-slate-300 focus:bg-slate-300 active:bg-slate-300/80 dark:hover:bg-navy-450 dark:focus:bg-navy-450 dark:active:bg-navy-450/90">4</a>
-                            </li>
-                            <li class="bg-slate-150 dark:bg-navy-500">
-                                <a href="#"
-                                    class="flex h-8 min-w-[2rem] items-center justify-center rounded-lg px-3 leading-tight transition-colors hover:bg-slate-300 focus:bg-slate-300 active:bg-slate-300/80 dark:hover:bg-navy-450 dark:focus:bg-navy-450 dark:active:bg-navy-450/90">5</a>
-                            </li>
-                            <li class="rounded-r-lg bg-slate-150 dark:bg-navy-500">
-                                <a href="#"
-                                    class="flex size-8 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-300 focus:bg-slate-300 active:bg-slate-300/80 dark:text-navy-200 dark:hover:bg-navy-450 dark:focus:bg-navy-450 dark:active:bg-navy-450/90">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-4" fill="none"
-                                        viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </a>
-                            </li>
-                        </ol>
-
-                        <div class="text-xs-plus">1 - 10 of 10 entries</div>
-                    </div>
+                <div class="mask is-star flex size-10 shrink-0 items-center justify-center bg-error">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+            </div>
+            <a href="{{ route('provider.requests.index', ['needs_proof' => '1']) }}" class="badge mt-2 inline-flex bg-error/10 py-1 px-1.5 text-error dark:bg-error/15 hover:bg-error/20">
+                {{ __('finance.common.view') }}
+            </a>
+        </div>
+        <div class="card justify-center p-4.5">
+            <div class="flex items-center justify-between gap-3">
+                <div class="min-w-0 flex-1 text-start">
+                    <p class="text-base font-semibold text-slate-700 dark:text-navy-100 tabular-nums" dir="ltr">{{ $fulfilledLast30Count ?? 0 }}</p>
+                    <p class="text-xs-plus line-clamp-2">{{ __('provider.dashboard.fulfilled_30d') }}</p>
+                </div>
+                <div class="mask is-star flex size-10 shrink-0 items-center justify-center bg-success">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+            <a href="{{ route('provider.requests.index', ['status' => 'FULFILLED']) }}" class="badge mt-2 inline-flex bg-success/10 py-1 px-1.5 text-success dark:bg-success/15 hover:bg-success/20">
+                {{ __('finance.common.view') }}
+            </a>
+        </div>
+        <div class="card justify-center p-4.5 flex flex-col">
+            <div class="flex items-center justify-between gap-3">
+                <div class="min-w-0 flex-1 text-start">
+                    <p class="text-base font-semibold text-slate-700 dark:text-navy-100 tabular-nums" dir="ltr">{{ number_format($valueFulfilledLast30 ?? 0, 2) }}</p>
+                    <p class="text-xs-plus line-clamp-2">{{ __('provider.dashboard.value_delivered_30d') }} ({{ __('SAR') }})</p>
+                </div>
+                <div class="mask is-star flex size-10 shrink-0 items-center justify-center bg-primary dark:bg-accent">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+            </div>
+            <div class="mt-3 grid grid-cols-2 gap-2 rounded-lg bg-slate-100/80 p-2.5 dark:bg-navy-600/50">
+                <div class="text-center">
+                    <p class="text-xs text-slate-500 dark:text-navy-400">{{ __('provider.dashboard.in_pipeline') }}</p>
+                    <p class="text-sm font-semibold tabular-nums text-slate-800 dark:text-navy-100" dir="ltr">{{ $inPipelineCount ?? 0 }}</p>
+                </div>
+                <div class="text-center border-s border-slate-200 dark:border-navy-500">
+                    <p class="text-xs text-slate-500 dark:text-navy-400">{{ __('provider.dashboard.qr_redeemed_30d') }}</p>
+                    <p class="text-sm font-semibold tabular-nums text-slate-800 dark:text-navy-100" dir="ltr">{{ $qrRedeemedLast30Count ?? 0 }}</p>
                 </div>
             </div>
         </div>
+    </div>
 
+    {{-- 4. Quick actions (prominent, full width) --}}
+    <div class="card mt-4 px-4 pb-4 pt-1 sm:px-5">
+        <div class="my-3">
+            <h2 class="font-medium tracking-wide text-slate-700 dark:text-navy-100">{{ __('provider.dashboard.quick_actions') }}</h2>
+        </div>
+        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <a href="{{ route('provider.requests.index') }}" class="btn flex w-full items-center justify-center gap-2 bg-primary py-2.5 text-white dark:bg-accent hover:bg-primary-focus dark:hover:bg-accent-focus">
+                <i class="fa-solid fa-inbox" aria-hidden="true"></i>
+                <span>{{ __('Incoming Requests') }}</span>
+            </a>
+            <a href="{{ route('provider.menu-items.index') }}" class="btn flex w-full items-center justify-center gap-2 border-2 border-primary bg-transparent py-2.5 text-primary dark:border-accent dark:text-accent hover:bg-primary/10 dark:hover:bg-accent/10">
+                <i class="fa-solid fa-utensils" aria-hidden="true"></i>
+                <span>{{ __('Inventory') }}</span>
+            </a>
+            <a href="{{ route('provider.qr.scan') }}" class="btn flex w-full items-center justify-center gap-2 border border-slate-200 bg-white py-2.5 text-slate-800 hover:bg-slate-50 dark:border-navy-500 dark:bg-navy-700 dark:text-navy-100 dark:hover:bg-navy-600">
+                <i class="fa-solid fa-qrcode" aria-hidden="true"></i>
+                <span>{{ __('Scan QR Code') }}</span>
+            </a>
+        </div>
+    </div>
+
+    {{-- 5. Chart + recent: stacked; chart stays LTR for numeric axis --}}
+    <div class="mt-4 space-y-4 sm:mt-5 sm:space-y-5 lg:mt-6">
+        <div class="card px-4 pb-4 sm:px-5">
+            <div class="my-3 flex h-8 items-center justify-between gap-2">
+                <h2 class="font-medium tracking-wide text-slate-700 dark:text-navy-100 text-start">
+                    {{ __('provider.dashboard.chart_title') }}
+                </h2>
+            </div>
+            <div class="min-h-[250px] w-full overflow-x-auto" dir="ltr">
+                <div class="ax-transparent-gridline min-w-[min(100%,42rem)] pe-2"
+                     data-chart-series="{{ json_encode($weeklyFulfilledChart['series'] ?? []) }}"
+                     data-chart-categories="{{ json_encode($weeklyFulfilledChart['categories'] ?? []) }}"
+                     data-chart-label="{{ json_encode(__('provider.dashboard.chart_series')) }}"
+                     data-chart-rtl="{{ app()->getLocale() === 'ar' ? '1' : '0' }}"
+                     x-data="{
+                        init() {
+                            $nextTick(() => {
+                                if (this.$el._x_chart) return;
+                                const config = { ...pages.charts.incomePersonal };
+                                const series = JSON.parse(this.$el.dataset.chartSeries);
+                                const categories = JSON.parse(this.$el.dataset.chartCategories);
+                                const label = JSON.parse(this.$el.dataset.chartLabel);
+                                const isRtl = this.$el.dataset.chartRtl === '1';
+                                config.series = [{ name: label, data: series }];
+                                config.xaxis = { ...config.xaxis, categories, position: 'bottom' };
+                                config.chart = { ...config.chart, toolbar: { show: false } };
+                                config.yaxis = { ...config.yaxis, ...(isRtl ? { opposite: true } : {}) };
+                                config.dataLabels = { ...config.dataLabels, enabled: series.some(v => v > 0) };
+                                if (series.every(v => v === 0)) {
+                                    config.yaxis = { ...config.yaxis, min: 0, max: 5, forceNiceScale: true, ...(isRtl ? { opposite: true } : {}) };
+                                }
+                                this.$el._x_chart = new ApexCharts(this.$el, config);
+                                this.$el._x_chart.render();
+                            });
+                        }
+                     }" x-init="init()"></div>
+            </div>
+        </div>
+
+        <div class="card px-4 pb-4 sm:px-5">
+            <div class="my-3 flex flex-wrap items-center justify-between gap-2">
+                <h2 class="font-medium tracking-wide text-slate-700 dark:text-navy-100 text-start">
+                    {{ __('provider.dashboard.recent_requests') }}
+                </h2>
+                <a href="{{ route('provider.requests.index') }}"
+                    class="border-b border-dotted border-current pb-0.5 text-xs-plus font-medium text-primary hover:text-primary/70 dark:text-accent-light">
+                    {{ __('provider.dashboard.view_all') }}
+                </a>
+            </div>
+            <div class="divide-y divide-slate-100 dark:divide-navy-500 rounded-lg border border-slate-100 dark:border-navy-500 overflow-hidden">
+                @forelse($recentRequests as $req)
+                    <a href="{{ route('provider.requests.show', $req->id) }}" class="flex flex-col gap-2 p-3 transition-colors hover:bg-slate-50 dark:hover:bg-navy-600/50 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+                        <div class="min-w-0 flex-1 text-start">
+                            <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-3">
+                                <span class="inline-flex w-fit shrink-0 rounded-md bg-slate-100 px-2 py-0.5 text-xs font-semibold tabular-nums text-slate-700 dark:bg-navy-600 dark:text-navy-100" dir="ltr">#{{ $req->id }}</span>
+                                <span class="font-medium text-slate-700 dark:text-navy-100 break-words">{{ $req->items->first()?->menuItem?->name ?? __('Request') }}</span>
+                            </div>
+                            <p class="text-xs text-slate-500 dark:text-navy-400 mt-1">
+                                <span class="text-slate-400 dark:text-navy-500">{{ __('Recipient') }}</span>
+                                @if ($req->recipient?->name ?? $req->recipient?->email)
+                                    <span class="ms-1">{{ $req->recipient->name ?? $req->recipient->email }}</span>
+                                @else
+                                    <span class="ms-1 italic text-slate-400">{{ __('provider.dashboard.no_recipient_name') }}</span>
+                                @endif
+                            </p>
+                            <p class="text-tiny text-slate-400 dark:text-navy-500 mt-0.5" title="{{ $req->created_at->timezone(config('app.timezone'))->format('Y-m-d H:i') }}">
+                                {{ __('provider.dashboard.request_created') }} {{ $req->created_at->diffForHumans() }}
+                            </p>
+                        </div>
+                        <span class="shrink-0 self-start sm:self-center rounded-md bg-slate-50 px-2 py-1 text-xs font-medium leading-snug sm:max-w-[12rem] sm:text-end dark:bg-navy-600/80 {{ $req->status === 'FULFILLED' ? 'text-success' : ($req->status === 'REQUESTED' ? 'text-warning' : 'text-primary dark:text-accent-light') }}">
+                            {{ $statusLabels[$req->status] ?? str_replace('_', ' ', $req->status) }}
+                        </span>
+                    </a>
+                @empty
+                    <div class="p-4 text-sm text-slate-500 dark:text-navy-400 text-center">{{ __('provider.dashboard.no_requests') }}</div>
+                @endforelse
+            </div>
+        </div>
+    </div>
 </x-app-layout>
