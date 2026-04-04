@@ -208,11 +208,12 @@ Route::get('/payments/callback', [\App\Http\Controllers\PaymentCallbackControlle
 Route::get('/payments/error', [\App\Http\Controllers\PaymentCallbackController::class, 'error'])->name('payments.error');
 
 // General routes //
-// Pending approval: recipient or provider (blocked from dashboard by EnsureAccountApproved)
+// Pending approval: recipient or provider (blocked from dashboard by EnsureAccountApproved).
+// Same middleware with pending_only: active users are redirected to dashboard from these URLs.
 // Provider registration: GET allows guest + auth (auth with profile sees read-only)
 Route::get('/register/provider', [ProviderRegistrationController::class, 'create'])->name('register.provider');
 
-Route::middleware($authMiddleware)->group(function () {
+Route::middleware(array_merge($authMiddleware, ['account.approved:pending_only']))->group(function () {
     Route::get('/approval-pending', function () {
         return view('auth.approval-pending');
     })->name('approval.pending');
