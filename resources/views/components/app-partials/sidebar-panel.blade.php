@@ -40,9 +40,14 @@
                                 </a>
                                 <ul x-collapse x-show="expanded">
                                     @foreach ($menu['submenu'] as $subKey => $submenu)
-                                        <li @if (($submenu['route_name'] ?? '') === $pageName) x-init="$el.scrollIntoView({block:'center'}); expanded = true" @endif>
+                                        @php
+                                            $submenuActive = isset($submenu['route_match'])
+                                                ? request()->routeIs($submenu['route_match'])
+                                                : (($submenu['route_name'] ?? '') === $pageName);
+                                        @endphp
+                                        <li @if ($submenuActive) x-init="$el.scrollIntoView({block:'center'}); expanded = true" @endif>
                                             <a href="{{ Route::has($submenu['route_name'] ?? '') ? route($submenu['route_name']) : '#' }}"
-                                                class="flex items-center justify-between p-2 text-xs-plus tracking-wide outline-hidden transition-[color,padding-inline-start] duration-300 ease-in-out hover:ps-4 {{ ($submenu['route_name'] ?? '') === $pageName ? 'text-primary dark:text-accent-light font-medium' : 'text-slate-600 hover:text-slate-800 dark:text-navy-200 dark:hover:text-navy-50' }}">
+                                                class="flex items-center justify-between p-2 text-xs-plus tracking-wide outline-hidden transition-[color,padding-inline-start] duration-300 ease-in-out hover:ps-4 {{ $submenuActive ? 'text-primary dark:text-accent-light font-medium' : 'text-slate-600 hover:text-slate-800 dark:text-navy-200 dark:hover:text-navy-50' }}">
                                                 <div class="flex items-center space-x-2">
                                                     <div class="size-1.5 rounded-full border border-current opacity-40"></div>
                                                     <span>{{ $submenu['title'] }}</span>

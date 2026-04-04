@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Permissions\PermissionDefinitions;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class RoleSeeder extends Seeder
 {
@@ -33,32 +34,19 @@ class RoleSeeder extends Seeder
         // Admin Permissions (All permissions)
         $adminPermissions = Permission::all()->pluck('name')->toArray();
         $adminRole->syncPermissions($adminPermissions);
-        $this->command->info('✅ Assigned ' . count($adminPermissions) . ' permissions to admin role (all permissions)');
+        $this->command->info('✅ Assigned '.count($adminPermissions).' permissions to admin role (all permissions)');
 
-        // Donor Permissions
-        $donorPermissions = [
-            'donations.process',              // FR 3.1
-            'dashboard.donor.view_stats',     // FR 4.1
-        ];
+        // Donor / recipient / provider — keep in sync with PermissionDefinitions
+        $donorPermissions = PermissionDefinitions::donor();
         $donorRole->syncPermissions($donorPermissions);
-        $this->command->info('✅ Assigned ' . count($donorPermissions) . ' permissions to donor role');
+        $this->command->info('✅ Assigned '.count($donorPermissions).' permissions to donor role');
 
-        // Recipient Permissions
-        $recipientPermissions = [
-            'requests.submit',                // FR 5.1
-        ];
+        $recipientPermissions = PermissionDefinitions::recipient();
         $recipientRole->syncPermissions($recipientPermissions);
-        $this->command->info('✅ Assigned ' . count($recipientPermissions) . ' permissions to recipient role');
+        $this->command->info('✅ Assigned '.count($recipientPermissions).' permissions to recipient role');
 
-        // Provider Permissions
-        $providerPermissions = [
-            'qr.redeem',                                      // FR 9.1
-            'fulfillment_proof.upload',                      // FR 10.1
-            'requests.adopt',                                 // FR 21.1
-            'provider.capacity.toggle',                       // FR 23.1
-            'provider.pickup_notes_and_hours.update',        // FR 23.2
-        ];
+        $providerPermissions = PermissionDefinitions::provider();
         $providerRole->syncPermissions($providerPermissions);
-        $this->command->info('✅ Assigned ' . count($providerPermissions) . ' permissions to provider role');
+        $this->command->info('✅ Assigned '.count($providerPermissions).' permissions to provider role');
     }
 }

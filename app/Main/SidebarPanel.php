@@ -17,13 +17,18 @@ class SidebarPanel
                     'admin_users' => [
                         'title' => __('Users'),
                         'submenu' => [
+                            'admin_users_manage' => [
+                                'title' => __('User Management'),
+                                'route_name' => 'admin.manage.users.index',
+                            ],
                             'admin_users_pending' => [
                                 'title' => __('Pending Approvals'),
                                 'route_name' => 'admin.users.pending',
                             ],
-                            'admin_users_manage' => [
-                                'title' => __('User Management'),
-                                'route_name' => 'admin.manage.users.index',
+                            'admin_roles_permissions' => [
+                                'title' => __('rbac.nav.roles_permissions'),
+                                'route_name' => 'admin.roles.index',
+                                'route_match' => 'admin.roles.*',
                             ],
                         ],
                     ],

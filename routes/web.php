@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\AllowanceSettingsController;
 use App\Http\Controllers\Admin\FinancialOverviewController;
 use App\Http\Controllers\Admin\FinancialReportController;
 use App\Http\Controllers\Admin\QrSettingsController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SummaryReportController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\ProviderRegistrationController;
@@ -77,6 +78,14 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin'
         Route::delete('/manage/users/{user}', [UserManagementController::class, 'destroy'])->name('manage.users.destroy');
         Route::post('/manage/users/{user}/deactivate', [UserManagementController::class, 'deactivate'])->name('manage.users.deactivate');
         Route::post('/manage/users/{user}/reactivate', [UserManagementController::class, 'reactivate'])->name('manage.users.reactivate');
+
+        // Roles & permissions (Spatie)
+        Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
+        Route::get('/roles/create', [RoleController::class, 'create'])->name('roles.create');
+        Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
+        Route::get('/roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
+        Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
+        Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
 
         // Admin Request Management (ECS-63)
         Route::get('/requests', [\App\Http\Controllers\Admin\AdminRequestController::class, 'index'])->name('requests.index');

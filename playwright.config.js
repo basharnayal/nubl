@@ -28,7 +28,9 @@ export default defineConfig({
     },
     {
       command: 'npm run dev',
-      url: 'http://localhost:5173', // Default Vite port
+      // Use `port` (TCP check), not `url` (HTTP check): Vite often returns 404 for GET `/`,
+      // and Playwright treats that as "not ready" until timeout.
+      port: 5173,
       reuseExistingServer: true,
       timeout: 120 * 1000,
     }
