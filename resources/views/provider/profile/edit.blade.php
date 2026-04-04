@@ -76,11 +76,12 @@
                                     <span class="text-slate-600 dark:text-navy-300">{{ __('Closed') }}</span>
                                 </label>
                             </div>
+                            {{-- LTR flex row + justify: EN packs left, AR (rtl:) packs right; time inputs stay dir=ltr --}}
                             <div
-                                class="provider-oh-hours flex flex-col gap-3 sm:flex-row sm:items-end sm:gap-4 rtl:sm:flex-row-reverse">
-                                <div class="min-w-0 flex-1 sm:max-w-[12rem]">
+                                class="provider-oh-hours flex w-full flex-col gap-3 sm:flex-row sm:items-end sm:justify-start sm:gap-4 rtl:sm:flex-row-reverse rtl:sm:justify-end">
+                                <div class="min-w-0 w-full shrink-0 sm:w-auto sm:max-w-[12rem]">
                                     <label
-                                        class="mb-1 block text-xs font-medium text-slate-500 dark:text-navy-400">{{ __('Open') }}</label>
+                                        class="mb-1 block text-start text-xs font-medium text-slate-500 dark:text-navy-400">{{ __('Open') }}</label>
                                     <div dir="ltr" class="w-full">
                                         <input type="time" name="operating_hours[{{ $dayKey }}][open]"
                                             value="{{ old("operating_hours.$dayKey.open", $dayData['open'] ?? '09:00') }}"
@@ -88,9 +89,9 @@
                                             class="provider-oh-open w-full rounded-lg border border-slate-300 px-3 py-2.5 text-base text-slate-900 dark:border-navy-500 dark:bg-navy-800 dark:text-navy-50" />
                                     </div>
                                 </div>
-                                <div class="min-w-0 flex-1 sm:max-w-[12rem]">
+                                <div class="min-w-0 w-full shrink-0 sm:w-auto sm:max-w-[12rem]">
                                     <label
-                                        class="mb-1 block text-xs font-medium text-slate-500 dark:text-navy-400">{{ __('Close') }}</label>
+                                        class="mb-1 block text-start text-xs font-medium text-slate-500 dark:text-navy-400">{{ __('Close') }}</label>
                                     <div dir="ltr" class="w-full">
                                         <input type="time" name="operating_hours[{{ $dayKey }}][close]"
                                             value="{{ old("operating_hours.$dayKey.close", $dayData['close'] ?? '17:00') }}"

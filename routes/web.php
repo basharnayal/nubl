@@ -50,6 +50,10 @@ Route::get('/dashboard', function () {
 Route::middleware(array_merge($authMiddleware, ['account.approved']))->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/provider-business', [ProfileController::class, 'updateProviderBusiness'])
+        ->name('profile.provider-business.update');
+    Route::patch('/profile/provider-financial', [ProfileController::class, 'updateProviderFinancial'])
+        ->name('profile.provider-financial.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
