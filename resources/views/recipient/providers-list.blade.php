@@ -8,48 +8,58 @@
                     <p class="text-slate-400 dark:text-navy-300 text-sm mt-2">{{ __('Check back later or contact support.') }}</p>
                 </div>
             @else
-                <div class="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                <div class="space-y-3 sm:space-y-4">
                     @foreach($providers as $provider)
                         @php
                             $profile = $provider->providerProfile;
                             $operating = $provider->providerOperatingInfo;
+                            $listTitle = \App\Support\ProviderDisplay::businessTitle($profile, $provider->name);
                         @endphp
                         <div @click="open('{{ route('recipient.providers.menu', ['provider' => $provider->id]) }}', '{{ addslashes($profile->full_name_en ?? $profile->full_name_ar ?? $provider->name) }}')"
                             @keydown.enter="open('{{ route('recipient.providers.menu', ['provider' => $provider->id]) }}', '{{ addslashes($profile->full_name_en ?? $profile->full_name_ar ?? $provider->name) }}')"
                             @keydown.space.prevent="open('{{ route('recipient.providers.menu', ['provider' => $provider->id]) }}', '{{ addslashes($profile->full_name_en ?? $profile->full_name_ar ?? $provider->name) }}')"
-                            class="provider-card card cursor-pointer transition-shadow hover:shadow-md"
+                            class="provider-card card flex cursor-pointer flex-col gap-3 p-4 transition-shadow hover:border-primary/35 hover:shadow-md sm:flex-row sm:items-center sm:gap-4 sm:p-5 dark:hover:border-accent/30"
                             role="button"
                             tabindex="0"
                             aria-label="{{ __('View menu for') }} {{ $profile->full_name_en ?? $profile->full_name_ar ?? $provider->name }}">
-                            <div class="p-5">
-                                <h3 class="text-lg font-semibold text-slate-800 dark:text-navy-100 truncate">
-                                    {{ $profile->full_name_en ?? $provider->name }}
-                                </h3>
-                                @if($profile->business_name_en ?? $profile->business_name_ar)
-                                    <p class="mt-1 text-sm text-primary dark:text-accent-light font-medium">
-                                        {{ \App\Support\ProviderDisplay::businessTitle($profile, $provider->name) }}
-                                    </p>
-                                @endif
-                                @if($profile->city || $profile->region || filled($profile->location))
-                                    <p class="mt-2 text-sm text-slate-500 dark:text-navy-300 flex items-center gap-1">
-                                        <span aria-hidden="true">📍</span>
-                                        {{ \App\Support\ProviderDisplay::locationLine($profile) }}
-                                    </p>
-                                @endif
-                                @if($profile->business_category && is_array($profile->business_category))
-                                    <div class="mt-2 flex flex-wrap gap-1">
-                                        @foreach(array_slice($profile->business_category, 0, 3) as $cat)
-                                            <span class="badge bg-slate-200 text-slate-700 dark:bg-navy-600 dark:text-navy-200">
-                                                {{ \App\Support\ProviderDisplay::businessCategoryLabel(is_string($cat) ? $cat : (string) ($cat['name'] ?? $cat)) }}
-                                            </span>
-                                        @endforeach
-                                    </div>
-                                @endif
-                                @if($operating && $operating->daily_capacity)
-                                    <p class="mt-2 text-xs text-slate-400 dark:text-navy-400">
-                                        {{ __('Capacity') }}: {{ $operating->daily_capacity }}
-                                    </p>
-                                @endif
+                            <div class="flex min-w-0 flex-1 flex-row gap-3 sm:contents">
+                                <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-sm font-bold text-primary dark:bg-accent/15 dark:text-accent-light sm:size-14">
+                                    {{ \App\Support\ProviderDisplay::initials($listTitle) }}
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <h3 class="text-base font-semibold text-slate-800 dark:text-navy-100 sm:text-lg">
+                                        {{ $listTitle }}
+                                    </h3>
+                                    @if($profile->full_name_en ?? $profile->full_name_ar)
+                                        <p class="mt-0.5 truncate text-sm text-slate-600 dark:text-navy-300">
+                                            {{ $profile->full_name_en ?? $provider->name }}
+                                        </p>
+                                    @endif
+                                    @if($profile->city || $profile->region || filled($profile->location))
+                                        <p class="mt-1 line-clamp-1 text-xs text-slate-500 dark:text-navy-400">
+                                            {{ \App\Support\ProviderDisplay::locationLine($profile) }}
+                                        </p>
+                                    @endif
+                                    @if($profile->business_category && is_array($profile->business_category))
+                                        <div class="mt-2 flex flex-wrap gap-1">
+                                            @foreach(array_slice($profile->business_category, 0, 3) as $cat)
+                                                <span class="badge bg-slate-200 text-slate-700 dark:bg-navy-600 dark:text-navy-200">
+                                                    {{ \App\Support\ProviderDisplay::businessCategoryLabel(is_string($cat) ? $cat : (string) ($cat['name'] ?? $cat)) }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                    @if($operating && $operating->daily_capacity)
+                                        <p class="mt-1 text-xs text-slate-400 dark:text-navy-400">
+                                            {{ __('Capacity') }}: {{ $operating->daily_capacity }}
+                                        </p>
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="flex shrink-0 justify-end text-primary dark:text-accent-light">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
                             </div>
                         </div>
                     @endforeach

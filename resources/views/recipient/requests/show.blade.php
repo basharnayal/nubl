@@ -1,4 +1,14 @@
-<x-app-layout title="{{ __('Request Details') }} #{{ $request->id }}" is-header-blur="true">
+@php
+    $requestCard = \App\Support\RecipientRequestStatusPresenter::card($request, (bool) session('request_submitted'));
+    $requestPageTitle = session('request_submitted')
+        ? __('Request submitted')
+        : match ($request->status) {
+            'FULFILLED' => __('recipient.request_fulfilled.page_title'),
+            'APPROVED', 'REDEEMABLE' => __('recipient.request_redeem.page_title'),
+            default => __('Request Details'),
+        };
+@endphp
+<x-app-layout title="{{ $requestPageTitle }} #{{ $request->id }}" is-header-blur="true">
     <div class="pt-4">
         <div class="mb-4 flex items-center justify-between">
             <a href="{{ route('recipient.requests.index') }}"
@@ -26,109 +36,56 @@
             @endif
         </div>
 
-        {{-- Status Card --}}
-        <div class="card mb-6">
-            <div class="border-b border-slate-200 p-6 dark:border-navy-600">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-sm text-slate-500 dark:text-navy-400">{{ __('Status') }}</p>
-                        @php
-                            $statusConfig = [
-                                'REQUESTED' => ['class' => 'bg-warning/10 text-warning dark:bg-warning/15', 'label' => __('Requested')],
-                                'APPROVED' => ['class' => 'bg-primary/10 text-primary dark:bg-accent-light/15 dark:text-accent-light', 'label' => __('Approved')], // Provider adopted (funding_source PROVIDER_ADOPTION)
-                                'ADMIN_PENDING' => ['class' => 'bg-warning/10 text-warning dark:bg-warning/15', 'label' => __('Admin Pending')],
-                                'ADMIN_APPROVED' => ['class' => 'bg-success/10 text-success dark:bg-success/15', 'label' => __('Admin Approved')],
-                                'REDEEMABLE' => ['class' => 'bg-success/10 text-success dark:bg-success/15', 'label' => __('Redeemable')],
-                                'FULFILLED' => ['class' => 'bg-slate-200/80 text-slate-600 dark:bg-navy-500 dark:text-navy-200', 'label' => __('Fulfilled')],
-                                'REJECTED' => ['class' => 'bg-error/10 text-error dark:bg-error/15', 'label' => __('Rejected')],
-                                'ADMIN_REJECTED' => ['class' => 'bg-error/10 text-error dark:bg-error/15', 'label' => __('Rejected')],
-                                'CANCELLED' => ['class' => 'bg-slate-200/80 text-slate-600 dark:bg-navy-500 dark:text-navy-200', 'label' => __('Cancelled')],
-                            ];
-                            $config = $statusConfig[$request->status] ?? ['class' => 'bg-slate-200/80 text-slate-600 dark:bg-navy-500 dark:text-navy-200', 'label' => str_replace('_', ' ', $request->status)];
-                        @endphp
-                        <span
-                            class="badge mt-1 inline-block rounded-full px-3 py-1 text-lg font-bold {{ $config['class'] }}">
-                            {{ $config['label'] }}
-                        </span>
-                    </div>
+        <div class="mx-auto w-full max-w-5xl space-y-6">
+        @include('recipient.requests.partials.request-status-card', [
+            'request' => $request,
+            'card' => $requestCard,
+        ])
 
-                    <div class="text-right">
-                        @if(in_array($request->status, ['APPROVED', 'REDEEMABLE']))
-                            <span
-                                class="inline-block text-sm text-slate-600 dark:text-navy-300">{{ __('Show this QR code to the provider to redeem') }}</span>
-                        @endif
+        @if(in_array($request->status, ['APPROVED', 'REDEEMABLE'], true) && $request->redemption && $request->redemption->status === 'PENDING')
+            @php
+                $modalQrExpired = $request->redemption->redeem_expires_at && $request->redemption->redeem_expires_at->isPast();
+            @endphp
+            @if(! $modalQrExpired)
+                @php
+                    $rawTokenDecrypted = Illuminate\Support\Facades\Crypt::decryptString($request->redemption->token_ciphertext);
+                    $shortTokenDecrypted = Illuminate\Support\Facades\Crypt::decryptString($request->redemption->short_code_ciphertext);
+                @endphp
+                <x-lineone-modal id="redeem-qr-{{ $request->id }}" :title="__('recipient.request_redeem.modal_title')"
+                    size="md">
+                    <p class="mb-4 text-center text-sm text-slate-600 dark:text-navy-300">
+                        {{ __('Show this QR code to the provider to redeem your order') }}
+                    </p>
+                    <div class="flex flex-col items-center justify-center space-y-4">
+                        <div
+                            class="rounded-lg border-2 border-slate-200 bg-white p-4 dark:border-navy-600 dark:bg-navy-800">
+                            {!! app('qrcode')->size(200)->generate($rawTokenDecrypted) !!}
+                        </div>
+                        <div
+                            class="w-full max-w-[240px] rounded-lg border border-slate-200 bg-slate-100 px-4 py-2 text-center dark:border-navy-600 dark:bg-navy-700">
+                            <p class="mb-1 text-xs uppercase tracking-wider text-slate-500 dark:text-navy-300">
+                                {{ __('Manual Code') }}
+                            </p>
+                            <p class="select-all font-mono text-lg font-bold tracking-widest text-slate-800 dark:text-navy-100">
+                                {{ $shortTokenDecrypted }}
+                            </p>
+                        </div>
+                        <p class="text-center text-sm font-bold text-error">
+                            {{ __('Expires in') }}:
+                            {{ $request->redemption->redeem_expires_at->timezone('Asia/Riyadh')->diffForHumans() }}
+                            ({{ $request->redemption->redeem_expires_at->timezone('Asia/Riyadh')->format('h:i A') }})
+                        </p>
+                        <p class="text-xs text-slate-500 dark:text-navy-400">{{ __('Request #') }}{{ $request->id }}</p>
                     </div>
-                </div>
-
-                @if($request->rejection_reason_code)
-                    <div
-                        class="mt-4 rounded-lg border border-error/30 bg-error/10 p-4 dark:bg-error/15 dark:border-error/20">
-                        <p class="font-bold text-slate-800 dark:text-navy-100">{{ __('Reason for Rejection') }}:</p>
-                        <p class="text-slate-700 dark:text-navy-200">{{ $request->rejection_reason_code }}</p>
-                        @if($request->rejection_reason_note)
-                            <p class="mt-1 text-sm text-slate-600 dark:text-navy-300">{{ $request->rejection_reason_note }}</p>
-                        @endif
-                    </div>
-                @endif
-
-                @if(in_array($request->status, ['APPROVED', 'REDEEMABLE']))
-                    <div class="mt-6 flex flex-col items-center border-t border-slate-200 pt-6 dark:border-navy-600">
-                        @if($request->redemption)
-                            @if($request->redemption->status === 'REDEEMED')
-                                <div
-                                    class="rounded-lg border border-success/30 bg-success/10 p-4 text-center font-bold text-success dark:border-success/20 dark:bg-success/15">
-                                    {{ __('Order already redeemed.') }}
-                                </div>
-                            @elseif($request->redemption->status === 'EXPIRED' || $request->redemption->redeem_expires_at->isPast())
-                                <div
-                                    class="rounded-lg border border-error/30 bg-error/10 p-4 text-center font-bold text-error dark:border-error/20 dark:bg-error/15">
-                                    {{ __('QR Expired.') }}
-                                </div>
-                            @elseif($request->redemption->status === 'PENDING')
-                                @php
-                                    $rawTokenDecrypted = Illuminate\Support\Facades\Crypt::decryptString($request->redemption->token_ciphertext);
-                                    $shortTokenDecrypted = Illuminate\Support\Facades\Crypt::decryptString($request->redemption->short_code_ciphertext);
-                                @endphp
-                                <p class="mb-4 text-sm font-medium text-slate-700 dark:text-navy-100">
-                                    {{ __('Show this QR code to the provider to redeem your order') }}
-                                </p>
-                                <div class="flex flex-col items-center justify-center space-y-3">
-                                    <div
-                                        class="rounded-lg border-2 border-slate-200 bg-white p-4 dark:border-navy-600 dark:bg-navy-800">
-                                        {!! app('qrcode')->size(200)->generate($rawTokenDecrypted) !!}
-                                    </div>
-                                    <div
-                                        class="bg-slate-100 px-4 py-2 rounded-lg border border-slate-200 text-center dark:bg-navy-700 dark:border-navy-600 w-full max-w-[240px]">
-                                        <p class="text-xs text-slate-500 uppercase tracking-wider mb-1 dark:text-navy-300">
-                                            {{ __('Manual Code') }}
-                                        </p>
-                                        <p
-                                            class="text-lg font-mono font-bold tracking-widest text-slate-800 select-all dark:text-navy-100">
-                                            {{ $shortTokenDecrypted }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <p class="mt-4 text-sm font-bold text-error">
-                                    {{ __('Expires in') }}:
-                                    {{ $request->redemption->redeem_expires_at->timezone('Asia/Riyadh')->diffForHumans() }}
-                                    ({{ $request->redemption->redeem_expires_at->timezone('Asia/Riyadh')->format('h:i A') }})
-                                </p>
-                                <p class="mt-1 text-xs text-slate-500 dark:text-navy-400">{{ __('Request #') }}{{ $request->id }}
-                                </p>
-                            @endif
-                        @else
-                            <p class="text-sm font-medium text-slate-500">{{ __('QR Code is being generated...') }}</p>
-                        @endif
-                    </div>
-                @endif
-            </div>
-        </div>
+                </x-lineone-modal>
+            @endif
+        @endif
 
         <div class="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6">
             {{-- Items List --}}
             <div class="md:col-span-2">
                 <div class="card p-6">
-                    <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Request Items') }}
+                    <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Order') }}
                     </h3>
                     <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
                         <table class="is-hoverable w-full text-left">
@@ -154,9 +111,34 @@
                             </thead>
                             <tbody>
                                 @foreach($request->items as $item)
+                                    @php
+                                        $menu = $item->menuItem;
+                                        $imgUrl = $menu?->image_url;
+                                    @endphp
                                     <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
                                         <td class="px-4 py-3 font-medium text-slate-700 dark:text-navy-100 sm:px-5">
-                                            {{ $item->menuItem->name ?? __('Unknown Item') }}
+                                            <div class="flex max-w-md items-center gap-3">
+                                                <div
+                                                    class="size-12 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 dark:border-navy-600 dark:bg-navy-700">
+                                                    @if($imgUrl)
+                                                        <img src="{{ $imgUrl }}"
+                                                            alt="{{ $menu?->name ?? __('Menu item') }}"
+                                                            class="size-full object-cover">
+                                                    @else
+                                                        <div class="flex size-full items-center justify-center text-slate-400 dark:text-navy-500"
+                                                            aria-hidden="true">
+                                                            <svg class="size-6" fill="none" stroke="currentColor"
+                                                                viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round"
+                                                                    stroke-width="2"
+                                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                                </path>
+                                                            </svg>
+                                                        </div>
+                                                    @endif
+                                                </div>
+                                                <span class="min-w-0">{{ $menu?->name ?? __('Unknown Item') }}</span>
+                                            </div>
                                         </td>
                                         <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $item->quantity }}</td>
                                         <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $item->price_snapshot }}
@@ -189,7 +171,9 @@
                 <div class="card p-6">
                     <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Provider Info') }}
                     </h3>
-                    <p class="font-medium text-slate-800 dark:text-navy-100">{{ $request->provider->name }}</p>
+                    <p class="font-medium text-slate-800 dark:text-navy-100">
+                        {{ \App\Support\ProviderDisplay::businessTitle($request->provider->providerProfile, $request->provider->name) }}
+                    </p>
                     <p class="mt-1 text-sm text-slate-500 dark:text-navy-400">
                         {{ $request->provider->providerProfile->location ?? __('Location N/A') }}
                     </p>
@@ -203,6 +187,7 @@
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     </div>
 </x-app-layout>

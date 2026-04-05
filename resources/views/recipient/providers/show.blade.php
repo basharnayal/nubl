@@ -5,85 +5,120 @@
             <div class="lg:flex lg:gap-8">
                 {{-- Left Column: Provider Info & Menu --}}
                 <div class="flex-1">
-                    {{-- Provider Info Card --}}
-                    <div class="card mb-6 border-l-4 border-l-primary p-6 dark:border-l-accent">
-                        <div class="flex items-start justify-between">
-                            <div>
-                                <h1 class="mb-2 text-2xl font-bold text-slate-800 dark:text-navy-100">
-                                    {{ \App\Support\ProviderDisplay::businessTitle($provider->providerProfile, $provider->name) }}
+                    @php
+                        $capacityOn = $provider->accepting_orders
+                            && $provider->providerOperatingInfo
+                            && $provider->providerOperatingInfo->daily_capacity > 0;
+                        $businessTitle = \App\Support\ProviderDisplay::businessTitle($provider->providerProfile, $provider->name);
+                        $dayKey = strtolower(now()->format('l'));
+                        $today = $provider->providerOperatingInfo?->operating_hours[$dayKey] ?? null;
+                        $openNow = false;
+                        if ($today && empty($today['closed']) && ! empty($today['open'] ?? null) && ! empty($today['close'] ?? null)) {
+                            try {
+                                $openT = today()->copy()->setTimeFromTimeString($today['open']);
+                                $closeT = today()->copy()->setTimeFromTimeString($today['close']);
+                                $openNow = now()->between($openT, $closeT);
+                            } catch (\Throwable) {
+                                $openNow = false;
+                            }
+                        }
+                    @endphp
+                    {{-- Provider bar (horizontal) + meta --}}
+                    <div class="card mb-6 overflow-hidden p-4 sm:p-5">
+                        <div
+                            class="flex w-full items-center gap-3 rounded-2xl border border-primary/25 bg-primary/[0.04] px-4 py-3 dark:border-accent/35 dark:bg-accent/[0.06] sm:gap-4 sm:px-5 sm:py-3.5">
+                            <div
+                                class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary dark:bg-accent/20 dark:text-accent-light sm:size-12"
+                                aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 sm:size-7" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                        d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2M3.75 3.47v-.84A.75.75 0 014.5 2h15a.75.75 0 01.75.75v.84m-16.5 0V9a.75.75 0 00.75.75h14.25a.75.75 0 00.75-.75V3.47m-16.5 0A48.11 48.11 0 0112 2.25c2.414 0 4.722.284 6.878.849M3.75 3.47V9m0-5.53v5.53" />
+                                </svg>
+                            </div>
+                            <div class="min-w-0 flex-1 text-start">
+                                <h1 class="truncate text-lg font-bold tracking-tight text-slate-800 dark:text-navy-100 sm:text-xl">
+                                    {{ $businessTitle }}
                                 </h1>
-                                <p class="mb-4 text-slate-600 dark:text-navy-300">
+                                <p class="truncate text-sm text-slate-600 dark:text-navy-300">
                                     {{ \App\Support\ProviderDisplay::businessCategoryLine($provider->providerProfile->business_category) ?? __('General Provider') }}
                                 </p>
                             </div>
-                            @php
-                                $capacityOn = $provider->accepting_orders
-                                    && $provider->providerOperatingInfo
-                                    && $provider->providerOperatingInfo->daily_capacity > 0;
-                            @endphp
-                            <div>
+                            <div class="shrink-0">
                                 @if($capacityOn)
                                     <span
-                                        class="badge rounded-full bg-success/10 text-success dark:bg-success/15">{{ __('Capacity') }}:
+                                        class="badge whitespace-nowrap rounded-full bg-success/10 text-success dark:bg-success/15">{{ __('Capacity') }}:
                                         ON</span>
                                 @else
                                     <span
-                                        class="badge rounded-full bg-error/10 text-error dark:bg-error/15">{{ __('Capacity') }}:
+                                        class="badge whitespace-nowrap rounded-full bg-error/10 text-error dark:bg-error/15">{{ __('Capacity') }}:
                                         OFF</span>
                                 @endif
                             </div>
                         </div>
 
-                        <div
-                            class="mt-2 grid grid-cols-1 gap-4 text-sm text-slate-500 md:grid-cols-2 dark:text-navy-400">
-                            <p class="flex items-center">
-                                <svg class="mr-2 size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
-                                    </path>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                </svg>
-                                {{ \App\Support\ProviderDisplay::locationLine($provider->providerProfile) }}
-                            </p>
-                            @if($provider->providerOperatingInfo && !empty($provider->providerOperatingInfo->service_type))
-                                <p class="flex items-center">
-                                    <svg class="mr-2 size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="mt-3 flex flex-wrap items-center gap-2">
+                            @if($today && empty($today['closed']) && $openNow)
+                                <span
+                                    class="inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success/10 px-3 py-1 text-xs font-medium text-success dark:border-success/40 dark:bg-success/15">
+                                    <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
-                                        </path>
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                     </svg>
-                                    {{ __('Service Type') }}:
-                                    {{ \App\Support\ProviderDisplay::serviceTypeLine($provider->providerOperatingInfo->service_type) }}
-                                </p>
+                                    {{ __('Open now') }}
+                                </span>
+                            @elseif($today && empty($today['closed']))
+                                <span
+                                    class="inline-flex items-center gap-1.5 rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600 dark:border-navy-500 dark:bg-navy-600/50 dark:text-navy-200">
+                                    <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {{ __('Closed now') }}
+                                </span>
                             @endif
-                            <p class="flex items-center">
-                                <svg class="mr-2 size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span
+                                class="inline-flex items-center gap-1.5 rounded-full border border-primary/20 bg-white/80 px-3 py-1 text-xs text-slate-600 dark:border-accent/25 dark:bg-navy-800/80 dark:text-navy-300">
+                                <svg class="size-3.5 shrink-0 text-primary dark:text-accent-light" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                {{ __('Hours') }}:
-                                @if($provider->providerOperatingInfo && isset($provider->providerOperatingInfo->operating_hours[strtolower(now()->format('l'))]))
-                                    @php $today = $provider->providerOperatingInfo->operating_hours[strtolower(now()->format('l'))]; @endphp
-                                    {{ isset($today['closed']) && $today['closed'] ? __('Closed Today') : ($today['open'] . ' - ' . $today['close']) }}
-                                @else
-                                    N/A
-                                @endif
-                            </p>
-                            @if($provider->providerOperatingInfo && filled($provider->providerOperatingInfo->pickup_notes))
-                                <p class="col-span-full mt-2 rounded-lg border border-primary/20 bg-primary/[0.06] p-3 text-sm text-slate-700 dark:border-accent/30 dark:bg-accent/10 dark:text-navy-100">
-                                    <span class="font-semibold">{{ __('Pickup / delivery notes') }}:</span>
-                                    {{ $provider->providerOperatingInfo->pickup_notes }}
-                                </p>
+                                <span class="max-w-[14rem] truncate sm:max-w-xs">{{ \App\Support\ProviderDisplay::locationLine($provider->providerProfile) }}</span>
+                            </span>
+                            @if($today)
+                                <span
+                                    class="inline-flex items-center gap-1.5 rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600 dark:border-navy-500 dark:text-navy-300">
+                                    <svg class="size-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {{ isset($today['closed']) && $today['closed'] ? __('Closed Today') : ($today['open'].' - '.$today['close']) }}
+                                </span>
                             @endif
                         </div>
+
+                        @if($provider->providerOperatingInfo && !empty($provider->providerOperatingInfo->service_type))
+                            <p class="mt-3 flex items-center gap-2 text-sm text-slate-500 dark:text-navy-400">
+                                <svg class="size-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                                {{ __('Service Type') }}:
+                                {{ \App\Support\ProviderDisplay::serviceTypeLine($provider->providerOperatingInfo->service_type) }}
+                            </p>
+                        @endif
+                        @if($provider->providerOperatingInfo && filled($provider->providerOperatingInfo->pickup_notes))
+                            <p
+                                class="mt-3 rounded-xl border border-primary/20 bg-primary/[0.06] p-3 text-sm text-slate-700 dark:border-accent/30 dark:bg-accent/10 dark:text-navy-100">
+                                <span class="font-semibold">{{ __('Pickup / delivery notes') }}:</span>
+                                {{ $provider->providerOperatingInfo->pickup_notes }}
+                            </p>
+                        @endif
                     </div>
 
-                    @if(Session::has('success'))
-                        <div class="mb-4">
-                            <x-lineone-alert type="success" dismissible>{{ Session::get('success') }}</x-lineone-alert>
-                        </div>
-                    @endif
                     @if($errors->any())
                         <div class="mb-4">
                             <x-lineone-alert type="danger" dismissible>
@@ -137,11 +172,11 @@
                         </form>
                     </div>
 
-                    {{-- Menu Grid --}}
-                    <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                    {{-- Menu list (horizontal rows) --}}
+                    <div class="flex flex-col gap-3 sm:gap-4">
                         @forelse($menuItems as $item)
                             <div
-                                class="card group relative flex h-full flex-col overflow-hidden transition-shadow hover:shadow-soft dark:hover:shadow-soft-dark">
+                                class="card group relative flex flex-row overflow-hidden transition-shadow hover:shadow-soft dark:hover:shadow-soft-dark">
                                 @if(!$item->is_active)
                                     <div
                                         class="absolute inset-0 z-10 flex items-center justify-center bg-white/60 dark:bg-navy-900/60">
@@ -150,49 +185,97 @@
                                     </div>
                                 @endif
 
-                                @if($item->image_url)
-                                    <img class="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                        src="{{ $item->image_url }}" alt="{{ $item->name }}">
-                                @else
-                                    <div
-                                        class="flex h-48 w-full items-center justify-center bg-slate-100 text-slate-400 dark:bg-navy-700 dark:text-navy-400">
-                                        <svg class="size-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                @endif
+                                <div
+                                    class="relative h-28 w-28 shrink-0 overflow-hidden bg-slate-100 sm:h-32 sm:w-32 dark:bg-navy-700">
+                                    @if($item->image_url)
+                                        <img class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                            src="{{ $item->image_url }}" alt="{{ $item->name }}">
+                                    @else
+                                        <div class="flex size-full items-center justify-center text-slate-400 dark:text-navy-400">
+                                            <svg class="size-10 sm:size-12" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                    @endif
+                                </div>
 
-                                <div class="flex flex-grow flex-col p-5">
-                                    <div class="mb-2 flex items-start justify-between">
-                                        <h5
-                                            class="line-clamp-2 text-lg font-bold tracking-tight text-slate-800 dark:text-navy-100">
-                                            {{ $item->name }}
-                                        </h5>
-                                        <span
-                                            class="badge shrink-0 rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary dark:bg-accent-light/15 dark:text-accent-light">{{ number_format($item->price, 2) }}
-                                            {{ __('SAR') }}</span>
-                                    </div>
-                                    <p class="mb-3 line-clamp-3 text-sm font-normal text-slate-600 dark:text-navy-300">
-                                        {{ $item->description }}
-                                    </p>
-
-                                    <div class="mt-auto">
-                                        <div class="mt-4 flex items-center justify-between">
+                                <div class="flex min-w-0 flex-1 flex-col justify-center p-4 sm:p-5">
+                                    <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                                        <div class="min-w-0 flex-1">
+                                            <h5
+                                                class="line-clamp-2 text-base font-bold tracking-tight text-slate-800 dark:text-navy-100 sm:text-lg">
+                                                {{ $item->name }}
+                                            </h5>
+                                            <p class="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-navy-300">
+                                                {{ $item->description }}
+                                            </p>
+                                        </div>
+                                        <div class="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
+                                            <span
+                                                class="badge w-fit rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary dark:bg-accent-light/15 dark:text-accent-light">{{ number_format($item->price, 2) }}
+                                                {{ __('SAR') }}</span>
                                             @if($item->max_per_request)
-                                                <span class="text-xs font-medium text-warning">{{ __('Max') }}
+                                                <span class="text-xs font-medium text-warning sm:text-end">{{ __('Max') }}
                                                     {{ $item->max_per_request }} /{{ __('req') }}</span>
-                                            @else
-                                                <span></span>
                                             @endif
-
-                                            <button type="button"
-                                                onclick="openItemModal({{ $item->id }}, '{{ addslashes($item->name) }}', {{ $item->price }}, {{ $item->max_per_request ?? 99 }})"
-                                                class="btn bg-primary text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus"
-                                                {{ (!$item->is_active || !$capacityOn) ? 'disabled' : '' }}>
-                                                {{ __('Add to Cart') }}
-                                            </button>
+                                        </div>
+                                    </div>
+                                    @php $itemMax = $item->max_per_request ?? 99; @endphp
+                                    <div class="mt-3 flex justify-end">
+                                        <div id="menu-controls-{{ $item->id }}"
+                                            class="menu-item-controls inline-flex max-w-full items-center gap-2 rounded-full border border-slate-200/90 bg-slate-100/95 py-1.5 ps-1.5 pe-2 shadow-sm dark:border-navy-600 dark:bg-navy-700/80 sm:gap-2.5 sm:ps-2 sm:pe-2.5"
+                                            data-item-id="{{ $item->id }}"
+                                            data-price="{{ $item->price }}"
+                                            data-max="{{ $itemMax }}"
+                                            data-item-name="{{ e($item->name) }}"
+                                            data-capacity-on="{{ $capacityOn ? '1' : '0' }}"
+                                            data-item-active="{{ $item->is_active ? '1' : '0' }}"
+                                            role="group"
+                                            aria-label="{{ __('Quantity') }} — {{ $item->name }}">
+                                            <div class="flex shrink-0 justify-center">
+                                                <button type="button"
+                                                    class="menu-trash hidden flex size-8 items-center justify-center rounded-full text-error hover:bg-error/10 hover:text-error-focus disabled:pointer-events-none disabled:opacity-40"
+                                                    onclick="menuRemove({{ $item->id }})"
+                                                    aria-label="{{ __('Remove') }}"
+                                                    {{ (!$item->is_active || !$capacityOn) ? 'disabled' : '' }}>
+                                                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                        aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                                            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                    </svg>
+                                                </button>
+                                                <button type="button"
+                                                    class="menu-add-first flex size-8 items-center justify-center rounded-full bg-primary/25 text-primary ring-1 ring-primary/20 hover:bg-primary/35 dark:bg-accent/25 dark:text-accent-light dark:ring-accent/30 dark:hover:bg-accent/35"
+                                                    onclick="menuAdjustQty({{ $item->id }}, 1)"
+                                                    aria-label="{{ __('Add to Cart') }}"
+                                                    {{ (!$item->is_active || !$capacityOn) ? 'disabled' : '' }}>
+                                                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                                                        aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                            d="M12 4.5v15m7.5-7.5h-15" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <span
+                                                class="menu-line-total shrink-0 whitespace-nowrap text-sm font-semibold tabular-nums text-slate-800 dark:text-navy-100">0.00
+                                                {{ __('SAR') }}</span>
+                                            <div class="flex items-center gap-1">
+                                                <button type="button"
+                                                    class="menu-minus flex size-7 shrink-0 items-center justify-center rounded-full border border-slate-300/90 bg-white text-sm font-bold leading-none text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-navy-500 dark:bg-navy-600 dark:text-navy-100 dark:hover:bg-navy-500"
+                                                    onclick="menuAdjustQty({{ $item->id }}, -1)"
+                                                    aria-label="{{ __('Decrease quantity') }}"
+                                                    {{ (!$item->is_active || !$capacityOn) ? 'disabled' : '' }}>−</button>
+                                                <span
+                                                    class="menu-qty-display min-w-[1.25rem] text-center text-sm font-bold text-slate-800 dark:text-navy-100">0</span>
+                                                <button type="button"
+                                                    class="menu-plus flex size-7 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white text-sm font-bold leading-none text-slate-800 shadow-sm hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-navy-500 dark:bg-navy-600 dark:text-navy-100 dark:hover:bg-navy-500"
+                                                    onclick="menuAdjustQty({{ $item->id }}, 1)"
+                                                    aria-label="{{ __('Increase quantity') }}"
+                                                    {{ (!$item->is_active || !$capacityOn) ? 'disabled' : '' }}>+</button>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -292,46 +375,6 @@
         </div>
     </div>
 
-    {{-- Item Selection Modal --}}
-    <div id="item-modal" tabindex="-1" aria-hidden="true"
-        class="hidden fixed inset-0 left-0 right-0 top-0 z-50 flex h-[calc(100%-1rem)] max-h-full items-center justify-center overflow-y-auto overflow-x-hidden bg-black/50 backdrop-blur-sm md:inset-0">
-        <div class="relative max-h-full w-full max-w-md p-4">
-            <div
-                class="relative rounded-lg border border-slate-150 bg-white shadow-soft dark:border-navy-600 dark:bg-navy-750">
-                <div class="flex items-center justify-between border-b border-slate-200 px-4 py-3 dark:border-navy-600">
-                    <h3 class="text-base font-semibold text-slate-800 dark:text-navy-100" id="modal-title">
-                        {{ __('Select Item') }}
-                    </h3>
-                    <button type="button" onclick="closeItemModal()"
-                        class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20">
-                        <svg class="size-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
-                        </svg>
-                        <span class="sr-only">{{ __('Close') }}</span>
-                    </button>
-                </div>
-                <div class="p-4 md:p-5">
-                    <p class="mb-4 text-sm text-slate-500 dark:text-navy-400" id="modal-price"></p>
-                    <div class="mb-4 flex items-center justify-between rounded-lg bg-slate-100 p-3 dark:bg-navy-600/50">
-                        <span class="font-medium text-slate-700 dark:text-navy-100">{{ __('Quantity') }}</span>
-                        <div class="flex items-center">
-                            <button type="button" onclick="adjustModalQty(-1)"
-                                class="btn size-8 flex items-center justify-center rounded-full bg-slate-200 font-bold text-slate-800 hover:bg-slate-300 dark:bg-navy-600 dark:text-navy-100 dark:hover:bg-navy-500">-</button>
-                            <span id="modal-qty"
-                                class="mx-4 text-lg font-bold text-slate-800 dark:text-navy-100">1</span>
-                            <button type="button" onclick="adjustModalQty(1)"
-                                class="btn size-8 flex items-center justify-center rounded-full bg-slate-200 font-bold text-slate-800 hover:bg-slate-300 dark:bg-navy-600 dark:text-navy-100 dark:hover:bg-navy-500">+</button>
-                        </div>
-                    </div>
-                    <x-lineone-button type="button" onclick="addToCart()" variant="primary"
-                        class="w-full">{{ __('Add to Request') }}</x-lineone-button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     {{-- Mobile Sticky Cart Summary --}}
     <div
         class="fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200 bg-white p-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] dark:border-navy-600 dark:bg-navy-800 lg:hidden">
@@ -352,48 +395,79 @@
 
     <script>
         let cart = [];
-        let selectedItem = null;
-        let selectedQty = 1;
         const weeklyUsed = {{ $weeklyUsed }};
         const allowance = {{ $weeklyLimit ?? 400 }};
+        const sarLabel = @json(__('SAR'));
 
-        function openItemModal(id, name, price, max) {
-            selectedItem = { id, name, price, max };
-            selectedQty = 1;
+        function getMenuMeta(id) {
+            const el = document.getElementById('menu-controls-' + id);
+            if (!el) return null;
+            return {
+                id: Number(el.dataset.itemId),
+                name: el.dataset.itemName,
+                price: parseFloat(el.dataset.price),
+                max: parseInt(el.dataset.max, 10) || 99,
+            };
+        }
+
+        function menuRemove(id) {
+            cart = cart.filter(i => i.id !== id);
+            renderCart();
+        }
+
+        function menuAdjustQty(id, delta) {
+            const meta = getMenuMeta(id);
+            if (!meta) return;
             const existing = cart.find(i => i.id === id);
-            if (existing) selectedQty = existing.qty;
-
-            document.getElementById('modal-title').textContent = name;
-            document.getElementById('modal-price').textContent = price.toFixed(2) + ' SAR / item';
-            document.getElementById('modal-qty').textContent = selectedQty;
-            document.getElementById('item-modal').classList.remove('hidden');
-        }
-
-        function closeItemModal() {
-            document.getElementById('item-modal').classList.add('hidden');
-            selectedItem = null;
-        }
-
-        function adjustModalQty(delta) {
-            let newQty = selectedQty + delta;
-            if (newQty < 1) newQty = 1;
-            if (selectedItem.max && newQty > selectedItem.max) newQty = selectedItem.max;
-            selectedQty = newQty;
-            document.getElementById('modal-qty').textContent = selectedQty;
-        }
-
-        function addToCart() {
-            if (!selectedItem) return;
-            const existingIndex = cart.findIndex(i => i.id === selectedItem.id);
-            if (existingIndex > -1) cart[existingIndex].qty = selectedQty;
-            else cart.push({ ...selectedItem, qty: selectedQty });
-            closeItemModal();
+            let qty = existing ? existing.qty : 0;
+            qty += delta;
+            if (qty < 0) qty = 0;
+            if (meta.max && qty > meta.max) qty = meta.max;
+            if (qty === 0) {
+                cart = cart.filter(i => i.id !== id);
+            } else if (existing) {
+                existing.qty = qty;
+            } else {
+                cart.push({ id: meta.id, name: meta.name, price: meta.price, max: meta.max, qty });
+            }
             renderCart();
         }
 
         function removeFromCart(id) {
-            cart = cart.filter(i => i.id !== id);
-            renderCart();
+            menuRemove(id);
+        }
+
+        function updateMenuControlRows() {
+            document.querySelectorAll('.menu-item-controls').forEach(el => {
+                const id = Number(el.dataset.itemId);
+                const row = cart.find(i => i.id === id);
+                const qty = row ? row.qty : 0;
+                const price = parseFloat(el.dataset.price);
+                const max = parseInt(el.dataset.max, 10) || 99;
+                const lineTotal = qty * price;
+                const locked = el.dataset.capacityOn !== '1' || el.dataset.itemActive !== '1';
+                const totalEl = el.querySelector('.menu-line-total');
+                const qtyEl = el.querySelector('.menu-qty-display');
+                const trash = el.querySelector('.menu-trash');
+                const addFirst = el.querySelector('.menu-add-first');
+                const minus = el.querySelector('.menu-minus');
+                const plus = el.querySelector('.menu-plus');
+                if (totalEl) totalEl.textContent = lineTotal.toFixed(2) + ' ' + sarLabel;
+                if (qtyEl) qtyEl.textContent = String(qty);
+                if (trash && addFirst) {
+                    if (qty > 0) {
+                        trash.classList.remove('hidden');
+                        addFirst.classList.add('hidden');
+                    } else {
+                        trash.classList.add('hidden');
+                        addFirst.classList.remove('hidden');
+                    }
+                }
+                if (minus) minus.disabled = locked || qty <= 0;
+                if (plus) plus.disabled = locked || qty >= max;
+                if (trash) trash.disabled = locked;
+                if (addFirst) addFirst.disabled = locked;
+            });
         }
 
         function renderCart() {
@@ -409,18 +483,16 @@
                     total += lineTotal;
                     count += item.qty;
                     const el = document.createElement('div');
-                    el.className = 'flex items-center justify-between rounded-lg bg-slate-100 p-2 text-sm dark:bg-navy-600/50';
+                    el.className = 'flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-100 px-3 py-2.5 text-sm dark:border-navy-600 dark:bg-navy-750/90';
                     el.innerHTML = `
-                        <div>
-                            <span class="block font-medium text-slate-700 dark:text-navy-100">${item.name}</span>
-                            <span class="text-xs text-slate-500 dark:text-navy-400">${item.qty} x ${item.price.toFixed(2)}</span>
+                        <div class="min-w-0 flex-1">
+                            <span class="block truncate font-medium text-slate-700 dark:text-navy-100">${escapeHtml(item.name)}</span>
+                            <span class="text-xs text-slate-500 dark:text-navy-400">${item.qty} × ${item.price.toFixed(2)}</span>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-bold text-slate-700 dark:text-navy-100">${lineTotal.toFixed(2)}</span>
-                            <button type="button" onclick="removeFromCart(${item.id})" class="text-error hover:text-error-focus">
-                                <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                            </button>
-                        </div>
+                        <span class="shrink-0 font-bold tabular-nums text-slate-800 dark:text-navy-100">${lineTotal.toFixed(2)} ${sarLabel}</span>
+                        <button type="button" onclick="menuRemove(${item.id})" class="shrink-0 p-1 text-error hover:text-error-focus" aria-label="{{ __('Remove') }}">
+                            <svg class="size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg>
+                        </button>
                     `;
                     container.appendChild(el);
                 });
@@ -429,8 +501,8 @@
             const projected = weeklyUsed + total;
             const exceeds = projected > allowance;
 
-            document.getElementById('cart-total').textContent = total.toFixed(2) + ' SAR';
-            document.getElementById('cart-projected-week').textContent = projected.toFixed(2) + ' / ' + allowance + ' SAR';
+            document.getElementById('cart-total').textContent = total.toFixed(2) + ' ' + sarLabel;
+            document.getElementById('cart-projected-week').textContent = projected.toFixed(2) + ' / ' + allowance + ' ' + sarLabel;
             document.getElementById('cart-projected-week').className = exceeds ? 'font-bold text-error' : 'font-medium text-success';
 
             const warningEl = document.getElementById('allowance-warning');
@@ -451,7 +523,7 @@
                 mobileSubmitBtn.disabled = false;
             }
 
-            document.getElementById('mobile-total').textContent = total.toFixed(2) + ' SAR';
+            document.getElementById('mobile-total').textContent = total.toFixed(2) + ' ' + sarLabel;
             document.getElementById('mobile-count').textContent = count;
 
             const formContainer = document.getElementById('form-items-container');
@@ -468,6 +540,16 @@
                 formContainer.appendChild(inputId);
                 formContainer.appendChild(inputQty);
             });
+
+            updateMenuControlRows();
         }
+
+        function escapeHtml(s) {
+            const d = document.createElement('div');
+            d.textContent = s;
+            return d.innerHTML;
+        }
+
+        renderCart();
     </script>
 </x-app-layout>

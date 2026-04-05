@@ -177,7 +177,10 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:recipi
         Route::get('/providers/{provider}/menu', [RecipientController::class, 'providerMenu'])
             ->name('providers.menu');
 
-        // Recipient Request Submission
+        // Legacy URL: confirmation now lives on the request show page
+        Route::get('requests/{id}/submitted', function (int $id) {
+            return redirect()->route('recipient.requests.show', ['request' => $id], 301);
+        })->whereNumber('id')->name('requests.submitted');
         Route::resource('requests', \App\Http\Controllers\Recipient\RecipientRequestController::class)
             ->only(['index', 'show', 'store']);
         Route::post('requests/{id}/cancel', [\App\Http\Controllers\Recipient\RecipientRequestController::class, 'cancel'])

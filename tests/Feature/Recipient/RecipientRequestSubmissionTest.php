@@ -104,7 +104,10 @@ class RecipientRequestSubmissionTest extends TestCase
             ]);
 
         $response->assertSessionHasNoErrors();
-        $response->assertRedirect();
+        $created = RequestModel::where('recipient_id', $this->recipient->id)->first();
+        $this->assertNotNull($created);
+        $response->assertRedirect(route('recipient.requests.show', $created->id));
+        $response->assertSessionHas('request_submitted');
 
         // Check Header
         $this->assertDatabaseHas('requests', [
@@ -115,7 +118,7 @@ class RecipientRequestSubmissionTest extends TestCase
         ]);
 
         // Check Items
-        $request = RequestModel::where('recipient_id', $this->recipient->id)->first();
+        $request = $created;
         $this->assertCount(2, $request->items);
 
         $this->assertDatabaseHas('request_items', [
@@ -223,15 +226,17 @@ class RecipientRequestSubmissionTest extends TestCase
 
         $this->travel(3)->seconds();
 
-        $this->actingAs($this->recipient)
+        $secondResponse = $this->actingAs($this->recipient)
             ->post(route('recipient.requests.store'), [
                 'provider_id' => $this->provider->id,
                 'items' => [
                     ['id' => $this->menuItem2->id, 'quantity' => 1],
                 ],
-            ])
-            ->assertSessionHasNoErrors()
-            ->assertSessionHas('success');
+            ]);
+        $secondResponse->assertSessionHasNoErrors();
+        $newRequest = RequestModel::orderByDesc('id')->first();
+        $secondResponse->assertRedirect(route('recipient.requests.show', $newRequest->id));
+        $secondResponse->assertSessionHas('request_submitted');
 
         $this->assertDatabaseCount('requests', 2);
 
@@ -426,5 +431,46 @@ class RecipientRequestSubmissionTest extends TestCase
 
         $response->assertSessionHasErrors(['items.0.id']);
         $this->assertDatabaseCount('requests', 0);
+    }
+
+    #[Test]
+    public function recipient_can_view_submitted_confirmation_page(): void
+    {
+        $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 1],
+                ],
+            ]);
+
+        $request = RequestModel::first();
+        $this->assertNotNull($request);
+
+        $this->get(route('recipient.requests.show', $request->id))
+            ->assertOk()
+            ->assertSee(__('recipient.request_submitted.title'), false);
+    }
+
+    #[Test]
+    public function other_recipient_cannot_view_submitted_confirmation_page(): void
+    {
+        $request = RequestModel::create([
+            'recipient_id' => $this->recipient->id,
+            'provider_id' => $this->provider->id,
+            'reserved_amount' => 50.00,
+            'status' => 'REQUESTED',
+            'funding_source' => 'CITY_FUND',
+        ]);
+
+        $other = User::factory()->create([
+            'status' => User::STATUS_ACTIVE,
+            'is_active' => true,
+        ]);
+        $other->assignRole('recipient');
+
+        $this->actingAs($other)
+            ->get(route('recipient.requests.show', $request->id))
+            ->assertNotFound();
     }
 }
