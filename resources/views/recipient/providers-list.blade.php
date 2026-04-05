@@ -27,20 +27,20 @@
                                 </h3>
                                 @if($profile->business_name_en ?? $profile->business_name_ar)
                                     <p class="mt-1 text-sm text-primary dark:text-accent-light font-medium">
-                                        {{ $profile->business_name_en ?? $profile->business_name_ar }}
+                                        {{ \App\Support\ProviderDisplay::businessTitle($profile, $provider->name) }}
                                     </p>
                                 @endif
-                                @if($profile->city || $profile->region)
+                                @if($profile->city || $profile->region || filled($profile->location))
                                     <p class="mt-2 text-sm text-slate-500 dark:text-navy-300 flex items-center gap-1">
                                         <span aria-hidden="true">📍</span>
-                                        {{ implode(', ', array_filter([$profile->city, $profile->region])) }}
+                                        {{ \App\Support\ProviderDisplay::locationLine($profile) }}
                                     </p>
                                 @endif
                                 @if($profile->business_category && is_array($profile->business_category))
                                     <div class="mt-2 flex flex-wrap gap-1">
                                         @foreach(array_slice($profile->business_category, 0, 3) as $cat)
                                             <span class="badge bg-slate-200 text-slate-700 dark:bg-navy-600 dark:text-navy-200">
-                                                {{ is_string($cat) ? $cat : ($cat['name'] ?? $cat) }}
+                                                {{ \App\Support\ProviderDisplay::businessCategoryLabel(is_string($cat) ? $cat : (string) ($cat['name'] ?? $cat)) }}
                                             </span>
                                         @endforeach
                                     </div>

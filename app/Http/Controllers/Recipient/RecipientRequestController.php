@@ -116,7 +116,7 @@ class RecipientRequestController extends Controller
      */
     public function index()
     {
-        $requests = RequestModel::with(['provider', 'items'])
+        $requests = RequestModel::with(['provider.providerProfile', 'items'])
             ->where('recipient_id', auth()->id())
             ->latest()
             ->paginate(10);

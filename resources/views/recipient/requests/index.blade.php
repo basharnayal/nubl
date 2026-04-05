@@ -18,7 +18,7 @@
                         </div>
                     @else
                         <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
-                            <table class="is-hoverable w-full text-left">
+                            <table class="is-hoverable w-full text-start">
                                 <thead>
                                     <tr>
                                         <th class="whitespace-nowrap rounded-tl-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('ID') }}</th>
@@ -37,13 +37,14 @@
                                                 <p class="font-medium text-primary dark:text-accent-light">#{{ $request->id }}</p>
                                             </td>
                                             <td class="px-4 py-3 sm:px-5">
-                                                <span class="font-medium text-slate-700 dark:text-navy-100">{{ $request->provider->name }}</span>
+                                                <span class="font-medium text-slate-700 dark:text-navy-100">{{ \App\Support\ProviderDisplay::businessTitle($request->provider->providerProfile, $request->provider->name) }}</span>
                                             </td>
                                             <td class="px-4 py-3 sm:px-5">
-                                                <div class="font-medium text-slate-700 dark:text-navy-100">{{ $request->created_at->format('M d, Y') }}</div>
+                                                <div class="font-medium text-slate-700 dark:text-navy-100" dir="auto">{{ $request->created_at->locale(app()->getLocale())->translatedFormat('j F Y') }}</div>
                                             </td>
                                             <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                                {{ $request->items->sum('quantity') }} {{ __('items') }}
+                                                @php $itemQty = $request->items->sum('quantity'); @endphp
+                                                {{ $itemQty }} {{ trans_choice('recipient.requests.items_count', $itemQty) }}
                                             </td>
                                             <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                                 <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100">{{ $request->reserved_amount }} {{ __('SAR') }}</p>

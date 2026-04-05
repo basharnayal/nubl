@@ -1,4 +1,4 @@
-<x-app-layout title="{{ $provider->providerProfile->business_name_en ?? $provider->name }} - {{ __('Menu') }}"
+<x-app-layout title="{{ \App\Support\ProviderDisplay::businessTitle($provider->providerProfile, $provider->name) }} - {{ __('Menu') }}"
     is-header-blur="true">
     <div class="pb-24 pt-4 lg:pb-8">
         <div class="relative">
@@ -10,10 +10,10 @@
                         <div class="flex items-start justify-between">
                             <div>
                                 <h1 class="mb-2 text-2xl font-bold text-slate-800 dark:text-navy-100">
-                                    {{ $provider->providerProfile->business_name_en ?? $provider->name }}
+                                    {{ \App\Support\ProviderDisplay::businessTitle($provider->providerProfile, $provider->name) }}
                                 </h1>
                                 <p class="mb-4 text-slate-600 dark:text-navy-300">
-                                    {{ $provider->providerProfile->business_category ? implode(', ', $provider->providerProfile->business_category) : __('General Provider') }}
+                                    {{ \App\Support\ProviderDisplay::businessCategoryLine($provider->providerProfile->business_category) ?? __('General Provider') }}
                                 </p>
                             </div>
                             @php
@@ -44,7 +44,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
-                                {{ $provider->providerProfile->location ?? ($provider->providerProfile->city . ', ' . $provider->providerProfile->region) }}
+                                {{ \App\Support\ProviderDisplay::locationLine($provider->providerProfile) }}
                             </p>
                             @if($provider->providerOperatingInfo && !empty($provider->providerOperatingInfo->service_type))
                                 <p class="flex items-center">
@@ -54,7 +54,7 @@
                                         </path>
                                     </svg>
                                     {{ __('Service Type') }}:
-                                    {{ implode(', ', array_map(fn($s) => ucfirst(str_replace('_', ' ', $s)), $provider->providerOperatingInfo->service_type)) }}
+                                    {{ \App\Support\ProviderDisplay::serviceTypeLine($provider->providerOperatingInfo->service_type) }}
                                 </p>
                             @endif
                             <p class="flex items-center">

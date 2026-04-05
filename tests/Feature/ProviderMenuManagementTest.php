@@ -165,7 +165,9 @@ class ProviderMenuManagementTest extends TestCase
             'location' => '24.7136, 46.6753',
         ]);
 
-        $response = $this->actingAs($recipient)->get(route('recipient.providers.index'));
+        $response = $this->withSession(['locale' => 'en'])
+            ->actingAs($recipient)
+            ->get(route('recipient.providers.index'));
 
         $response->assertStatus(200);
         $response->assertSee('Visible Provider');

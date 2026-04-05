@@ -26,22 +26,23 @@
                 {{-- Provider Grid --}}
                 <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                     @forelse($providers as $provider)
+                        @php
+                            $profile = $provider->providerProfile;
+                            $operating = $provider->providerOperatingInfo;
+                        @endphp
                         <div class="card p-5 transition-colors hover:border-primary/30 dark:hover:border-accent/30">
                             <h5 class="mb-2 text-lg font-bold tracking-tight text-slate-800 dark:text-navy-100">
-                                {{ $provider->providerProfile?->business_name_en ?? $provider->name }}
+                                {{ \App\Support\ProviderDisplay::businessTitle($profile, $provider->name) }}
                             </h5>
                             <p class="mb-2 truncate text-sm text-slate-600 dark:text-navy-300">
-                                @php
-                                    $categories = $provider->providerProfile?->business_category;
-                                @endphp
-                                {{ $categories ? implode(', ', array_map(fn ($c) => ucfirst(str_replace('_', ' ', $c)), $categories)) : __('General Provider') }}
+                                {{ \App\Support\ProviderDisplay::businessCategoryLine($profile?->business_category) ?? __('General Provider') }}
                             </p>
-                            @if($provider->providerOperatingInfo && !empty($provider->providerOperatingInfo->service_type))
+                            @if($operating && !empty($operating->service_type))
                             <p class="mb-3 flex items-center text-xs text-slate-500 dark:text-navy-400">
                                 <svg class="mr-1 size-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                                 </svg>
-                                {{ implode(', ', array_map(fn($s) => ucfirst(str_replace('_', ' ', $s)), $provider->providerOperatingInfo->service_type)) }}
+                                {{ \App\Support\ProviderDisplay::serviceTypeLine($operating->service_type) }}
                             </p>
                             @endif
 
@@ -52,13 +53,13 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
-                                {{ $provider->providerProfile?->city ?? __('Unknown City') }}
+                                {{ \App\Support\ProviderDisplay::cityLabel($profile?->city) }}
                             </div>
 
                             <a href="{{ route('recipient.providers.show', $provider->id) }}"
                                 class="btn inline-flex items-center bg-primary text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus">
                                 {{ __('View Menu & Order') }}
-                                <svg class="ml-2 size-4" fill="currentColor" viewBox="0 0 20 20">
+                                <svg class="ms-2 size-4 rtl:rotate-180" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd"
                                         d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
                                         clip-rule="evenodd"></path>
