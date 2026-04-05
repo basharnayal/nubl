@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Services\AuditService;
 use App\Models\RecipientKycDetails;
 use App\Models\RecipientProfile;
 use App\Models\User;
@@ -22,6 +23,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class ResubmitApplicationController extends Controller
 {
+    public function __construct(
+        private AuditService $auditService,
+    ) {}
+
     public function edit(Request $request): View|RedirectResponse
     {
         $user = $request->user();
@@ -186,6 +191,13 @@ class ResubmitApplicationController extends Controller
             }
             throw $e;
         }
+
+        $this->auditService->log('recipient_application', 'resubmitted', [
+            'user_id' => $user->id,
+            'recipient_profile_id' => $profile->id,
+            'id_photo_updated' => (bool) $idPath,
+            'address_confirmation_updated' => (bool) $addrPath,
+        ]);
 
         return redirect()->route('approval.pending')->with('success', __('Your application has been submitted for review.'));
     }

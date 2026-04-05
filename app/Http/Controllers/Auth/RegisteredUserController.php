@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Helpers\PhoneHelper;
 use App\Http\Controllers\Controller;
 use App\Contracts\NotificationServiceInterface;
+use App\Http\Services\AuditService;
 use App\Http\Services\OtpService;
 use App\Models\RecipientKycDetails;
 use App\Models\RecipientProfile;
@@ -29,7 +30,8 @@ class RegisteredUserController extends Controller
 {
     public function __construct(
         private OtpService $otpService,
-        private NotificationServiceInterface $notificationService
+        private NotificationServiceInterface $notificationService,
+        private AuditService $auditService,
     ) {}
 
     public function create(): View
@@ -163,6 +165,11 @@ class RegisteredUserController extends Controller
             Storage::disk('local')->delete($addressPhotoPath);
             throw $e;
         }
+
+        $this->auditService->log('recipient_account', 'registered', [
+            'user_id' => auth()->id(),
+            'membership_type' => User::MEMBERSHIP_RECIPIENT,
+        ]);
 
         if (config('app.phone_verification_enabled', true)) {
             return redirect()->route('verification.phone');
