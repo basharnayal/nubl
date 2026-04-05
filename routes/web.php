@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\ProviderRegistrationController;
 use App\Http\Controllers\Auth\ResubmitApplicationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Provider\ProviderDashboardController;
 use App\Http\Controllers\Recipient\RecipientController;
 use Illuminate\Support\Facades\Route;
 
@@ -50,6 +51,10 @@ Route::get('/dashboard', function () {
 Route::middleware(array_merge($authMiddleware, ['account.approved']))->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::patch('/profile/provider-business', [ProfileController::class, 'updateProviderBusiness'])
+        ->name('profile.provider-business.update');
+    Route::patch('/profile/provider-financial', [ProfileController::class, 'updateProviderFinancial'])
+        ->name('profile.provider-financial.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
@@ -133,7 +138,7 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:provid
             ->withoutMiddleware('account.approved')
             ->name('application');
 
-        Route::get('/dashboard', fn () => view('provider.dashboard'))->name('dashboard');
+        Route::get('/dashboard', ProviderDashboardController::class)->name('dashboard');
 
         // Provider Menu Management (ECS-62)
         Route::resource('menu-items', \App\Http\Controllers\Provider\MenuItemController::class);

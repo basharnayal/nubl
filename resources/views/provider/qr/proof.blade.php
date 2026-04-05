@@ -39,6 +39,19 @@
                     enctype="multipart/form-data" class="space-y-6" x-data="proofUpload()" x-on:submit="validateBeforeSubmit($event)">
                     @csrf
 
+                    <div x-show="submitError" x-cloak x-ref="submitErrorBanner" x-transition
+                        class="flex gap-3 rounded-xl border border-error/30 bg-error/10 p-4 text-sm font-medium text-error dark:border-error/40 dark:bg-error/10"
+                        role="alert" dir="auto">
+                        <i class="fa-solid fa-circle-exclamation mt-0.5 shrink-0" aria-hidden="true"></i>
+                        <p class="leading-relaxed" x-text="submitError"></p>
+                    </div>
+                    <div x-show="cameraError" x-cloak x-ref="cameraErrorBanner" x-transition
+                        class="flex gap-3 rounded-xl border border-error/30 bg-error/10 p-4 text-sm font-medium text-error dark:border-error/40 dark:bg-error/10"
+                        role="alert" dir="auto">
+                        <i class="fa-solid fa-circle-exclamation mt-0.5 shrink-0" aria-hidden="true"></i>
+                        <p class="leading-relaxed" x-text="cameraError"></p>
+                    </div>
+
                     <div class="space-y-6">
                         {{-- Option 1: File Upload --}}
                         <div
@@ -150,6 +163,11 @@
     </div>
 
     <script>
+        const proofUploadMessages = {
+            submit: @json(__('You must provide proof by either uploading a file or capturing a photo.')),
+            camera: @json(__('Camera access is required to capture the proof photo. Please allow camera permission.')),
+        };
+
         function proofUpload() {
             return {
                 cameraActive: false,
@@ -157,10 +175,15 @@
                 photoBase64: '',
                 stream: null,
                 fileSelected: false,
+                submitError: '',
+                cameraError: '',
 
                 onFileChange() {
                     const input = this.$refs.fileInput;
                     this.fileSelected = input.files && input.files.length > 0;
+                    if (this.fileSelected) {
+                        this.submitError = '';
+                    }
                     if (this.fileSelected && this.photoCaptured) {
                         this.retakePhoto();
                         this.stopCamera();
@@ -173,13 +196,18 @@
                         this.fileSelected = false;
                     }
 
+                    this.cameraError = '';
+
                     try {
                         this.stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
                         this.$refs.video.srcObject = this.stream;
                         this.cameraActive = true;
                     } catch (err) {
-                        alert('{{ __("Camera access is required to capture the proof photo. Please allow camera permission.") }}');
+                        this.cameraError = proofUploadMessages.camera;
                         console.error(err);
+                        this.$nextTick(() => {
+                            this.$refs.cameraErrorBanner?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        });
                     }
                 },
 
@@ -200,21 +228,28 @@
                     this.photoBase64 = canvas.toDataURL('image/jpeg', 0.85);
                     this.photoCaptured = true;
                     this.$refs.previewImg.src = this.photoBase64;
+                    this.submitError = '';
                     this.stopCamera();
                 },
 
                 retakePhoto() {
                     this.photoCaptured = false;
                     this.photoBase64 = '';
+                    this.submitError = '';
                     this.startCamera();
                 },
 
                 validateBeforeSubmit(event) {
                     if (!this.fileSelected && !this.photoBase64) {
                         event.preventDefault();
-                        alert('{{ __("You must provide proof by either uploading a file or capturing a photo.") }}');
+                        this.submitError = proofUploadMessages.submit;
+                        this.$nextTick(() => {
+                            this.$refs.submitErrorBanner?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        });
+
                         return false;
                     }
+                    this.submitError = '';
                 }
             };
         }

@@ -19,12 +19,9 @@
         @include('provider.requests.partials.incoming-status-badge', ['request' => $request])
     </div>
 
-    <div class="mt-3 flex items-center gap-3">
-        <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-slate-200/90 dark:bg-navy-600" title="{{ __('Anonymous reference') }}" aria-hidden="true">
-            <i class="fa-solid fa-fingerprint text-sm text-slate-600 dark:text-navy-200"></i>
-        </div>
-        <div class="min-w-0 flex-1 text-start" dir="ltr">
-            <span class="block truncate font-mono text-sm font-medium text-slate-700 dark:text-navy-100" title="{{ $refLabel }}">{{ $refLabel }}</span>
+    <div class="mt-3 flex w-full justify-start">
+        <div class="min-w-0 max-w-full">
+            @include('provider.requests.partials.pseudonymous-ref-inline', ['ref' => $refLabel, 'variant' => 'card'])
             <p class="mt-0.5 truncate text-xs text-slate-500 dark:text-navy-400" title="{{ $typeLabel }}">{{ $typeLabel }}</p>
         </div>
     </div>

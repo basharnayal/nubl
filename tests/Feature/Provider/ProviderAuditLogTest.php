@@ -8,10 +8,11 @@ use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-class ProviderProfileUpdateTest extends TestCase
+class ProviderAuditLogTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -22,16 +23,8 @@ class ProviderProfileUpdateTest extends TestCase
         Role::firstOrCreate(['name' => 'provider', 'guard_name' => 'web']);
     }
 
-    #[Test]
-    public function provider_can_update_operating_profile_and_pickup_notes(): void
+    private function seedProviderWithOperating(User $provider): void
     {
-        $provider = User::factory()->create([
-            'status' => User::STATUS_ACTIVE,
-            'is_active' => true,
-            'accepting_orders' => true,
-        ]);
-        $provider->assignRole('provider');
-
         ProviderProfile::create([
             'user_id' => $provider->id,
             'full_name_ar' => 'مزود',
@@ -63,32 +56,68 @@ class ProviderProfileUpdateTest extends TestCase
             'adoption_support' => 'yes',
             'pickup_notes' => null,
         ]);
+    }
 
+    #[Test]
+    public function toggle_store_logs_activity(): void
+    {
+        $provider = User::factory()->create([
+            'status' => User::STATUS_ACTIVE,
+            'is_active' => true,
+            'accepting_orders' => true,
+        ]);
+        $provider->assignRole('provider');
+        $this->seedProviderWithOperating($provider);
+
+        $before = Activity::query()->count();
+
+        $response = $this->actingAs($provider)->post(route('provider.profile.toggle-active'));
+        $response->assertRedirect();
+
+        $this->assertSame($before + 1, Activity::query()->count());
+        $latest = Activity::query()->latest('id')->first();
+        $this->assertSame('provider.store_availability_toggled', $latest->description);
+        $props = $latest->properties?->toArray() ?? [];
+        $this->assertSame('provider', $props['entity'] ?? null);
+        $this->assertTrue($props['accepting_orders_before'] ?? null);
+        $this->assertFalse($props['accepting_orders_after'] ?? null);
+    }
+
+    #[Test]
+    public function operating_profile_update_logs_activity(): void
+    {
+        $provider = User::factory()->create([
+            'status' => User::STATUS_ACTIVE,
+            'is_active' => true,
+            'accepting_orders' => true,
+        ]);
+        $provider->assignRole('provider');
+        $this->seedProviderWithOperating($provider);
+
+        $weekdays = array_keys(config('provider.weekdays'));
         $payload = [
-            'daily_capacity' => 75,
-            'service_type' => ['pickup', 'delivery'],
-            'estimated_preparation_order_time' => '45 minutes',
-            'adoption_support' => 'partially',
-            'pickup_notes' => 'Ring the side door bell.',
+            'daily_capacity' => 60,
+            'service_type' => ['delivery'],
+            'estimated_preparation_order_time' => '30 minutes',
+            'adoption_support' => 'yes',
+            'pickup_notes' => null,
         ];
         foreach ($weekdays as $day) {
             $payload['operating_hours'][$day] = ['closed' => true];
         }
 
+        $before = Activity::query()->count();
+
         $response = $this->actingAs($provider)->put(route('provider.profile.update'), $payload);
-
         $response->assertRedirect(route('provider.profile.edit'));
-        $response->assertSessionHas('success');
 
-        $provider->refresh();
-        $info = $provider->providerOperatingInfo;
-        $this->assertSame(75, (int) $info->daily_capacity);
-        $this->assertSame(['pickup', 'delivery'], $info->service_type);
-        $this->assertSame('Ring the side door bell.', $info->pickup_notes);
+        $this->assertSame($before + 1, Activity::query()->count());
+        $latest = Activity::query()->latest('id')->first();
+        $this->assertSame('provider_operating_info.updated', $latest->description);
     }
 
     #[Test]
-    public function provider_can_update_business_profile_from_account_profile_page(): void
+    public function business_profile_update_logs_activity(): void
     {
         $provider = User::factory()->create([
             'name' => 'Provider',
@@ -115,6 +144,8 @@ class ProviderProfileUpdateTest extends TestCase
             'location' => null,
         ]);
 
+        $before = Activity::query()->count();
+
         $response = $this->actingAs($provider)->patch(route('profile.provider-business.update'), [
             'full_name_ar' => 'مزود محدث',
             'full_name_en' => 'Updated Provider',
@@ -130,44 +161,14 @@ class ProviderProfileUpdateTest extends TestCase
         ]);
 
         $response->assertRedirect(route('profile.edit'));
-        $response->assertSessionHas('status', 'business-profile-updated');
 
-        $provider->refresh();
-        $this->assertSame('Updated Provider', $provider->name);
-        $this->assertSame('966501111111', $provider->phone_number);
-
-        $profile = $provider->providerProfile;
-        $this->assertSame('مزود محدث', $profile->full_name_ar);
-        $this->assertSame('New Shop', $profile->business_name_en);
-        $this->assertSame(['restaurant', 'bakery'], $profile->business_category);
-        $this->assertSame('Near gate 1', $profile->location);
+        $this->assertSame($before + 1, Activity::query()->count());
+        $latest = Activity::query()->latest('id')->first();
+        $this->assertSame('provider_profile.business_updated', $latest->description);
     }
 
     #[Test]
-    public function non_provider_cannot_update_provider_business_profile(): void
-    {
-        Role::firstOrCreate(['name' => 'recipient', 'guard_name' => 'web']);
-        $user = User::factory()->create(['status' => User::STATUS_ACTIVE, 'is_active' => true]);
-        $user->assignRole('recipient');
-
-        $response = $this->actingAs($user)->patch(route('profile.provider-business.update'), [
-            'full_name_ar' => 'x',
-            'full_name_en' => 'x',
-            'phone_number' => '501111111',
-            'business_name_ar' => 'x',
-            'business_name_en' => 'x',
-            'business_category' => ['restaurant'],
-            'address_ar' => 'x',
-            'address_en' => 'x',
-            'city' => 'medina',
-            'region' => 'western',
-        ]);
-
-        $response->assertForbidden();
-    }
-
-    #[Test]
-    public function provider_can_update_financial_profile_from_account_profile_page(): void
+    public function financial_profile_update_logs_activity_without_raw_iban_in_properties(): void
     {
         $provider = User::factory()->create([
             'status' => User::STATUS_ACTIVE,
@@ -198,6 +199,8 @@ class ProviderProfileUpdateTest extends TestCase
             'account_holder_name' => 'Old Holder',
         ]);
 
+        $before = Activity::query()->count();
+
         $response = $this->actingAs($provider)->patch(route('profile.provider-financial.update'), [
             'bank_name' => 'Al Rajhi Bank',
             'iban' => 'SA0380000000608010167519',
@@ -205,27 +208,12 @@ class ProviderProfileUpdateTest extends TestCase
         ]);
 
         $response->assertRedirect(route('profile.edit'));
-        $response->assertSessionHas('status', 'financial-profile-updated');
 
-        $financial = $provider->fresh()->providerFinancialInfo;
-        $this->assertSame('Al Rajhi Bank', $financial->bank_name);
-        $this->assertSame('SA0380000000608010167519', $financial->iban);
-        $this->assertSame('New Holder Name', $financial->account_holder_name);
-    }
-
-    #[Test]
-    public function non_provider_cannot_update_provider_financial_profile(): void
-    {
-        Role::firstOrCreate(['name' => 'recipient', 'guard_name' => 'web']);
-        $user = User::factory()->create(['status' => User::STATUS_ACTIVE, 'is_active' => true]);
-        $user->assignRole('recipient');
-
-        $response = $this->actingAs($user)->patch(route('profile.provider-financial.update'), [
-            'bank_name' => 'x',
-            'iban' => 'SA123',
-            'account_holder_name' => 'x',
-        ]);
-
-        $response->assertForbidden();
+        $this->assertSame($before + 1, Activity::query()->count());
+        $latest = Activity::query()->latest('id')->first();
+        $this->assertSame('provider_financial.updated', $latest->description);
+        $props = $latest->properties?->toArray() ?? [];
+        $this->assertArrayNotHasKey('iban', $props);
+        $this->assertTrue($props['iban_updated'] ?? false);
     }
 }

@@ -4,28 +4,15 @@ namespace App\Http\Controllers\Provider;
 
 use App\Contracts\NotificationServiceInterface;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Provider\IndexProviderRequestsRequest;
+use App\Http\Requests\Provider\UpdateProviderRequestActionRequest;
 use App\Http\Services\AuditService;
 use App\Http\Services\SystemWalletService;
 use App\Models\Request as RequestModel;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 
 class ProviderRequestController extends Controller
 {
-    /** Status values allowed in the incoming-requests filter (matches provider UI). */
-    private const FILTER_STATUSES = [
-        'REQUESTED',
-        'APPROVED',
-        'ADMIN_PENDING',
-        'ADMIN_APPROVED',
-        'REDEEMABLE',
-        'FULFILLED',
-        'REJECTED',
-        'CANCELLED',
-        'ADMIN_REJECTED',
-    ];
-
     public function __construct(
         private SystemWalletService $systemWalletService,
         private AuditService $auditService,
@@ -35,16 +22,9 @@ class ProviderRequestController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $httpRequest)
+    public function index(IndexProviderRequestsRequest $request)
     {
-        $validated = $httpRequest->validate([
-            'from' => ['nullable', 'date'],
-            'to' => ['nullable', 'date'],
-            'status' => ['nullable', 'string', Rule::in(self::FILTER_STATUSES)],
-            'needs_proof' => ['nullable', 'in:1'],
-            'q' => ['nullable', 'string', 'max:40'],
-            'per_page' => ['nullable', 'integer', Rule::in([15, 25, 50])],
-        ]);
+        $validated = $request->validated();
 
         $dateRangeInvalid = ! empty($validated['from']) && ! empty($validated['to'])
             && $validated['to'] < $validated['from'];
@@ -73,6 +53,10 @@ class ProviderRequestController extends Controller
             });
         }
 
+        if (! empty($validated['funding_source'])) {
+            $query->where('funding_source', $validated['funding_source']);
+        }
+
         if (! empty($validated['q'])) {
             $idQuery = ltrim(trim($validated['q']), '#');
             if ($idQuery !== '' && ctype_digit($idQuery)) {
@@ -96,6 +80,7 @@ class ProviderRequestController extends Controller
             'to' => $validated['to'] ?? null,
             'status' => $validated['status'] ?? null,
             'needs_proof' => $validated['needs_proof'] ?? null,
+            'funding_source' => $validated['funding_source'] ?? null,
             'q' => $validated['q'] ?? null,
             'per_page' => $perPage,
         ];
@@ -104,12 +89,10 @@ class ProviderRequestController extends Controller
             || filled($filters['to'])
             || filled($filters['status'])
             || filled($filters['needs_proof'])
+            || filled($filters['funding_source'])
             || filled($filters['q']);
 
-        $filterStatuses = self::FILTER_STATUSES;
-
-        $thisWeekFrom = now()->startOfWeek()->toDateString();
-        $thisWeekTo = now()->toDateString();
+        $filterStatuses = IndexProviderRequestsRequest::FILTER_STATUSES;
 
         $statusFilterLabels = [
             'REQUESTED' => __('Requested'),
@@ -129,8 +112,6 @@ class ProviderRequestController extends Controller
             'filters',
             'hasActiveFilters',
             'filterStatuses',
-            'thisWeekFrom',
-            'thisWeekTo',
             'statusFilterLabels'
         ));
 
@@ -158,15 +139,11 @@ class ProviderRequestController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(UpdateProviderRequestActionRequest $request, string $id)
     {
         $requestModel = RequestModel::forProvider(auth()->id())->findOrFail($id);
 
-        $validated = $request->validate([
-            'action' => ['required', 'in:adopt,approve,reject'], // adopt->APPROVED, approve->REDEEMABLE, reject->REJECTED; FULFILLED is separate
-            'rejection_reason_code' => ['required_if:action,reject', 'string', 'nullable'],
-            'rejection_reason_note' => ['nullable', 'string'],
-        ]);
+        $validated = $request->validated();
 
         $action = $validated['action'];
 
@@ -208,6 +185,12 @@ class ProviderRequestController extends Controller
                     'funding_source' => 'CITY_FUND',
                 ]);
                 \App\Http\Services\RedemptionService::generateForRequest($requestModel);
+                $this->auditService->log('request', 'approved_city_fund', [
+                    'request_id' => $requestModel->id,
+                    'provider_user_id' => auth()->id(),
+                    'funding_source' => 'CITY_FUND',
+                    'reserved_amount' => $amount,
+                ]);
                 $this->notificationService->sendRequestStatusChanged($requestModel->load('recipient'), 'REDEEMABLE');
                 $this->auditService->log('notification', 'sent', [
                     'type' => 'request_status_changed',
@@ -220,6 +203,11 @@ class ProviderRequestController extends Controller
                     'status' => 'REJECTED',
                     'rejection_reason_code' => $validated['rejection_reason_code'],
                     'rejection_reason_note' => $validated['rejection_reason_note'] ?? null,
+                ]);
+                $this->auditService->log('request', 'rejected_by_provider', [
+                    'request_id' => $requestModel->id,
+                    'provider_user_id' => auth()->id(),
+                    'rejection_reason_code' => $validated['rejection_reason_code'],
                 ]);
                 $this->notificationService->sendRequestStatusChanged($requestModel->load('recipient'), 'REJECTED');
                 $this->auditService->log('notification', 'sent', [

@@ -3,19 +3,14 @@
 namespace App\Http\Controllers\Provider;
 
 use App\Http\Controllers\Controller;
-use App\Http\Services\AuditService;
-use App\Http\Services\SystemWalletService;
-use App\Models\FundTransaction;
-use App\Models\OrderRedemption;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Http\Requests\Provider\RedeemProviderQrRequest;
+use App\Http\Services\RedemptionService;
 use Illuminate\Support\Facades\RateLimiter;
 
 class ProviderQrController extends Controller
 {
     public function __construct(
-        private AuditService $auditService,
-        private SystemWalletService $systemWalletService
+        private RedemptionService $redemptionService
     ) {}
 
     public function scan()
@@ -23,12 +18,8 @@ class ProviderQrController extends Controller
         return view('provider.qr.scan');
     }
 
-    public function redeem(Request $request)
+    public function redeem(RedeemProviderQrRequest $request)
     {
-        $request->validate([
-            'token' => 'required|string',
-        ]);
-
         $rawToken = $request->input('token');
         $providerId = auth()->id();
 
@@ -43,87 +34,12 @@ class ProviderQrController extends Controller
 
         $tokenHash = hash('sha256', $rawToken);
 
-        try {
-            DB::beginTransaction();
+        $result = $this->redemptionService->redeem($tokenHash, $providerId);
 
-            // Atomic validation & locks
-            $redemption = OrderRedemption::where(function ($query) use ($tokenHash) {
-                $query->where('token_code', $tokenHash)
-                    ->orWhere('short_code_hash', $tokenHash);
-            })->lockForUpdate()->first();
-
-            if (! $redemption) {
-                DB::rollBack();
-
-                return response()->json(['error' => __('Invalid token.')], 404);
-            }
-
-            if ($redemption->provider_id !== $providerId) {
-                DB::rollBack();
-
-                return response()->json(['error' => __('This code is not valid for your account.')], 403);
-            }
-
-            if ($redemption->status === 'REDEEMED') {
-                DB::rollBack();
-
-                return response()->json(['error' => __('This code has already been used.')], 409);
-            }
-
-            if ($redemption->status === 'EXPIRED' || $redemption->redeem_expires_at->isPast()) {
-                DB::rollBack();
-
-                return response()->json(['error' => __('This QR code has expired.')], 422);
-            }
-
-            if ($redemption->status !== 'PENDING') {
-                DB::rollBack();
-
-                return response()->json(['error' => __('This code cannot be redeemed.')], 422);
-            }
-
-            // Perform Redemption
-            $redemption->status = 'REDEEMED';
-            $redemption->save();
-
-            // Transfer from city fund to provider at redemption (QR scan), not at approval
-            $requestModel = $redemption->request;
-
-            $alreadyTransferred = FundTransaction::where('request_id', $requestModel->id)
-                ->where('source', FundTransaction::SOURCE_PAYOUT)
-                ->exists();
-
-            if (! $alreadyTransferred && $requestModel->funding_source === 'CITY_FUND') {
-                $this->systemWalletService->transferToProviderForRequest($requestModel, $redemption->id);
-            }
-
-            // Audit logging
-            $this->auditService->log('redemption', 'redeemed', [
-                'redemption_id' => $redemption->id,
-                'request_id' => $requestModel->id,
-                'provider_id' => $providerId,
-            ]);
-
-            DB::commit();
-
+        if (! empty($result['clear_rate_limit'])) {
             RateLimiter::clear($cacheKey);
-
-            return response()->json([
-                'success' => __('Successfully redeemed!'),
-                'order_redemption_id' => $redemption->id,
-                'redirect_url' => route('provider.proof.index', $redemption->id),
-            ]);
-
-        } catch (\Throwable $e) {
-            DB::rollBack();
-            \Illuminate\Support\Facades\Log::error('Redemption error: '.$e->getMessage(), ['exception' => $e]);
-
-            // Expose the real error safely to diagnose the silent 500
-            $errorMsg = $e instanceof \RuntimeException || $e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException
-                ? $e->getMessage()
-                : __('A server error occurred during redemption.').' : '.$e->getMessage();
-
-            return response()->json(['error' => $errorMsg], 500);
         }
+
+        return response()->json($result['body'], $result['status']);
     }
 }
