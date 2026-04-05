@@ -63,10 +63,22 @@ class MyFatoorahService
     {
         $data = $this->client->getPaymentStatus($keyId, $keyType, null, null, null);
 
+        if ($data === null || ! is_object($data)) {
+            throw new \RuntimeException('MyFatoorah getPaymentStatus returned an empty or invalid response.');
+        }
+
         $rawArray = json_decode(json_encode($data), true);
+        if (! is_array($rawArray)) {
+            $rawArray = [];
+        }
+
+        $status = $data->InvoiceStatus ?? 'Unknown';
+        if (! is_string($status)) {
+            $status = is_scalar($status) ? (string) $status : 'Unknown';
+        }
 
         return [
-            'status' => $data->InvoiceStatus ?? 'Unknown',
+            'status' => $status,
             'invoice_id' => $data->InvoiceId ?? null,
             'raw_response' => $rawArray,
         ];

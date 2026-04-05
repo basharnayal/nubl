@@ -3,6 +3,10 @@
     $retryMessage = match ($reason) {
         'api_unavailable' => __('The payment service is temporarily unavailable. Please try again in a few moments.'),
         'ambiguous' => __('We received an unclear response from the payment service. Please try again.'),
+        'missing_callback' => __('We could not confirm your payment because the gateway did not return a valid reference. Please try again or contact support.'),
+        'processing_error' => __('Your payment may have been received but we could not finish updating your account. Please check your donations list or contact support with your receipt if the amount was charged.'),
+        'payment_not_found' => __('We could not match this payment to your donation. If you were charged, please contact support with your bank or gateway receipt.'),
+        'gateway_declined' => __('The payment was not completed or was declined by the payment provider.'),
         default => __('Your payment could not be processed. Please try again or contact support if the problem persists.'),
     };
 @endphp

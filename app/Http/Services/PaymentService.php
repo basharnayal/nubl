@@ -77,9 +77,7 @@ class PaymentService
 
             $payment->update(['status' => Payment::STATUS_FAILED]);
 
-            return redirect()
-                ->route('donor.payments.failed', ['payment_id' => $payment->id])
-                ->with('payment_reason', 'api_unavailable');
+            return $this->redirectDonorFailed($payment, 'api_unavailable');
         }
 
         $payment->update([
@@ -110,33 +108,76 @@ class PaymentService
                 'query' => $request->query(),
             ]);
 
-            return redirect()->route('donor.payments.failed');
+            return $this->redirectDonorFailed(null, 'missing_callback');
         }
 
-        $this->auditService->log('payment', 'callback_received', [
-            'external_id' => $paymentId,
-        ], null);
+        $paymentIdStr = (string) $paymentId;
 
         try {
             $keyType = $request->query('paymentId') ? 'PaymentId' : 'InvoiceId';
-            $statusResult = $this->myFatoorah->getPaymentStatus((string) $paymentId, $keyType);
+            $statusResult = $this->myFatoorah->getPaymentStatus($paymentIdStr, $keyType);
         } catch (\Throwable $e) {
             $this->auditService->log('payment', 'callback_verification_failed', [
                 'error' => $e->getMessage(),
-                'external_id' => $paymentId,
+                'external_id' => $paymentIdStr,
             ], null);
 
             Log::critical('Payment critical failure: callback verification failed', [
-                'external_id' => $paymentId,
+                'external_id' => $paymentIdStr,
                 'error' => $e->getMessage(),
             ]);
 
-            return redirect()
-                ->route('donor.payments.failed')
-                ->with('payment_reason', 'api_unavailable');
+            $payment = $this->findPaymentByExternalIds($paymentIdStr);
+
+            return $this->redirectDonorFailed($payment, 'api_unavailable');
         }
 
-        $invoiceId = (string) ($statusResult['invoice_id'] ?? $paymentId);
+        $normalized = $this->normalizeGatewayStatusResult($statusResult, $paymentIdStr);
+        if ($normalized === null) {
+            $this->auditService->log('payment', 'callback_unexpected_response', [
+                'external_id' => $paymentIdStr,
+                'raw_type' => get_debug_type($statusResult),
+            ], null);
+
+            Log::critical('Payment critical failure: unexpected gateway response shape', [
+                'external_id' => $paymentIdStr,
+            ]);
+
+            $payment = $this->findPaymentByExternalIds($paymentIdStr);
+
+            return $this->redirectDonorFailed($payment, 'ambiguous');
+        }
+
+        $invoiceId = $normalized['invoice_id'];
+        $gatewayStatus = $normalized['status'];
+
+        try {
+            return $this->processCallbackPaymentState($invoiceId, $gatewayStatus);
+        } catch (\Throwable $e) {
+            Log::critical('Payment critical failure: callback processing failed', [
+                'invoice_id' => $invoiceId,
+                'gateway_status' => $gatewayStatus,
+                'error' => $e->getMessage(),
+                'exception' => $e::class,
+            ]);
+
+            $this->auditService->log('payment', 'callback_processing_failed', [
+                'invoice_id' => $invoiceId,
+                'gateway_status' => $gatewayStatus,
+                'error' => $e->getMessage(),
+            ], null);
+
+            $payment = Payment::where('external_payment_id', $invoiceId)->first();
+
+            return $this->redirectDonorFailed($payment, 'processing_error');
+        }
+    }
+
+    /**
+     * Core callback logic after gateway returned a normalized status (wrapped in try/catch by handleCallback).
+     */
+    private function processCallbackPaymentState(string $invoiceId, string $gatewayStatus): RedirectResponse
+    {
         $payment = Payment::where('external_payment_id', $invoiceId)->first();
 
         if (! $payment) {
@@ -148,24 +189,22 @@ class PaymentService
                 'invoice_id' => $invoiceId,
             ]);
 
-            return redirect()->route('donor.payments.failed');
+            return $this->redirectDonorFailed(null, 'payment_not_found');
         }
 
-        // Idempotency: already succeeded — do not process again
         if ($payment->status === Payment::STATUS_SUCCEEDED) {
             return redirect()->route('donor.payments.success', ['payment_id' => $payment->id]);
         }
 
-        // Idempotency: fund_transaction already exists — do not credit again
         if (FundTransaction::where('payment_id', $payment->id)->exists()) {
             $payment->update(['status' => Payment::STATUS_SUCCEEDED]);
 
             return redirect()->route('donor.payments.success', ['payment_id' => $payment->id]);
         }
 
-        $status = $statusResult['status'] ?? '';
+        $status = $gatewayStatus;
 
-        if (in_array($status, ['Paid', 'DuplicatePayment'])) {
+        if (in_array($status, ['Paid', 'DuplicatePayment'], true)) {
             return DB::transaction(function () use ($payment) {
                 $payment->update([
                     'status' => Payment::STATUS_SUCCEEDED,
@@ -206,53 +245,141 @@ class PaymentService
             'gateway_status' => $status,
         ]);
 
-        $redirect = redirect()->route('donor.payments.failed', ['payment_id' => $payment->id]);
-        if (in_array($status, ['Unknown', '']) || ! $status) {
-            $redirect = $redirect->with('payment_reason', 'ambiguous');
+        $reason = 'gateway_declined';
+        if ($status === '' || $status === 'Unknown') {
+            $reason = 'ambiguous';
         }
 
-        return $redirect;
+        return $this->redirectDonorFailed($payment, $reason);
     }
 
     public function handleError(Request $request): RedirectResponse
     {
         $paymentId = $request->query('paymentId') ?? $request->query('invoiceId');
-        $payment = null;
 
         $this->auditService->log('payment', 'error_url_received', [
             'external_id' => $paymentId,
             'query' => $request->query(),
         ], null);
 
-        if ($paymentId) {
-            try {
-                $keyType = $request->query('paymentId') ? 'PaymentId' : 'InvoiceId';
-                $statusResult = $this->myFatoorah->getPaymentStatus((string) $paymentId, $keyType);
-                $invoiceId = (string) ($statusResult['invoice_id'] ?? $paymentId);
-                $payment = Payment::where('external_payment_id', $invoiceId)->first();
+        if (! $paymentId) {
+            return $this->redirectDonorFailed(null, 'api_unavailable');
+        }
 
-                if ($payment && $payment->status !== Payment::STATUS_SUCCEEDED) {
-                    $payment->update([
-                        'status' => Payment::STATUS_FAILED,
-                        'notes' => array_merge($payment->notes ?? [], ['error_url' => true]),
-                    ]);
+        $paymentIdStr = (string) $paymentId;
+        $payment = null;
 
-                    $this->auditService->log('payment', 'failed', [
-                        'payment_id' => $payment->id,
-                        'source' => 'error_url',
-                    ], $payment->sponsor_id);
+        try {
+            $keyType = $request->query('paymentId') ? 'PaymentId' : 'InvoiceId';
+            $statusResult = $this->myFatoorah->getPaymentStatus($paymentIdStr, $keyType);
+            $normalized = $this->normalizeGatewayStatusResult($statusResult, $paymentIdStr);
 
-                    Log::critical('Payment critical failure: error URL received', [
-                        'payment_id' => $payment->id,
-                        'sponsor_id' => $payment->sponsor_id,
-                        'amount' => $payment->amount,
-                    ]);
-                }
-            } catch (\Throwable $e) {
-                // Ignore — payment may not exist
+            if ($normalized === null) {
+                Log::warning('Payment error URL: unexpected gateway response', [
+                    'external_id' => $paymentIdStr,
+                ]);
+                $payment = $this->findPaymentByExternalIds($paymentIdStr);
+            } else {
+                $payment = Payment::where('external_payment_id', $normalized['invoice_id'])->first();
+            }
+
+            if ($payment && $payment->status !== Payment::STATUS_SUCCEEDED) {
+                $payment->update([
+                    'status' => Payment::STATUS_FAILED,
+                    'notes' => array_merge($payment->notes ?? [], ['error_url' => true]),
+                ]);
+
+                $this->auditService->log('payment', 'failed', [
+                    'payment_id' => $payment->id,
+                    'source' => 'error_url',
+                ], $payment->sponsor_id);
+
+                Log::critical('Payment critical failure: error URL received', [
+                    'payment_id' => $payment->id,
+                    'sponsor_id' => $payment->sponsor_id,
+                    'amount' => $payment->amount,
+                ]);
+            }
+        } catch (\Throwable $e) {
+            $this->auditService->log('payment', 'error_url_verification_failed', [
+                'external_id' => $paymentIdStr,
+                'error' => $e->getMessage(),
+            ], null);
+
+            Log::warning('Payment error URL: gateway verification failed', [
+                'external_id' => $paymentIdStr,
+                'error' => $e->getMessage(),
+            ]);
+
+            $payment = $this->findPaymentByExternalIds($paymentIdStr);
+
+            if ($payment && $payment->status !== Payment::STATUS_SUCCEEDED) {
+                $payment->update([
+                    'status' => Payment::STATUS_FAILED,
+                    'notes' => array_merge($payment->notes ?? [], [
+                        'error_url' => true,
+                        'gateway_unavailable' => true,
+                    ]),
+                ]);
+
+                $this->auditService->log('payment', 'failed', [
+                    'payment_id' => $payment->id,
+                    'source' => 'error_url',
+                    'unverified' => true,
+                ], $payment->sponsor_id);
             }
         }
 
-        return redirect()->route('donor.payments.failed', isset($payment) ? ['payment_id' => $payment->id] : []);
+        return $this->redirectDonorFailed($payment, 'api_unavailable');
+    }
+
+    /**
+     * @return array{invoice_id: string, status: string}|null
+     */
+    private function normalizeGatewayStatusResult(mixed $statusResult, string $fallbackExternalId): ?array
+    {
+        if (! is_array($statusResult)) {
+            return null;
+        }
+
+        $status = $statusResult['status'] ?? 'Unknown';
+        if (! is_string($status)) {
+            $status = is_scalar($status) ? (string) $status : 'Unknown';
+        }
+
+        $invoiceId = $statusResult['invoice_id'] ?? null;
+        if ($invoiceId !== null && ! is_scalar($invoiceId)) {
+            $invoiceId = null;
+        }
+
+        $invoiceIdStr = $invoiceId !== null ? (string) $invoiceId : $fallbackExternalId;
+
+        if ($invoiceIdStr === '') {
+            return null;
+        }
+
+        return [
+            'invoice_id' => $invoiceIdStr,
+            'status' => $status,
+        ];
+    }
+
+    /**
+     * Lookup by stored invoice id (same value MyFatoorah sends as invoiceId in many flows).
+     */
+    private function findPaymentByExternalIds(string $externalId): ?Payment
+    {
+        return Payment::where('external_payment_id', $externalId)->first();
+    }
+
+    private function redirectDonorFailed(?Payment $payment, string $reason): RedirectResponse
+    {
+        $params = [];
+        if ($payment !== null) {
+            $params['payment_id'] = $payment->id;
+        }
+
+        return redirect()->route('donor.payments.failed', $params)
+            ->with('payment_reason', $reason);
     }
 }
