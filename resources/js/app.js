@@ -1,5 +1,8 @@
 import './bootstrap';
+import { initFormSubmitGuard } from './form-submit-guard';
 import '../css/app.css';
+
+initFormSubmitGuard();
 
 import Alpine from 'alpinejs';
 import persist from '@alpinejs/persist';

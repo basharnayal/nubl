@@ -1,4 +1,5 @@
 import usePopper from './usePopper';
+import { getCsrfToken } from '../utils/csrf';
 
 export default function notificationPanel() {
   const base = usePopper({ placement: 'bottom-end', offset: 12 });
@@ -35,7 +36,7 @@ export default function notificationPanel() {
           headers: {
             'Content-Type': 'application/json',
             Accept: 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+            'X-CSRF-TOKEN': getCsrfToken(),
             'X-Requested-With': 'XMLHttpRequest',
           },
           credentials: 'same-origin',

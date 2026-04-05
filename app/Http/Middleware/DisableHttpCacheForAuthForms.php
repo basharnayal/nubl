@@ -4,17 +4,21 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Avoid caching GET pages that embed CSRF tokens (login, register, etc.).
- * If the browser restores a stale page from the back/forward cache while the
- * session token has rotated, POST returns 419 TokenMismatchException.
+ * Prevents browsers from caching HTML that embeds session CSRF tokens.
+ *
+ * - Guest auth routes (login, register, …): stale bfcache after session rotation → 419.
+ * - Authenticated HTML (sidebar logout, forms): same class of failure when navigating back.
+ *
+ * Double POST from rapid clicks is mitigated globally in resources/js/form-submit-guard.js.
  */
 class DisableHttpCacheForAuthForms
 {
     /** @var list<string> */
-    protected array $routeNames = [
+    protected array $guestFormRouteNames = [
         'login',
         'register',
         'register.provider',
@@ -30,14 +34,34 @@ class DisableHttpCacheForAuthForms
             return $response;
         }
 
-        foreach ($this->routeNames as $name) {
-            if ($request->routeIs($name)) {
-                $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
-                $response->headers->set('Pragma', 'no-cache');
+        if ($request->expectsJson()) {
+            return $response;
+        }
 
-                return $response;
+        foreach ($this->guestFormRouteNames as $name) {
+            if ($request->routeIs($name)) {
+                return $this->applyNoStore($response);
             }
         }
+
+        if (Auth::check() && $this->isHtmlResponse($response)) {
+            return $this->applyNoStore($response);
+        }
+
+        return $response;
+    }
+
+    private function isHtmlResponse(Response $response): bool
+    {
+        $contentType = $response->headers->get('Content-Type', '');
+
+        return $contentType === '' || str_contains($contentType, 'text/html');
+    }
+
+    private function applyNoStore(Response $response): Response
+    {
+        $response->headers->set('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
+        $response->headers->set('Pragma', 'no-cache');
 
         return $response;
     }
