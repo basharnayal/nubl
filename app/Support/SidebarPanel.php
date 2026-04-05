@@ -136,10 +136,6 @@ class SidebarPanel
                         'title' => __('My Requests'),
                         'route_name' => 'recipient.requests.index',
                     ],
-                    'recipient_qr' => [
-                        'title' => __('QR Codes'),
-                        'route_name' => '',
-                    ],
                 ],
             ],
         ];

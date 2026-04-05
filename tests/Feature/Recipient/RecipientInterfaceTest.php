@@ -89,7 +89,7 @@ class RecipientInterfaceTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('My Requests');
-        $response->assertSee($this->provider->name); // User Name is shown in index
+        $response->assertSee('Test Provider Business'); // business name on list (ProviderDisplay)
         $response->assertSee('50.00');
         $response->assertSee('SAR');
     }
@@ -110,7 +110,8 @@ class RecipientInterfaceTest extends TestCase
     #[Test]
     public function recipient_can_view_providers_list()
     {
-        $response = $this->actingAs($this->recipient)
+        $response = $this->withSession(['locale' => 'en'])
+            ->actingAs($this->recipient)
             ->get(route('recipient.providers.index'));
 
         $response->assertStatus(200);

@@ -3,15 +3,15 @@
 namespace App\Notifications;
 
 use App\Models\Request as RequestModel;
-use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class RequestStatusChangedNotification extends Notification implements ShouldQueue
+/**
+ * Notifies the recipient when a request status changes (provider/admin actions).
+ * Not queued so the bell updates immediately without a queue worker (same as provider request notifications).
+ */
+class RequestStatusChangedNotification extends Notification
 {
-    use Queueable;
-
     public function __construct(
         public RequestModel $request,
         public string $status

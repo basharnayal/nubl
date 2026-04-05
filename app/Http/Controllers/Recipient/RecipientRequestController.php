@@ -104,11 +104,13 @@ class RecipientRequestController extends Controller
 
         RecipientFundRetryCache::clear($user->id);
 
-        $this->submissionService->createRequest($user, $providerId, $itemsData);
+        $created = $this->submissionService->createRequest($user, $providerId, $itemsData);
 
         RecipientRequestSubmitCooldown::clear($user->id);
 
-        return back()->with('success', __('Request submitted successfully!'));
+        return redirect()
+            ->route('recipient.requests.show', $created->id)
+            ->with('request_submitted', true);
     }
 
     /**
@@ -116,7 +118,7 @@ class RecipientRequestController extends Controller
      */
     public function index()
     {
-        $requests = RequestModel::with(['provider', 'items'])
+        $requests = RequestModel::with(['provider.providerProfile', 'items'])
             ->where('recipient_id', auth()->id())
             ->latest()
             ->paginate(10);
@@ -129,7 +131,7 @@ class RecipientRequestController extends Controller
      */
     public function show($id)
     {
-        $request = RequestModel::with(['provider', 'items.menuItem', 'redemption'])
+        $request = RequestModel::with(['provider.providerProfile', 'items.menuItem', 'redemption'])
             ->where('recipient_id', auth()->id())
             ->findOrFail($id);
 

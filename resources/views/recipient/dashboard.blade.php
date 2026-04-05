@@ -39,9 +39,9 @@
                                 </div>
                             </div>
                             <div>
-                                <div class="badge mt-2 space-x-1 bg-success/10 py-1 px-1.5 text-success dark:bg-success/15">
+                                <div class="badge mt-2 inline-flex items-center gap-1 bg-success/10 py-1 px-1.5 text-success dark:bg-success/15">
                                     <span>{{ $pendingCount ?? 0 }}</span>
-                                    <span class="text-tiny-plus">{{ __('pending') }}</span>
+                                    <span class="text-tiny-plus">{{ __('Pending') }}</span>
                                 </div>
                             </div>
                         </div>
@@ -60,7 +60,7 @@
                             <div>
                                 <a href="{{ route('recipient.requests.index') }}" class="badge mt-2 inline-flex space-x-1 bg-success/10 py-1 px-1.5 text-success dark:bg-success/15 hover:bg-success/20">
                                     <span>{{ __('View') }}</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                                 </a>
                             </div>
                         </div>
@@ -79,7 +79,7 @@
                             <div>
                                 <a href="{{ route('recipient.providers.index') }}" class="badge mt-2 inline-flex space-x-1 bg-info/10 py-1 px-1.5 text-info dark:bg-info/15 hover:bg-info/20">
                                     <span>{{ __('Browse') }}</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                                 </a>
                             </div>
                         </div>
@@ -98,7 +98,7 @@
                             <div>
                                 <a href="{{ route('recipient.requests.index') }}" class="badge mt-2 inline-flex space-x-1 bg-warning/10 py-1 px-1.5 text-warning dark:bg-warning/15 hover:bg-warning/20">
                                     <span>{{ __('View') }}</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                                 </a>
                             </div>
                         </div>
@@ -129,21 +129,25 @@
                             ];
                         @endphp
                         @forelse($recentRequests as $req)
+                        @php
+                            $reqProvider = $req->provider;
+                            $reqProviderTitle = \App\Support\ProviderDisplay::businessTitle($reqProvider->providerProfile, $reqProvider->name);
+                        @endphp
                         <a href="{{ route('recipient.requests.show', $req->id) }}" class="card block p-3 hover:bg-slate-50 dark:hover:bg-navy-600/50 transition-colors">
-                            <div class="flex items-center space-x-3">
+                            <div class="flex items-start gap-3">
                                 <div class="flex size-10 shrink-0 items-center justify-center rounded-lg {{ in_array($req->status, ['FULFILLED']) ? 'bg-success/10' : (in_array($req->status, ['REDEEMABLE', 'APPROVED']) ? 'bg-info/10' : 'bg-primary/10 dark:bg-accent/10') }}">
                                     <i class="fa-solid fa-utensils {{ in_array($req->status, ['FULFILLED']) ? 'text-success' : (in_array($req->status, ['REDEEMABLE', 'APPROVED']) ? 'text-info' : 'text-primary dark:text-accent-light') }}"></i>
                                 </div>
-                                <div class="flex-1">
+                                <div class="min-w-0 flex-1">
                                     <p class="font-medium text-slate-700 dark:text-navy-100">{{ $req->items->first()?->menuItem?->name ?? __('Request') }}</p>
-                                    <div class="mt-0.5 flex text-xs text-slate-400 dark:text-navy-300">
-                                        <p>{{ __('Provider:') }} {{ $req->provider->providerProfile->full_name_en ?? $req->provider->providerProfile->full_name_ar ?? $req->provider->name }}</p>
-                                        <div class="mx-2 my-1 hidden w-px bg-slate-200 dark:bg-navy-500 sm:flex"></div>
-                                        <p class="hidden sm:flex">{{ __('Requested:') }} {{ $req->created_at->diffForHumans() }}</p>
+                                    <div class="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-400 dark:text-navy-300">
+                                        <span>{{ __('Provider:') }} {{ $reqProviderTitle }}</span>
+                                        <span class="hidden h-3 w-px shrink-0 bg-slate-200 dark:bg-navy-500 sm:inline-block" aria-hidden="true"></span>
+                                        <span class="hidden sm:inline">{{ __('Requested:') }} {{ $req->created_at->diffForHumans() }}</span>
                                     </div>
                                 </div>
+                                <p class="max-w-[42%] shrink-0 text-end text-xs leading-snug font-medium sm:max-w-[36%] {{ $req->status === 'FULFILLED' ? 'text-success' : (in_array($req->status, ['REDEEMABLE', 'APPROVED']) ? 'text-info' : 'text-primary dark:text-accent-light') }}">{{ $statusLabels[$req->status] ?? str_replace('_', ' ', $req->status) }}</p>
                             </div>
-                            <p class="-mt-3 text-right text-xs font-medium {{ $req->status === 'FULFILLED' ? 'text-success' : (in_array($req->status, ['REDEEMABLE', 'APPROVED']) ? 'text-info' : 'text-primary dark:text-accent-light') }}">{{ $statusLabels[$req->status] ?? str_replace('_', ' ', $req->status) }}</p>
                             <div class="progress mt-2 h-1.5 bg-slate-150 dark:bg-navy-500">
                                 <div class="relative overflow-hidden rounded-full {{ $req->status === 'FULFILLED' ? 'w-full bg-success' : (in_array($req->status, ['REDEEMABLE', 'APPROVED']) ? 'w-3/4 bg-info' : 'w-3/12 bg-primary dark:bg-accent') }}"></div>
                             </div>
@@ -170,17 +174,21 @@
                         </div>
                         <div class="space-y-3.5">
                             @forelse($recentRequests as $activityReq)
+                            @php
+                                $actP = $activityReq->provider;
+                                $actProviderTitle = \App\Support\ProviderDisplay::businessTitle($actP->providerProfile, $actP->name);
+                            @endphp
                             <a href="{{ route('recipient.requests.show', $activityReq->id) }}" class="flex cursor-pointer items-center justify-between hover:bg-slate-50 dark:hover:bg-navy-600/50 rounded-lg -mx-2 px-2 py-2 transition-colors">
                                 <div class="flex items-center space-x-3.5">
                                     <div class="avatar size-10">
-                                        <div class="is-initial rounded-full bg-primary/10 text-sm-plus font-medium text-primary dark:bg-accent/10 dark:text-accent-light">{{ substr($activityReq->provider->providerProfile->full_name_en ?? $activityReq->provider->name ?? '??', 0, 2) }}</div>
+                                        <div class="is-initial rounded-full bg-primary/10 text-sm-plus font-medium text-primary dark:bg-accent/10 dark:text-accent-light">{{ \App\Support\ProviderDisplay::initials($actProviderTitle) }}</div>
                                     </div>
                                     <div>
-                                        <p class="font-medium text-slate-700 dark:text-navy-100">{{ $activityReq->provider->providerProfile->full_name_en ?? $activityReq->provider->providerProfile->full_name_ar ?? $activityReq->provider->name }}</p>
+                                        <p class="font-medium text-slate-700 dark:text-navy-100">{{ $actProviderTitle }}</p>
                                         <p class="text-xs text-slate-400 line-clamp-1 dark:text-navy-300">{{ $activityReq->created_at->diffForHumans() }} — {{ $statusLabels[$activityReq->status] ?? $activityReq->status }}</p>
                                     </div>
                                 </div>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-slate-400 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
                             </a>
@@ -201,17 +209,20 @@
                         </div>
                         <div class="space-y-3.5">
                             @forelse($providers ?? [] as $provider)
+                            @php
+                                $browseTitle = \App\Support\ProviderDisplay::businessTitle($provider->providerProfile, $provider->name);
+                            @endphp
                             <a href="{{ route('recipient.providers.show', $provider->id) }}" class="flex cursor-pointer items-center justify-between space-x-2 hover:bg-slate-50 dark:hover:bg-navy-600/50 rounded-lg -mx-2 px-2 py-2 transition-colors">
                                 <div class="flex items-center space-x-3">
                                     <div class="avatar size-10">
-                                        <div class="is-initial rounded-full bg-secondary/10 text-sm-plus font-medium text-secondary">{{ substr($provider->providerProfile->full_name_en ?? $provider->providerProfile->full_name_ar ?? $provider->name ?? '??', 0, 2) }}</div>
+                                        <div class="is-initial rounded-full bg-secondary/10 text-sm-plus font-medium text-secondary">{{ \App\Support\ProviderDisplay::initials($browseTitle) }}</div>
                                     </div>
                                     <div>
-                                        <p class="font-medium text-slate-700 dark:text-navy-100">{{ $provider->providerProfile->full_name_en ?? $provider->providerProfile->full_name_ar ?? $provider->name }}</p>
+                                        <p class="font-medium text-slate-700 dark:text-navy-100">{{ $browseTitle }}</p>
                                         <p class="text-xs text-slate-400 line-clamp-1 dark:text-navy-300">{{ __('View menu') }}</p>
                                     </div>
                                 </div>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary dark:text-accent-light" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-5 text-primary dark:text-accent-light rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
                             </a>
@@ -274,7 +285,7 @@
                     <div class="card p-4">
                         <div class="space-y-1 text-center font-inter text-xs-plus">
                             <div class="flex items-center justify-between px-2 pb-4">
-                                <p class="font-medium text-slate-700 dark:text-navy-100">{{ now()->translatedFormat('F Y') }}</p>
+                                <p class="font-medium text-slate-700 dark:text-navy-100">{{ now()->locale(app()->getLocale())->translatedFormat('F Y') }}</p>
                                 <div class="-mr-1.5 flex space-x-2">
                                     <button class="btn size-7 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -317,11 +328,11 @@
                             <div class="mt-3 space-y-2">
                                 <div class="rounded-lg bg-primary/5 dark:bg-accent/5 px-3 py-2 text-xs">
                                     <p class="font-medium text-slate-700 dark:text-navy-100">{{ __('New provider joined') }}</p>
-                                    <p class="text-slate-500 dark:text-navy-400">{{ __('Al-Rashid Kitchen is now available') }}</p>
+                                    <p class="text-slate-500 dark:text-navy-400">{{ __('recipient.dashboard.promo_new_provider_body') }}</p>
                                 </div>
                                 <div class="rounded-lg bg-success/5 px-3 py-2 text-xs">
                                     <p class="font-medium text-slate-700 dark:text-navy-100">{{ __('Community support') }}</p>
-                                    <p class="text-slate-500 dark:text-navy-400">{{ __('Weekly meal program expanded') }}</p>
+                                    <p class="text-slate-500 dark:text-navy-400">{{ __('recipient.dashboard.promo_community_body') }}</p>
                                 </div>
                             </div>
                         </div>
