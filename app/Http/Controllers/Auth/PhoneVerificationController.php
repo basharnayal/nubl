@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Services\AuditService;
 use App\Http\Services\OtpService;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -16,7 +17,8 @@ use Illuminate\View\View;
 class PhoneVerificationController extends Controller
 {
     public function __construct(
-        private OtpService $otpService
+        private OtpService $otpService,
+        private AuditService $auditService
     ) {}
 
     /**
@@ -59,6 +61,10 @@ class PhoneVerificationController extends Controller
         }
 
         $user->update(['phone_verified_at' => now()]);
+
+        $this->auditService->log('auth', 'phone_verified', [
+            'user_id' => $user->id,
+        ], $user->id);
 
         return $this->redirectAfterVerification($user);
     }

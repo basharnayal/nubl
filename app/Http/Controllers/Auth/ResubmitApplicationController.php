@@ -3,16 +3,14 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\RecipientKycDetails;
-use App\Models\RecipientProfile;
+use App\Http\Requests\Auth\UpdateResubmitApplicationRequest;
+use App\Http\Services\AuditService;
 use App\Models\User;
-use App\Rules\Base64Image;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rules\Password;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -22,6 +20,10 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class ResubmitApplicationController extends Controller
 {
+    public function __construct(
+        private AuditService $auditService
+    ) {}
+
     public function edit(Request $request): View|RedirectResponse
     {
         $user = $request->user();
@@ -88,24 +90,16 @@ class ResubmitApplicationController extends Controller
         return Storage::disk('local')->response($path);
     }
 
-    public function update(Request $request): RedirectResponse
+    public function update(UpdateResubmitApplicationRequest $request): RedirectResponse
     {
         $user = $request->user();
-        if ($user->status !== User::STATUS_REJECTED) {
-            return redirect()->route('approval.pending');
-        }
-        if (! in_array($user->membership_type, [User::MEMBERSHIP_RECIPIENT, User::MEMBERSHIP_PROVIDER], true)) {
-            abort(403);
-        }
 
-        if ($user->membership_type === User::MEMBERSHIP_RECIPIENT) {
-            return $this->updateRecipient($request, $user);
-        }
-
-        return $this->updateProvider($request, $user);
+        return $user->membership_type === User::MEMBERSHIP_RECIPIENT
+            ? $this->updateRecipient($request, $user)
+            : $this->updateProvider($request, $user);
     }
 
-    private function updateRecipient(Request $request, User $user): RedirectResponse
+    private function updateRecipient(UpdateResubmitApplicationRequest $request, User $user): RedirectResponse
     {
         $user->load(['recipientProfile', 'recipientKycDetails']);
         $profile = $user->recipientProfile;
@@ -114,25 +108,7 @@ class ResubmitApplicationController extends Controller
             return redirect()->route('approval.pending')->with('error', __('Application data is incomplete.'));
         }
 
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'nationality' => ['required', 'string', 'in:'.implode(',', config('nationalities'))],
-            'short_address' => ['required', 'string', 'max:500'],
-            'id_type' => ['required', 'string', 'in:'.implode(',', RecipientProfile::ID_TYPES)],
-            'income_band' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::INCOME_BANDS)],
-            'household_size' => ['required', 'integer', 'min:1', 'max:50'],
-            'marital_status' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::MARITAL_STATUSES)],
-            'is_student' => ['required', 'in:0,1'],
-            'id_photo_base64' => ['nullable', 'string'],
-            'address_confirmation_base64' => ['nullable', 'string'],
-        ]);
-
-        if ($request->filled('id_photo_base64')) {
-            $request->validate(['id_photo_base64' => [new Base64Image]]);
-        }
-        if ($request->filled('address_confirmation_base64')) {
-            $request->validate(['address_confirmation_base64' => [new Base64Image]]);
-        }
+        $validated = $request->validated();
 
         $idPath = null;
         $addrPath = null;
@@ -187,48 +163,20 @@ class ResubmitApplicationController extends Controller
             throw $e;
         }
 
+        $this->auditService->log('application', 'resubmitted', [
+            'user_id' => $user->id,
+            'membership_type' => $user->membership_type,
+        ], $user->id);
+
         return redirect()->route('approval.pending')->with('success', __('Your application has been submitted for review.'));
     }
 
-    private function updateProvider(Request $request, User $user): RedirectResponse
+    private function updateProvider(UpdateResubmitApplicationRequest $request, User $user): RedirectResponse
     {
         $user->load(['providerProfile', 'providerOperatingInfo', 'providerFinancialInfo', 'providerDocuments']);
 
-        $maxMb = config('provider.document_max_size_mb', 5);
-        $maxBytes = $maxMb * 1024 * 1024;
-
-        $validated = $request->validate([
-            'full_name_ar' => ['required', 'string', 'max:255'],
-            'full_name_en' => ['required', 'string', 'max:255'],
-            'business_name_ar' => ['required', 'string', 'max:255'],
-            'business_name_en' => ['required', 'string', 'max:255'],
-            'unified_number' => ['required', 'string', 'max:50'],
-            'business_category' => ['required', 'array', 'min:1'],
-            'business_category.*' => ['string', 'in:'.implode(',', config('provider.business_categories'))],
-            'address_ar' => ['required', 'string', 'max:1000'],
-            'address_en' => ['required', 'string', 'max:1000'],
-            'city' => ['required', 'string', 'in:'.implode(',', array_keys(config('provider.cities', [])))],
-            'region' => ['required', 'string', 'in:'.implode(',', array_keys(config('provider.regions', [])))],
-            'location' => ['nullable', 'string', 'max:500'],
-            'daily_capacity' => ['required', 'integer', 'min:1', 'max:10000'],
-            'service_type' => ['required', 'array', 'min:1'],
-            'service_type.*' => ['string', 'in:'.implode(',', config('provider.service_types'))],
-            'estimated_preparation_order_time' => ['required', 'string', 'max:100'],
-            'adoption_support' => ['required', 'string', 'in:yes,partially,no'],
-            'bank_name' => ['required', 'string', 'max:255'],
-            'iban' => ['required', 'string', 'max:50'],
-            'account_holder_name' => ['required', 'string', 'max:255'],
-            'business_license' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.$maxBytes],
-            'id_or_iqama' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.$maxBytes],
-            'password' => ['nullable', 'confirmed', Password::defaults()],
-        ]);
-
-        $request->validate([
-            'operating_hours' => ['required', 'array'],
-            ...collect(array_keys(config('provider.weekdays')))->mapWithKeys(fn ($d) => ["operating_hours.{$d}" => ['required', 'array']])->all(),
-        ]);
-
-        $operatingHours = $this->buildOperatingHoursFromRequest($request);
+        $validated = $request->validated();
+        $operatingHours = $request->normalizedOperatingHours();
 
         $profile = $user->providerProfile;
         $operating = $user->providerOperatingInfo;
@@ -249,7 +197,7 @@ class ResubmitApplicationController extends Controller
         }
 
         try {
-            DB::transaction(function () use ($user, $profile, $operating, $financial, $docs, $validated, $operatingHours, $licensePath, $idDocPath, $request) {
+            DB::transaction(function () use ($user, $profile, $operating, $financial, $docs, $validated, $operatingHours, $licensePath, $idDocPath) {
                 $userUpdates = [
                     'name' => $validated['full_name_en'],
                     'status' => User::STATUS_PENDING_APPROVAL,
@@ -311,33 +259,12 @@ class ResubmitApplicationController extends Controller
             throw $e;
         }
 
+        $this->auditService->log('application', 'resubmitted', [
+            'user_id' => $user->id,
+            'membership_type' => $user->membership_type,
+        ], $user->id);
+
         return redirect()->route('approval.pending')->with('success', __('Your application has been submitted for review.'));
-    }
-
-    private function buildOperatingHoursFromRequest(Request $request): array
-    {
-        $operatingHours = [];
-        $weekdays = array_keys(config('provider.weekdays'));
-        $oh = $request->input('operating_hours', []);
-
-        foreach ($weekdays as $day) {
-            $dayData = $oh[$day] ?? [];
-            $closed = filter_var($dayData['closed'] ?? false, FILTER_VALIDATE_BOOLEAN);
-            if ($closed) {
-                $operatingHours[$day] = ['closed' => true];
-            } else {
-                $open = trim($dayData['open'] ?? '');
-                $close = trim($dayData['close'] ?? '');
-                if (! $open || ! $close) {
-                    throw \Illuminate\Validation\ValidationException::withMessages([
-                        "operating_hours.{$day}" => [__('Set opening and closing time, or mark as closed.')],
-                    ]);
-                }
-                $operatingHours[$day] = ['open' => $open, 'close' => $close, 'closed' => false];
-            }
-        }
-
-        return $operatingHours;
     }
 
     private function storeBase64Image(string $base64Data, string $directory): string

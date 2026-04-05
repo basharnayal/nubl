@@ -26,6 +26,10 @@ class NotificationService implements NotificationServiceInterface
         }
     }
 
+    /**
+     * Pending recipient/provider: every admin gets {@see AccountApprovalPendingNotification}.
+     * Other new users (e.g. donor): {@see NewUserRegisteredNotification} to all admins.
+     */
     public function sendNewUserRegisteredToAdmins(User $user): void
     {
         $admins = User::role('admin')->get();
@@ -39,6 +43,7 @@ class NotificationService implements NotificationServiceInterface
         $admins->each(fn ($admin) => $admin->notify(new NewUserRegisteredNotification($user)));
     }
 
+    /** Notify every admin when a rejected applicant resubmits (see {@see UserObserver}). */
     public function sendDocumentsResubmittedForReviewToAdmins(User $user): void
     {
         User::role('admin')->get()->each(

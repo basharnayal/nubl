@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Http\Services\AuditService;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\RedirectResponse;
@@ -15,6 +16,10 @@ use Illuminate\View\View;
 
 class NewPasswordController extends Controller
 {
+    public function __construct(
+        private AuditService $auditService
+    ) {}
+
     /**
      * Display the password reset view.
      */
@@ -39,15 +44,21 @@ class NewPasswordController extends Controller
         // Here we will attempt to reset the user's password. If it is successful we
         // will update the password on an actual user model and persist it to the
         // database. Otherwise we will parse the error and return the response.
+        $auditService = $this->auditService;
+
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
-            function (User $user) use ($request) {
+            function (User $user) use ($request, $auditService) {
                 $user->forceFill([
                     'password' => Hash::make($request->password),
                     'remember_token' => Str::random(60),
                 ])->save();
 
                 event(new PasswordReset($user));
+
+                $auditService->log('auth', 'password_reset_completed', [
+                    'user_id' => $user->id,
+                ], $user->id);
             }
         );
 

@@ -2,24 +2,21 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Contracts\NotificationServiceInterface;
 use App\Helpers\PhoneHelper;
 use App\Http\Controllers\Controller;
-use App\Contracts\NotificationServiceInterface;
+use App\Http\Requests\Auth\StoreRegisteredUserRequest;
+use App\Http\Services\AuditService;
 use App\Http\Services\OtpService;
 use App\Models\RecipientKycDetails;
 use App\Models\RecipientProfile;
 use App\Models\User;
-use App\Rules\Base64Image;
-use App\Rules\SaudiPhoneNumber;
-use App\Rules\SaudiPhoneUnique;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Validation\Rules;
 use Illuminate\View\View;
 
 /**
@@ -29,7 +26,8 @@ class RegisteredUserController extends Controller
 {
     public function __construct(
         private OtpService $otpService,
-        private NotificationServiceInterface $notificationService
+        private NotificationServiceInterface $notificationService,
+        private AuditService $auditService
     ) {}
 
     public function create(): View
@@ -37,33 +35,17 @@ class RegisteredUserController extends Controller
         return view('auth.register');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreRegisteredUserRequest $request): RedirectResponse
     {
-        // Recipient: only base64 camera capture allowed (no file upload)
-        if ($request->membership_type === 'recipient') {
-            if ($request->hasFile('id_photo') || $request->hasFile('address_confirmation')) {
-                abort(422, 'Use camera capture only. File upload is not allowed.');
-            }
-        }
-
-        $type = $request->validate([
-            'membership_type' => ['required', 'in:donor,recipient'],
-        ])['membership_type'];
-
-        return $type === User::MEMBERSHIP_DONOR
+        return $request->validated('membership_type') === User::MEMBERSHIP_DONOR
             ? $this->storeDonor($request)
             : $this->storeRecipient($request);
     }
 
     /** Donor: instant approval, goes to dashboard */
-    protected function storeDonor(Request $request): RedirectResponse
+    protected function storeDonor(StoreRegisteredUserRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'phone_number' => ['required', 'string', new SaudiPhoneNumber, new SaudiPhoneUnique],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', Rules\Password::defaults()],
-        ]);
+        $validated = $request->validated();
 
         $phoneNormalized = PhoneHelper::normalize($validated['phone_number']);
 
@@ -82,36 +64,30 @@ class RegisteredUserController extends Controller
 
         $this->notificationService->sendNewUserRegisteredToAdmins($user);
 
+        $this->auditService->log('registration', 'completed', [
+            'user_id' => $user->id,
+            'membership_type' => $user->membership_type,
+            'requires_approval' => false,
+        ], $user->id);
+
         Auth::login($user);
 
         if (config('app.phone_verification_enabled', true)) {
             $this->otpService->sendOtp($user);
+
             return redirect()->route('verification.phone');
         }
         if (config('app.email_verification_enabled', true) && ! $user->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');
         }
+
         return redirect(route('dashboard', absolute: false));
     }
 
     /** Recipient: pending_approval, goes to approval-pending page until admin approves */
-    protected function storeRecipient(Request $request): RedirectResponse
+    protected function storeRecipient(StoreRegisteredUserRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'phone_number' => ['required', 'string', new SaudiPhoneNumber, new SaudiPhoneUnique],
-            'nationality' => ['required', 'string', 'in:'.implode(',', config('nationalities'))],
-            'short_address' => ['required', 'string', 'max:500'],
-            'id_type' => ['required', 'string', 'in:'.implode(',', RecipientProfile::ID_TYPES)],
-            'id_photo_base64' => ['required', 'string', new Base64Image],
-            'income_band' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::INCOME_BANDS)],
-            'household_size' => ['required', 'integer', 'min:1', 'max:50'],
-            'marital_status' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::MARITAL_STATUSES)],
-            'is_student' => ['required', 'boolean'],
-            'address_confirmation_base64' => ['required', 'string', new Base64Image],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', Rules\Password::defaults()],
-        ]);
+        $validated = $request->validated();
 
         $idPhotoPath = $this->storeBase64Image($validated['id_photo_base64'], 'recipient_id_photos');
         $addressPhotoPath = $this->storeBase64Image($validated['address_confirmation_base64'], 'recipient_address_photos');
@@ -119,7 +95,7 @@ class RegisteredUserController extends Controller
         $phoneNormalized = PhoneHelper::normalize($validated['phone_number']);
 
         try {
-            DB::transaction(function () use ($validated, $phoneNormalized, $idPhotoPath, $addressPhotoPath) {
+            $user = DB::transaction(function () use ($validated, $phoneNormalized, $idPhotoPath, $addressPhotoPath) {
                 $user = User::create([
                     'name' => $validated['name'],
                     'email' => $validated['email'],
@@ -157,7 +133,15 @@ class RegisteredUserController extends Controller
                 if (config('app.phone_verification_enabled', true)) {
                     $this->otpService->sendOtp($user);
                 }
+
+                return $user;
             });
+
+            $this->auditService->log('registration', 'completed', [
+                'user_id' => $user->id,
+                'membership_type' => $user->membership_type,
+                'requires_approval' => true,
+            ], $user->id);
         } catch (\Throwable $e) {
             Storage::disk('local')->delete($idPhotoPath);
             Storage::disk('local')->delete($addressPhotoPath);
@@ -170,6 +154,7 @@ class RegisteredUserController extends Controller
         if (config('app.email_verification_enabled', true) && ! Auth::user()->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');
         }
+
         return redirect()->route('approval.pending');
     }
 
@@ -190,5 +175,4 @@ class RegisteredUserController extends Controller
 
         return $path;
     }
-
 }

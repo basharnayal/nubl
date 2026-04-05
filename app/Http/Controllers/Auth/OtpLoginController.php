@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Helpers\PhoneHelper;
 use App\Http\Controllers\Controller;
+use App\Http\Services\AuditService;
 use App\Http\Services\OtpService;
 use App\Models\User;
-use App\Helpers\PhoneHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -17,7 +18,8 @@ use Illuminate\Validation\ValidationException;
 class OtpLoginController extends Controller
 {
     public function __construct(
-        private OtpService $otpService
+        private OtpService $otpService,
+        private AuditService $auditService
     ) {}
 
     /**
@@ -69,7 +71,7 @@ class OtpLoginController extends Controller
     {
         $request->validate([
             'otp_phone' => ['required', 'string'],
-            'otp_code'  => ['required', 'string', 'size:6'],
+            'otp_code' => ['required', 'string', 'size:6'],
         ]);
 
         $phone = $request->input('otp_phone');
@@ -91,6 +93,11 @@ class OtpLoginController extends Controller
 
         Auth::login($user, $request->boolean('otp_remember'));
         $request->session()->regenerate();
+
+        $this->auditService->log('auth', 'login', [
+            'user_id' => $user->id,
+            'method' => 'otp',
+        ], $user->id);
 
         if (config('app.phone_verification_enabled', true) && ! $user->hasVerifiedPhone()) {
             $user->update(['phone_verified_at' => now()]);
