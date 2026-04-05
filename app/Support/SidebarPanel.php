@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Main;
+namespace App\Support;
 
 class SidebarPanel
 {

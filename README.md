@@ -402,7 +402,7 @@ The project uses **Lineone sidebar layout** (not Breeze top-nav):
 </x-guest-layout>
 ```
 
-Navigation is driven by `SidebarPanel` and `SidebarComposer` (role-based sidebar menu).
+Navigation is driven by `App\Support\SidebarPanel` and `SidebarComposer` (`app/Support/SidebarPanel.php`, role-based sidebar menu).
 
 ### Route Organization
 

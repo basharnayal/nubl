@@ -2,7 +2,7 @@
 
 namespace App\Http\View\Composers;
 
-use App\Main\SidebarPanel;
+use App\Support\SidebarPanel;
 use Illuminate\View\View;
 
 class SidebarComposer
