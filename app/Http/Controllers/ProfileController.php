@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Http\Requests\UpdateProviderBusinessProfileRequest;
 use App\Http\Requests\UpdateProviderFinancialProfileRequest;
+use App\Http\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -14,6 +15,10 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
+    public function __construct(
+        private AuditService $auditService
+    ) {}
+
     /**
      * Display the user's profile form.
      */
@@ -47,10 +52,18 @@ class ProfileController extends Controller
             $user->email_verified_at = null;
         }
 
+        $changedAttributes = array_keys($user->getDirty());
         $user->save();
 
         if ($user->hasRole('provider') && $user->providerProfile) {
             $user->providerProfile->update(['email' => $user->email]);
+        }
+
+        if ($user->hasRole('provider') && $changedAttributes !== []) {
+            $this->auditService->log('provider_account', 'updated', [
+                'user_id' => $user->id,
+                'changed_attributes' => $changedAttributes,
+            ]);
         }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
@@ -89,6 +102,11 @@ class ProfileController extends Controller
             ]);
         });
 
+        $this->auditService->log('provider_profile', 'business_updated', [
+            'user_id' => $user->id,
+            'provider_profile_id' => $profile->id,
+        ]);
+
         return Redirect::route('profile.edit')->with('status', 'business-profile-updated');
     }
 
@@ -107,6 +125,13 @@ class ProfileController extends Controller
             'bank_name' => $validated['bank_name'],
             'iban' => $validated['iban'],
             'account_holder_name' => $validated['account_holder_name'],
+        ]);
+
+        $this->auditService->log('provider_financial', 'updated', [
+            'user_id' => $user->id,
+            'provider_financial_info_id' => $financial->id,
+            'bank_name' => $validated['bank_name'],
+            'iban_updated' => true,
         ]);
 
         return Redirect::route('profile.edit')->with('status', 'financial-profile-updated');

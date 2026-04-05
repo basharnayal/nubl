@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Provider;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Provider\UpdateProviderProfileRequest;
+use App\Http\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -11,6 +12,10 @@ use Illuminate\View\View;
 
 class ProviderProfileController extends Controller
 {
+    public function __construct(
+        private AuditService $auditService
+    ) {}
+
     /**
      * Show the form for editing operating profile (hours, capacity, pickup notes).
      */
@@ -60,6 +65,13 @@ class ProviderProfileController extends Controller
             ]);
         });
 
+        $validatedKeys = array_keys($request->validated());
+        $this->auditService->log('provider_operating_info', 'updated', [
+            'user_id' => $user->id,
+            'provider_operating_info_id' => $operatingInfo->id,
+            'updated_fields' => $validatedKeys,
+        ]);
+
         return redirect()->route('provider.profile.edit')->with('success', __('Profile updated.'));
     }
 
@@ -70,10 +82,17 @@ class ProviderProfileController extends Controller
     public function toggleActive(Request $request): RedirectResponse
     {
         $user = auth()->user();
+        $acceptingOrdersBefore = (bool) $user->accepting_orders;
         $user->accepting_orders = ! $user->accepting_orders;
         $user->save();
 
-        $open = $user->accepting_orders;
+        $open = (bool) $user->accepting_orders;
+
+        $this->auditService->log('provider', 'store_availability_toggled', [
+            'user_id' => $user->id,
+            'accepting_orders_before' => $acceptingOrdersBefore,
+            'accepting_orders_after' => $open,
+        ]);
 
         return back()->with('success', $open
             ? __('Your store is now open. Recipients can see your menu.')

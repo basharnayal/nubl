@@ -184,6 +184,12 @@ class ProviderRequestController extends Controller
                     'funding_source' => 'CITY_FUND',
                 ]);
                 \App\Http\Services\RedemptionService::generateForRequest($requestModel);
+                $this->auditService->log('request', 'approved_city_fund', [
+                    'request_id' => $requestModel->id,
+                    'provider_user_id' => auth()->id(),
+                    'funding_source' => 'CITY_FUND',
+                    'reserved_amount' => $amount,
+                ]);
                 $this->notificationService->sendRequestStatusChanged($requestModel->load('recipient'), 'REDEEMABLE');
                 $this->auditService->log('notification', 'sent', [
                     'type' => 'request_status_changed',
@@ -196,6 +202,11 @@ class ProviderRequestController extends Controller
                     'status' => 'REJECTED',
                     'rejection_reason_code' => $validated['rejection_reason_code'],
                     'rejection_reason_note' => $validated['rejection_reason_note'] ?? null,
+                ]);
+                $this->auditService->log('request', 'rejected_by_provider', [
+                    'request_id' => $requestModel->id,
+                    'provider_user_id' => auth()->id(),
+                    'rejection_reason_code' => $validated['rejection_reason_code'],
                 ]);
                 $this->notificationService->sendRequestStatusChanged($requestModel->load('recipient'), 'REJECTED');
                 $this->auditService->log('notification', 'sent', [
