@@ -53,6 +53,10 @@ class ProviderRequestController extends Controller
             });
         }
 
+        if (! empty($validated['funding_source'])) {
+            $query->where('funding_source', $validated['funding_source']);
+        }
+
         if (! empty($validated['q'])) {
             $idQuery = ltrim(trim($validated['q']), '#');
             if ($idQuery !== '' && ctype_digit($idQuery)) {
@@ -76,6 +80,7 @@ class ProviderRequestController extends Controller
             'to' => $validated['to'] ?? null,
             'status' => $validated['status'] ?? null,
             'needs_proof' => $validated['needs_proof'] ?? null,
+            'funding_source' => $validated['funding_source'] ?? null,
             'q' => $validated['q'] ?? null,
             'per_page' => $perPage,
         ];
@@ -84,12 +89,10 @@ class ProviderRequestController extends Controller
             || filled($filters['to'])
             || filled($filters['status'])
             || filled($filters['needs_proof'])
+            || filled($filters['funding_source'])
             || filled($filters['q']);
 
         $filterStatuses = IndexProviderRequestsRequest::FILTER_STATUSES;
-
-        $thisWeekFrom = now()->startOfWeek()->toDateString();
-        $thisWeekTo = now()->toDateString();
 
         $statusFilterLabels = [
             'REQUESTED' => __('Requested'),
@@ -109,8 +112,6 @@ class ProviderRequestController extends Controller
             'filters',
             'hasActiveFilters',
             'filterStatuses',
-            'thisWeekFrom',
-            'thisWeekTo',
             'statusFilterLabels'
         ));
 

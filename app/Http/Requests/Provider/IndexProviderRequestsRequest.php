@@ -35,6 +35,7 @@ class IndexProviderRequestsRequest extends FormRequest
             'to' => ['nullable', 'date'],
             'status' => ['nullable', 'string', Rule::in(self::FILTER_STATUSES)],
             'needs_proof' => ['nullable', 'in:1'],
+            'funding_source' => ['nullable', 'string', Rule::in(['PROVIDER_ADOPTION', 'CITY_FUND'])],
             'q' => ['nullable', 'string', 'max:40'],
             'per_page' => ['nullable', 'integer', Rule::in([15, 25, 50])],
         ];

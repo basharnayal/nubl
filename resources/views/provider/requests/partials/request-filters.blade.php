@@ -2,28 +2,33 @@
     'filters',
     'filterStatuses',
     'statusFilterLabels',
-    'thisWeekFrom',
-    'thisWeekTo',
 ])
 
 @php
     $queryExceptPage = request()->except('page');
-    $thisWeekParams = array_merge($queryExceptPage, ['from' => $thisWeekFrom, 'to' => $thisWeekTo]);
-    $needsProofParams = array_merge($queryExceptPage, ['needs_proof' => '1']);
     $perPageValue = (int) old('per_page', $filters['per_page'] ?? 15);
-    // Status quick filters: drop status + needs_proof so we don’t combine incompatible filters.
-    $statusQuickBase = array_merge(request()->except(['page', 'status', 'needs_proof']), ['per_page' => $perPageValue]);
+    // Quick filters: drop incompatible params so pills don’t stack contradictory filters.
+    $filterQuickBase = array_merge(
+        request()->except(['page', 'status', 'needs_proof', 'funding_source']),
+        ['per_page' => $perPageValue]
+    );
+    $needsProofParams = array_merge($filterQuickBase, ['needs_proof' => '1']);
+    $statusQuickBase = $filterQuickBase;
     $requestedParams = array_merge($statusQuickBase, ['status' => 'REQUESTED']);
     $approvedParams = array_merge($statusQuickBase, ['status' => 'APPROVED']);
     $redeemableParams = array_merge($statusQuickBase, ['status' => 'REDEEMABLE']);
     $fulfilledParams = array_merge($statusQuickBase, ['status' => 'FULFILLED']);
+    $adoptedParams = array_merge($statusQuickBase, ['funding_source' => 'PROVIDER_ADOPTION']);
     $quickPill =
-        'inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-primary/25 hover:bg-primary/5 hover:text-primary dark:border-navy-600 dark:bg-navy-800/60 dark:text-navy-200 dark:hover:border-accent/30 dark:hover:bg-accent/10 dark:hover:text-accent-light';
+        'inline-flex shrink-0 min-h-[2.5rem] items-center gap-1.5 whitespace-nowrap rounded-full border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:border-primary/30 hover:bg-primary/5 hover:text-primary dark:border-navy-600 dark:bg-navy-800/60 dark:text-navy-200 dark:hover:border-accent/35 dark:hover:bg-accent/10 dark:hover:text-accent-light';
 @endphp
 
 <div class="border-b border-slate-200/90 bg-slate-50/50 px-4 py-5 dark:border-navy-600 dark:bg-navy-900/20 sm:px-6">
     <form method="get" action="{{ route('provider.requests.index') }}" class="space-y-5">
         <input type="hidden" name="per_page" value="{{ $perPageValue }}">
+        @if (filled($filters['funding_source'] ?? null))
+            <input type="hidden" name="funding_source" value="{{ $filters['funding_source'] }}">
+        @endif
 
         <div class="grid gap-4 lg:grid-cols-12 lg:items-stretch lg:gap-4">
             {{-- Date range — neutral cards (donor dashboard style) --}}
@@ -124,46 +129,52 @@
             </div>
         </div>
 
-        {{-- Actions + quick filters --}}
-        <div
-            class="flex flex-col gap-4 border-t border-slate-200/90 pt-4 dark:border-navy-600 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-            <div class="flex flex-wrap items-center gap-2">
-                <span class="text-sm font-semibold text-slate-600 dark:text-navy-300">{{ __('Quick filters') }}</span>
-                <a href="{{ route('provider.requests.index', $requestedParams) }}" class="{{ $quickPill }}">
-                    <i class="fa-solid fa-inbox text-[0.7rem] opacity-80" aria-hidden="true"></i>
-                    {{ __('Requested') }}
-                </a>
-                <a href="{{ route('provider.requests.index', $approvedParams) }}" class="{{ $quickPill }}">
-                    <i class="fa-solid fa-circle-check text-[0.7rem] opacity-80" aria-hidden="true"></i>
-                    {{ __('Approved') }}
-                </a>
-                <a href="{{ route('provider.requests.index', $redeemableParams) }}" class="{{ $quickPill }}">
-                    <i class="fa-solid fa-qrcode text-[0.7rem] opacity-80" aria-hidden="true"></i>
-                    {{ __('Redeemable') }}
-                </a>
-                <a href="{{ route('provider.requests.index', $needsProofParams) }}" class="{{ $quickPill }}">
-                    <i class="fa-solid fa-clock text-[0.7rem] opacity-80" aria-hidden="true"></i>
-                    {{ __('Needs proof') }}
-                </a>
-                <a href="{{ route('provider.requests.index', $fulfilledParams) }}" class="{{ $quickPill }}">
-                    <i class="fa-solid fa-flag-checkered text-[0.7rem] opacity-80" aria-hidden="true"></i>
-                    {{ __('Fulfilled') }}
-                </a>
-                <a href="{{ route('provider.requests.index', $thisWeekParams) }}" class="{{ $quickPill }}">
-                    <i class="fa-regular fa-calendar text-[0.7rem] opacity-80" aria-hidden="true"></i>
-                    {{ __('This week') }}
-                </a>
-            </div>
-            <div class="flex w-full flex-wrap gap-2 sm:w-auto sm:justify-end">
-                <a href="{{ route('provider.requests.index') }}"
-                    class="inline-flex min-h-[2.75rem] flex-1 items-center justify-center rounded-xl border-2 border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-navy-500 dark:bg-navy-800 dark:text-navy-100 dark:hover:border-navy-400 dark:hover:bg-navy-700 sm:flex-none">
-                    {{ __('Clear filters') }}
-                </a>
-                <button type="submit"
-                    class="inline-flex min-h-[2.75rem] flex-1 items-center justify-center gap-2 rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-focus focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:bg-accent dark:hover:bg-accent-focus dark:focus-visible:ring-accent dark:focus-visible:ring-offset-navy-900 sm:flex-none">
-                    <i class="fa-solid fa-magnifying-glass text-sm opacity-95" aria-hidden="true"></i>
-                    {{ __('Apply filters') }}
-                </button>
+        {{-- Quick filters + actions: single row (flex-nowrap); scroll horizontally when wider than viewport --}}
+        <div class="border-t border-slate-200/90 pt-5 dark:border-navy-600">
+            <p class="mb-3 text-sm font-semibold text-slate-700 dark:text-navy-100">{{ __('Quick filters') }}</p>
+            <div
+                class="is-scrollbar-hidden min-w-0 overflow-x-auto pb-1"
+                role="region"
+                aria-label="{{ __('Quick filters') }}">
+                <div class="flex w-max flex-nowrap items-center gap-2 sm:gap-2.5">
+                    <div class="flex flex-nowrap gap-2 sm:gap-2.5">
+                        <a href="{{ route('provider.requests.index', $requestedParams) }}" class="{{ $quickPill }}">
+                            <i class="fa-solid fa-inbox text-[0.75rem] opacity-90" aria-hidden="true"></i>
+                            {{ __('Requested') }}
+                        </a>
+                        <a href="{{ route('provider.requests.index', $approvedParams) }}" class="{{ $quickPill }}">
+                            <i class="fa-solid fa-circle-check text-[0.75rem] opacity-90" aria-hidden="true"></i>
+                            {{ __('Approved') }}
+                        </a>
+                        <a href="{{ route('provider.requests.index', $redeemableParams) }}" class="{{ $quickPill }}">
+                            <i class="fa-solid fa-qrcode text-[0.75rem] opacity-90" aria-hidden="true"></i>
+                            {{ __('Redeemable') }}
+                        </a>
+                        <a href="{{ route('provider.requests.index', $needsProofParams) }}" class="{{ $quickPill }}">
+                            <i class="fa-solid fa-clock text-[0.75rem] opacity-90" aria-hidden="true"></i>
+                            {{ __('Needs proof') }}
+                        </a>
+                        <a href="{{ route('provider.requests.index', $fulfilledParams) }}" class="{{ $quickPill }}">
+                            <i class="fa-solid fa-flag-checkered text-[0.75rem] opacity-90" aria-hidden="true"></i>
+                            {{ __('Fulfilled') }}
+                        </a>
+                        <a href="{{ route('provider.requests.index', $adoptedParams) }}" class="{{ $quickPill }}">
+                            <i class="fa-solid fa-hand-holding-heart text-[0.75rem] opacity-90" aria-hidden="true"></i>
+                            {{ __('provider.requests.quick_filter_adopted') }}
+                        </a>
+                    </div>
+                    <div class="flex shrink-0 flex-nowrap gap-2 sm:gap-3">
+                        <a href="{{ route('provider.requests.index') }}"
+                            class="inline-flex min-h-[2.75rem] shrink-0 items-center justify-center whitespace-nowrap rounded-xl border-2 border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 dark:border-navy-500 dark:bg-navy-800 dark:text-navy-100 dark:hover:border-navy-400 dark:hover:bg-navy-700 sm:min-w-[10rem]">
+                            {{ __('Clear filters') }}
+                        </a>
+                        <button type="submit"
+                            class="inline-flex min-h-[2.75rem] shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-primary px-6 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-primary-focus focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 dark:bg-accent dark:hover:bg-accent-focus dark:focus-visible:ring-accent dark:focus-visible:ring-offset-navy-900 sm:min-w-[12rem]">
+                            <i class="fa-solid fa-magnifying-glass text-sm opacity-95" aria-hidden="true"></i>
+                            {{ __('Apply filters') }}
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </form>

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Provider;
 
+use App\Models\Request as RequestModel;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -39,8 +40,10 @@ class ProviderDashboardTest extends TestCase
         $response->assertSee('Store Status');
         $response->assertSee('OPEN');
         $response->assertSee('Pause Store');
+        $response->assertSee(__('provider.dashboard.kpi_section'), false);
         $response->assertSee('Awaiting your response', false);
-        $response->assertSee('Fulfilled (30 days)', false);
+        $response->assertSee(__('provider.dashboard.adoptions_title'), false);
+        $response->assertSee(__('provider.dashboard.fulfilled_30d'), false);
         $response->assertSee('Fulfilled orders by week', false);
         $response->assertSee('Recent requests', false);
         $response->assertSee('View all', false);
@@ -70,5 +73,68 @@ class ProviderDashboardTest extends TestCase
 
         $this->provider->refresh();
         $this->assertTrue($this->provider->accepting_orders);
+    }
+
+    #[Test]
+    public function dashboard_shows_adopted_requests_count_for_provider_as_donor(): void
+    {
+        Role::firstOrCreate(['name' => 'recipient', 'guard_name' => 'web']);
+
+        $recipient = User::factory()->create(['status' => User::STATUS_ACTIVE]);
+        $recipient->assignRole('recipient');
+
+        RequestModel::create([
+            'recipient_id' => $recipient->id,
+            'provider_id' => $this->provider->id,
+            'reserved_amount' => 25.00,
+            'status' => 'APPROVED',
+            'funding_source' => 'PROVIDER_ADOPTION',
+        ]);
+
+        $response = $this->actingAs($this->provider)
+            ->get(route('provider.dashboard'));
+
+        $response->assertOk();
+        $response->assertSee('data-metric="adopted-donor-count"', false);
+        $response->assertSee(__('provider.dashboard.adoptions_title'), false);
+
+        $this->assertSame(
+            1,
+            RequestModel::query()
+                ->where('provider_id', $this->provider->id)
+                ->where('funding_source', 'PROVIDER_ADOPTION')
+                ->count()
+        );
+    }
+
+    #[Test]
+    public function provider_requests_index_accepts_funding_source_filter_for_adoptions(): void
+    {
+        Role::firstOrCreate(['name' => 'recipient', 'guard_name' => 'web']);
+
+        $recipient = User::factory()->create(['status' => User::STATUS_ACTIVE]);
+        $recipient->assignRole('recipient');
+
+        RequestModel::create([
+            'recipient_id' => $recipient->id,
+            'provider_id' => $this->provider->id,
+            'reserved_amount' => 10.00,
+            'status' => 'APPROVED',
+            'funding_source' => 'PROVIDER_ADOPTION',
+        ]);
+        RequestModel::create([
+            'recipient_id' => $recipient->id,
+            'provider_id' => $this->provider->id,
+            'reserved_amount' => 10.00,
+            'status' => 'REQUESTED',
+            'funding_source' => 'CITY_FUND',
+        ]);
+
+        $response = $this->actingAs($this->provider)
+            ->get(route('provider.requests.index', ['funding_source' => 'PROVIDER_ADOPTION']));
+
+        $response->assertOk();
+        $requests = $response->viewData('requests');
+        $this->assertSame(1, $requests->total());
     }
 }

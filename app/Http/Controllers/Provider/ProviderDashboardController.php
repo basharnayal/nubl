@@ -31,6 +31,10 @@ class ProviderDashboardController extends Controller
             })
             ->count();
 
+        $adoptedRequestsCount = RequestModel::forProvider($providerId)
+            ->where('funding_source', 'PROVIDER_ADOPTION')
+            ->count();
+
         $qrRedeemedLast30Count = OrderRedemption::query()
             ->where('provider_id', $providerId)
             ->where('status', 'REDEEMED')
@@ -40,7 +44,7 @@ class ProviderDashboardController extends Controller
         $weeklyFulfilledChart = $this->weeklyFulfilledChartData($providerId);
 
         $recentRequests = RequestModel::forProvider($providerId)
-            ->with(['recipient', 'items.menuItem'])
+            ->with(['items.menuItem.menuItemCategory'])
             ->latest()
             ->take(5)
             ->get();
@@ -60,6 +64,7 @@ class ProviderDashboardController extends Controller
         return view('provider.dashboard', compact(
             'pendingRequestsCount',
             'pendingProofCount',
+            'adoptedRequestsCount',
             'inPipelineCount',
             'fulfilledLast30Count',
             'valueFulfilledLast30',
