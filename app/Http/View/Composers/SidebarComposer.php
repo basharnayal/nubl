@@ -18,8 +18,8 @@ class SidebarComposer
             return;
         }
 
-        $pageName = $route->getName();
-        $routePrefix = explode('.', $pageName)[0] ?? '';
+        $pageName = $route->getName() ?? '';
+        $routePrefix = $pageName !== '' ? explode('.', $pageName)[0] : '';
 
         $actor = $this->resolveActor();
         $sidebarMenu = SidebarPanel::forActor($actor);
