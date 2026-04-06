@@ -3,6 +3,7 @@
 namespace App\Http\Services;
 
 use App\Models\Payment;
+use App\Support\FinancialMath;
 use App\Models\PendingAllocation;
 use App\Models\Request as RequestModel;
 use App\Models\RequestPaymentLink;
@@ -22,18 +23,31 @@ class AllocationService
      */
     public function availableCityFundAmount(): float
     {
+        return (float) $this->availableCityFundAmountString();
+    }
+
+    /**
+     * Unallocated SAR across succeeded donor payments (FIFO pool), as a decimal string.
+     */
+    private function availableCityFundAmountString(): string
+    {
         $payments = Payment::where('status', Payment::STATUS_SUCCEEDED)
             ->orderBy('created_at')
             ->get();
 
-        $total = 0.0;
+        $total = '0.00';
 
         foreach ($payments as $payment) {
-            $used = (float) RequestPaymentLink::where('payment_id', $payment->id)->sum('amount');
-            $available = (float) $payment->amount - $used;
+            $used = FinancialMath::normalize(
+                (string) RequestPaymentLink::where('payment_id', $payment->id)->sum('amount')
+            );
+            $available = FinancialMath::sub(
+                FinancialMath::normalize((string) ($payment->getRawOriginal('amount') ?? $payment->amount)),
+                $used
+            );
 
-            if ($available > 0) {
-                $total += $available;
+            if (FinancialMath::compare($available, '0.00') > 0) {
+                $total = FinancialMath::add($total, $available);
             }
         }
 
@@ -49,7 +63,10 @@ class AllocationService
             return true;
         }
 
-        return $this->availableCityFundAmount() + 0.001 >= $amount;
+        return FinancialMath::compare(
+            $this->availableCityFundAmountString(),
+            FinancialMath::normalize($amount)
+        ) >= 0;
     }
 
     /**
@@ -74,30 +91,35 @@ class AllocationService
             ->orderBy('created_at')
             ->get();
 
-        $remaining = $amount;
+        $remaining = FinancialMath::normalize($amount);
         $allocations = [];
 
         foreach ($payments as $payment) {
-            if ($remaining <= 0) {
+            if (FinancialMath::compare($remaining, '0.00') <= 0) {
                 break;
             }
 
-            $used = (float) RequestPaymentLink::where('payment_id', $payment->id)->sum('amount');
-            $available = (float) $payment->amount - $used;
+            $used = FinancialMath::normalize(
+                (string) RequestPaymentLink::where('payment_id', $payment->id)->sum('amount')
+            );
+            $available = FinancialMath::sub(
+                FinancialMath::normalize((string) ($payment->getRawOriginal('amount') ?? $payment->amount)),
+                $used
+            );
 
-            if ($available <= 0) {
+            if (FinancialMath::compare($available, '0.00') <= 0) {
                 continue;
             }
 
-            $allocate = min($remaining, $available);
+            $allocate = FinancialMath::min($remaining, $available);
             $allocations[] = [
                 'payment_id' => $payment->id,
-                'amount' => $allocate,
+                'amount' => (float) $allocate,
             ];
-            $remaining -= $allocate;
+            $remaining = FinancialMath::sub($remaining, $allocate);
         }
 
-        if ($remaining > 0.001) {
+        if (FinancialMath::compare($remaining, '0.00') > 0) {
             throw new \RuntimeException('Insufficient funds in city fund to allocate for this request.');
         }
 

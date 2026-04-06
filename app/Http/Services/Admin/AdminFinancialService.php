@@ -3,6 +3,7 @@
 namespace App\Http\Services\Admin;
 
 use App\Models\Ewallet;
+use App\Support\FinancialMath;
 use App\Models\FundTransaction;
 use App\Models\OrderRedemption;
 use App\Models\Payment;
@@ -181,7 +182,10 @@ class AdminFinancialService
             'ledger_entries_count'  => $ledgerCnt,
             'ledger_in_amount'      => $ledgerIn,
             'ledger_out_amount'     => $ledgerOut,
-            'ledger_net_amount'     => round($ledgerIn - $ledgerOut, 2),
+            'ledger_net_amount'     => (float) FinancialMath::sub(
+                FinancialMath::normalize((string) $ledgerIn),
+                FinancialMath::normalize((string) $ledgerOut)
+            ),
             'payouts_to_providers'  => $payoutsToProviders,
 
             // requests
