@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Rbac;
+namespace App\Support;
 
 final class ProtectedRoles
 {

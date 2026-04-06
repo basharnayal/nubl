@@ -783,5 +783,6 @@
     "recipient.request_progress.title_admin_approved": "Approved by admin",
     "recipient.request_progress.subtitle_admin_approved": "Your request has been approved. Further updates will appear here.",
     "recipient.request_progress.title_generic": "Request details",
-    "recipient.request_progress.subtitle_generic": "Status and timeline for this request."
+    "recipient.request_progress.subtitle_generic": "Status and timeline for this request.",
+    "Login failed. Please check your credentials.": "Login failed. Please check your credentials."
 }
