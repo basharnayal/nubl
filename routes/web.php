@@ -53,6 +53,7 @@ Route::get('/dashboard', function () {
 Route::middleware(array_merge($authMiddleware, ['account.approved']))->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/photo', [ProfileController::class, 'uploadPhoto'])->name('profile.photo.upload');
     Route::patch('/profile/provider-business', [ProfileController::class, 'updateProviderBusiness'])
         ->name('profile.provider-business.update');
     Route::patch('/profile/provider-financial', [ProfileController::class, 'updateProviderFinancial'])

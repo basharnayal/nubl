@@ -9,7 +9,7 @@
         $operating = ($providerData ?? [])['operating'] ?? null;
         $financial = ($providerData ?? [])['financial'] ?? null;
         $stepErrorKeys = [
-            1 => ['full_name_ar', 'full_name_en', 'phone_number', 'email', 'business_name_ar', 'business_name_en', 'unified_number', 'business_category', 'address_ar', 'address_en', 'city', 'region', 'location'],
+            1 => ['full_name_ar', 'full_name_en', 'phone_number', 'email', 'business_name_ar', 'business_name_en', 'unified_number', 'business_category', 'address_ar', 'address_en', 'city', 'region', 'location', 'profile_logo'],
             2 => array_merge(['daily_capacity', 'service_type', 'estimated_preparation_order_time', 'adoption_support'], array_map(fn($d) => "operating_hours.{$d}", array_keys(config('provider.weekdays')))),
             3 => ['bank_name', 'iban', 'account_holder_name'],
             4 => ['business_license', 'id_or_iqama', 'password'],
@@ -40,6 +40,12 @@
                     </div>
                     <div><x-input-label :value="__('Phone')" /><p class="mt-1 text-gray-900">{{ $profile->phone_number }}</p></div>
                     <div><x-input-label :value="__('Email')" /><p class="mt-1 text-gray-900">{{ $profile->user->email }}</p></div>
+                    @if($profile->logo_url)
+                        <div>
+                            <x-input-label :value="__('Business / profile photo')" />
+                            <img src="{{ $profile->logo_url }}" alt="" class="mt-2 h-20 w-20 rounded-xl border border-slate-200 object-cover dark:border-navy-600" />
+                        </div>
+                    @endif
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div><x-input-label :value="__('Business Name (Arabic)')" /><p class="mt-1 text-gray-900">{{ $profile->business_name_ar }}</p></div>
                         <div><x-input-label :value="__('Business Name (English)')" /><p class="mt-1 text-gray-900">{{ $profile->business_name_en }}</p></div>
@@ -159,6 +165,13 @@
                         <x-input-label for="email" :value="__('Email')" required />
                         <x-text-input id="email" name="email" type="email" value="{{ old('email') }}" class="block mt-1 w-full" required />
                         <x-input-error :messages="$errors->get('email')" class="mt-2" />
+                    </div>
+                    <div>
+                        <x-input-label :value="__('Business / profile photo (optional)')" />
+                        <p class="mt-1 text-xs text-slate-500 dark:text-navy-400">{{ __('PNG, JPG, or WebP — max 2 MB. Shown on your storefront and account.') }}</p>
+                        <input type="file" name="profile_logo" accept="image/png,image/jpeg,image/webp"
+                            class="mt-2 block w-full text-sm text-slate-600 file:me-4 file:rounded-lg file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary dark:text-navy-300 dark:file:bg-accent/15 dark:file:text-accent-light" />
+                        <x-input-error :messages="$errors->get('profile_logo')" class="mt-2" />
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>

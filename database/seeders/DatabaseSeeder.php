@@ -23,6 +23,8 @@ class DatabaseSeeder extends Seeder
         // Step 2: Create Roles and assign Permissions
         $this->call(RoleSeeder::class);
 
+        $this->call(AdminUserSeeder::class);
+
         // Step 3: Create system-level ewallet
         $this->call(EwalletSeeder::class);
 

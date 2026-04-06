@@ -181,7 +181,7 @@
                             <a href="{{ route('recipient.requests.show', $activityReq->id) }}" class="flex cursor-pointer items-center justify-between hover:bg-slate-50 dark:hover:bg-navy-600/50 rounded-lg -mx-2 px-2 py-2 transition-colors">
                                 <div class="flex items-center space-x-3.5">
                                     <div class="avatar size-10">
-                                        <div class="is-initial rounded-full bg-primary/10 text-sm-plus font-medium text-primary dark:bg-accent/10 dark:text-accent-light">{{ \App\Support\ProviderDisplay::initials($actProviderTitle) }}</div>
+                                        <x-provider-profile-avatar :profile="$actP->providerProfile" :title="$actProviderTitle" variant="compact-primary" />
                                     </div>
                                     <div>
                                         <p class="font-medium text-slate-700 dark:text-navy-100">{{ $actProviderTitle }}</p>
@@ -215,7 +215,7 @@
                             <a href="{{ route('recipient.providers.show', $provider->id) }}" class="flex cursor-pointer items-center justify-between space-x-2 hover:bg-slate-50 dark:hover:bg-navy-600/50 rounded-lg -mx-2 px-2 py-2 transition-colors">
                                 <div class="flex items-center space-x-3">
                                     <div class="avatar size-10">
-                                        <div class="is-initial rounded-full bg-secondary/10 text-sm-plus font-medium text-secondary">{{ \App\Support\ProviderDisplay::initials($browseTitle) }}</div>
+                                        <x-provider-profile-avatar :profile="$provider->providerProfile" :title="$browseTitle" variant="compact-secondary" />
                                     </div>
                                     <div>
                                         <p class="font-medium text-slate-700 dark:text-navy-100">{{ $browseTitle }}</p>

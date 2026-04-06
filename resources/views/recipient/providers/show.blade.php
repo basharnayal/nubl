@@ -10,6 +10,7 @@
                             && $provider->providerOperatingInfo
                             && $provider->providerOperatingInfo->daily_capacity > 0;
                         $businessTitle = \App\Support\ProviderDisplay::businessTitle($provider->providerProfile, $provider->name);
+                        $headerLogoUrl = $provider->providerProfile?->logo_url;
                         $dayKey = strtolower(now()->format('l'));
                         $today = $provider->providerOperatingInfo?->operating_hours[$dayKey] ?? null;
                         $openNow = false;
@@ -27,15 +28,23 @@
                     <div class="card mb-6 overflow-hidden p-4 sm:p-5">
                         <div
                             class="flex w-full items-center gap-3 rounded-2xl border border-primary/25 bg-primary/[0.04] px-4 py-3 dark:border-accent/35 dark:bg-accent/[0.06] sm:gap-4 sm:px-5 sm:py-3.5">
-                            <div
-                                class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary dark:bg-accent/20 dark:text-accent-light sm:size-12"
-                                aria-hidden="true">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="size-6 sm:size-7" fill="none"
-                                    viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
-                                        d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2M3.75 3.47v-.84A.75.75 0 014.5 2h15a.75.75 0 01.75.75v.84m-16.5 0V9a.75.75 0 00.75.75h14.25a.75.75 0 00.75-.75V3.47m-16.5 0A48.11 48.11 0 0112 2.25c2.414 0 4.722.284 6.878.849M3.75 3.47V9m0-5.53v5.53" />
-                                </svg>
-                            </div>
+                            @if ($headerLogoUrl)
+                                <div
+                                    class="size-11 shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-slate-200/90 dark:bg-navy-800 dark:ring-navy-600 sm:size-12">
+                                    <img src="{{ $headerLogoUrl }}" alt=""
+                                        class="size-full object-cover" />
+                                </div>
+                            @else
+                                <div
+                                    class="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary dark:bg-accent/20 dark:text-accent-light sm:size-12"
+                                    aria-hidden="true">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-6 sm:size-7" fill="none"
+                                        viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                            d="M13.5 21v-7.5a.75.75 0 01.75-.75h3a.75.75 0 01.75.75V21m-4.5 0H2M3.75 3.47v-.84A.75.75 0 014.5 2h15a.75.75 0 01.75.75v.84m-16.5 0V9a.75.75 0 00.75.75h14.25a.75.75 0 00.75-.75V3.47m-16.5 0A48.11 48.11 0 0112 2.25c2.414 0 4.722.284 6.878.849M3.75 3.47V9m0-5.53v5.53" />
+                                    </svg>
+                                </div>
+                            @endif
                             <div class="min-w-0 flex-1 text-start">
                                 <h1 class="truncate text-lg font-bold tracking-tight text-slate-800 dark:text-navy-100 sm:text-xl">
                                     {{ $businessTitle }}

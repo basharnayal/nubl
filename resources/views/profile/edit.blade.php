@@ -9,6 +9,9 @@
             @if (session('status') === 'profile-updated')
                 <x-lineone-alert type="success" dismissible>{{ __('Account details saved.') }}</x-lineone-alert>
             @endif
+            @if (session('status') === 'profile-photo-updated')
+                <x-lineone-alert type="success" dismissible>{{ __('Profile photo saved.') }}</x-lineone-alert>
+            @endif
             @if (session('status') === 'business-profile-updated')
                 <x-lineone-alert type="success" dismissible>{{ __('Business profile saved.') }}</x-lineone-alert>
             @endif
@@ -18,7 +21,11 @@
 
             {{-- Account: name, email, password (all roles) --}}
             <div class="card overflow-hidden rounded-2xl border border-slate-200/90 p-6 shadow-sm dark:border-navy-600 dark:bg-navy-800/40 sm:p-8">
-                @include('profile.update-profile-information-form')
+                @include('profile.update-profile-information-form', [
+                    'user' => $user,
+                    'providerProfile' => $providerProfile ?? null,
+                    'recipientProfile' => $recipientProfile ?? null,
+                ])
             </div>
 
             @if ($user->hasRole('provider') && $providerProfile)
@@ -26,10 +33,15 @@
                 <div
                     class="card overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.06] via-white to-white p-6 shadow-sm dark:border-accent/20 dark:from-navy-800/80 dark:via-navy-800/50 dark:to-navy-800/40 sm:p-8">
                     <div class="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start">
-                        <div
-                            class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary dark:bg-accent/15 dark:text-accent-light">
-                            <i class="fa-solid fa-store text-xl" aria-hidden="true"></i>
-                        </div>
+                        @if ($providerProfile->logo_url)
+                            <img src="{{ $providerProfile->logo_url }}" alt=""
+                                class="size-12 shrink-0 rounded-2xl border border-primary/20 object-cover dark:border-accent/30" />
+                        @else
+                            <div
+                                class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary dark:bg-accent/15 dark:text-accent-light">
+                                <i class="fa-solid fa-store text-xl" aria-hidden="true"></i>
+                            </div>
+                        @endif
                         <div class="min-w-0 flex-1 space-y-1">
                             <h2 class="text-lg font-bold text-slate-900 dark:text-navy-100">{{ __('Business profile') }}</h2>
                             <p class="text-sm leading-relaxed text-slate-600 dark:text-navy-300">
