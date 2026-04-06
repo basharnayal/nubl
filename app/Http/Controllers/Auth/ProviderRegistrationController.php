@@ -78,8 +78,13 @@ class ProviderRegistrationController extends Controller
 
         $phoneNormalized = PhoneHelper::normalize($validated['phone_number']);
 
+        $profileLogoPath = null;
+        if ($request->hasFile('profile_logo')) {
+            $profileLogoPath = $request->file('profile_logo')->store('provider-logos', 'public');
+        }
+
         try {
-            $user = DB::transaction(function () use ($validated, $phoneNormalized, $operatingHours, $licensePath, $idPath) {
+            $user = DB::transaction(function () use ($validated, $phoneNormalized, $operatingHours, $licensePath, $idPath, $profileLogoPath) {
                 $user = User::create([
                     'name' => $validated['full_name_en'],
                     'email' => $validated['email'],
@@ -107,6 +112,7 @@ class ProviderRegistrationController extends Controller
                     'city' => $validated['city'],
                     'region' => $validated['region'],
                     'location' => $validated['location'] ?? null,
+                    'logo_path' => $profileLogoPath,
                 ]);
 
                 ProviderOperatingInfo::create([
@@ -152,6 +158,9 @@ class ProviderRegistrationController extends Controller
         } catch (\Throwable $e) {
             Storage::disk('local')->delete($licensePath);
             Storage::disk('local')->delete($idPath);
+            if ($profileLogoPath) {
+                Storage::disk('public')->delete($profileLogoPath);
+            }
             throw $e;
         }
 

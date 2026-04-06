@@ -50,6 +50,7 @@ class StoreRegisteredUserRequest extends FormRequest
                 'address_confirmation_base64' => ['required', 'string', new Base64Image],
                 'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
                 'password' => ['required', Rules\Password::defaults()],
+                'profile_logo' => ['nullable', 'image', 'max:2048'],
             ]);
         }
 
@@ -63,7 +64,7 @@ class StoreRegisteredUserRequest extends FormRequest
                 return;
             }
             if ($this->hasFile('id_photo') || $this->hasFile('address_confirmation')) {
-                abort(422, 'Use camera capture only. File upload is not allowed.');
+                abort(422, 'Use camera capture only. File upload is not allowed for identity or address proof.');
             }
         });
     }

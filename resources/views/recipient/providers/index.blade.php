@@ -34,10 +34,7 @@
                         <a href="{{ route('recipient.providers.show', $provider->id) }}"
                             class="card flex flex-col gap-3 overflow-hidden p-4 transition-colors hover:border-primary/35 sm:flex-row sm:items-center sm:gap-4 sm:p-5 dark:hover:border-accent/35">
                             <div class="flex min-w-0 flex-1 flex-row gap-3 sm:contents">
-                            <div
-                                class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-sm font-bold text-primary dark:bg-accent/15 dark:text-accent-light sm:size-14">
-                                {{ \App\Support\ProviderDisplay::initials($rowTitle) }}
-                            </div>
+                            <x-provider-profile-avatar :profile="$profile" :title="$rowTitle" />
                             <div class="flex min-w-0 flex-1 flex-col justify-center gap-1">
                                 <h5 class="text-base font-bold tracking-tight text-slate-800 dark:text-navy-100 sm:text-lg">
                                     {{ $rowTitle }}

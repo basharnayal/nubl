@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('city');
             $table->string('region');
             $table->string('location')->nullable();
+            $table->string('logo_path', 512)->nullable();
             $table->timestamps();
         });
     }

@@ -53,6 +53,9 @@ Route::get('/dashboard', function () {
 Route::middleware(array_merge($authMiddleware, ['account.approved']))->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/photo', [ProfileController::class, 'uploadPhoto'])
+        ->middleware('throttle:profile_photo')
+        ->name('profile.photo.upload');
     Route::patch('/profile/provider-business', [ProfileController::class, 'updateProviderBusiness'])
         ->name('profile.provider-business.update');
     Route::patch('/profile/provider-financial', [ProfileController::class, 'updateProviderFinancial'])
@@ -213,13 +216,15 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:donor'
         Route::get('/donations/new', [\App\Http\Controllers\Donor\DonationController::class, 'create'])->name('donations.new');
         Route::get('/donations', [\App\Http\Controllers\Donor\DonationController::class, 'index'])->name('donations.index');
         Route::get('/donations/{payment}/receipt', [\App\Http\Controllers\Donor\DonationController::class, 'receipt'])->name('donations.receipt');
-        Route::post('/payments/initiate', [\App\Http\Controllers\Donor\DonationController::class, 'initiate'])->name('payments.initiate');
+        Route::post('/payments/initiate', [\App\Http\Controllers\Donor\DonationController::class, 'initiate'])
+            ->middleware('throttle:donor_payments')
+            ->name('payments.initiate');
         Route::get('/payments/success', [\App\Http\Controllers\PaymentCallbackController::class, 'success'])->name('payments.success');
         Route::get('/payments/failed', [\App\Http\Controllers\PaymentCallbackController::class, 'failed'])->name('payments.failed');
     });
 
 // Notifications (auth required — for real-time polling)
-Route::middleware($authMiddleware)->group(function () {
+Route::middleware(array_merge($authMiddleware, ['throttle:notifications']))->group(function () {
     Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{notification}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
@@ -228,17 +233,19 @@ Route::middleware($authMiddleware)->group(function () {
 // Payment callback (no auth — MyFatoorah redirects the user's browser here).
 // Rate-limited to prevent abuse (attackers flooding with random IDs to exhaust MyFatoorah API quota).
 Route::get('/payments/callback', [\App\Http\Controllers\PaymentCallbackController::class, 'callback'])
-    ->middleware('throttle:20,1')
+    ->middleware('throttle:payments_gateway')
     ->name('payments.callback');
 Route::get('/payments/error', [\App\Http\Controllers\PaymentCallbackController::class, 'error'])
-    ->middleware('throttle:20,1')
+    ->middleware('throttle:payments_gateway')
     ->name('payments.error');
 
 // General routes //
 // Pending approval: recipient or provider (blocked from dashboard by EnsureAccountApproved).
 // Same middleware with pending_only: active users are redirected to dashboard from these URLs.
 // Provider registration: GET allows guest + auth (auth with profile sees read-only)
-Route::get('/register/provider', [ProviderRegistrationController::class, 'create'])->name('register.provider');
+Route::get('/register/provider', [ProviderRegistrationController::class, 'create'])
+    ->middleware('throttle:registration')
+    ->name('register.provider');
 
 Route::middleware(array_merge($authMiddleware, ['account.approved:pending_only']))->group(function () {
     Route::get('/approval-pending', function () {
@@ -246,7 +253,9 @@ Route::middleware(array_merge($authMiddleware, ['account.approved:pending_only']
     })->name('approval.pending');
 
     Route::get('/application/resubmit', [ResubmitApplicationController::class, 'edit'])->name('application.resubmit.edit');
-    Route::post('/application/resubmit', [ResubmitApplicationController::class, 'update'])->name('application.resubmit.update');
+    Route::post('/application/resubmit', [ResubmitApplicationController::class, 'update'])
+        ->middleware('throttle:application_resubmit')
+        ->name('application.resubmit.update');
     Route::get('/application/my-file/{type}', [ResubmitApplicationController::class, 'serveFile'])->name('application.my-file');
 });
 

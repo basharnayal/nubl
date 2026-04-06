@@ -63,9 +63,7 @@
                                 <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $user->id }}</td>
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <div class="avatar flex size-10">
-                                            <img class="mask is-squircle" src="{{ asset('images/200x200.png') }}" alt="avatar" />
-                                        </div>
+                                        <x-user-avatar :user="$user" size-class="size-10" />
                                     </td>
                                     <td class="px-4 py-3 sm:px-5">
                                         <div class="font-medium text-slate-700 dark:text-navy-100">{{ $user->name }}</div>

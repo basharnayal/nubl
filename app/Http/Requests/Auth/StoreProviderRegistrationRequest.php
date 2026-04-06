@@ -50,6 +50,7 @@ class StoreProviderRegistrationRequest extends FormRequest
             'city' => ['required', 'string', 'in:'.implode(',', array_keys(config('provider.cities', [])))],
             'region' => ['required', 'string', 'in:'.implode(',', array_keys(config('provider.regions', [])))],
             'location' => ['nullable', 'string', 'max:500'],
+            'profile_logo' => ['nullable', 'image', 'max:2048'],
             'daily_capacity' => ['required', 'integer', 'min:1', 'max:10000'],
             'service_type' => ['required', 'array'],
             'service_type.*' => ['string', 'in:'.implode(',', config('provider.service_types', []))],

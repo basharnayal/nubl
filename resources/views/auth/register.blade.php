@@ -4,7 +4,7 @@
     Design: Lineone sign-up-1 style.
 --}}
 <x-register-layout :title="__('Register')">
-    <form method="POST" action="{{ route('register') }}" x-data="registerForm()" x-init="init()" x-on:submit="validateBeforeSubmit($event)">
+    <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" x-data="registerForm()" x-init="init()" x-on:submit="validateBeforeSubmit($event)">
         @csrf
 
         {{-- Membership type: radio cards --}}
@@ -132,6 +132,17 @@
                 </label>
                 <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
             </div>
+
+            {{-- Optional profile photo (file upload — public disk, same as account profile) --}}
+            <div class="rounded-lg border border-slate-200 bg-white p-4 dark:border-navy-600 dark:bg-navy-800/50">
+                <x-input-label :value="__('Profile photo (optional)')" />
+                <p class="mt-1 text-xs text-slate-500 dark:text-navy-400">{{ __('PNG, JPG, or WebP — max 2 MB. Shown in your account after approval.') }}</p>
+                <input type="file" name="profile_logo" accept="image/png,image/jpeg,image/webp"
+                    x-bind:disabled="membershipType !== 'recipient'"
+                    class="mt-2 block w-full text-sm text-slate-600 file:me-4 file:rounded-lg file:border-0 file:bg-primary/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-primary dark:text-navy-300 dark:file:bg-accent/15 dark:file:text-accent-light" />
+                <x-input-error :messages="$errors->get('profile_logo')" class="mt-2" />
+            </div>
+
             {{-- Basic info: Nationality + ID Type in one row --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>

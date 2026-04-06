@@ -171,12 +171,21 @@
                 <div class="card p-6">
                     <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Provider Info') }}
                     </h3>
-                    <p class="font-medium text-slate-800 dark:text-navy-100">
-                        {{ \App\Support\ProviderDisplay::businessTitle($request->provider->providerProfile, $request->provider->name) }}
-                    </p>
-                    <p class="mt-1 text-sm text-slate-500 dark:text-navy-400">
-                        {{ $request->provider->providerProfile->location ?? __('Location N/A') }}
-                    </p>
+                    @php
+                        $providerCardProfile = $request->provider->providerProfile;
+                        $providerCardTitle = \App\Support\ProviderDisplay::businessTitle($providerCardProfile, $request->provider->name);
+                    @endphp
+                    <div class="flex items-start gap-3">
+                        <x-provider-profile-avatar :profile="$providerCardProfile" :title="$providerCardTitle" />
+                        <div class="min-w-0 flex-1">
+                            <p class="font-medium text-slate-800 dark:text-navy-100">
+                                {{ $providerCardTitle }}
+                            </p>
+                            <p class="mt-1 text-sm text-slate-500 dark:text-navy-400">
+                                {{ $providerCardProfile->location ?? __('Location N/A') }}
+                            </p>
+                        </div>
+                    </div>
 
                     <div class="mt-6 border-t border-slate-200 pt-6 dark:border-navy-600">
                         <p class="text-xs text-slate-400 dark:text-navy-500">{{ __('Request ID') }}: {{ $request->id }}
