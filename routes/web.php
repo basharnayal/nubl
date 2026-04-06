@@ -225,9 +225,14 @@ Route::middleware($authMiddleware)->group(function () {
     Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 });
 
-// Payment callback (no auth — MyFatoorah redirects here)
-Route::get('/payments/callback', [\App\Http\Controllers\PaymentCallbackController::class, 'callback'])->name('payments.callback');
-Route::get('/payments/error', [\App\Http\Controllers\PaymentCallbackController::class, 'error'])->name('payments.error');
+// Payment callback (no auth — MyFatoorah redirects the user's browser here).
+// Rate-limited to prevent abuse (attackers flooding with random IDs to exhaust MyFatoorah API quota).
+Route::get('/payments/callback', [\App\Http\Controllers\PaymentCallbackController::class, 'callback'])
+    ->middleware('throttle:20,1')
+    ->name('payments.callback');
+Route::get('/payments/error', [\App\Http\Controllers\PaymentCallbackController::class, 'error'])
+    ->middleware('throttle:20,1')
+    ->name('payments.error');
 
 // General routes //
 // Pending approval: recipient or provider (blocked from dashboard by EnsureAccountApproved).

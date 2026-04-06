@@ -23,24 +23,32 @@ class SystemWalletService
     ) {}
     /**
      * Add funds to the system wallet when a donor's payment is confirmed.
-     * Call this from DonationService::confirmDonation() (or equivalent) after payment verification.
+     *
+     * IMPORTANT — This method is designed to be called from within an existing
+     * DB::transaction (e.g. PaymentService::processCallbackPaymentState) that
+     * already holds a lockForUpdate on the Payment row. The lock on Payment
+     * serialises concurrent callbacks for the same payment_id, so the
+     * idempotency check here cannot race.
+     *
+     * If called outside a transaction, the idempotency check is still present
+     * but is NOT race-safe on its own.
      *
      * @param  float  $amount  Amount to add (SAR)
      * @param  int  $donorId  User ID of the donor
-     * @param  int|null  $paymentId  Optional payment record ID (when payments table exists)
+     * @param  int|null  $paymentId  Optional payment record ID
      * @return void
      */
     public function addFundsFromDonation(float $amount, int $donorId, ?int $paymentId = null): void
     {
-        // Idempotency: do not create duplicate fund_transaction for same payment
+        // Idempotency: do not create duplicate fund_transaction for same payment.
+        // Safe because the caller holds a FOR UPDATE lock on the Payment row,
+        // serialising concurrent attempts for the same payment_id.
         if ($paymentId !== null && FundTransaction::where('payment_id', $paymentId)->exists()) {
             return;
         }
 
-        // 1. Get the default system wallet
         $systemWallet = Ewallet::where('owner_type', 'SYSTEM')->firstOrFail();
 
-        // 2. Create FundTransaction (balance is calculated from transactions: sum(IN) - sum(OUT))
         FundTransaction::create([
             'wallet_id' => $systemWallet->id,
             'sponsor_id' => $donorId,

@@ -175,9 +175,16 @@ class PaymentService
 
     /**
      * Core callback logic after gateway returned a normalized status (wrapped in try/catch by handleCallback).
+     *
+     * Race-condition safety: uses pessimistic locking (SELECT ... FOR UPDATE) on the Payment row
+     * so that concurrent callbacks for the same invoice are serialised. The idempotency guards
+     * (status check + FundTransaction existence check) now run inside the same DB transaction
+     * that credits the wallet, eliminating the window where two requests could both pass the
+     * guard and create duplicate FundTransactions.
      */
     private function processCallbackPaymentState(string $invoiceId, string $gatewayStatus): RedirectResponse
     {
+        // ── 1. Locate the payment ──────────────────────────────────────────
         $payment = Payment::where('external_payment_id', $invoiceId)->first();
 
         if (! $payment) {
@@ -192,42 +199,54 @@ class PaymentService
             return $this->redirectDonorFailed(null, 'payment_not_found');
         }
 
+        // ── 2. Quick idempotency check (no lock needed — read-only fast path) ─
         if ($payment->status === Payment::STATUS_SUCCEEDED) {
             return redirect()->route('donor.payments.success', ['payment_id' => $payment->id]);
         }
 
-        if (FundTransaction::where('payment_id', $payment->id)->exists()) {
-            $payment->update(['status' => Payment::STATUS_SUCCEEDED]);
-
-            return redirect()->route('donor.payments.success', ['payment_id' => $payment->id]);
-        }
-
+        // ── 3. Gateway says "Paid" → credit funds inside a locked transaction ─
         $status = $gatewayStatus;
 
         if (in_array($status, ['Paid', 'DuplicatePayment'], true)) {
             return DB::transaction(function () use ($payment) {
-                $payment->update([
+
+                // Re-fetch with pessimistic lock to serialise concurrent callbacks
+                $locked = Payment::where('id', $payment->id)->lockForUpdate()->first();
+
+                // Double-check after acquiring lock (another request may have finished first)
+                if ($locked->status === Payment::STATUS_SUCCEEDED) {
+                    return redirect()->route('donor.payments.success', ['payment_id' => $locked->id]);
+                }
+
+                if (FundTransaction::where('payment_id', $locked->id)->exists()) {
+                    $locked->update(['status' => Payment::STATUS_SUCCEEDED]);
+
+                    return redirect()->route('donor.payments.success', ['payment_id' => $locked->id]);
+                }
+
+                $locked->update([
                     'status' => Payment::STATUS_SUCCEEDED,
-                    'notes' => array_merge($payment->notes ?? [], ['callback_verified' => true]),
+                    'notes' => array_merge($locked->notes ?? [], ['callback_verified' => true]),
                 ]);
 
                 $this->systemWallet->addFundsFromDonation(
-                    (float) $payment->amount,
-                    $payment->sponsor_id,
-                    $payment->id
+                    (float) $locked->amount,
+                    $locked->sponsor_id,
+                    $locked->id
                 );
 
-                $this->notificationService->sendDonationReceipt($payment);
+                $this->notificationService->sendDonationReceipt($locked);
 
                 $this->auditService->log('payment', 'succeeded', [
-                    'payment_id' => $payment->id,
-                    'amount' => $payment->amount,
-                ], $payment->sponsor_id);
+                    'payment_id' => $locked->id,
+                    'amount' => $locked->amount,
+                ], $locked->sponsor_id);
 
-                return redirect()->route('donor.payments.success', ['payment_id' => $payment->id]);
+                return redirect()->route('donor.payments.success', ['payment_id' => $locked->id]);
             });
         }
 
+        // ── 4. Gateway returned a non-success status ─────────────────────
         $payment->update([
             'status' => Payment::STATUS_FAILED,
             'notes' => array_merge($payment->notes ?? [], ['callback_status' => $status]),
