@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Http\Services\AuditService;
 use App\Models\FundTransaction;
+use App\Support\FinancialMath;
 
 class FundTransactionObserver
 {
@@ -23,8 +24,10 @@ class FundTransactionObserver
             return;
         }
 
-        $amount = (float) $transaction->amount;
-        if ($amount <= 0) {
+        $amount = FinancialMath::normalize(
+            (string) ($transaction->getRawOriginal('amount') ?? $transaction->amount)
+        );
+        if (FinancialMath::compare($amount, '0.00') <= 0) {
             return;
         }
 
@@ -40,7 +43,7 @@ class FundTransactionObserver
             'wallet_id'            => $transaction->wallet_id,
             'direction'            => $transaction->direction,
             'source'               => $transaction->source,
-            'amount'               => $amount,
+            'amount'               => (float) $amount,
             'payment_id'           => $transaction->payment_id,
             'request_id'           => $transaction->request_id,
             'order_redemption_id'  => $transaction->order_redemption_id,

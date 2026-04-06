@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Services\Admin\AdminFinancialService;
+use App\Support\FinancialMath;
 use Illuminate\View\View;
 
 class FinancialOverviewController extends Controller
@@ -15,7 +16,10 @@ class FinancialOverviewController extends Controller
     public function index(): View
     {
         $overview = $this->financialService->getOverview();
-        $overview['unsuccessful_payments_amount'] = (float) $overview['pending_amount'] + (float) $overview['failed_amount'];
+        $overview['unsuccessful_payments_amount'] = (float) FinancialMath::add(
+            FinancialMath::normalize((string) $overview['pending_amount']),
+            FinancialMath::normalize((string) $overview['failed_amount'])
+        );
         $overview['unsuccessful_payments_count'] = (int) $overview['pending_count'] + (int) $overview['failed_count'];
 
         $chartPayments = $this->buildPaymentsDonutConfig($overview);

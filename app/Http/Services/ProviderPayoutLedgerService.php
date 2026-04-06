@@ -3,6 +3,7 @@
 namespace App\Http\Services;
 
 use App\Models\Ewallet;
+use App\Support\FinancialMath;
 use App\Models\FundTransaction;
 use App\Models\ProviderPayout;
 use Illuminate\Database\Eloquent\Builder;
@@ -62,24 +63,16 @@ class ProviderPayoutLedgerService
 
     public function addDecimal(string $a, string $b): string
     {
-        if (function_exists('bcadd')) {
-            return bcadd($a, $b, 2);
-        }
-
-        return $this->roundDecimal((string) ((float) $a + (float) $b));
+        return FinancialMath::add($a, $b);
     }
 
     public function compare(string $a, string $b): int
     {
-        if (function_exists('bccomp')) {
-            return bccomp($a, $b, 2);
-        }
-
-        return (float) $a <=> (float) $b;
+        return FinancialMath::compare($a, $b);
     }
 
     public function roundDecimal(string $value): string
     {
-        return number_format((float) $value, 2, '.', '');
+        return FinancialMath::normalize($value);
     }
 }

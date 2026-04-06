@@ -3,6 +3,7 @@
 namespace App\Http\Services;
 
 use App\Models\Ewallet;
+use App\Support\FinancialMath;
 use App\Models\FundTransaction;
 use App\Models\ProviderProfile;
 use App\Models\Request as RequestModel;
@@ -88,7 +89,10 @@ class SystemWalletService
     {
         $systemWallet = $this->getSystemWallet();
 
-        return (float) $systemWallet->balance >= $amount;
+        return FinancialMath::compare(
+            FinancialMath::normalize((string) ($systemWallet->getRawOriginal('balance') ?? $systemWallet->balance)),
+            FinancialMath::normalize($amount)
+        ) >= 0;
     }
 
     /**
@@ -103,17 +107,19 @@ class SystemWalletService
      */
     public function transferToProviderForRequest(RequestModel $request, ?int $orderRedemptionId = null): void
     {
-        $amount = (float) $request->reserved_amount;
+        $amount = FinancialMath::normalize(
+            (string) ($request->getRawOriginal('reserved_amount') ?? $request->reserved_amount)
+        );
 
-        if ($amount <= 0) {
+        if (FinancialMath::compare($amount, '0.00') <= 0) {
             return;
         }
 
-        if (! $this->hasSufficientBalance($amount)) {
+        if (! $this->hasSufficientBalance((float) $amount)) {
             throw new \RuntimeException('City fund has insufficient balance for this request.');
         }
 
-        $this->allocationService->allocateToRequest($request->id, $amount);
+        $this->allocationService->allocateToRequest($request->id, (float) $amount);
 
         $systemWallet = $this->getSystemWallet();
 
@@ -129,7 +135,7 @@ class SystemWalletService
             'wallet_id' => $systemWallet->id,
             'sponsor_id' => null,
             'source' => FundTransaction::SOURCE_PAYOUT,
-            'amount' => $amount,
+            'amount' => (float) $amount,
             'direction' => FundTransaction::DIRECTION_OUT,
             'payment_id' => null,
             'request_id' => $request->id,
@@ -140,7 +146,7 @@ class SystemWalletService
             'wallet_id' => $providerWallet->id,
             'sponsor_id' => null,
             'source' => FundTransaction::SOURCE_PAYOUT,
-            'amount' => $amount,
+            'amount' => (float) $amount,
             'direction' => FundTransaction::DIRECTION_IN,
             'payment_id' => null,
             'request_id' => $request->id,
@@ -149,7 +155,7 @@ class SystemWalletService
 
         $this->auditService->log('wallet', 'payout_to_provider', [
             'request_id' => $request->id,
-            'amount' => $amount,
+            'amount' => (float) $amount,
             'provider_id' => $request->provider_id,
         ], auth()->id());
     }

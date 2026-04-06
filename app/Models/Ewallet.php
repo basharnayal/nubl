@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\FinancialMath;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,12 +25,12 @@ class Ewallet extends Model
      * Balance is kept in sync by FundTransactionObserver (updated on each new FundTransaction).
      * Fallback: calculate from fund_transactions if needed.
      */
-    public function getBalanceFromTransactions(): float
+    public function getBalanceFromTransactions(): string
     {
-        $in = $this->fundTransactions()->where('direction', 'IN')->sum('amount');
-        $out = $this->fundTransactions()->where('direction', 'OUT')->sum('amount');
+        $in = (string) $this->fundTransactions()->where('direction', FundTransaction::DIRECTION_IN)->sum('amount');
+        $out = (string) $this->fundTransactions()->where('direction', FundTransaction::DIRECTION_OUT)->sum('amount');
 
-        return (float) ($in - $out);
+        return FinancialMath::sub(FinancialMath::normalize($in), FinancialMath::normalize($out));
     }
 
     /**
