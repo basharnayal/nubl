@@ -1583,5 +1583,6 @@
     "recipient.request_progress.title_admin_approved": "موافقة الإدارة",
     "recipient.request_progress.subtitle_admin_approved": "تمت الموافقة على طلبك. ستظهر أي تحديثات لاحقة هنا.",
     "recipient.request_progress.title_generic": "تفاصيل الطلب",
-    "recipient.request_progress.subtitle_generic": "الحالة والجدول الزمني لهذا الطلب."
+    "recipient.request_progress.subtitle_generic": "الحالة والجدول الزمني لهذا الطلب.",
+    "Login failed. Please check your credentials.": "فشل تسجيل الدخول. يرجى التحقق من بياناتك."
 }

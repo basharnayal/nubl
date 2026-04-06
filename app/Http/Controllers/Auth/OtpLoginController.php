@@ -40,15 +40,9 @@ class OtpLoginController extends Controller
         $normalized = PhoneHelper::normalize($request->input('phone'));
         $user = User::findByPhone($normalized);
 
-        if (! $user) {
+        if (! $user || ! $user->is_active) {
             throw ValidationException::withMessages([
-                'otp_phone' => [__('No account found with this phone number.')],
-            ]);
-        }
-
-        if (! $user->is_active) {
-            throw ValidationException::withMessages([
-                'otp_phone' => [__('Your account has been deactivated. Please contact support.')],
+                'otp_phone' => [__('Login failed. Please check your credentials.')],
             ]);
         }
 
@@ -79,15 +73,9 @@ class OtpLoginController extends Controller
 
         $user = $this->otpService->verifyOtpForLogin($phone, $code);
 
-        if (! $user) {
+        if (! $user || ! $user->is_active) {
             throw ValidationException::withMessages([
-                'otp_code' => [__('The verification code is invalid or has expired.')],
-            ]);
-        }
-
-        if (! $user->is_active) {
-            throw ValidationException::withMessages([
-                'otp_code' => [__('Your account has been deactivated. Please contact support.')],
+                'otp_code' => [__('Login failed. Please check your credentials.')],
             ]);
         }
 

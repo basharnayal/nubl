@@ -36,7 +36,7 @@
                     <tbody>
                         @foreach ($roles as $role)
                             @php
-                                $protected = \App\Rbac\ProtectedRoles::isProtected($role->name);
+                                $protected = \App\Support\ProtectedRoles::isProtected($role->name);
                             @endphp
                             <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
                                 <td class="whitespace-nowrap px-4 py-3 sm:px-5">

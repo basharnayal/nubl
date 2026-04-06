@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Rbac\ProtectedRoles;
+use App\Support\ProtectedRoles;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Spatie\Permission\Models\Role;

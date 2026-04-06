@@ -3,7 +3,7 @@
 namespace App\Http\Services;
 
 use App\Permissions\PermissionDefinitions;
-use App\Rbac\ProtectedRoles;
+use App\Support\ProtectedRoles;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
 use Spatie\Permission\Models\Permission;
