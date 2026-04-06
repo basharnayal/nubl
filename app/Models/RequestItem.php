@@ -17,6 +17,10 @@ class RequestItem extends Model
         'line_total',
     ];
 
+    protected $casts = [
+        'price_snapshot' => 'decimal:2',
+        'line_total' => 'decimal:2',
+    ];
 
     public function request()
     {
