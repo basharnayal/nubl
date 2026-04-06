@@ -160,10 +160,22 @@ class RecipientRequestController extends Controller
 
         $requestModel->update(['status' => 'CANCELLED']);
 
+        $this->auditService->log('request', 'cancelled_by_recipient', [
+            'request_id' => $requestModel->id,
+            'recipient_id' => auth()->id(),
+        ]);
+
         $this->notificationService->sendRequestStatusChangedToProvider(
             $requestModel->load('provider'),
             'CANCELLED'
         );
+
+        $this->auditService->log('notification', 'sent', [
+            'type' => 'request_status_changed',
+            'provider_user_id' => $requestModel->provider_id,
+            'request_id' => $requestModel->id,
+            'status' => 'CANCELLED',
+        ]);
 
         return back()->with('success', __('Request cancelled successfully.'));
     }

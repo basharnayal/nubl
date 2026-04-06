@@ -66,6 +66,13 @@ class ProfileController extends Controller
             ]);
         }
 
+        if ($user->hasRole('recipient') && $changedAttributes !== []) {
+            $this->auditService->log('recipient_account', 'updated', [
+                'user_id' => $user->id,
+                'changed_attributes' => $changedAttributes,
+            ]);
+        }
+
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
@@ -147,6 +154,11 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+
+        $this->auditService->log('account', 'deleted', [
+            'user_id' => $user->id,
+            'membership_type' => $user->membership_type,
+        ], $user->id);
 
         Auth::logout();
 

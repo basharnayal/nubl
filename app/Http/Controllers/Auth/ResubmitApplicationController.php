@@ -21,7 +21,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class ResubmitApplicationController extends Controller
 {
     public function __construct(
-        private AuditService $auditService
+        private AuditService $auditService,
     ) {}
 
     public function edit(Request $request): View|RedirectResponse
@@ -166,6 +166,9 @@ class ResubmitApplicationController extends Controller
         $this->auditService->log('application', 'resubmitted', [
             'user_id' => $user->id,
             'membership_type' => $user->membership_type,
+            'recipient_profile_id' => $profile->id,
+            'id_photo_updated' => (bool) $idPath,
+            'address_confirmation_updated' => (bool) $addrPath,
         ], $user->id);
 
         return redirect()->route('approval.pending')->with('success', __('Your application has been submitted for review.'));

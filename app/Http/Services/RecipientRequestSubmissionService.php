@@ -88,6 +88,13 @@ class RecipientRequestSubmissionService
 
         $this->notificationService->sendNewRequestToProvider($req->load('provider'));
 
+        $this->auditService->log('notification', 'sent', [
+            'type' => 'new_request_to_provider',
+            'provider_user_id' => $providerId,
+            'request_id' => $req->id,
+            'recipient_id' => $user->id,
+        ]);
+
         return $req;
     }
 }

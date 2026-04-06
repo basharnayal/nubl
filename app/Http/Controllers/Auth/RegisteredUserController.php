@@ -27,7 +27,7 @@ class RegisteredUserController extends Controller
     public function __construct(
         private OtpService $otpService,
         private NotificationServiceInterface $notificationService,
-        private AuditService $auditService
+        private AuditService $auditService,
     ) {}
 
     public function create(): View
