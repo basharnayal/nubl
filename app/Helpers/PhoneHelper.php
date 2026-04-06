@@ -68,6 +68,34 @@ class PhoneHelper
     }
 
     /**
+     * Mask digits for logging (PII). Keeps a short prefix + last 2 digits for support correlation.
+     * Example: 966501234567 → 966*******67
+     */
+    public static function maskForLog(?string $phone): string
+    {
+        if ($phone === null || $phone === '') {
+            return '';
+        }
+
+        $digits = preg_replace('/\D/', '', (string) $phone);
+        $len = strlen($digits);
+
+        if ($len <= 4) {
+            return str_repeat('*', $len);
+        }
+
+        $headLen = min(3, $len - 3);
+        $tailLen = 2;
+        $middleLen = $len - $headLen - $tailLen;
+
+        if ($middleLen < 1) {
+            return str_repeat('*', $len);
+        }
+
+        return substr($digits, 0, $headLen).str_repeat('*', $middleLen).substr($digits, -$tailLen);
+    }
+
+    /**
      * Format for display (e.g. +966 50 006 1559).
      */
     public static function formatForDisplay(string $phone): string

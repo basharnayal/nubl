@@ -50,4 +50,14 @@ class PhoneHelperTest extends TestCase
     {
         $this->assertSame('+966 50 123 4567', PhoneHelper::formatForDisplay('0501234567'));
     }
+
+    #[Test]
+    public function mask_for_log_hides_middle_digits(): void
+    {
+        $this->assertSame('966*******67', PhoneHelper::maskForLog('966501234567'));
+        $this->assertSame('966*******67', PhoneHelper::maskForLog('+966 50 123 4567'));
+        $this->assertSame('****', PhoneHelper::maskForLog('1234'));
+        $this->assertSame('', PhoneHelper::maskForLog(''));
+        $this->assertSame('', PhoneHelper::maskForLog(null));
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Services;
 
+use App\Helpers\PhoneHelper;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -98,7 +99,10 @@ class OtpService
         $sent = $this->smsService->send($phone, $body);
 
         if (! $sent) {
-            Log::info('OtpService [fallback]: OTP for user_id=' . $user->id . ' is ' . $otp . ' (SMS not sent – check TAQNYAT_BEARER_TOKEN)');
+            Log::warning('OtpService: SMS send failed; OTP not logged for security', [
+                'user_id' => $user->id,
+                'phone' => PhoneHelper::maskForLog($phone),
+            ]);
         }
 
         return [
@@ -159,7 +163,9 @@ class OtpService
         $sent = $this->smsService->send($normalized, $body);
 
         if (! $sent) {
-            Log::info('OtpService [login fallback]: OTP for phone=' . $normalized . ' is ' . $otp . ' (SMS not sent)');
+            Log::warning('OtpService: login SMS send failed; OTP not logged for security', [
+                'phone' => PhoneHelper::maskForLog($normalized),
+            ]);
         }
 
         return [
