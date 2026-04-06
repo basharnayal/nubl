@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('short_address');
             $table->string('id_type', 50); // national_id, iqama
             $table->string('id_photo_path');
+            $table->string('logo_path', 512)->nullable();
             $table->timestamps();
         });
     }

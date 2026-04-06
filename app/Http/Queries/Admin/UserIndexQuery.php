@@ -10,7 +10,7 @@ class UserIndexQuery
 {
     public function __invoke(Request $request, int $perPage = 15): LengthAwarePaginator
     {
-        $query = User::with(['roles', 'providerProfile']);
+        $query = User::with(['roles', 'providerProfile', 'recipientProfile']);
 
         if ($request->filled('search')) {
             $search = $request->search;
@@ -32,6 +32,15 @@ class UserIndexQuery
             }
         }
 
-        return $query->orderBy('created_at', 'desc')->paginate($perPage)->withQueryString();
+        return $query
+            ->orderByRaw(
+                '(SELECT COUNT(*) FROM model_has_roles mhr
+                INNER JOIN roles r ON r.id = mhr.role_id
+                WHERE mhr.model_id = users.id AND mhr.model_type = ? AND r.name = ?) DESC',
+                [User::class, 'admin']
+            )
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage)
+            ->withQueryString();
     }
 }

@@ -22,19 +22,13 @@
         <!-- Bottom: User Profile -->
         <div class="flex flex-col items-center space-y-3 py-3">
             <div x-data="usePopper({ placement: '{{ app()->getLocale() === 'ar' ? 'left-end' : 'right-end' }}', offset: 12 })" @click.outside="if(isShowPopper) isShowPopper = false" class="flex">
-                <button @click="isShowPopper = !isShowPopper" x-ref="popperRef" class="avatar size-12 cursor-pointer">
-                    <div class="is-initial flex size-12 items-center justify-center rounded-full bg-primary text-white dark:bg-accent">
-                        {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
-                    </div>
+                <button @click="isShowPopper = !isShowPopper" x-ref="popperRef" class="cursor-pointer">
+                    <x-user-avatar :user="Auth::user()" size-class="size-12" />
                 </button>
                 <div :class="isShowPopper && 'show'" class="popper-root fixed" x-ref="popperRoot">
                     <div class="popper-box w-64 rounded-lg border border-slate-150 bg-white shadow-soft dark:border-navy-600 dark:bg-navy-700">
                         <div class="flex items-center space-x-4 rounded-t-lg bg-slate-100 py-5 px-4 dark:bg-navy-800">
-                            <div class="avatar size-14">
-                                <div class="is-initial flex size-14 items-center justify-center rounded-full bg-primary text-white dark:bg-accent">
-                                    {{ strtoupper(substr(Auth::user()->name ?? 'U', 0, 1)) }}
-                                </div>
-                            </div>
+                            <x-user-avatar :user="Auth::user()" size-class="size-14" />
                             <div>
                                 <a href="{{ route('profile.edit') }}" class="text-base font-medium text-slate-700 hover:text-primary focus:text-primary dark:text-navy-100 dark:hover:text-accent-light dark:focus:text-accent-light">
                                     {{ Auth::user()->name }}

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProfilePhotoRequest;
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\User;
 use App\Http\Requests\UpdateProviderBusinessProfileRequest;
 use App\Http\Requests\UpdateProviderFinancialProfileRequest;
 use App\Http\Services\AuditService;
@@ -11,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -27,16 +30,22 @@ class ProfileController extends Controller
         $user = $request->user();
         $providerProfile = null;
         $providerFinancial = null;
+        $recipientProfile = null;
         if ($user->hasRole('provider')) {
             $user->loadMissing(['providerProfile', 'providerFinancialInfo']);
             $providerProfile = $user->providerProfile;
             $providerFinancial = $user->providerFinancialInfo;
+        }
+        if ($user->hasRole('recipient')) {
+            $user->loadMissing('recipientProfile');
+            $recipientProfile = $user->recipientProfile;
         }
 
         return view('profile.edit', [
             'user' => $user,
             'providerProfile' => $providerProfile,
             'providerFinancial' => $providerFinancial,
+            'recipientProfile' => $recipientProfile,
         ]);
     }
 
@@ -46,7 +55,7 @@ class ProfileController extends Controller
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
         $user = $request->user();
-        $user->fill($request->validated());
+        $user->fill($request->safe()->only(['name', 'email']));
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;
@@ -74,6 +83,61 @@ class ProfileController extends Controller
         }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * Upload or remove profile photo (separate from name/email update).
+     */
+    public function uploadPhoto(ProfilePhotoRequest $request): RedirectResponse
+    {
+        $user = $request->user();
+        $user->loadMissing(['providerProfile', 'recipientProfile']);
+
+        DB::transaction(function () use ($request, $user) {
+            $this->syncProfilePhoto($request, $user);
+        });
+
+        return Redirect::route('profile.edit')->with('status', 'profile-photo-updated');
+    }
+
+    /**
+     * Store or remove profile logo on public disk (same pattern as menu item images).
+     */
+    private function syncProfilePhoto(Request $request, User $user): void
+    {
+        $profile = null;
+        $folder = '';
+
+        if ($user->hasRole('provider') && $user->providerProfile) {
+            $profile = $user->providerProfile;
+            $folder = 'provider-logos';
+        } elseif ($user->hasRole('recipient') && $user->recipientProfile) {
+            $profile = $user->recipientProfile;
+            $folder = 'recipient-logos';
+        }
+
+        if ($profile === null) {
+            return;
+        }
+
+        $currentPath = $profile->logo_path;
+
+        if ($request->hasFile('profile_logo')) {
+            $newPath = $request->file('profile_logo')->store($folder, 'public');
+            if ($currentPath && Storage::disk('public')->exists($currentPath)) {
+                Storage::disk('public')->delete($currentPath);
+            }
+            $profile->update(['logo_path' => $newPath]);
+
+            return;
+        }
+
+        if ($request->boolean('remove_profile_logo')) {
+            if ($currentPath && Storage::disk('public')->exists($currentPath)) {
+                Storage::disk('public')->delete($currentPath);
+            }
+            $profile->update(['logo_path' => null]);
+        }
     }
 
     /**

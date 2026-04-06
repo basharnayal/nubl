@@ -23,9 +23,7 @@
                             tabindex="0"
                             aria-label="{{ __('View menu for') }} {{ $profile->full_name_en ?? $profile->full_name_ar ?? $provider->name }}">
                             <div class="flex min-w-0 flex-1 flex-row gap-3 sm:contents">
-                                <div class="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-sm font-bold text-primary dark:bg-accent/15 dark:text-accent-light sm:size-14">
-                                    {{ \App\Support\ProviderDisplay::initials($listTitle) }}
-                                </div>
+                                <x-provider-profile-avatar :profile="$profile" :title="$listTitle" />
                                 <div class="min-w-0 flex-1">
                                     <h3 class="text-base font-semibold text-slate-800 dark:text-navy-100 sm:text-lg">
                                         {{ $listTitle }}

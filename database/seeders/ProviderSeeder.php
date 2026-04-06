@@ -108,6 +108,7 @@ class ProviderSeeder extends Seeder
                     'city' => 'Riyadh',
                     'region' => 'western',
                     'location' => 'Riyadh, King Fahd Road',
+                    'logo_path' => 'provider-logos/panda.png',
                 ],
                 'operating' => [
                     'daily_capacity' => 200,
@@ -141,6 +142,7 @@ class ProviderSeeder extends Seeder
                     'city' => 'Riyadh',
                     'region' => 'western',
                     'location' => 'Jeddah, Al Zahra',
+                    'logo_path' => 'provider-logos/Danube.png',
                 ],
                 'operating' => [
                     'daily_capacity' => 150,
@@ -174,6 +176,7 @@ class ProviderSeeder extends Seeder
                     'city' => 'medina',
                     'region' => 'western',
                     'location' => 'Medina',
+                    'logo_path' => 'provider-logos/McDonald\'s.png',
                 ],
                 'operating' => [
                     'daily_capacity' => 120,
@@ -207,6 +210,7 @@ class ProviderSeeder extends Seeder
                     'city' => 'Riyadh',
                     'region' => 'western',
                     'location' => 'Riyadh, Olaya',
+                    'logo_path' => 'provider-logos/Carrefour.jpg',
                 ],
                 'operating' => [
                     'daily_capacity' => 250,
@@ -241,6 +245,7 @@ class ProviderSeeder extends Seeder
                     'city' => 'Riyadh',
                     'region' => 'western',
                     'location' => 'Riyadh — An Nasim Al Gharbi',
+                    'logo_path' => 'provider-logos/shawarma house.png',
                 ],
                 'operating' => [
                     'daily_capacity' => 200,
@@ -308,6 +313,22 @@ class ProviderSeeder extends Seeder
                     'id_or_iqama_path' => 'provider_documents/seed-id-placeholder',
                 ]);
             }
+        }
+
+        // Demo logos under storage/app/public/provider-logos/ — sync paths for existing profiles seeded before logo_path existed
+        $demoLogos = [
+            'panda@nubl.com' => 'provider-logos/panda.png',
+            'danube@nubl.com' => 'provider-logos/Danube.png',
+            'mcdonalds@nubl.com' => 'provider-logos/McDonald\'s.png',
+            'carrefour@nubl.com' => 'provider-logos/Carrefour.jpg',
+            'shawarmahouse@nubl.com' => 'provider-logos/shawarma house.png',
+        ];
+        foreach ($demoLogos as $email => $logoPath) {
+            User::query()
+                ->where('email', $email)
+                ->first()
+                ?->providerProfile
+                ?->update(['logo_path' => $logoPath]);
         }
     }
 }
