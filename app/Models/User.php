@@ -95,6 +95,14 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * Bank payout requests for this provider (weekly settlement queue).
+     */
+    public function providerPayouts(): HasMany
+    {
+        return $this->hasMany(ProviderPayout::class, 'provider_id');
+    }
+
+    /**
      * Check if the user has full access (not pending approval).
      */
     public function hasFullAccess(): bool

@@ -59,6 +59,10 @@ class SidebarPanel
                                 'title' => __('finance.nav.summary_reports'),
                                 'route_name' => 'admin.finances.summary-reports.index',
                             ],
+                            'admin_finances_provider_payouts' => [
+                                'title' => __('finance.nav.provider_payouts'),
+                                'route_name' => 'admin.finances.provider-payouts.index',
+                            ],
                         ],
                     ],
                     'admin_settings' => [
@@ -92,6 +96,10 @@ class SidebarPanel
                     'provider_dashboard' => [
                         'title' => __('Dashboard'),
                         'route_name' => 'provider.dashboard',
+                    ],
+                    'provider_wallet' => [
+                        'title' => __('provider.wallet.nav'),
+                        'route_name' => 'provider.wallet.index',
                     ],
                     'provider_requests' => [
                         'title' => __('Fulfillments'),

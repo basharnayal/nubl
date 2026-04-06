@@ -72,6 +72,16 @@ return [
             'icon_svg' => 'bell',
             'subtitle' => 'Weekly allowance',
         ],
+        'provider_payout_pending_review' => [
+            'icon' => 'warning',
+            'icon_svg' => 'clock',
+            'subtitle' => 'notifications.provider_payout_pending_review_subtitle',
+        ],
+        'provider_payout_transferred' => [
+            'icon' => 'success',
+            'icon_svg' => 'check-circle',
+            'subtitle' => 'notifications.provider_payout_transferred_subtitle',
+        ],
     ],
 
     /*

@@ -16,6 +16,7 @@ class FundTransaction extends Model
         'payment_id',
         'request_id',
         'order_redemption_id',
+        'provider_payout_id',
     ];
 
     protected $casts = [
@@ -34,6 +35,9 @@ class FundTransaction extends Model
     public const SOURCE_CANCELLED = 'CANCELLED';
 
     public const SOURCE_PAYOUT = 'PAYOUT';
+
+    /** External bank withdrawal from provider wallet after admin confirms transfer (distinct from internal city-fund → provider credit). */
+    public const SOURCE_PROVIDER_BANK_PAYOUT = 'PROVIDER_BANK_PAYOUT';
 
     public const DIRECTION_IN = 'IN';
 
@@ -65,5 +69,10 @@ class FundTransaction extends Model
     public function orderRedemption(): BelongsTo
     {
         return $this->belongsTo(OrderRedemption::class, 'order_redemption_id');
+    }
+
+    public function providerPayout(): BelongsTo
+    {
+        return $this->belongsTo(ProviderPayout::class);
     }
 }

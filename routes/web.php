@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\AllowanceSettingsController;
 use App\Http\Controllers\Admin\FinancialOverviewController;
 use App\Http\Controllers\Admin\FinancialReportController;
+use App\Http\Controllers\Admin\ProviderPayoutController;
 use App\Http\Controllers\Admin\QrSettingsController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SummaryReportController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\Auth\ProviderRegistrationController;
 use App\Http\Controllers\Auth\ResubmitApplicationController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Provider\ProviderDashboardController;
+use App\Http\Controllers\Provider\ProviderWalletController;
 use App\Http\Controllers\Recipient\RecipientController;
 use Illuminate\Support\Facades\Route;
 
@@ -124,6 +126,14 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin'
             // FR-19.1: auto-generated weekly / monthly summary reports
             Route::get('/summary-reports', [SummaryReportController::class, 'index'])->name('summary-reports.index');
             Route::get('/summary-reports/{summaryReport}/download', [SummaryReportController::class, 'download'])->name('summary-reports.download');
+
+            Route::get('/provider-payouts', [ProviderPayoutController::class, 'index'])->name('provider-payouts.index');
+            Route::get('/provider-payouts/{provider_payout}', [ProviderPayoutController::class, 'show'])->name('provider-payouts.show');
+            Route::post('/provider-payouts/{provider_payout}/receipt', [ProviderPayoutController::class, 'storeReceipt'])->name('provider-payouts.receipt.store');
+            Route::get('/provider-payouts/{provider_payout}/receipt-file', [ProviderPayoutController::class, 'receiptFile'])->name('provider-payouts.receipt.file');
+            Route::post('/provider-payouts/{provider_payout}/confirm', [ProviderPayoutController::class, 'confirm'])->name('provider-payouts.confirm');
+            Route::post('/provider-payouts/{provider_payout}/reject', [ProviderPayoutController::class, 'reject'])->name('provider-payouts.reject');
+            Route::post('/provider-payouts/{provider_payout}/cancel', [ProviderPayoutController::class, 'cancel'])->name('provider-payouts.cancel');
         });
     });
 
@@ -139,6 +149,10 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:provid
             ->name('application');
 
         Route::get('/dashboard', ProviderDashboardController::class)->name('dashboard');
+
+        Route::get('/wallet', [ProviderWalletController::class, 'index'])->name('wallet.index');
+        Route::get('/wallet/payouts/{provider_payout}/receipt', [ProviderWalletController::class, 'downloadReceipt'])
+            ->name('wallet.payout-receipt');
 
         // Provider Menu Management (ECS-62)
         Route::resource('menu-items', \App\Http\Controllers\Provider\MenuItemController::class);

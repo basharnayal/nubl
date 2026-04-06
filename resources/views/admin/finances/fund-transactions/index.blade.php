@@ -32,7 +32,7 @@
                 </select>
                 <select name="source" class="form-select form-select-lineone w-full">
                     <option value="">{{ __('finance.ledger.source') }}</option>
-                    @foreach([FundTransaction::SOURCE_DONATION, FundTransaction::SOURCE_PAYOUT, FundTransaction::SOURCE_REDEMPTION, FundTransaction::SOURCE_REFUND, FundTransaction::SOURCE_EXPIRY_ROLLBACK, FundTransaction::SOURCE_CANCELLED] as $src)
+                    @foreach([FundTransaction::SOURCE_DONATION, FundTransaction::SOURCE_PAYOUT, FundTransaction::SOURCE_REDEMPTION, FundTransaction::SOURCE_REFUND, FundTransaction::SOURCE_EXPIRY_ROLLBACK, FundTransaction::SOURCE_CANCELLED, FundTransaction::SOURCE_PROVIDER_BANK_PAYOUT] as $src)
                         <option value="{{ $src }}" {{ request('source') === $src ? 'selected' : '' }}>{{ __('finance.source_code.'.$src) }}</option>
                     @endforeach
                 </select>
