@@ -23,7 +23,7 @@
         <main class="grid min-h-screen w-full grow grid-cols-1 place-items-center px-4 py-6">
             {{-- Locale switcher --}}
             <div class="absolute top-4 {{ app()->getLocale() === 'ar' ? 'left-4' : 'right-4' }} z-20 flex items-center gap-2">
-                <a href="{{ route('locale.switch', 'en') }}" class="text-sm {{ app()->getLocale() === 'en' ? 'font-semibold text-primary dark:text-accent-light' : 'text-slate-500 hover:text-slate-700 dark:text-navy-400 dark:hover:text-navy-200' }}">English</a>
+                <a href="{{ route('locale.switch', 'en') }}" class="text-sm {{ app()->getLocale() === 'en' ? 'font-semibold text-primary dark:text-accent-light' : 'text-slate-500 hover:text-slate-700 dark:text-navy-400 dark:hover:text-navy-200' }}">{{ __('English') }}</a>
                 <span class="text-slate-300 dark:text-navy-500">|</span>
                 <a href="{{ route('locale.switch', 'ar') }}" class="text-sm {{ app()->getLocale() === 'ar' ? 'font-semibold text-primary dark:text-accent-light' : 'text-slate-500 hover:text-slate-700 dark:text-navy-400 dark:hover:text-navy-200' }}">{{ __('Arabic') }}</a>
             </div>

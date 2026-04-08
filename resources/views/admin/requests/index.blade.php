@@ -140,7 +140,7 @@
     <script>
         function openReviewModal(request, items) {
             document.getElementById('modal-req-id').textContent = request.id;
-            document.getElementById('modal-total').textContent = parseFloat(request.reserved_amount).toFixed(2) + ' SAR';
+            document.getElementById('modal-total').textContent = parseFloat(request.reserved_amount).toFixed(2) + ' {{ __('SAR') }}';
 
             const list = document.getElementById('modal-items-list');
             list.innerHTML = '';

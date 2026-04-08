@@ -27,7 +27,7 @@
                     <div :class="isShowPopper && 'show'" class="popper-root fixed z-[9999]" x-ref="popperRoot">
                         <div class="popper-box mx-4 mt-1 flex flex-col rounded-lg border border-slate-150 bg-white shadow-soft dark:border-navy-800 dark:bg-navy-700 dark:shadow-soft-dark sm:m-0 min-w-[120px]">
                             <a href="{{ route('locale.switch', 'en') }}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-100 dark:text-navy-100 dark:hover:bg-navy-600 {{ app()->getLocale() === 'en' ? 'bg-primary/10 text-primary dark:bg-accent-light/15 dark:text-accent-light font-medium' : '' }}">
-                                English
+                                {{ __('English') }}
                             </a>
                             <a href="{{ route('locale.switch', 'ar') }}" class="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-100 dark:text-navy-100 dark:hover:bg-navy-600 {{ app()->getLocale() === 'ar' ? 'bg-primary/10 text-primary dark:bg-accent-light/15 dark:text-accent-light font-medium' : '' }}">
                                 {{ __('Arabic') }}
