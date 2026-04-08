@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreRoleRequest;
 use App\Http\Requests\Admin\UpdateRoleRequest;
-use App\Http\Services\RoleManagementService;
+use App\Services\RoleManagementService;
 use App\Support\ProtectedRoles;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;

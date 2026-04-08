@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Provider;
 use App\Contracts\NotificationServiceInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Provider\StoreProviderProofRequest;
-use App\Http\Services\AuditService;
 use App\Models\OrderProof;
 use App\Models\OrderRedemption;
+use App\Services\AuditService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 

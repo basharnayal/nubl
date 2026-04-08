@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Services\Admin\AdminFinancialService;
 use App\Models\SummaryReport;
+use App\Services\Admin\AdminFinancialService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 

@@ -2,14 +2,14 @@
 
 namespace Tests\Unit\Donor;
 
-use App\Http\Services\AllocationService;
-use App\Http\Services\AuditService;
 use App\Models\Ewallet;
 use App\Models\Payment;
 use App\Models\ProviderMenuItem;
 use App\Models\Request as RequestModel;
 use App\Models\RequestPaymentLink;
 use App\Models\User;
+use App\Services\AllocationService;
+use App\Services\AuditService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;

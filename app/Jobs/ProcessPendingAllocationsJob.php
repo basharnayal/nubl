@@ -2,9 +2,9 @@
 
 namespace App\Jobs;
 
-use App\Http\Services\AllocationService;
-use App\Http\Services\AuditService;
 use App\Models\PendingAllocation;
+use App\Services\AllocationService;
+use App\Services\AuditService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\DB;

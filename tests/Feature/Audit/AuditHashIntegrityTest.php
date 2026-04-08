@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Audit;
 
-use App\Http\Services\AuditService;
 use App\Models\Activity;
 use App\Models\User;
+use App\Services\AuditService;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;

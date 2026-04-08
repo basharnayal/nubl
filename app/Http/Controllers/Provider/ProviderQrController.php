@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Provider;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Provider\RedeemProviderQrRequest;
-use App\Http\Services\RedemptionService;
+use App\Services\RedemptionService;
 use Illuminate\Support\Facades\RateLimiter;
 
 class ProviderQrController extends Controller

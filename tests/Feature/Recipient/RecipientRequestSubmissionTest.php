@@ -307,9 +307,9 @@ class RecipientRequestSubmissionTest extends TestCase
 
         $job = new ProcessRecipientAllowanceRetryJob($this->recipient->id);
         $job->handle(
-            app(\App\Http\Services\RecipientRequestSubmissionService::class),
-            app(\App\Http\Services\AllocationService::class),
-            app(\App\Http\Services\AuditService::class)
+            app(\App\Services\RecipientRequestSubmissionService::class),
+            app(\App\Services\AllocationService::class),
+            app(\App\Services\AuditService::class)
         );
 
         $this->assertDatabaseCount('requests', 2);

@@ -2,9 +2,9 @@
 
 namespace Tests\Unit\Auth;
 
-use App\Http\Services\OtpService;
-use App\Http\Services\SmsService;
 use App\Models\User;
+use App\Services\OtpService;
+use App\Services\SmsService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Mockery;

@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Services;
 
 use App\Models\Payment;
-use App\Support\FinancialMath;
 use App\Models\PendingAllocation;
 use App\Models\Request as RequestModel;
 use App\Models\RequestPaymentLink;
 use App\Models\SystemSetting;
+use App\Support\FinancialMath;
 
 class AllocationService
 {

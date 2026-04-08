@@ -6,9 +6,9 @@ use App\Contracts\NotificationServiceInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Provider\IndexProviderRequestsRequest;
 use App\Http\Requests\Provider\UpdateProviderRequestActionRequest;
-use App\Http\Services\AuditService;
-use App\Http\Services\SystemWalletService;
 use App\Models\Request as RequestModel;
+use App\Services\AuditService;
+use App\Services\SystemWalletService;
 use Illuminate\Support\Facades\DB;
 
 class ProviderRequestController extends Controller
@@ -158,7 +158,7 @@ class ProviderRequestController extends Controller
                     'status' => 'APPROVED',
                     'funding_source' => 'PROVIDER_ADOPTION',
                 ]);
-                \App\Http\Services\RedemptionService::generateForRequest($requestModel);
+                \App\Services\RedemptionService::generateForRequest($requestModel);
                 // FR-22.2: explicit audit — adopting provider is credited as donor for this request
                 $this->auditService->log('request', 'provider_credited_as_donor', [
                     'request_id' => $requestModel->id,
@@ -184,7 +184,7 @@ class ProviderRequestController extends Controller
                     'status' => 'REDEEMABLE',
                     'funding_source' => 'CITY_FUND',
                 ]);
-                \App\Http\Services\RedemptionService::generateForRequest($requestModel);
+                \App\Services\RedemptionService::generateForRequest($requestModel);
                 $this->auditService->log('request', 'approved_city_fund', [
                     'request_id' => $requestModel->id,
                     'provider_user_id' => auth()->id(),

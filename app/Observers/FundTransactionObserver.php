@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Http\Services\AuditService;
 use App\Models\FundTransaction;
+use App\Services\AuditService;
 use App\Support\FinancialMath;
 
 class FundTransactionObserver

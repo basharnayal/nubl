@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Recipient;
 
 use App\Http\Controllers\Controller;
-use App\Http\Services\RecipientAllowanceService;
 use App\Models\ProviderMenuItem;
 use App\Models\User;
+use App\Services\RecipientAllowanceService;
 use Illuminate\Http\Request;
 
 class ProviderMenuController extends Controller

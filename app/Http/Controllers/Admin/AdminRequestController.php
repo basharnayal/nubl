@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Contracts\NotificationServiceInterface;
 use App\Http\Controllers\Controller;
-use App\Http\Services\AuditService;
 use App\Models\Request as RequestModel;
+use App\Services\AuditService;
 use Illuminate\Http\Request;
 
 class AdminRequestController extends Controller

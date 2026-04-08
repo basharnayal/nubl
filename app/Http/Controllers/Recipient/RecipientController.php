@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Recipient;
 
 use App\Http\Controllers\Controller;
-use App\Http\Services\RecipientAllowanceService;
 use App\Models\Request as RequestModel;
 use App\Models\User;
+use App\Services\RecipientAllowanceService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\View\View;

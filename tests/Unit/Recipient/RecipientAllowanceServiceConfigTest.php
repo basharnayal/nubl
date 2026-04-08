@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Recipient;
 
-use App\Http\Services\RecipientAllowanceService;
+use App\Services\RecipientAllowanceService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;

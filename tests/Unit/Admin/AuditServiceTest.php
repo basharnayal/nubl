@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Admin;
 
-use App\Http\Services\AuditService;
 use App\Models\User;
+use App\Services\AuditService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use PHPUnit\Framework\Attributes\Test;

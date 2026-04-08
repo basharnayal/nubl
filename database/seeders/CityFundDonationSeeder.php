@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Http\Services\SystemWalletService;
 use App\Models\FundTransaction;
 use App\Models\Payment;
 use App\Models\User;
+use App\Services\SystemWalletService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 

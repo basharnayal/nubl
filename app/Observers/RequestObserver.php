@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Http\Services\AuditService;
 use App\Models\Request as RequestModel;
+use App\Services\AuditService;
 
 /**
  * Central audit for request status transitions (actor + timestamp via Spatie activity).

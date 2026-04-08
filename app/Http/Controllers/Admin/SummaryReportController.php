@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Services\Admin\SummaryReportExportService;
 use App\Models\SummaryReport;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -16,7 +15,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class SummaryReportController extends Controller
 {
     public function __construct(
-        private readonly SummaryReportExportService $exporter
+        private readonly \App\Services\Admin\SummaryReportExportService $exporter
     ) {}
 
     public function index(Request $request): View

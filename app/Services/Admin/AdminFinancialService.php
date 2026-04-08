@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Services\Admin;
+namespace App\Services\Admin;
 
 use App\Models\Ewallet;
-use App\Support\FinancialMath;
 use App\Models\FundTransaction;
 use App\Models\OrderRedemption;
 use App\Models\Payment;
 use App\Models\Request as RequestModel;
 use App\Models\User;
+use App\Support\FinancialMath;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 

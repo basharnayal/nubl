@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Recipient;
 
-use App\Http\Services\RecipientAllowanceService;
 use App\Models\ProviderMenuItem;
 use App\Models\Request as RequestModel;
 use App\Models\User;
+use App\Services\RecipientAllowanceService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;

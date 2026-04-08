@@ -5,13 +5,13 @@ namespace App\Http\Controllers\Recipient;
 use App\Contracts\NotificationServiceInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Recipient\StoreRecipientRequest;
-use App\Http\Services\AllocationService;
-use App\Http\Services\AuditService;
-use App\Http\Services\RecipientAllowanceService;
-use App\Http\Services\RecipientRequestSubmissionService;
 use App\Jobs\ProcessRecipientAllowanceRetryJob;
 use App\Jobs\ProcessRecipientFundRetryJob;
 use App\Models\Request as RequestModel;
+use App\Services\AllocationService;
+use App\Services\AuditService;
+use App\Services\RecipientAllowanceService;
+use App\Services\RecipientRequestSubmissionService;
 use App\Support\RecipientAllowanceRetryCache;
 use App\Support\RecipientFundRetryCache;
 use App\Support\RecipientRequestSubmitCooldown;
@@ -137,7 +137,7 @@ class RecipientRequestController extends Controller
 
         // Ensure redemption token exists for APPROVED/REDEEMABLE (e.g. legacy APPROVED orders)
         if (in_array($request->status, ['APPROVED', 'REDEEMABLE']) && ! $request->redemption) {
-            \App\Http\Services\RedemptionService::generateForRequest($request);
+            \App\Services\RedemptionService::generateForRequest($request);
             $request->load('redemption');
         }
 

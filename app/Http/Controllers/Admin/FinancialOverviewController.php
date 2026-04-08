@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Services\Admin\AdminFinancialService;
+use App\Services\Admin\AdminFinancialService;
 use App\Support\FinancialMath;
 use Illuminate\View\View;
 

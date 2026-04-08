@@ -4,8 +4,6 @@ namespace App\Providers;
 
 use App\Contracts\AllocationEngineServiceInterface;
 use App\Contracts\NotificationServiceInterface;
-use App\Http\Services\AllocationEngineService;
-use App\Http\Services\NotificationService;
 use App\Http\View\Composers\SidebarComposer;
 use App\Models\FundTransaction;
 use App\Models\Request as RequestModel;
@@ -13,6 +11,8 @@ use App\Models\User;
 use App\Observers\FundTransactionObserver;
 use App\Observers\RequestObserver;
 use App\Observers\UserObserver;
+use App\Services\AllocationEngineService;
+use App\Services\NotificationService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;

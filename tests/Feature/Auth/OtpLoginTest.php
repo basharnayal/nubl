@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Http\Services\SmsService;
 use App\Models\User;
+use App\Services\SmsService;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;

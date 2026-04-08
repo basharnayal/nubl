@@ -128,7 +128,7 @@ class PhoneVerificationTest extends TestCase
 
     public function test_resend_otp_succeeds_and_updates_cache(): void
     {
-        $this->mock(\App\Http\Services\SmsService::class, function ($mock) {
+        $this->mock(\App\Services\SmsService::class, function ($mock) {
             $mock->shouldReceive('send')->once()->andReturn(true);
         });
 
@@ -153,7 +153,7 @@ class PhoneVerificationTest extends TestCase
 
     public function test_resend_otp_fails_when_rate_limit_exceeded(): void
     {
-        $this->mock(\App\Http\Services\SmsService::class, function ($mock) {
+        $this->mock(\App\Services\SmsService::class, function ($mock) {
             $mock->shouldNotReceive('send');
         });
 

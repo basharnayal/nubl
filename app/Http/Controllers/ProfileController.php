@@ -4,10 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfilePhotoRequest;
 use App\Http\Requests\ProfileUpdateRequest;
-use App\Models\User;
 use App\Http\Requests\UpdateProviderBusinessProfileRequest;
 use App\Http\Requests\UpdateProviderFinancialProfileRequest;
-use App\Http\Services\AuditService;
+use App\Models\User;
+use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

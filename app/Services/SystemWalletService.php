@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Services;
 
 use App\Models\Ewallet;
-use App\Support\FinancialMath;
 use App\Models\FundTransaction;
 use App\Models\ProviderProfile;
 use App\Models\Request as RequestModel;
+use App\Support\FinancialMath;
 
 /**
  * Handles operations on the system's default wallet (Ewallet with owner_type = SYSTEM).

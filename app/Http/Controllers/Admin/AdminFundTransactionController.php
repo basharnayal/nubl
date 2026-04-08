@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Queries\Admin\AdminFundTransactionIndexQuery;
-use App\Http\Services\AuditService;
 use App\Models\FundTransaction;
+use App\Services\AuditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;

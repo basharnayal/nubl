@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Donor;
 
 use App\Http\Controllers\Controller;
-use App\Http\Services\PaymentService;
 use App\Models\Payment;
+use App\Services\PaymentService;
 use Illuminate\Http\Request;
 
 class DonationController extends Controller

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Services;
 
 use App\Models\Ewallet;
-use App\Support\FinancialMath;
 use App\Models\FundTransaction;
 use App\Models\ProviderPayout;
+use App\Support\FinancialMath;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;

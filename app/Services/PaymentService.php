@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Services;
 
 use App\Contracts\NotificationServiceInterface;
 use App\Models\FundTransaction;

@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Http\Services\RedemptionService;
 use App\Models\Request as RequestModel;
 use App\Models\SystemSetting;
 use App\Models\User;
+use App\Services\RedemptionService;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;

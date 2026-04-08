@@ -2,13 +2,12 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Http\Services\AllocationService;
-use App\Notifications\AllocationEngineStatusChangedNotification;
 use App\Models\Payment;
-use App\Models\PendingAllocation;
 use App\Models\Request as RequestModel;
 use App\Models\SystemSetting;
 use App\Models\User;
+use App\Notifications\AllocationEngineStatusChangedNotification;
+use App\Services\AllocationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\Activitylog\Models\Activity;

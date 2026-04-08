@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Services;
+namespace App\Services;
 
 use App\Helpers\PhoneHelper;
 use Illuminate\Support\Facades\Log;

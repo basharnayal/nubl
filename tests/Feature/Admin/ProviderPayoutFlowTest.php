@@ -2,13 +2,13 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Http\Services\ProviderPayoutGenerationService;
 use App\Models\Ewallet;
 use App\Models\FundTransaction;
 use App\Models\Payment;
 use App\Models\ProviderPayout;
 use App\Models\ProviderProfile;
 use App\Models\User;
+use App\Services\ProviderPayoutGenerationService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;

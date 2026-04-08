@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Admin;
 
-use App\Http\Services\RecipientAllowanceService;
 use App\Models\SystemSetting;
 use App\Models\User;
 use App\Notifications\WeeklyAllowanceNotification;
+use App\Services\RecipientAllowanceService;
 use App\Support\WeeklyAllowanceSettings;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;

@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Services\ProviderPayoutGenerationService;
+use App\Services\ProviderPayoutGenerationService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 

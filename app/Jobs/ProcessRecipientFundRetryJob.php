@@ -2,11 +2,11 @@
 
 namespace App\Jobs;
 
-use App\Http\Services\AllocationService;
-use App\Http\Services\AuditService;
-use App\Http\Services\RecipientAllowanceService;
-use App\Http\Services\RecipientRequestSubmissionService;
 use App\Models\User;
+use App\Services\AllocationService;
+use App\Services\AuditService;
+use App\Services\RecipientAllowanceService;
+use App\Services\RecipientRequestSubmissionService;
 use App\Support\RecipientFundRetryCache;
 use App\Support\RecipientRequestSubmitCooldown;
 use Illuminate\Contracts\Queue\ShouldQueue;
