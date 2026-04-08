@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\GenerateSummaryReportCommand;
+use App\Console\Commands\VerifyActivityLogIntegrityCommand;
 use Carbon\Carbon;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
@@ -22,6 +23,13 @@ Schedule::command(GenerateSummaryReportCommand::class, ['--type=monthly'])
     ->monthlyOn(1, '06:00')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/report-monthly.log'));
+
+// FR-13.2: Verify activity_log SHA-256 hashes (tamper detection).
+Schedule::command(VerifyActivityLogIntegrityCommand::class)
+    ->dailyAt('03:00')
+    ->timezone(config('app.timezone'))
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/activity-log-integrity.log'));
 
 // Weekly provider bank payout requests (Sun 00:00, app timezone — set APP_TIMEZONE=Asia/Riyadh for KSA).
 // Schedule::command('provider-payouts:generate-weekly')

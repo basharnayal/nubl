@@ -8,7 +8,6 @@ use App\Services\AuditService;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Arr;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -78,23 +77,7 @@ class AuditHashIntegrityTest extends TestCase
 
         $entry = Activity::latest()->first();
 
-        // Re-compute the same way Activity::computeEntryHash does
-        $data = [
-            'batch_uuid'   => $entry->batch_uuid,
-            'causer_id'    => $entry->causer_id,
-            'causer_type'  => $entry->causer_type,
-            'description'  => $entry->description,
-            'event'        => $entry->event,
-            'log_name'     => $entry->log_name,
-            'properties'   => $entry->properties instanceof \Illuminate\Support\Collection
-                ? $entry->properties->toArray()
-                : Arr::wrap($entry->properties ?? []),
-            'subject_id'   => $entry->subject_id,
-            'subject_type' => $entry->subject_type,
-        ];
-        ksort($data);
-
-        $recomputed = hash('sha256', json_encode($data, JSON_UNESCAPED_UNICODE));
+        $recomputed = Activity::computeHashFor($entry);
 
         $this->assertSame(
             $entry->sha256_hash,
@@ -129,23 +112,7 @@ class AuditHashIntegrityTest extends TestCase
 
         $entry->refresh();
 
-        // Re-compute with the tampered description
-        $data = [
-            'batch_uuid'   => $entry->batch_uuid,
-            'causer_id'    => $entry->causer_id,
-            'causer_type'  => $entry->causer_type,
-            'description'  => $entry->description,  // now 'payment.tampered'
-            'event'        => $entry->event,
-            'log_name'     => $entry->log_name,
-            'properties'   => $entry->properties instanceof \Illuminate\Support\Collection
-                ? $entry->properties->toArray()
-                : Arr::wrap($entry->properties ?? []),
-            'subject_id'   => $entry->subject_id,
-            'subject_type' => $entry->subject_type,
-        ];
-        ksort($data);
-
-        $recomputedAfterTamper = hash('sha256', json_encode($data, JSON_UNESCAPED_UNICODE));
+        $recomputedAfterTamper = Activity::computeHashFor($entry);
 
         $this->assertNotSame(
             $originalHash,
