@@ -18,7 +18,16 @@ const STEP_CONFIG = {
   },
 };
 
-const SAUDI_PHONE_REGEX = /^5[503649187]\d{7}$/;
+/** Mirrors App\Helpers\PhoneHelper::nationalMobileDigits (digits-only input paths). */
+function saudiNationalMobileDigits(raw) {
+  let s = String(raw || '').replace(/\D/g, '');
+  if (s.startsWith('00966')) s = s.slice(5);
+  else if (s.startsWith('966')) s = s.slice(3);
+  s = s.replace(/^0+/, '');
+  return s;
+}
+
+const SAUDI_PHONE_REGEX = /^[125]\d{8}$/;
 
 function providerForm(initialStep, weekdays) {
   return {
@@ -29,9 +38,17 @@ function providerForm(initialStep, weekdays) {
       this.$nextTick(() => this.normalizePhone());
     },
 
+    /** Same idea as register.blade.php: digits, max local length, then strip leading 0 for 05XXXXXXXX */
+    normalizePhoneInput(el) {
+      if (!el) return;
+      let v = (el.value || '').replace(/\D/g, '').slice(0, 10);
+      if (v.length === 10 && v.startsWith('0')) v = v.replace(/^0+/, '');
+      el.value = v;
+    },
+
     normalizePhone() {
       const el = document.getElementById('phone_number');
-      if (el) el.value = (el.value || '').replace(/\D/g, '').slice(0, 10);
+      this.normalizePhoneInput(el);
     },
 
     validateAndNext() {
@@ -83,7 +100,7 @@ function providerForm(initialStep, weekdays) {
 
     runCustomValidator(key) {
       if (key === 'phone') {
-        const phone = (document.getElementById('phone_number')?.value || '').replace(/\D/g, '');
+        const phone = saudiNationalMobileDigits(document.getElementById('phone_number')?.value || '');
         if (phone.length !== 9 || !SAUDI_PHONE_REGEX.test(phone)) {
           return { ok: false, msg: this.msg('phone_invalid') };
         }

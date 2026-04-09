@@ -16,6 +16,21 @@ class PhoneHelper
      */
     public static function normalize(string $phone): string
     {
+        $cleaned = self::nationalMobileDigits($phone);
+
+        if (strlen($cleaned) === 9 && preg_match('/^[125][0-9]{8}$/', $cleaned)) {
+            return '966' . $cleaned;
+        }
+
+        return '966' . $cleaned;
+    }
+
+    /**
+     * National mobile digits only (9), after +966 / 966 / 00966 / leading-zero handling.
+     * Same parsing path as validation; does not guarantee a valid Saudi mobile.
+     */
+    public static function nationalMobileDigits(string $phone): string
+    {
         $cleaned = preg_replace('/[^0-9+]/', '', (string) $phone);
 
         if (str_starts_with($cleaned, '+966')) {
@@ -26,13 +41,7 @@ class PhoneHelper
             $cleaned = substr($cleaned, 3);
         }
 
-        $cleaned = ltrim($cleaned, '0');
-
-        if (strlen($cleaned) === 9 && preg_match('/^[125][0-9]{8}$/', $cleaned)) {
-            return '966' . $cleaned;
-        }
-
-        return '966' . $cleaned;
+        return ltrim($cleaned, '0');
     }
 
     /**
@@ -40,17 +49,7 @@ class PhoneHelper
      */
     public static function isValid(string $phone): bool
     {
-        $cleaned = preg_replace('/[^0-9+]/', '', $phone);
-
-        if (str_starts_with($cleaned, '+966')) {
-            $cleaned = substr($cleaned, 4);
-        } elseif (str_starts_with($cleaned, '00966')) {
-            $cleaned = substr($cleaned, 5);
-        } elseif (str_starts_with($cleaned, '966')) {
-            $cleaned = substr($cleaned, 3);
-        }
-
-        $cleaned = ltrim($cleaned, '0');
+        $cleaned = self::nationalMobileDigits($phone);
 
         return strlen($cleaned) === 9 && preg_match('/^[125][0-9]{8}$/', $cleaned);
     }

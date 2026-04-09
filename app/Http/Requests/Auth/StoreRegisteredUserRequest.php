@@ -50,7 +50,6 @@ class StoreRegisteredUserRequest extends FormRequest
                 'address_confirmation_base64' => ['required', 'string', new Base64Image],
                 'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
                 'password' => ['required', Rules\Password::defaults()],
-                'profile_logo' => ['nullable', 'image', 'max:2048'],
             ]);
         }
 

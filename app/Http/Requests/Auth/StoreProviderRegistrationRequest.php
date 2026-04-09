@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Helpers\PhoneHelper;
 use App\Models\User;
 use App\Rules\SaudiPhoneNumber;
 use App\Rules\SaudiPhoneUnique;
@@ -20,6 +21,19 @@ class StoreProviderRegistrationRequest extends FormRequest
     public function authorize(): bool
     {
         return $this->user() === null;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        $phone = $this->input('phone_number');
+        if (! is_string($phone) || $phone === '') {
+            return;
+        }
+        if (PhoneHelper::isValid($phone)) {
+            $this->merge([
+                'phone_number' => PhoneHelper::nationalMobileDigits($phone),
+            ]);
+        }
     }
 
     public function rules(): array

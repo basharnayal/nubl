@@ -111,12 +111,7 @@ class ProfileController extends Controller
         if ($user->hasRole('provider') && $user->providerProfile) {
             $profile = $user->providerProfile;
             $folder = 'provider-logos';
-        } elseif ($user->hasRole('recipient') && $user->recipientProfile) {
-            $profile = $user->recipientProfile;
-            $folder = 'recipient-logos';
-        }
-
-        if ($profile === null) {
+        } else {
             return;
         }
 

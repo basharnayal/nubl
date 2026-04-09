@@ -1,7 +1,6 @@
 @php
     $providerProfile = $providerProfile ?? null;
-    $recipientProfile = $recipientProfile ?? null;
-    $profileForLogo = $providerProfile ?? $recipientProfile;
+    $profileForLogo = $providerProfile;
     $logoUrl = $profileForLogo?->logo_url;
 @endphp
 
