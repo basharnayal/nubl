@@ -1,7 +1,12 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig, devices } from '@playwright/test';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const testDir = path.join(__dirname, '../../tests/e2e');
+
 export default defineConfig({
-  testDir: './tests/e2e',
+  testDir,
   reporter: 'html',
   use: {
     baseURL: 'http://127.0.0.1:8001',

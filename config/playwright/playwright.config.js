@@ -1,15 +1,20 @@
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { defineConfig, devices } from '@playwright/test';
 
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const testDir = path.join(__dirname, '../../tests/e2e');
+
 export default defineConfig({
-  testDir: './tests/e2e',
+  testDir,
   fullyParallel: true,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
-  
+
   use: {
     // Point this to your standard local Laravel port
-    baseURL: 'http://127.0.0.1:8001', 
+    baseURL: 'http://127.0.0.1:8001',
     trace: 'on-first-retry',
   },
 
@@ -33,7 +38,7 @@ export default defineConfig({
       port: 5173,
       reuseExistingServer: true,
       timeout: 120 * 1000,
-    }
+    },
   ],
 
   projects: [
