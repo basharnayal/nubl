@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\AllowanceSettingsController;
 use App\Http\Controllers\Admin\FinancialOverviewController;
 use App\Http\Controllers\Admin\FinancialReportController;
+use App\Http\Controllers\Admin\MaintenanceSettingsController;
 use App\Http\Controllers\Admin\ProviderPayoutController;
 use App\Http\Controllers\Admin\QrSettingsController;
 use App\Http\Controllers\Admin\RoleController;
@@ -108,6 +109,15 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin'
         // FR-17.1: Weekly beneficiary allowance (scheduled next week)
         Route::get('/settings/allowances', [AllowanceSettingsController::class, 'edit'])->name('settings.allowances.edit');
         Route::put('/settings/allowances', [AllowanceSettingsController::class, 'update'])->name('settings.allowances.update');
+
+        // Laravel built-in maintenance (artisan down / up + secret bypass)
+        Route::get('/settings/maintenance', [MaintenanceSettingsController::class, 'edit'])->name('settings.maintenance.edit');
+        Route::post('/settings/maintenance/enable', [MaintenanceSettingsController::class, 'enable'])
+            ->middleware('throttle:6,1')
+            ->name('settings.maintenance.enable');
+        Route::post('/settings/maintenance/disable', [MaintenanceSettingsController::class, 'disable'])
+            ->middleware('throttle:6,1')
+            ->name('settings.maintenance.disable');
 
         // FR-24.1: Allocation engine pause/resume (global + per-provider)
         Route::get('/allocation/status', [\App\Http\Controllers\Admin\AdminAllocationController::class, 'status'])->name('allocation.status');
