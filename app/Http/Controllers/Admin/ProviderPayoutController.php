@@ -78,9 +78,10 @@ class ProviderPayoutController extends Controller
         $providerPayout->update(['receipt_path' => $path]);
 
         $this->auditService->log('provider_payout', 'payout_receipt_uploaded', [
+            'decision' => 'upload_receipt',
             'provider_payout_id' => $providerPayout->id,
             'path' => $path,
-        ]);
+        ], auth()->id());
 
         return back()->with('success', __('finance.provider_payouts.receipt_saved'));
     }

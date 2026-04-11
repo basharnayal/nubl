@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SystemSetting;
+use App\Services\AuditService;
 use App\Support\QrTtl;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -14,6 +15,10 @@ use Illuminate\View\View;
  */
 class QrSettingsController extends Controller
 {
+    public function __construct(
+        private readonly AuditService $auditService
+    ) {}
+
     public function edit(Request $request): View
     {
         abort_unless($request->user()->can('qr.configure_ttl'), 403);
@@ -38,6 +43,11 @@ class QrSettingsController extends Controller
         ]);
 
         SystemSetting::setValue('qr.ttl_minutes', (string) $validated['ttl_minutes']);
+
+        $this->auditService->log('qr_settings', 'updated', [
+            'decision' => 'save_ttl',
+            'ttl_minutes' => (int) $validated['ttl_minutes'],
+        ], $request->user()->id);
 
         return back()->with('success', __('Settings saved.'));
     }

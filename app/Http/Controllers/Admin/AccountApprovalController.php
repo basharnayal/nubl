@@ -40,16 +40,17 @@ class AccountApprovalController extends Controller
         $user->update(['status' => User::STATUS_ACTIVE, 'rejection_reason' => null]);
 
         $this->auditService->log('account_approval', 'approved', [
+            'decision' => 'approve',
             'user_id' => $user->id,
             'email' => $user->email,
             'membership_type' => $user->membership_type,
-        ]);
+        ], auth()->id());
         if ($user->membership_type === User::MEMBERSHIP_RECIPIENT) {
             $this->notificationService->sendAccountStatusUpdated($user, true);
             $this->auditService->log('notification', 'sent', [
                 'type' => 'account_approved',
                 'recipient_user_id' => $user->id,
-            ]);
+            ], auth()->id());
         }
 
         return redirect()->route('admin.users.pending')->with('success', __('Account approved successfully.'));
@@ -80,16 +81,17 @@ class AccountApprovalController extends Controller
         ]);
 
         $this->auditService->log('account_approval', 'rejected', [
+            'decision' => 'reject',
             'user_id' => $user->id,
             'email' => $user->email,
             'rejection_reason' => $validated['rejection_reason'],
-        ]);
+        ], auth()->id());
         if ($user->membership_type === User::MEMBERSHIP_RECIPIENT) {
             $this->notificationService->sendAccountStatusUpdated($user, false, $validated['rejection_reason']);
             $this->auditService->log('notification', 'sent', [
                 'type' => 'account_rejected',
                 'recipient_user_id' => $user->id,
-            ]);
+            ], auth()->id());
         }
 
         return redirect()->route('admin.users.pending')->with('success', __('Account rejected.'));

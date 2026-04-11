@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\SystemSetting;
+use App\Services\AuditService;
 use App\Services\RecipientAllowanceService;
+use App\Support\WeeklyAllowanceSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -13,6 +16,10 @@ use Illuminate\View\View;
  */
 class AllowanceSettingsController extends Controller
 {
+    public function __construct(
+        private readonly AuditService $auditService
+    ) {}
+
     public function edit(Request $request): View
     {
         abort_unless($request->user()->can('allowances.configure'), 403);
@@ -38,6 +45,12 @@ class AllowanceSettingsController extends Controller
             (float) $validated['weekly_allowance_sar'],
             $request->user()
         );
+
+        $this->auditService->log('allowance_settings', 'weekly_limit_scheduled', [
+            'decision' => 'schedule_pending_weekly_allowance',
+            'weekly_allowance_sar' => (float) $validated['weekly_allowance_sar'],
+            'effective_at' => SystemSetting::getValue(WeeklyAllowanceSettings::KEY_PENDING_EFFECTIVE_AT),
+        ], $request->user()->id);
 
         return back()->with('success', __('Weekly allowance update scheduled.'));
     }

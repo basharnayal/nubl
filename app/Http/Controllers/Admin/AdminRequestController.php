@@ -47,6 +47,12 @@ class AdminRequestController extends Controller
                 'funding_source' => 'CITY_FUND', // Confirming source
             ]);
             $requestModel->load(['recipient', 'provider']);
+            $this->auditService->log('admin_request', 'decided', [
+                'decision' => 'approve',
+                'request_id' => $requestModel->id,
+                'status' => 'ADMIN_APPROVED',
+                'funding_source' => 'CITY_FUND',
+            ], auth()->id());
             $this->notificationService->sendRequestStatusChanged($requestModel, 'ADMIN_APPROVED');
             $this->notificationService->sendRequestStatusChangedToProvider($requestModel, 'ADMIN_APPROVED');
             $this->auditService->log('notification', 'sent', [
@@ -54,7 +60,7 @@ class AdminRequestController extends Controller
                 'recipient_user_id' => $requestModel->recipient_id,
                 'request_id' => $requestModel->id,
                 'status' => 'ADMIN_APPROVED',
-            ]);
+            ], auth()->id());
         } elseif ($validated['action'] === 'reject') {
             $requestModel->update([
                 'status' => 'ADMIN_REJECTED',
@@ -62,6 +68,13 @@ class AdminRequestController extends Controller
                 'rejection_reason_note' => $validated['rejection_reason_note'] ?? null,
             ]);
             $requestModel->load(['recipient', 'provider']);
+            $this->auditService->log('admin_request', 'decided', [
+                'decision' => 'reject',
+                'request_id' => $requestModel->id,
+                'status' => 'ADMIN_REJECTED',
+                'rejection_reason_code' => $validated['rejection_reason_code'],
+                'rejection_reason_note' => $validated['rejection_reason_note'] ?? null,
+            ], auth()->id());
             $this->notificationService->sendRequestStatusChanged($requestModel, 'ADMIN_REJECTED');
             $this->notificationService->sendRequestStatusChangedToProvider($requestModel, 'ADMIN_REJECTED');
             $this->auditService->log('notification', 'sent', [
@@ -69,7 +82,7 @@ class AdminRequestController extends Controller
                 'recipient_user_id' => $requestModel->recipient_id,
                 'request_id' => $requestModel->id,
                 'status' => 'ADMIN_REJECTED',
-            ]);
+            ], auth()->id());
         }
 
         return back()->with('success', 'Request processed successfully.');
