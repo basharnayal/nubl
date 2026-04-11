@@ -2,6 +2,8 @@
 
 A digital platform for neighborhood-based food assistance (sadaqah) that connects donors, beneficiaries, and providers in a dignified, private, and transparent manner.
 
+**Further documentation:** Internal or extended developer guides (Git conventions, email/Mailtrap, Lineone usage) may live in [`docs/README_DEV.md`](docs/README_DEV.md). That path is listed in `.gitignore` in some setups; keep a copy alongside the codebase if your team relies on it.
+
 ---
 
 ## 🛠️ Technology Stack
@@ -12,6 +14,7 @@ A digital platform for neighborhood-based food assistance (sadaqah) that connect
 - **UI Components**: Lineone (Alpine.js + Tailwind)
 - **JavaScript**: Alpine.js
 - **Build Tool**: Vite
+- **End-to-end tests**: Playwright (`tests/e2e/`, config in `config/playwright/`)
 - **Authentication**: Laravel Sanctum
 - **Authorization**: Spatie Laravel Permission
 - **Audit Logging**: Spatie Laravel Activity Log
@@ -48,10 +51,12 @@ composer install
 npm install
 
 # 3. Environment Setup
+# Windows (cmd/PowerShell): copy .env.example .env
+# macOS/Linux: cp .env.example .env
 copy .env.example .env
 php artisan key:generate
 
-# Edit .env file with your database credentials and MyFatoorah API keys
+# Edit .env with your database credentials, MyFatoorah keys, SMS (Taqnyat), etc.
 
 # 4. Database Setup
 php artisan migrate
@@ -107,6 +112,10 @@ $user->assignRole('admin');
 | Clear Cache | `php artisan optimize:clear` |
 | Build Assets | `npm run build` |
 | Dev Server | `npm run dev` |
+| Full stack (server + queue + logs + Vite) | `composer run dev` |
+| PHPUnit | `php artisan test` or `composer test` |
+| E2E (Playwright, Laravel + Vite) | `npm run test:e2e` |
+| E2E (Playwright, PHP server only) | `npm run test:e2e:php-only` |
 | List Routes | `php artisan route:list` |
 | Tinker | `php artisan tinker` |
 | Queue Worker | `php artisan queue:work` |
@@ -134,8 +143,8 @@ nubl/
 │   └── View/Components/          # Blade Component Classes
 │
 ├── database/
-│   ├── migrations/               # Database Migrations
-│   └── seeders/                  # Database Seeders
+│   ├── migrations/
+│   └── seeders/
 │
 ├── resources/
 │   ├── css/
@@ -151,18 +160,21 @@ nubl/
 │       ├── recipient/            # Recipient Views
 │       └── provider/             # Provider Views
 │
-└── routes/
-    ├── web.php                   # Web Routes
-    ├── admin.php                 # Admin Routes (to be created)
-    ├── donor.php                 # Donor Routes (to be created)
-    ├── recipient.php             # Recipient Routes (to be created)
-    └── provider.php              # Provider Routes (to be created)
+├── routes/
+│   ├── web.php                   # Main web routes (role groups;        includes auth)
+│   ├── auth.php                  # Auth routes (required from web.php)
+│   └── console.php
+│
+└── tests/
+    ├── e2e/                      # Playwright specs (*.spec.js)
+    ├── Feature/                  # PHPUnit
+    └── Unit/
 ```
 
 ### Architecture Pattern
 
 - **MVC Pattern**: Model-View-Controller
-- **Service Layer**: Business logic in `app/Http/Services/`
+- **Service Layer**: Business logic in `app/Services/` 
 - **Form Requests**: Validation in `app/Http/Requests/`
 - **Blade Templates**: Server-side rendering (no SPA)
 
@@ -337,7 +349,7 @@ activity()->causedBy($user)->withProperties(['key' => 'value'])->log('custom.eve
 
 ### Important Files
 
-- **Service**: `app/Http/Services/AuditService.php` - Wrapper for consistent audit API
+- **Service**: `app/Services/AuditService.php` - Wrapper for consistent audit API
 - **Table**: `activity_log` - Stores all audit entries
 - **Docs**: [Spatie Activity Log](https://spatie.be/docs/laravel-activitylog)
 
@@ -350,7 +362,7 @@ activity()->causedBy($user)->withProperties(['key' => 'value'])->log('custom.eve
 Business logic should be in Services, not Controllers:
 
 ```php
-// app/Http/Services/DonationService.php
+// app/Services/DonationService.php
 class DonationService
 {
     public function __construct(
@@ -364,7 +376,7 @@ class DonationService
     }
 }
 
-// app/Http/Controllers/Donor/DonationController.php yo
+// app/Http/Controllers/Donor/DonationController.php
 class DonationController extends Controller
 {
     public function __construct(
@@ -401,17 +413,21 @@ The project uses **Lineone sidebar layout** (not Breeze top-nav):
 </x-guest-layout>
 ```
 
-Navigation is driven by `App\Support\SidebarPanel` and `SidebarComposer` (`app/Support/SidebarPanel.php`, role-based sidebar menu).
+Navigation is driven by `App\Support\SidebarPanel` and `App\Http\View\Composers\SidebarComposer` (see `app/Support/SidebarPanel.php` and `app/Http/View/Composers/SidebarComposer.php`) for the role-based sidebar menu.
 
 ### Route Organization
 
-```php
-// routes/web.php
-Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')
-    ->group(base_path('routes/admin.php'));
+Role-specific routes are grouped in `routes/web.php` (prefix + middleware + closures/controllers). Authentication routes live in `routes/auth.php` and are included at the bottom of `routes/web.php` via `require __DIR__.'/auth.php';`. There are no separate `routes/admin.php` / `routes/donor.php` files.
 
-Route::middleware(['auth', 'role:donor'])->prefix('donor')->name('donor.')
-    ->group(base_path('routes/donor.php'));
+Example (pattern only — see `routes/web.php` for the full tree):
+
+```php
+Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin']))
+    ->prefix('admin')->name('admin.')
+    ->group(function () {
+        Route::get('/dashboard', fn () => view('admin.dashboard'))->name('dashboard');
+        // …
+    });
 ```
 
 ---
@@ -453,7 +469,7 @@ php artisan make:request StoreDonationRequest
 
 6. **Create Service** (manually)
 ```bash
-# Create: app/Http/Services/DonationService.php
+# Create: app/Services/DonationService.php
 ```
 
 7. **Create Views** (manually)
@@ -464,9 +480,8 @@ php artisan make:request StoreDonationRequest
 #   - show.blade.php
 ```
 
-8. **Add Routes**
+8. **Add Routes** inside the appropriate group in `routes/web.php` (for example the `donor` prefix / middleware group), not a separate `routes/donor.php` file:
 ```php
-// routes/donor.php
 Route::resource('donations', DonationController::class);
 ```
 
@@ -474,6 +489,39 @@ Route::resource('donations', DonationController::class);
 ```bash
 php artisan optimize:clear
 ```
+
+---
+
+## 🧪 Testing
+
+### PHPUnit
+
+Automated tests live under `tests/Feature` and `tests/Unit`. Run:
+
+```bash
+php artisan test
+# or
+composer test
+```
+
+### Playwright (E2E)
+
+Browser tests are in `tests/e2e/` (`*.spec.js`). Config files:
+
+| File | Purpose |
+|------|---------|
+| `config/playwright/playwright.config.js` | Default: starts Laravel (`php artisan serve` on port **8001**) and Vite |
+| `config/playwright/playwright.php-only.config.js` | Laravel only (no Vite) — lighter runs |
+
+```bash
+npm install
+npx playwright install chromium   # first time / new machine
+npm run test:e2e                    # full stack
+npm run test:e2e:php-only          # PHP server only
+npm run test:e2e:ui                # Playwright UI mode
+```
+
+Extended notes (ports, troubleshooting): see `docs/playwright.md` when that file is available in your doc set.
 
 ---
 
@@ -544,17 +592,24 @@ php artisan migrate:fresh --seed
 ## 📦 Installed Packages
 
 ### PHP Packages (Composer)
-- `laravel/framework` ^12.0 - Core Laravel
-- `laravel/sanctum` ^4.3 - API Authentication
-- `spatie/laravel-permission` ^6.24 - Roles & Permissions
-- `spatie/laravel-activitylog` ^4.11 - Audit Logging
+- `laravel/framework` ^12.0 — Core Laravel
+- `laravel/sanctum` ^4.3 — API authentication
+- `spatie/laravel-permission` ^6.24 — Roles & permissions
+- `spatie/laravel-activitylog` ^4.11 — Audit logging
+- `myfatoorah/library` — Payments
+- `phpoffice/phpspreadsheet` — Excel exports / reports
+- `simplesoftwareio/simple-qrcode` — QR flows
+- `laravel-lang/common` (and related) — Translations
+- `taqnyat/php` — SMS
+- Requires PHP extension **bcmath** (wallet / allocation math)
 
 ### NPM Packages
-- `tailwindcss` ^4.1.18 - CSS Framework
-- `@tailwindcss/vite` ^4.1.18 - Tailwind Vite Plugin
-- `alpinejs` ^3.15.3 - JavaScript Framework
-- `simplebar`, `apexcharts`, `tom-select`, etc. - Lineone dependencies
-- `vite` ^7.0.7 - Build Tool
+- `tailwindcss` ^4.1.18 — CSS framework
+- `@tailwindcss/vite` ^4.1.18 — Tailwind Vite plugin
+- `alpinejs` ^3.15.3 — JavaScript
+- `@playwright/test` — E2E tests
+- `simplebar`, `apexcharts`, `tom-select`, etc. — Lineone / UI dependencies
+- `vite` ^7.0.7 — Build tool
 
 --- 
 ### External
@@ -565,5 +620,6 @@ php artisan migrate:fresh --seed
 - [Spatie Laravel Permission](https://spatie.be/docs/laravel-permission)
 - [Spatie Laravel Activity Log](https://spatie.be/docs/laravel-activitylog)
 - [Alpine.js Documentation](https://alpinejs.dev)
+- [Playwright Documentation](https://playwright.dev)
 
 ---
