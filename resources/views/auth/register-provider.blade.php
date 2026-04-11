@@ -107,7 +107,7 @@
             </div>
         @else
             {{-- Editable form --}}
-            <form method="POST" action="{{ route('register.provider') }}" enctype="multipart/form-data" onsubmit="this.querySelectorAll('input[name=phone_number]').forEach(el => { if(el.value) el.value = el.value.replace(/^0+/, ''); });">
+            <form method="POST" action="{{ route('register.provider') }}" enctype="multipart/form-data" onsubmit="this.querySelectorAll('input[name=phone_number]').forEach(el => { if (el && el.value) { let v = el.value.replace(/\D/g,'').slice(0,10); if (v.length === 10 && v.startsWith('0')) v = v.replace(/^0+/, ''); el.value = v; } });">
                 @csrf
 
                 <div id="provider-validation-error" class="hidden mb-6 p-4 rounded-lg border border-red-200 bg-red-50 text-red-700 text-sm" role="alert"></div>
@@ -158,7 +158,7 @@
                     <div>
                         <x-input-label for="phone_number" :value="__('Phone (Saudi +966)')" required />
                         <x-text-input id="phone_number" name="phone_number" type="tel" value="{{ old('phone_number') }}" placeholder="{{ __('Phone placeholder') }}" class="block mt-1 w-full" maxlength="10"
-                            x-on:input="$event.target.value = $event.target.value.replace(/\D/g,'').slice(0, 10)" required />
+                            x-on:input="normalizePhoneInput($event.target)" required />
                         <x-input-error :messages="$errors->get('phone_number')" class="mt-2" />
                     </div>
                     <div>

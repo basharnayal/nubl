@@ -21,22 +21,7 @@ class RecipientProfile extends Model
         'short_address',
         'id_type',
         'id_photo_path',
-        'logo_path',
     ];
-
-    public function getLogoUrlAttribute(): ?string
-    {
-        $path = $this->logo_path;
-        if ($path === null || $path === '') {
-            return null;
-        }
-
-        $normalized = str_replace('\\', '/', $path);
-        $segments = array_values(array_filter(explode('/', $normalized), static fn ($s) => $s !== ''));
-        $encoded = array_map(static fn (string $segment): string => rawurlencode($segment), $segments);
-
-        return asset('storage/'.implode('/', $encoded));
-    }
 
     /**
      * Get the user that owns the profile.

@@ -80,6 +80,11 @@ class SidebarPanel
                                 'title' => __('Weekly allowance'),
                                 'route_name' => 'admin.settings.allowances.edit',
                             ],
+                            'admin_settings_maintenance' => [
+                                'title' => __('Maintenance mode'),
+                                'route_name' => 'admin.settings.maintenance.edit',
+                                'route_match' => 'admin.settings.maintenance.*',
+                            ],
                         ],
                     ],
                 ],

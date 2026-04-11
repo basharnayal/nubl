@@ -94,10 +94,8 @@ class RegisteredUserController extends Controller
 
         $phoneNormalized = PhoneHelper::normalize($validated['phone_number']);
 
-        $profileLogoPath = null;
-
         try {
-            $user = DB::transaction(function () use ($request, $validated, $phoneNormalized, $idPhotoPath, $addressPhotoPath, &$profileLogoPath) {
+            $user = DB::transaction(function () use ($validated, $phoneNormalized, $idPhotoPath, $addressPhotoPath) {
                 $user = User::create([
                     'name' => $validated['name'],
                     'email' => $validated['email'],
@@ -109,17 +107,12 @@ class RegisteredUserController extends Controller
 
                 $user->assignRole('recipient');
 
-                if ($request->hasFile('profile_logo')) {
-                    $profileLogoPath = $request->file('profile_logo')->store('recipient-logos', 'public');
-                }
-
                 RecipientProfile::create([
                     'user_id' => $user->id,
                     'nationality' => $validated['nationality'],
                     'short_address' => $validated['short_address'],
                     'id_type' => $validated['id_type'],
                     'id_photo_path' => $idPhotoPath,
-                    'logo_path' => $profileLogoPath,
                 ]);
 
                 RecipientKycDetails::create([
@@ -152,9 +145,6 @@ class RegisteredUserController extends Controller
         } catch (\Throwable $e) {
             Storage::disk('local')->delete($idPhotoPath);
             Storage::disk('local')->delete($addressPhotoPath);
-            if ($profileLogoPath) {
-                Storage::disk('public')->delete($profileLogoPath);
-            }
             throw $e;
         }
 

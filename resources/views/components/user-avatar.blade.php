@@ -4,12 +4,10 @@
 ])
 
 @php
-    $user->loadMissing(['providerProfile', 'recipientProfile']);
+    $user->loadMissing(['providerProfile']);
     $logoUrl = null;
     if ($user->hasRole('provider') && $user->providerProfile?->logo_url) {
         $logoUrl = $user->providerProfile->logo_url;
-    } elseif ($user->hasRole('recipient') && $user->recipientProfile?->logo_url) {
-        $logoUrl = $user->recipientProfile->logo_url;
     }
     $initial = strtoupper(mb_substr((string) ($user->name ?? 'U'), 0, 1));
 @endphp
