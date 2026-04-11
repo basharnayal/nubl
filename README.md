@@ -120,7 +120,6 @@ $user->assignRole('admin');
 ```
 nubl/
 ├── app/
-│   ├── Enums/                    # Status Enums
 │   ├── Http/
 │   │   ├── Controllers/          # Controllers (organized by role)
 │   │   │   ├── Admin/
@@ -129,7 +128,7 @@ nubl/
 │   │   │   └── Provider/
 │   │   ├── Middleware/           # Custom Middleware
 │   │   ├── Requests/             # Form Requests (Validation)
-│   │   └── Services/             # Business Logic Layer
+│   └── Services/                 # Business Logic Layer
 │   ├── Models/                   # Eloquent Models
 │   ├── Providers/                # Service Providers
 │   └── View/Components/          # Blade Component Classes
@@ -557,7 +556,7 @@ php artisan migrate:fresh --seed
 - `simplebar`, `apexcharts`, `tom-select`, etc. - Lineone dependencies
 - `vite` ^7.0.7 - Build Tool
 
----
+--- 
 ### External
 
 - [Laravel Documentation](https://laravel.com/docs)
