@@ -47,7 +47,7 @@ async function goToNewDonation(page) {
 
 async function submitDonationForm(page) {
   await Promise.all([
-    page.waitForNavigation(),
+    page.waitForURL(/\/donor\/donations\/new$/),
     page.locator('form[action$="/donor/payments/initiate"]').evaluate(form => form.submit()),
   ]);
 }

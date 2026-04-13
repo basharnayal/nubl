@@ -52,20 +52,27 @@ test.describe('admin dashboard functionality', () => {
     await loginAsAdmin(page, seed);
 
     await expect(page).toHaveURL(/\/admin\/dashboard$/);
+    await expect(page.locator('h1, h2').first()).toBeVisible();
+
     await page.goto('/admin/users/pending');
     await expect(page).toHaveURL(/\/admin\/users\/pending$/);
+    await expect(page.locator('h1, h2').first()).toBeVisible();
 
     await page.goto('/admin/manage/users');
     await expect(page).toHaveURL(/\/admin\/manage\/users$/);
+    await expect(page.locator('h1, h2').first()).toBeVisible();
 
     await page.goto('/admin/requests');
     await expect(page).toHaveURL(/\/admin\/requests$/);
+    await expect(page.locator('h1, h2').first()).toBeVisible();
 
     await page.goto('/admin/settings/qr');
     await expect(page).toHaveURL(/\/admin\/settings\/qr$/);
+    await expect(page.locator('h1, h2').first()).toBeVisible();
 
     await page.goto('/admin/finances');
     await expect(page).toHaveURL(/\/admin\/finances$/);
+    await expect(page.locator('h1, h2').first()).toBeVisible();
   });
 
   test('admin can approve and reject pending accounts', async ({ page }) => {
@@ -171,7 +178,7 @@ test.describe('admin dashboard functionality', () => {
     await expect(page).toHaveURL(/\/admin\/finances$/);
 
     await page.goto(`/admin/finances/payments?donor_id=${seed.managedDonorId}&status=SUCCEEDED`);
-    await expect(page.locator(`text=${seed.paymentExternalId}`)).toBeVisible();
+    await expect(page.getByText(seed.paymentExternalId)).toBeVisible();
 
     const paymentsDownload = page.waitForEvent('download');
     await page.locator('a[href*="/admin/finances/payments/export"]').click();

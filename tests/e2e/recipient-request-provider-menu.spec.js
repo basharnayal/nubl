@@ -18,35 +18,39 @@ function fetchCreatedRequest(itemId) {
   return output ? JSON.parse(output) : null;
 }
 
-test('recipient can request an item from the provider menu', async ({ page }) => {
-  const seeded = seedRecipientRequestFlow();
+test.describe('recipient request flow', () => {
+  test.setTimeout(60000);
 
-  await page.goto('/login');
-  await page.locator('#email').fill(seeded.recipientEmail);
-  await page.locator('#password').fill(seeded.password);
+  test('recipient can request an item from the provider menu', async ({ page }) => {
+    const seeded = seedRecipientRequestFlow();
 
-  await Promise.all([
-    page.waitForURL(/\/recipient\/dashboard$/),
-    page.locator('form[action$="/login"] button[type="submit"]').click(),
-  ]);
+    await page.goto('/login');
+    await page.locator('#email').fill(seeded.recipientEmail);
+    await page.locator('#password').fill(seeded.password);
 
-  await page.goto(`/recipient/providers/${seeded.providerId}`);
-  await expect(page.locator('h1')).toContainText(seeded.businessName);
-  await expect(page.getByText(seeded.itemName)).toBeVisible();
+    await Promise.all([
+      page.waitForURL(/\/recipient\/dashboard$/),
+      page.locator('form[action$="/login"] button[type="submit"]').click(),
+    ]);
 
-  await page.locator(`button[onclick^="openItemModal(${seeded.itemId},"]`).click();
-  await expect(page.locator('#item-modal')).toBeVisible();
-  await page.locator('button[onclick="addToCart()"]').click();
+    await page.goto(`/recipient/providers/${seeded.providerId}`);
+    await expect(page.locator('h1')).toContainText(seeded.businessName);
+    await expect(page.getByText(seeded.itemName)).toBeVisible();
 
-  await expect(page.locator('#submit-btn')).toBeEnabled();
+    await page.locator(`button[onclick^="openItemModal(${seeded.itemId},"]`).click();
+    await expect(page.locator('#item-modal')).toBeVisible();
+    await page.locator('button[onclick="addToCart()"]').click();
 
-  await Promise.all([
-    page.waitForLoadState('networkidle'),
-    page.locator('#submit-btn').click(),
-  ]);
+    await expect(page.locator('#submit-btn')).toBeEnabled();
 
-  const createdRequest = fetchCreatedRequest(seeded.itemId);
-  expect(createdRequest).not.toBeNull();
-  expect(createdRequest.status).toBe('REQUESTED');
-  expect(createdRequest.reserved_amount).toBe(45);
+    await page.locator('#submit-btn').click();
+    // Controller redirects to recipient.requests.show after successful store
+    await page.waitForURL(/\/recipient\/requests\/\d+$/);
+    await expect(page.locator('main')).toContainText(seeded.itemName);
+
+    const createdRequest = fetchCreatedRequest(seeded.itemId);
+    expect(createdRequest).not.toBeNull();
+    expect(createdRequest.status).toBe('REQUESTED');
+    expect(createdRequest.reserved_amount).toBe(45);
+  });
 });

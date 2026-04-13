@@ -34,11 +34,7 @@ function pdfUpload(name) {
 }
 
 async function setCheckboxChecked(locator) {
-  await locator.evaluate(input => {
-    input.checked = true;
-    input.dispatchEvent(new Event('input', { bubbles: true }));
-    input.dispatchEvent(new Event('change', { bubbles: true }));
-  });
+  await locator.check({ force: true });
 }
 
 async function openInEnglish(page, path) {
@@ -53,7 +49,7 @@ async function loginByEmail(page, email, password) {
   await page.locator('#password').fill(password);
 
   await Promise.all([
-    page.waitForNavigation(),
+    page.waitForURL(/\/(donor\/dashboard|approval-pending)$/),
     page.locator('form[action$="/login"] button[type="submit"]').click(),
   ]);
 }

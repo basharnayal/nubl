@@ -7,6 +7,8 @@ const testDir = path.join(__dirname, '../../tests/e2e');
 
 export default defineConfig({
   testDir,
+  fullyParallel: false,
+  workers: 1,
   reporter: 'html',
   use: {
     baseURL: 'http://127.0.0.1:8001',

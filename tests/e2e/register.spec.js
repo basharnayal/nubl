@@ -1,6 +1,15 @@
 import { test, expect } from '@playwright/test';
+import { execFileSync } from 'node:child_process';
+
+function ensureRoles() {
+  execFileSync('php', ['scripts/playwright_auth_flows.php', 'ensure-roles'], {
+    cwd: process.cwd(),
+    encoding: 'utf8',
+  });
+}
 
 test('donor can register from /register and land on dashboard', async ({ page }) => {
+  ensureRoles();
   const uniqueSuffix = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
   const phoneSuffix = uniqueSuffix.slice(-7).padStart(7, '0');
 
