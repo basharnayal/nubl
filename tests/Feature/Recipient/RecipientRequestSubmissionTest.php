@@ -480,6 +480,74 @@ class RecipientRequestSubmissionTest extends TestCase
     }
 
     #[Test]
+    public function cannot_request_inactive_menu_item(): void
+    {
+        $this->menuItem1->update(['is_active' => false]);
+
+        $response = $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 1],
+                ],
+            ]);
+
+        $response->assertSessionHasErrors(['items.0.id']);
+        $this->assertDatabaseCount('requests', 0);
+    }
+
+    #[Test]
+    public function cannot_request_more_than_menu_item_max_per_request(): void
+    {
+        $this->menuItem1->update(['max_per_request' => 2]);
+
+        $response = $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 3],
+                ],
+            ]);
+
+        $response->assertSessionHasErrors(['items.0.quantity']);
+        $this->assertDatabaseCount('requests', 0);
+    }
+
+    #[Test]
+    public function cannot_request_from_provider_not_accepting_orders(): void
+    {
+        $this->provider->update(['accepting_orders' => false]);
+
+        $response = $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 1],
+                ],
+            ]);
+
+        $response->assertSessionHasErrors(['provider_id']);
+        $this->assertDatabaseCount('requests', 0);
+    }
+
+    #[Test]
+    public function cannot_request_when_provider_capacity_is_unavailable(): void
+    {
+        $this->provider->providerOperatingInfo->update(['daily_capacity' => 0]);
+
+        $response = $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 1],
+                ],
+            ]);
+
+        $response->assertSessionHasErrors(['provider_id']);
+        $this->assertDatabaseCount('requests', 0);
+    }
+
+    #[Test]
     public function recipient_can_view_submitted_confirmation_page(): void
     {
         $this->actingAs($this->recipient)

@@ -292,6 +292,80 @@ class ProviderPayoutFlowTest extends TestCase
     }
 
     #[Test]
+    public function cancelled_payout_makes_earnings_eligible_again_without_wallet_out_transaction(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-04-06 00:00:00', config('app.timezone')));
+        $ids = app(ProviderPayoutGenerationService::class)->generateWeeklyAt(Carbon::now());
+        Carbon::setTestNow();
+
+        $payout = ProviderPayout::findOrFail($ids[0]);
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.finances.provider-payouts.cancel', $payout), [
+                'admin_note' => 'cancel and regenerate',
+            ])
+            ->assertRedirect(route('admin.finances.provider-payouts.show', $payout));
+
+        $payout->refresh();
+        $this->assertSame(ProviderPayout::STATUS_CANCELLED, $payout->status);
+        $this->assertSame($this->admin->id, $payout->cancelled_by);
+        $this->assertNull($payout->fund_transaction_out_id);
+        $this->assertDatabaseMissing('fund_transactions', [
+            'wallet_id' => $this->providerWallet->id,
+            'source' => FundTransaction::SOURCE_PROVIDER_BANK_PAYOUT,
+            'provider_payout_id' => $payout->id,
+        ]);
+        $this->assertDatabaseHas('activity_log', [
+            'description' => 'provider_payout.payout_request_cancelled',
+            'causer_id' => $this->admin->id,
+        ]);
+
+        Carbon::setTestNow(Carbon::parse('2026-04-13 00:00:00', config('app.timezone')));
+        $ids2 = app(ProviderPayoutGenerationService::class)->generateWeeklyAt(Carbon::now());
+        Carbon::setTestNow();
+
+        $this->assertCount(1, $ids2);
+        $this->assertSame('60.00', (string) ProviderPayout::findOrFail($ids2[0])->amount);
+    }
+
+    #[Test]
+    public function admin_can_upload_receipt_before_confirming_payout(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-04-06 00:00:00', config('app.timezone')));
+        $ids = app(ProviderPayoutGenerationService::class)->generateWeeklyAt(Carbon::now());
+        Carbon::setTestNow();
+
+        $payout = ProviderPayout::findOrFail($ids[0]);
+
+        // storeReceipt() returns redirect()->back(); pin previous URL so the assertion matches real UX.
+        $this->actingAs($this->admin)
+            ->from(route('admin.finances.provider-payouts.show', $payout))
+            ->post(route('admin.finances.provider-payouts.receipt.store', $payout), [
+                'receipt' => UploadedFile::fake()->create('receipt.pdf', 100, 'application/pdf'),
+            ])
+            ->assertRedirect(route('admin.finances.provider-payouts.show', $payout))
+            ->assertSessionHas('success');
+
+        $receiptPath = $payout->fresh()->receipt_path;
+        $this->assertNotNull($receiptPath);
+        Storage::disk('local')->assertExists($receiptPath);
+        $this->assertDatabaseHas('activity_log', [
+            'description' => 'provider_payout.payout_receipt_uploaded',
+            'causer_id' => $this->admin->id,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.finances.provider-payouts.confirm', $payout->fresh()), [
+                'reference_number' => 'REF-PREUPLOADED',
+            ])
+            ->assertRedirect(route('admin.finances.provider-payouts.show', $payout));
+
+        $payout->refresh();
+        $this->assertSame(ProviderPayout::STATUS_TRANSFERRED, $payout->status);
+        $this->assertSame($receiptPath, $payout->receipt_path);
+    }
+
+    #[Test]
     public function unrelated_in_transactions_are_excluded_from_payout(): void
     {
         $donor = User::factory()->create();
