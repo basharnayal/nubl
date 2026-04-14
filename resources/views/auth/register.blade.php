@@ -44,7 +44,7 @@
 
         {{-- Common: name, email, password (donor & recipient) --}}
         <div x-show="membershipType && membershipType !== 'provider'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-            class="space-y-4" x-cloak>
+            class="space-y-4">
             <div>
                 <label class="relative flex">
                     <input id="name" name="name" type="text" value="{{ old('name') }}"
@@ -93,7 +93,7 @@
         </div>
 
         {{-- Donor only: phone — gold accent (giving) --}}
-        <div x-show="membershipType === 'donor'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-cloak class="space-y-4 mt-4 p-4 rounded-lg border border-secondary/20 bg-secondary/10 dark:border-secondary/20 dark:bg-secondary/10">
+        <div x-show="membershipType === 'donor'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" class="space-y-4 mt-4 p-4 rounded-lg border border-secondary/20 bg-secondary/10 dark:border-secondary/20 dark:bg-secondary/10">
             <div>
                 <label class="relative flex">
                     <input id="phone_number" name="phone_number" type="tel" value="{{ old('phone_number') }}" dir="ltr"
@@ -113,7 +113,7 @@
         </div>
 
         {{-- Recipient: KYC + identity/address photos (camera only) --}}
-        <div x-show="membershipType === 'recipient'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-cloak class="space-y-4 mt-4"
+        <div x-show="membershipType === 'recipient'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" class="space-y-4 mt-4"
             x-bind:aria-hidden="membershipType !== 'recipient'">
             {{-- Recipient phone — teal accent (same style as donor) --}}
             <div class="p-4 rounded-lg border border-primary/20 bg-primary/10 dark:border-accent/20 dark:bg-accent/10">
@@ -358,7 +358,7 @@
             <a class="text-sm text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent font-medium" href="{{ route('login') }}">
                 {{ __('Already registered?') }}
             </a>
-            <button type="submit" x-show="membershipType && membershipType !== 'provider'" x-cloak
+            <button type="submit" x-show="membershipType && membershipType !== 'provider'"
                 class="btn w-full sm:w-auto bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90 px-5 py-2.5 rounded-lg">
                 {{ __('Register') }}
             </button>

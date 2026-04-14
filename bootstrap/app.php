@@ -11,6 +11,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // When using ngrok / Cloudflare Tunnel / Reflect, set TRUSTED_PROXIES=* in .env so
+        // X-Forwarded-Host / X-Forwarded-Proto are honored. Then route(), asset(), and @vite
+        // emit URLs for the public tunnel host instead of APP_URL (e.g. localhost), and
+        // Alpine + bundled JS load so login/register fields are not stuck behind x-cloak.
+        $trusted = env('TRUSTED_PROXIES');
+        if ($trusted === '*') {
+            $middleware->trustProxies(at: '*');
+        } elseif (is_string($trusted) && $trusted !== '') {
+            $middleware->trustProxies(at: array_map(trim(...), explode(',', $trusted)));
+        }
+
         // Plain XSRF-TOKEN in the browser; required for JS CSRF + axios/fetch headers.
         $middleware->encryptCookies(except: [
             'XSRF-TOKEN',
