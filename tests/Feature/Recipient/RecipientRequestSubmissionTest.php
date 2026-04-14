@@ -157,10 +157,10 @@ class RecipientRequestSubmissionTest extends TestCase
             'status' => 'REDEEMABLE',
             'funding_source' => 'CITY_FUND',
         ])->items()->create([
-            'menu_item_id' => $this->menuItem1->id,
-            'quantity' => 6,
-            'price_snapshot' => 50.00,
-        ]);
+                    'menu_item_id' => $this->menuItem1->id,
+                    'quantity' => 6,
+                    'price_snapshot' => 50.00,
+                ]);
 
         // Try to add 120 SAR (300 + 120 = 420 > 400)
         $response = $this->actingAs($this->recipient)
@@ -197,10 +197,10 @@ class RecipientRequestSubmissionTest extends TestCase
             'status' => 'REDEEMABLE',
             'funding_source' => 'CITY_FUND',
         ])->items()->create([
-            'menu_item_id' => $this->menuItem1->id,
-            'quantity' => 6,
-            'price_snapshot' => 50.00,
-        ]);
+                    'menu_item_id' => $this->menuItem1->id,
+                    'quantity' => 6,
+                    'price_snapshot' => 50.00,
+                ]);
 
         $this->actingAs($this->recipient)
             ->post(route('recipient.requests.store'), [
@@ -586,5 +586,49 @@ class RecipientRequestSubmissionTest extends TestCase
         $this->actingAs($other)
             ->get(route('recipient.requests.show', $request->id))
             ->assertNotFound();
+    }
+    #[Test]
+    public function recipient_can_force_admin_review_when_exceeding_allowance()
+    {
+        Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00'));
+
+        // Existing REDEEMABLE request: 300 SAR (counts towards allowance)
+        RequestModel::create([
+            'recipient_id' => $this->recipient->id,
+            'provider_id' => $this->provider->id,
+            'reserved_amount' => 300.00,
+            'status' => 'REDEEMABLE',
+            'funding_source' => 'CITY_FUND',
+        ])->items()->create([
+                    'menu_item_id' => $this->menuItem1->id,
+                    'quantity' => 6,
+                    'price_snapshot' => 50.00,
+                ]);
+
+        // Try to add 120 SAR (300 + 120 = 420 > 400)
+        // With force_admin_review set to true
+        $response = $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 2], // 100
+                    ['id' => $this->menuItem2->id, 'quantity' => 1], // 20
+                ],
+                'force_admin_review' => '1',
+            ]);
+
+        $response->assertSessionHasNoErrors();
+
+        // Assert the new request is created as ADMIN_PENDING
+        $this->assertDatabaseHas('requests', [
+            'recipient_id' => $this->recipient->id,
+            'provider_id' => $this->provider->id,
+            'reserved_amount' => 120.00,
+            'status' => 'ADMIN_PENDING',
+        ]);
+
+        $created = RequestModel::where('recipient_id', $this->recipient->id)->orderByDesc('id')->first();
+        $response->assertRedirect(route('recipient.requests.show', $created->id));
+        $response->assertSessionHas('success');
     }
 }

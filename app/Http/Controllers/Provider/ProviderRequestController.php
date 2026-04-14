@@ -17,7 +17,8 @@ class ProviderRequestController extends Controller
         private SystemWalletService $systemWalletService,
         private AuditService $auditService,
         private NotificationServiceInterface $notificationService
-    ) {}
+    ) {
+    }
 
     /**
      * Display a listing of the resource.
@@ -26,7 +27,7 @@ class ProviderRequestController extends Controller
     {
         $validated = $request->validated();
 
-        $dateRangeInvalid = ! empty($validated['from']) && ! empty($validated['to'])
+        $dateRangeInvalid = !empty($validated['from']) && !empty($validated['to'])
             && $validated['to'] < $validated['from'];
 
         $providerId = auth()->id();
@@ -35,15 +36,15 @@ class ProviderRequestController extends Controller
         $query = RequestModel::forProvider($providerId)
             ->with(['items.menuItem.menuItemCategory', 'redemption.proof']);
 
-        if (! $dateRangeInvalid) {
-            if (! empty($validated['from'])) {
+        if (!$dateRangeInvalid) {
+            if (!empty($validated['from'])) {
                 $query->whereDate('created_at', '>=', $validated['from']);
             }
-            if (! empty($validated['to'])) {
+            if (!empty($validated['to'])) {
                 $query->whereDate('created_at', '<=', $validated['to']);
             }
         }
-        if (! empty($validated['status'])) {
+        if (!empty($validated['status'])) {
             $query->where('status', $validated['status']);
         }
         if (($validated['needs_proof'] ?? null) === '1') {
@@ -53,11 +54,11 @@ class ProviderRequestController extends Controller
             });
         }
 
-        if (! empty($validated['funding_source'])) {
+        if (!empty($validated['funding_source'])) {
             $query->where('funding_source', $validated['funding_source']);
         }
 
-        if (! empty($validated['q'])) {
+        if (!empty($validated['q'])) {
             $idQuery = ltrim(trim($validated['q']), '#');
             if ($idQuery !== '' && ctype_digit($idQuery)) {
                 $query->where('id', (int) $idQuery);
@@ -147,7 +148,7 @@ class ProviderRequestController extends Controller
 
         $action = $validated['action'];
 
-        if ($requestModel->status !== 'REQUESTED') {
+        if (!in_array($requestModel->status, ['REQUESTED', 'ADMIN_APPROVED'], true)) {
             return back()->with('error', 'This request is not in a pending state.');
         }
 
@@ -177,7 +178,7 @@ class ProviderRequestController extends Controller
                 // Provider accepts using City Fund — status REDEEMABLE (recipient can redeem)
                 // Transfer happens only at redemption (QR scan), not at approval
                 $amount = (float) $requestModel->reserved_amount;
-                if (! $this->systemWalletService->hasSufficientBalance($amount)) {
+                if (!$this->systemWalletService->hasSufficientBalance($amount)) {
                     return back()->with('error', __('City fund has insufficient balance for this request.'));
                 }
                 $requestModel->update([

@@ -13,7 +13,8 @@ class RecipientRequestSubmissionService
     public function __construct(
         private AuditService $auditService,
         private NotificationServiceInterface $notificationService
-    ) {}
+    ) {
+    }
 
     /**
      * @param  array<int, array{id: int, quantity: int}>  $itemsData
@@ -28,7 +29,7 @@ class RecipientRequestSubmissionService
         $dbItems = ProviderMenuItem::whereIn('id', $itemIds)->get()->keyBy('id');
 
         foreach ($itemsData as $item) {
-            if (! isset($dbItems[$item['id']])) {
+            if (!isset($dbItems[$item['id']])) {
                 throw new RuntimeException('Menu item no longer available.');
             }
 
@@ -60,7 +61,7 @@ class RecipientRequestSubmissionService
     /**
      * @param  array<int, array{id: int, quantity: int}>  $itemsData
      */
-    public function createRequest(User $user, int $providerId, array $itemsData): RequestModel
+    public function createRequest(User $user, int $providerId, array $itemsData, string $status = 'REQUESTED'): RequestModel
     {
         $computed = $this->computeLineItems($providerId, $itemsData);
         $totalAmount = $computed['total'];
@@ -71,7 +72,7 @@ class RecipientRequestSubmissionService
             'provider_id' => $providerId,
             'reserved_amount' => $totalAmount,
             'funding_source' => 'CITY_FUND',
-            'status' => 'REQUESTED',
+            'status' => $status,
             'is_flagged' => false,
         ]);
 
@@ -84,16 +85,25 @@ class RecipientRequestSubmissionService
             'recipient_id' => $user->id,
             'provider_id' => $providerId,
             'amount' => $totalAmount,
+            'status' => $status,
         ]);
 
-        $this->notificationService->sendNewRequestToProvider($req->load('provider'));
-
-        $this->auditService->log('notification', 'sent', [
-            'type' => 'new_request_to_provider',
-            'provider_user_id' => $providerId,
-            'request_id' => $req->id,
-            'recipient_id' => $user->id,
-        ]);
+        if ($status === 'ADMIN_PENDING') {
+            $this->notificationService->sendNewRequestToAdmins($req);
+            $this->auditService->log('notification', 'sent', [
+                'type' => 'new_request_to_admins',
+                'request_id' => $req->id,
+                'recipient_id' => $user->id,
+            ]);
+        } else {
+            $this->notificationService->sendNewRequestToProvider($req->load('provider'));
+            $this->auditService->log('notification', 'sent', [
+                'type' => 'new_request_to_provider',
+                'provider_user_id' => $providerId,
+                'request_id' => $req->id,
+                'recipient_id' => $user->id,
+            ]);
+        }
 
         return $req;
     }

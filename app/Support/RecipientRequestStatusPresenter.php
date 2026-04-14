@@ -74,7 +74,8 @@ class RecipientRequestStatusPresenter
             'REQUESTED' => self::requested($justSubmitted),
             'APPROVED', 'REDEEMABLE' => self::redeemReady($request),
             'FULFILLED' => self::fulfilled(),
-            'REJECTED', 'ADMIN_REJECTED' => self::rejected(),
+            'REJECTED' => self::rejected(),
+            'ADMIN_REJECTED' => self::adminRejected(),
             'CANCELLED' => self::cancelled(),
             'ADMIN_PENDING' => self::adminPending(),
             'ADMIN_APPROVED' => self::adminApproved(),
@@ -162,6 +163,26 @@ class RecipientRequestStatusPresenter
         ];
     }
 
+    private static function adminRejected(): array
+    {
+        return [
+            'accent' => 'error',
+            'heroIcon' => 'x',
+            'titleKey' => 'recipient.request_progress.title_admin_rejected',
+            'subtitleKey' => 'recipient.request_progress.subtitle_admin_rejected',
+            'badgeClass' => 'bg-error/10 text-error dark:bg-error/15',
+            'badgeLabelKey' => 'recipient.request_progress.badge_admin_rejected',
+            'steps' => [
+                ['state' => 'done', 'hintKey' => 'recipient.request_redeem.step1_hint', 'labelKey' => 'recipient.request_progress.step1'],
+                ['state' => 'current', 'hintKey' => 'recipient.request_progress.hint_admin_rejected', 'labelKey' => 'recipient.request_progress.admin_review'],
+                ['state' => 'pending', 'hintKey' => 'recipient.request_progress.hint_provider_review', 'labelKey' => 'recipient.request_progress.step2'],
+                ['state' => 'pending', 'hintKey' => 'recipient.request_redeem.step3_hint', 'labelKey' => 'recipient.request_progress.step3'],
+                ['state' => 'pending', 'hintKey' => 'recipient.request_progress.hint_fulfilled_pending', 'labelKey' => 'recipient.request_progress.step4'],
+            ],
+            'footer' => 'simple',
+        ];
+    }
+
     private static function cancelled(): array
     {
         return [
@@ -191,10 +212,11 @@ class RecipientRequestStatusPresenter
             'badgeClass' => 'bg-warning/10 text-warning dark:bg-warning/15',
             'badgeLabelKey' => 'recipient.request_progress.badge_admin_pending',
             'steps' => [
-                ['state' => 'done', 'hintKey' => 'recipient.request_redeem.step1_hint'],
-                ['state' => 'current', 'hintKey' => 'recipient.request_progress.hint_admin_review'],
-                ['state' => 'pending', 'hintKey' => 'recipient.request_redeem.step3_hint'],
-                ['state' => 'pending', 'hintKey' => 'recipient.request_progress.hint_fulfilled_pending'],
+                ['state' => 'done', 'hintKey' => 'recipient.request_redeem.step1_hint', 'labelKey' => 'recipient.request_progress.step1'],
+                ['state' => 'current', 'hintKey' => 'recipient.request_progress.hint_admin_review_pending', 'labelKey' => 'recipient.request_progress.admin_review'],
+                ['state' => 'pending', 'hintKey' => 'recipient.request_progress.hint_provider_review', 'labelKey' => 'recipient.request_progress.step2'],
+                ['state' => 'pending', 'hintKey' => 'recipient.request_redeem.step3_hint', 'labelKey' => 'recipient.request_progress.step3'],
+                ['state' => 'pending', 'hintKey' => 'recipient.request_progress.hint_fulfilled_pending', 'labelKey' => 'recipient.request_progress.step4'],
             ],
             'footer' => 'simple',
         ];
@@ -210,10 +232,11 @@ class RecipientRequestStatusPresenter
             'badgeClass' => 'bg-success/10 text-success dark:bg-success/15',
             'badgeLabelKey' => 'recipient.request_progress.badge_admin_approved',
             'steps' => [
-                ['state' => 'done', 'hintKey' => 'recipient.request_redeem.step1_hint'],
-                ['state' => 'done', 'hintKey' => 'recipient.request_redeem.step2_hint'],
-                ['state' => 'done', 'hintKey' => 'recipient.request_progress.hint_admin_ok'],
-                ['state' => 'pending', 'hintKey' => 'recipient.request_redeem.step4_pending_hint'],
+                ['state' => 'done', 'hintKey' => 'recipient.request_redeem.step1_hint', 'labelKey' => 'recipient.request_progress.step1'],
+                ['state' => 'done', 'hintKey' => 'recipient.request_progress.hint_admin_review_done', 'labelKey' => 'recipient.request_progress.admin_review'],
+                ['state' => 'current', 'hintKey' => 'recipient.request_progress.hint_provider_review', 'labelKey' => 'recipient.request_progress.step2'],
+                ['state' => 'pending', 'hintKey' => 'recipient.request_redeem.step3_hint', 'labelKey' => 'recipient.request_progress.step3'],
+                ['state' => 'pending', 'hintKey' => 'recipient.request_progress.hint_fulfilled_pending', 'labelKey' => 'recipient.request_progress.step4'],
             ],
             'footer' => 'simple',
         ];

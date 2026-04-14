@@ -13,7 +13,8 @@ class AdminRequestController extends Controller
     public function __construct(
         private AuditService $auditService,
         private NotificationServiceInterface $notificationService
-    ) {}
+    ) {
+    }
 
     public function index()
     {
@@ -22,7 +23,10 @@ class AdminRequestController extends Controller
             ->latest()
             ->paginate(15);
 
-        return view('admin.requests.index', compact('requests'));
+        $systemWalletService = app(\App\Services\SystemWalletService::class);
+        $cityFundBalance = $systemWalletService->getSystemWallet()->balance;
+
+        return view('admin.requests.index', compact('requests', 'cityFundBalance'));
     }
 
     public function update(Request $request, string $id)
@@ -42,9 +46,14 @@ class AdminRequestController extends Controller
         ]);
 
         if ($validated['action'] === 'approve') {
+            $allocationService = app(\App\Services\AllocationService::class);
+            if (!$allocationService->canCoverRequestAmount((float) $requestModel->reserved_amount)) {
+                return back()->with('error', 'Insufficient overall city fund allocation to approve this request.');
+            }
+
             $requestModel->update([
-                'status' => 'ADMIN_APPROVED', // or REDEEMABLE immediately?
-                'funding_source' => 'CITY_FUND', // Confirming source
+                'status' => 'ADMIN_APPROVED',
+                'funding_source' => 'CITY_FUND',
             ]);
             $requestModel->load(['recipient', 'provider']);
             $this->auditService->log('admin_request', 'decided', [

@@ -215,6 +215,8 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:recipi
         })->whereNumber('id')->name('requests.submitted');
         Route::resource('requests', \App\Http\Controllers\Recipient\RecipientRequestController::class)
             ->only(['index', 'show', 'store']);
+        Route::post('requests/cancel-throttle', [\App\Http\Controllers\Recipient\RecipientRequestController::class, 'cancelThrottle'])
+            ->name('requests.cancel-throttle');
         Route::post('requests/{id}/cancel', [\App\Http\Controllers\Recipient\RecipientRequestController::class, 'cancel'])
             ->name('requests.cancel');
     });
@@ -271,7 +273,7 @@ Route::middleware(array_merge($authMiddleware, ['account.approved:pending_only']
 
 // Test: debug roles (admin only - remove in production)
 Route::get('/test-roles', function () {
-    if (! auth()->user()->hasRole('admin')) {
+    if (!auth()->user()->hasRole('admin')) {
         abort(403);
     }
 
@@ -289,4 +291,4 @@ Route::get('/test-roles', function () {
 //     return 'تم تعيينك كـ admin بنجاح!';
 // });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

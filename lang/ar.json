@@ -1684,5 +1684,22 @@
     "Open bypass link": "فتح رابط التجاوز",
     "Copy URL": "نسخ الرابط",
     "Copied": "تم النسخ",
-    "Back to maintenance settings": "العودة إلى إعدادات الصيانة"
+    "Back to maintenance settings": "العودة إلى إعدادات الصيانة",
+    "Insufficient overall city fund allocation to approve this request.": "رصيد صندوق المدينة غير كافٍ للموافقة على هذا الطلب.",
+    "Request submitted for admin review successfully.": "تم إرسال الطلب لمراجعة الإدارة بنجاح.",
+    "Request cancelled. You must wait 60 seconds before trying again.": "تم إلغاء الطلب. يجب الانتظار 60 ثانية قبل المحاولة مرة أخرى.",
+    "City Fund Balance": "رصيد صندوق المدينة",
+    "Weekly Limit Exceeded": "تم تجاوز الحد الأسبوعي",
+    "Your request amount exceeds the available weekly allowance. You can cancel to reconsider, or send the request for manual admin review.": "قيمة طلبك تتجاوز الحد الأسبوعي المتاح. يمكنك الإلغاء لإعادة النظر، أو إرسال الطلب للمراجعة اليدوية من قبل الإدارة.",
+    "Send Request Review": "إرسال للمراجعة",
+    "New Pending Request Needs Approval": "طلب معلق جديد يحتاج إلى موافقة",
+    "Request #:id from :name exceeds their limit and requires admin approval.": "الطلب رقم :id من :name يتجاوز الحد ويحتاج إلى موافقة الإدارة.",
+    "recipient.request_progress.admin_review": "مراجعة الإدارة",
+    "recipient.request_progress.hint_admin_review_pending": "قيد المراجعة",
+    "recipient.request_progress.hint_admin_review_done": "تمت المراجعة",
+    "recipient.request_progress.title_admin_rejected": "تم رفض الطلب بواسطة الإدارة",
+    "recipient.request_progress.subtitle_admin_rejected": "لم تتم الموافقة على هذا الطلب من قبل الإدارة.",
+    "recipient.request_progress.badge_admin_rejected": "مرفوض من الإدارة",
+    "recipient.request_progress.hint_admin_rejected": "تم الرفض",
+    "recipient.request_progress.hint_provider_review": "قيد المراجعة لدى المزود"
 }
