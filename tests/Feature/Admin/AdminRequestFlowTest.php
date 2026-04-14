@@ -44,6 +44,7 @@ class AdminRequestFlowTest extends TestCase
             'provider_id' => $this->provider->id,
             'name' => 'Test Item',
             'price' => 100.00,
+            'category' => 'food',
             'is_active' => true,
         ]);
 

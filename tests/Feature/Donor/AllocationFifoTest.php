@@ -97,6 +97,7 @@ class AllocationFifoTest extends TestCase
             'provider_id' => $provider->id,
             'reserved_amount' => 100,
             'status' => 'REQUESTED',
+            'funding_source' => 'CITY_FUND',
         ]);
 
         $allocationService = app(AllocationService::class);
@@ -108,5 +109,10 @@ class AllocationFifoTest extends TestCase
         $amounts = $links->pluck('amount')->map(fn ($a) => (float) $a)->toArray();
         $this->assertEqualsWithDelta(50, $amounts[0], 0.01);
         $this->assertEqualsWithDelta(50, $amounts[1], 0.01);
+
+        // Allocation must be audited
+        $this->assertDatabaseHas('activity_log', [
+            'description' => 'allocation.created',
+        ]);
     }
 }

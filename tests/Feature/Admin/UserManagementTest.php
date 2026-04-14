@@ -137,6 +137,27 @@ class UserManagementTest extends TestCase
         $this->assertNotNull($activity);
     }
 
+    public function test_admin_cannot_remove_own_admin_role(): void
+    {
+        $admin = $this->createAdmin();
+
+        $response = $this->actingAs($admin)
+            ->from(route('admin.manage.users.edit', $admin))
+            ->put(route('admin.manage.users.update', $admin), [
+                'name' => $admin->name,
+                'email' => $admin->email,
+                'membership_type' => User::MEMBERSHIP_DONOR,
+                'phone_number' => $admin->phone_number,
+                'password' => '',
+                'roles' => ['donor'],
+            ]);
+
+        $response->assertRedirect(route('admin.manage.users.edit', $admin));
+        $response->assertSessionHas('error', __('You cannot remove your own admin role.'));
+
+        $this->assertTrue($admin->fresh()->hasRole('admin'));
+    }
+
     public function test_admin_can_delete_user(): void
     {
         $admin = $this->createAdmin();

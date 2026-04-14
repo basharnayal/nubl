@@ -8,12 +8,20 @@ use App\Models\Payment;
 use App\Models\ProviderPayout;
 use App\Models\ProviderProfile;
 use App\Models\User;
+use App\Notifications\ProviderPayoutPendingAdminNotification;
+use App\Notifications\ProviderPayoutTransferredNotification;
+use App\Services\AuditService;
 use App\Services\ProviderPayoutGenerationService;
+use App\Services\ProviderPayoutLedgerService;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -94,6 +102,107 @@ class ProviderPayoutFlowTest extends TestCase
     }
 
     #[Test]
+    public function generation_notifies_admins_with_payload_and_audits_creation(): void
+    {
+        Notification::fake();
+        Carbon::setTestNow(Carbon::parse('2026-04-06 00:00:00', config('app.timezone')));
+
+        $ids = app(ProviderPayoutGenerationService::class)->generateWeeklyAt(Carbon::now());
+
+        Carbon::setTestNow();
+
+        $payout = ProviderPayout::findOrFail($ids[0]);
+
+        Notification::assertSentTo(
+            $this->admin,
+            ProviderPayoutPendingAdminNotification::class,
+            function (ProviderPayoutPendingAdminNotification $notification) use ($payout) {
+                $payload = $notification->toArray($this->admin);
+
+                $this->assertSame('provider_payout_pending_review', $payload['type']);
+                $this->assertSame($payout->id, $payload['provider_payout_id']);
+                $this->assertStringContainsString('60.00', $payload['message']);
+                $this->assertSame(route('admin.finances.provider-payouts.show', $payout), $payload['url']);
+
+                return true;
+            }
+        );
+
+        $activity = Activity::query()
+            ->where('description', 'provider_payout.payout_request_created')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($activity);
+        $this->assertSame($payout->id, $activity->properties->get('provider_payout_id'));
+        $this->assertSame($this->provider->id, $activity->properties->get('provider_id'));
+        $this->assertSame('60.00', $activity->properties->get('amount'));
+    }
+
+    #[Test]
+    public function weekly_generation_returns_empty_while_cache_lock_is_held(): void
+    {
+        $lock = Cache::lock('provider-payout-generate-weekly', 600);
+        $this->assertTrue($lock->get());
+
+        try {
+            Carbon::setTestNow(Carbon::parse('2026-04-06 00:00:00', config('app.timezone')));
+            $ids = app(ProviderPayoutGenerationService::class)->generateWeeklyAt(Carbon::now());
+            Carbon::setTestNow();
+
+            $this->assertSame([], $ids);
+            $this->assertDatabaseCount('provider_payouts', 0);
+        } finally {
+            $lock->release();
+            Carbon::setTestNow();
+        }
+    }
+
+    #[Test]
+    public function weekly_generation_releases_cache_lock_when_generation_throws(): void
+    {
+        $throwingLedger = new class extends ProviderPayoutLedgerService
+        {
+            public function eligibleEarningTransactions(Ewallet $providerWallet): Collection
+            {
+                throw new \RuntimeException('ledger unavailable');
+            }
+        };
+
+        $service = new ProviderPayoutGenerationService($throwingLedger, app(AuditService::class));
+
+        Carbon::setTestNow(Carbon::parse('2026-04-06 00:00:00', config('app.timezone')));
+
+        try {
+            $service->generateWeeklyAt(Carbon::now());
+            $this->fail('Expected generation to surface the ledger failure.');
+        } catch (\RuntimeException $e) {
+            $this->assertSame('ledger unavailable', $e->getMessage());
+        }
+
+        $ids = app(ProviderPayoutGenerationService::class)->generateWeeklyAt(Carbon::now());
+        Carbon::setTestNow();
+
+        $this->assertCount(1, $ids);
+    }
+
+    #[Test]
+    public function weekly_generation_command_creates_payouts_for_supplied_run_time(): void
+    {
+        $this->artisan('provider-payouts:generate-weekly', [
+            '--at' => '2026-04-06T00:00:00+03:00',
+        ])
+            ->expectsOutput('Created 1 payout request(s).')
+            ->assertSuccessful();
+
+        $this->assertDatabaseCount('provider_payouts', 1);
+        $this->assertSame(
+            ProviderPayout::STATUS_PENDING_ADMIN_REVIEW,
+            ProviderPayout::query()->firstOrFail()->status
+        );
+    }
+
+    #[Test]
     public function no_payout_created_when_total_below_minimum(): void
     {
         FundTransaction::where('wallet_id', $this->providerWallet->id)->delete();
@@ -165,6 +274,54 @@ class ProviderPayoutFlowTest extends TestCase
     }
 
     #[Test]
+    public function confirming_payout_notifies_provider_with_payload_and_audits_confirmation(): void
+    {
+        Notification::fake();
+        Carbon::setTestNow(Carbon::parse('2026-04-06 00:00:00', config('app.timezone')));
+        $ids = app(ProviderPayoutGenerationService::class)->generateWeeklyAt(Carbon::now());
+        Carbon::setTestNow();
+
+        $payout = ProviderPayout::findOrFail($ids[0]);
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.finances.provider-payouts.confirm', $payout), [
+                'reference_number' => 'REF-NOTIFY',
+                'receipt' => UploadedFile::fake()->create('receipt.pdf', 100, 'application/pdf'),
+                'admin_note' => 'sent',
+            ])
+            ->assertRedirect(route('admin.finances.provider-payouts.show', $payout));
+
+        $payout->refresh();
+
+        Notification::assertSentTo(
+            $this->provider,
+            ProviderPayoutTransferredNotification::class,
+            function (ProviderPayoutTransferredNotification $notification) use ($payout) {
+                $payload = $notification->toArray($this->provider);
+
+                $this->assertSame('provider_payout_transferred', $payload['type']);
+                $this->assertSame($payout->id, $payload['provider_payout_id']);
+                $this->assertStringContainsString('60.00', $payload['message']);
+                $this->assertSame(route('provider.dashboard'), $payload['url']);
+
+                return true;
+            }
+        );
+
+        $activity = Activity::query()
+            ->where('description', 'provider_payout.payout_request_confirmed')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($activity);
+        $this->assertSame($this->admin->id, $activity->causer_id);
+        $this->assertSame($payout->id, $activity->properties->get('provider_payout_id'));
+        $this->assertSame($payout->fund_transaction_out_id, $activity->properties->get('fund_transaction_id'));
+        $this->assertSame('60.00', $activity->properties->get('amount'));
+        $this->assertSame($this->provider->id, $activity->properties->get('provider_id'));
+    }
+
+    #[Test]
     public function cannot_confirm_twice(): void
     {
         Carbon::setTestNow(Carbon::parse('2026-04-06 00:00:00', config('app.timezone')));
@@ -189,6 +346,83 @@ class ProviderPayoutFlowTest extends TestCase
     }
 
     #[Test]
+    public function cannot_confirm_when_payout_items_no_longer_match_payout_amount(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-04-06 00:00:00', config('app.timezone')));
+        $ids = app(ProviderPayoutGenerationService::class)->generateWeeklyAt(Carbon::now());
+        Carbon::setTestNow();
+
+        $payout = ProviderPayout::findOrFail($ids[0]);
+        $payout->items()->firstOrFail()->update(['amount' => 59.00]);
+
+        $outCountBefore = FundTransaction::where('wallet_id', $this->providerWallet->id)
+            ->where('direction', FundTransaction::DIRECTION_OUT)
+            ->count();
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.finances.provider-payouts.confirm', $payout), [
+                'reference_number' => 'REF-MISMATCH',
+                'receipt' => UploadedFile::fake()->create('receipt.pdf', 100, 'application/pdf'),
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $payout->refresh();
+        $this->assertSame(ProviderPayout::STATUS_PENDING_ADMIN_REVIEW, $payout->status);
+        $this->assertNull($payout->fund_transaction_out_id);
+        $this->assertSame(
+            $outCountBefore,
+            FundTransaction::where('wallet_id', $this->providerWallet->id)
+                ->where('direction', FundTransaction::DIRECTION_OUT)
+                ->count()
+        );
+        $this->assertDatabaseMissing('fund_transactions', [
+            'wallet_id' => $this->providerWallet->id,
+            'source' => FundTransaction::SOURCE_PROVIDER_BANK_PAYOUT,
+            'provider_payout_id' => $payout->id,
+        ]);
+    }
+
+    #[Test]
+    public function cannot_confirm_when_provider_wallet_balance_is_insufficient(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-04-06 00:00:00', config('app.timezone')));
+        $ids = app(ProviderPayoutGenerationService::class)->generateWeeklyAt(Carbon::now());
+        Carbon::setTestNow();
+
+        $payout = ProviderPayout::findOrFail($ids[0]);
+        $this->providerWallet->update(['balance' => 10.00]);
+
+        $outCountBefore = FundTransaction::where('wallet_id', $this->providerWallet->id)
+            ->where('direction', FundTransaction::DIRECTION_OUT)
+            ->count();
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.finances.provider-payouts.confirm', $payout), [
+                'reference_number' => 'REF-LOW-BALANCE',
+                'receipt' => UploadedFile::fake()->create('receipt.pdf', 100, 'application/pdf'),
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $payout->refresh();
+        $this->assertSame(ProviderPayout::STATUS_PENDING_ADMIN_REVIEW, $payout->status);
+        $this->assertNull($payout->fund_transaction_out_id);
+        $this->assertSame('10.00', (string) $this->providerWallet->fresh()->balance);
+        $this->assertSame(
+            $outCountBefore,
+            FundTransaction::where('wallet_id', $this->providerWallet->id)
+                ->where('direction', FundTransaction::DIRECTION_OUT)
+                ->count()
+        );
+        $this->assertDatabaseMissing('fund_transactions', [
+            'wallet_id' => $this->providerWallet->id,
+            'source' => FundTransaction::SOURCE_PROVIDER_BANK_PAYOUT,
+            'provider_payout_id' => $payout->id,
+        ]);
+    }
+
+    #[Test]
     public function rejected_payout_makes_earnings_eligible_again(): void
     {
         Carbon::setTestNow(Carbon::parse('2026-04-06 00:00:00', config('app.timezone')));
@@ -205,6 +439,11 @@ class ProviderPayoutFlowTest extends TestCase
 
         $payout->refresh();
         $this->assertSame(ProviderPayout::STATUS_REJECTED, $payout->status);
+        $this->assertSame($this->admin->id, $payout->rejected_by);
+        $this->assertDatabaseHas('activity_log', [
+            'description' => 'provider_payout.payout_request_rejected',
+            'causer_id' => $this->admin->id,
+        ]);
 
         Carbon::setTestNow(Carbon::parse('2026-04-13 00:00:00', config('app.timezone')));
         $ids2 = app(ProviderPayoutGenerationService::class)->generateWeeklyAt(Carbon::now());
@@ -212,6 +451,80 @@ class ProviderPayoutFlowTest extends TestCase
 
         $this->assertCount(1, $ids2);
         $this->assertSame('60.00', (string) ProviderPayout::findOrFail($ids2[0])->amount);
+    }
+
+    #[Test]
+    public function cancelled_payout_makes_earnings_eligible_again_without_wallet_out_transaction(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-04-06 00:00:00', config('app.timezone')));
+        $ids = app(ProviderPayoutGenerationService::class)->generateWeeklyAt(Carbon::now());
+        Carbon::setTestNow();
+
+        $payout = ProviderPayout::findOrFail($ids[0]);
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.finances.provider-payouts.cancel', $payout), [
+                'admin_note' => 'cancel and regenerate',
+            ])
+            ->assertRedirect(route('admin.finances.provider-payouts.show', $payout));
+
+        $payout->refresh();
+        $this->assertSame(ProviderPayout::STATUS_CANCELLED, $payout->status);
+        $this->assertSame($this->admin->id, $payout->cancelled_by);
+        $this->assertNull($payout->fund_transaction_out_id);
+        $this->assertDatabaseMissing('fund_transactions', [
+            'wallet_id' => $this->providerWallet->id,
+            'source' => FundTransaction::SOURCE_PROVIDER_BANK_PAYOUT,
+            'provider_payout_id' => $payout->id,
+        ]);
+        $this->assertDatabaseHas('activity_log', [
+            'description' => 'provider_payout.payout_request_cancelled',
+            'causer_id' => $this->admin->id,
+        ]);
+
+        Carbon::setTestNow(Carbon::parse('2026-04-13 00:00:00', config('app.timezone')));
+        $ids2 = app(ProviderPayoutGenerationService::class)->generateWeeklyAt(Carbon::now());
+        Carbon::setTestNow();
+
+        $this->assertCount(1, $ids2);
+        $this->assertSame('60.00', (string) ProviderPayout::findOrFail($ids2[0])->amount);
+    }
+
+    #[Test]
+    public function admin_can_upload_receipt_before_confirming_payout(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-04-06 00:00:00', config('app.timezone')));
+        $ids = app(ProviderPayoutGenerationService::class)->generateWeeklyAt(Carbon::now());
+        Carbon::setTestNow();
+
+        $payout = ProviderPayout::findOrFail($ids[0]);
+
+        // storeReceipt() returns redirect()->back(); pin previous URL so the assertion matches real UX.
+        $this->actingAs($this->admin)
+            ->from(route('admin.finances.provider-payouts.show', $payout))
+            ->post(route('admin.finances.provider-payouts.receipt.store', $payout), [
+                'receipt' => UploadedFile::fake()->create('receipt.pdf', 100, 'application/pdf'),
+            ])
+            ->assertRedirect(route('admin.finances.provider-payouts.show', $payout))
+            ->assertSessionHas('success');
+
+        $receiptPath = $payout->fresh()->receipt_path;
+        $this->assertNotNull($receiptPath);
+        Storage::disk('local')->assertExists($receiptPath);
+        $this->assertDatabaseHas('activity_log', [
+            'description' => 'provider_payout.payout_receipt_uploaded',
+            'causer_id' => $this->admin->id,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.finances.provider-payouts.confirm', $payout->fresh()), [
+                'reference_number' => 'REF-PREUPLOADED',
+            ])
+            ->assertRedirect(route('admin.finances.provider-payouts.show', $payout));
+
+        $payout->refresh();
+        $this->assertSame(ProviderPayout::STATUS_TRANSFERRED, $payout->status);
+        $this->assertSame($receiptPath, $payout->receipt_path);
     }
 
     #[Test]

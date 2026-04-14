@@ -86,7 +86,13 @@ class AllocationServiceTest extends TestCase
         ]);
 
         $audit = Mockery::mock(AuditService::class);
-        $audit->shouldReceive('log')->once();
+        $audit->shouldReceive('log')
+            ->once()
+            ->with('allocation', 'created', Mockery::on(function (array $data) use ($request) {
+                return ($data['request_id'] ?? null) === $request->id
+                    && abs((float) ($data['amount'] ?? 0) - 50.0) < 0.001;
+            }), Mockery::any());
+        // isPaused() path also calls log('allocation', 'queued_pending') — but only if paused; not here
         $this->app->instance(AuditService::class, $audit);
 
         $service = app(AllocationService::class);
@@ -102,6 +108,9 @@ class AllocationServiceTest extends TestCase
             'payment_id' => $p2->id,
             'amount' => 10,
         ]);
+
+        // Exactly two links — no more, no less
+        $this->assertSame(2, \App\Models\RequestPaymentLink::where('request_id', $request->id)->count());
     }
 
     #[Test]
@@ -146,12 +155,15 @@ class AllocationServiceTest extends TestCase
         ]);
 
         $audit = Mockery::mock(AuditService::class);
+        // No 'allocation.created' audit should fire when funds are insufficient;
+        // 'allocation.queued_pending' also must not fire (engine not paused here).
         $audit->shouldNotReceive('log');
         $this->app->instance(AuditService::class, $audit);
 
         $service = app(AllocationService::class);
 
         $this->expectException(\RuntimeException::class);
+        // Production message: 'Insufficient funds in city fund to allocate for this request.'
         $this->expectExceptionMessage('Insufficient funds');
 
         $service->allocateToRequest($request->id, 100.0);

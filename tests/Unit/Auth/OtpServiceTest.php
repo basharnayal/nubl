@@ -75,4 +75,40 @@ class OtpServiceTest extends TestCase
 
         $this->assertFalse($result['success']);
     }
+
+    #[Test]
+    public function send_otp_succeeds_and_stores_code_in_cache(): void
+    {
+        Cache::flush();
+
+        $sms = Mockery::mock(SmsService::class);
+        $sms->shouldReceive('send')->once()->andReturn(true);
+        $service = new OtpService($sms);
+        $user = User::factory()->create(['phone_number' => '966501234567']);
+
+        $result = $service->sendOtp($user);
+
+        $this->assertTrue($result['success']);
+        $stored = Cache::get('otp:user:' . $user->id);
+        $this->assertNotNull($stored, 'OTP must be stored in cache after send.');
+        $this->assertMatchesRegularExpression('/^\d{6}$/', $stored);
+    }
+
+    #[Test]
+    public function send_otp_blocked_when_resend_limit_exceeded(): void
+    {
+        Cache::flush();
+
+        $sms = Mockery::mock(SmsService::class);
+        $sms->shouldNotReceive('send');
+        $service = new OtpService($sms);
+        $user = User::factory()->create(['phone_number' => '966501234567']);
+
+        // Pre-fill the resend counter at the limit
+        Cache::put('otp:resend:' . $user->id, OtpService::RESEND_LIMIT, now()->addMinutes(60));
+
+        $result = $service->sendOtp($user);
+
+        $this->assertFalse($result['success']);
+    }
 }

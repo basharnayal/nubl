@@ -2,11 +2,13 @@
 
 namespace Tests\Feature\Donor;
 
+use App\Contracts\NotificationServiceInterface;
 use App\Models\Ewallet;
 use App\Models\FundTransaction;
 use App\Models\Payment;
 use App\Models\User;
 use App\Services\MyFatoorahService;
+use App\Services\NotificationService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Notifications\DatabaseNotification;
 use PHPUnit\Framework\Attributes\Test;
@@ -139,6 +141,100 @@ class PaymentFlowTest extends TestCase
 
         $count = FundTransaction::where('payment_id', $payment->id)->count();
         $this->assertSame(1, $count, 'Only one FundTransaction should exist despite double callback');
+    }
+
+    #[Test]
+    public function callback_processing_failure_rolls_back_partial_side_effects_and_allows_retry(): void
+    {
+        $payment = Payment::create([
+            'sponsor_id' => $this->donor->id,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'external_payment_id' => 'rollback-222',
+            'status' => Payment::STATUS_PENDING,
+            'amount' => 88.75,
+        ]);
+
+        $mockMyFatoorah = $this->createMock(MyFatoorahService::class);
+        $mockMyFatoorah->expects($this->exactly(2))
+            ->method('getPaymentStatus')
+            ->willReturn([
+                'status' => 'Paid',
+                'invoice_id' => 'rollback-222',
+                'raw_response' => [],
+            ]);
+        $this->app->instance(MyFatoorahService::class, $mockMyFatoorah);
+
+        $failingNotifications = $this->createMock(NotificationServiceInterface::class);
+        $failingNotifications->method('sendDonationReceipt')
+            ->willThrowException(new \RuntimeException('notification transport failed'));
+        $this->app->instance(NotificationServiceInterface::class, $failingNotifications);
+
+        $this->get(route('payments.callback', ['paymentId' => 'rollback-222']))
+            ->assertRedirect(route('donor.payments.failed', ['payment_id' => $payment->id]))
+            ->assertSessionHas('payment_reason', 'processing_error');
+
+        $this->assertSame(Payment::STATUS_PENDING, $payment->fresh()->status);
+        $this->assertSame('0.00', (string) Ewallet::where('owner_type', 'SYSTEM')->firstOrFail()->fresh()->balance);
+        $this->assertSame(0, FundTransaction::where('payment_id', $payment->id)->count());
+        $this->assertSame(0, DatabaseNotification::where('notifiable_id', $this->donor->id)->count());
+        $this->assertDatabaseHas('activity_log', [
+            'description' => 'payment.callback_processing_failed',
+        ]);
+
+        $this->app->instance(NotificationServiceInterface::class, app(NotificationService::class));
+        // Laravel may memoize the route controller; clear it so the next request resolves
+        // PaymentService with the rebound NotificationServiceInterface.
+        app('router')->getRoutes()->getByName('payments.callback')->flushController();
+
+        $this->get(route('payments.callback', ['paymentId' => 'rollback-222']))
+            ->assertRedirect(route('donor.payments.success', ['payment_id' => $payment->id]));
+
+        $this->assertSame(Payment::STATUS_SUCCEEDED, $payment->fresh()->status);
+        $this->assertSame('88.75', (string) Ewallet::where('owner_type', 'SYSTEM')->firstOrFail()->fresh()->balance);
+        $this->assertSame(1, FundTransaction::where('payment_id', $payment->id)->count());
+        $this->assertSame(1, DatabaseNotification::where('notifiable_id', $this->donor->id)->count());
+    }
+
+    #[Test]
+    public function callback_with_invoice_id_uses_invoice_key_and_credits_system_wallet(): void
+    {
+        $payment = Payment::create([
+            'sponsor_id' => $this->donor->id,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'external_payment_id' => 'inv-777',
+            'status' => Payment::STATUS_PENDING,
+            'amount' => 125.50,
+        ]);
+
+        $mockMyFatoorah = $this->createMock(MyFatoorahService::class);
+        $mockMyFatoorah->expects($this->once())
+            ->method('getPaymentStatus')
+            ->with('inv-777', 'InvoiceId')
+            ->willReturn([
+                'status' => 'Paid',
+                'invoice_id' => 'inv-777',
+                'raw_response' => [],
+            ]);
+
+        $this->app->instance(MyFatoorahService::class, $mockMyFatoorah);
+
+        $this->get(route('payments.callback', ['invoiceId' => 'inv-777']))
+            ->assertRedirect(route('donor.payments.success', ['payment_id' => $payment->id]));
+
+        $payment->refresh();
+        $this->assertSame(Payment::STATUS_SUCCEEDED, $payment->status);
+
+        $systemWallet = Ewallet::where('owner_type', 'SYSTEM')->firstOrFail();
+        $this->assertSame('125.50', (string) $systemWallet->fresh()->balance);
+
+        $this->assertDatabaseHas('fund_transactions', [
+            'wallet_id' => $systemWallet->id,
+            'sponsor_id' => $this->donor->id,
+            'source' => FundTransaction::SOURCE_DONATION,
+            'amount' => 125.50,
+            'direction' => FundTransaction::DIRECTION_IN,
+            'payment_id' => $payment->id,
+        ]);
     }
 
     #[Test]

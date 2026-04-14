@@ -10,6 +10,8 @@ use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class QrSettingsTest extends TestCase
@@ -54,6 +56,15 @@ class QrSettingsTest extends TestCase
 
         $this->assertSame('240', SystemSetting::getValue('qr.ttl_minutes'));
 
+        $activity = Activity::query()
+            ->where('description', 'qr_settings.updated')
+            ->latest('id')
+            ->first();
+        $this->assertNotNull($activity);
+        $this->assertSame($this->admin->id, $activity->causer_id);
+        $this->assertSame('save_ttl', $activity->properties->get('decision'));
+        $this->assertSame(240, $activity->properties->get('ttl_minutes'));
+
         $provider = User::factory()->create(['status' => User::STATUS_ACTIVE, 'is_active' => true]);
         $provider->assignRole('provider');
         $recipient = User::factory()->create(['status' => User::STATUS_ACTIVE]);
@@ -75,6 +86,18 @@ class QrSettingsTest extends TestCase
             $redemption->redeem_expires_at->getTimestamp(),
             3
         );
+    }
+
+    #[Test]
+    public function admin_without_qr_permission_cannot_update_qr_settings(): void
+    {
+        Role::findByName('admin')->revokePermissionTo('qr.configure_ttl');
+
+        $this->actingAs($this->admin)
+            ->put(route('admin.settings.qr.update'), ['ttl_minutes' => 240])
+            ->assertForbidden();
+
+        $this->assertNull(SystemSetting::getValue('qr.ttl_minutes'));
     }
 
     #[Test]

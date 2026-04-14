@@ -9,6 +9,7 @@ use App\Models\ProviderMenuItem;
 use App\Models\ProviderOperatingInfo;
 use App\Models\Request as RequestModel;
 use App\Models\User;
+use App\Support\RecipientFundRetryCache;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Queue;
@@ -272,6 +273,51 @@ class RecipientRequestSubmissionTest extends TestCase
     }
 
     #[Test]
+    public function fund_retry_job_creates_request_when_city_fund_is_replenished(): void
+    {
+        Queue::fake();
+        Payment::query()->delete();
+
+        $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 1],
+                    ['id' => $this->menuItem2->id, 'quantity' => 1],
+                ],
+            ])
+            ->assertSessionHas('info');
+
+        Queue::assertPushed(ProcessRecipientFundRetryJob::class, function (ProcessRecipientFundRetryJob $job) {
+            return $job->userId === $this->recipient->id;
+        });
+        $this->assertNotNull(RecipientFundRetryCache::getPayload($this->recipient->id));
+        $this->assertDatabaseCount('requests', 0);
+
+        Payment::factory()->create([
+            'amount' => 70.00,
+            'status' => Payment::STATUS_SUCCEEDED,
+        ]);
+
+        $job = new ProcessRecipientFundRetryJob($this->recipient->id);
+        $job->handle(
+            app(\App\Services\RecipientRequestSubmissionService::class),
+            app(\App\Services\AllocationService::class),
+            app(\App\Services\AuditService::class)
+        );
+
+        $request = RequestModel::where('recipient_id', $this->recipient->id)->first();
+        $this->assertNotNull($request);
+        $this->assertSame('REQUESTED', $request->status);
+        $this->assertEquals(70.00, (float) $request->reserved_amount);
+        $this->assertNull(RecipientFundRetryCache::getPayload($this->recipient->id));
+
+        $this->provider->refresh();
+        $this->assertCount(1, $this->provider->notifications);
+        $this->assertSame('provider_new_request', $this->provider->notifications->first()->data['type'] ?? null);
+    }
+
+    #[Test]
     public function allowance_retry_job_creates_request_when_weekly_allowance_frees()
     {
         Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00'));
@@ -430,6 +476,74 @@ class RecipientRequestSubmissionTest extends TestCase
             ]);
 
         $response->assertSessionHasErrors(['items.0.id']);
+        $this->assertDatabaseCount('requests', 0);
+    }
+
+    #[Test]
+    public function cannot_request_inactive_menu_item(): void
+    {
+        $this->menuItem1->update(['is_active' => false]);
+
+        $response = $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 1],
+                ],
+            ]);
+
+        $response->assertSessionHasErrors(['items.0.id']);
+        $this->assertDatabaseCount('requests', 0);
+    }
+
+    #[Test]
+    public function cannot_request_more_than_menu_item_max_per_request(): void
+    {
+        $this->menuItem1->update(['max_per_request' => 2]);
+
+        $response = $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 3],
+                ],
+            ]);
+
+        $response->assertSessionHasErrors(['items.0.quantity']);
+        $this->assertDatabaseCount('requests', 0);
+    }
+
+    #[Test]
+    public function cannot_request_from_provider_not_accepting_orders(): void
+    {
+        $this->provider->update(['accepting_orders' => false]);
+
+        $response = $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 1],
+                ],
+            ]);
+
+        $response->assertSessionHasErrors(['provider_id']);
+        $this->assertDatabaseCount('requests', 0);
+    }
+
+    #[Test]
+    public function cannot_request_when_provider_capacity_is_unavailable(): void
+    {
+        $this->provider->providerOperatingInfo->update(['daily_capacity' => 0]);
+
+        $response = $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 1],
+                ],
+            ]);
+
+        $response->assertSessionHasErrors(['provider_id']);
         $this->assertDatabaseCount('requests', 0);
     }
 

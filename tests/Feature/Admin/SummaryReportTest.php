@@ -10,6 +10,8 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Activitylog\Models\Activity;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
@@ -116,6 +118,16 @@ class SummaryReportTest extends TestCase
         $response->assertSee('2026-03-30');
     }
 
+    #[Test]
+    public function admin_without_report_export_permission_cannot_view_summary_reports(): void
+    {
+        Role::findByName('admin')->revokePermissionTo('reports.export_csv');
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.finances.summary-reports.index'))
+            ->assertForbidden();
+    }
+
     // -------------------------------------------------------------------------
     // Admin download Excel (XLSX)
     // -------------------------------------------------------------------------
@@ -123,6 +135,13 @@ class SummaryReportTest extends TestCase
     #[Test]
     public function admin_can_download_summary_report_excel_fr_19_1(): void
     {
+        if (! extension_loaded('zip')) {
+            $this->markTestSkipped('PHP ext-zip is required to generate XLSX (PhpSpreadsheet).');
+        }
+        if (! class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+            $this->markTestSkipped('phpoffice/phpspreadsheet is not available (autoload / install).');
+        }
+
         $report = SummaryReport::create([
             'type'         => 'monthly',
             'period_from'  => '2026-03-01',
@@ -161,6 +180,42 @@ class SummaryReportTest extends TestCase
         $this->assertNotEmpty($content);
         // XLSX files start with PK (ZIP magic bytes)
         $this->assertStringStartsWith('PK', $content);
+    }
+
+    #[Test]
+    public function summary_report_download_writes_audit_entry_before_streaming(): void
+    {
+        $report = SummaryReport::create([
+            'type' => 'weekly',
+            'period_from' => '2026-03-30',
+            'period_to' => '2026-04-05',
+            'payload' => [
+                'payments_total_count' => 3,
+                'payments_succeeded_amount' => 150.0,
+                'payments_failed_amount' => 0,
+                'ledger_entries_count' => 2,
+                'ledger_in_amount' => 150.0,
+                'ledger_out_amount' => 75.0,
+            ],
+            'generated_at' => now(),
+        ]);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.finances.summary-reports.download', $report))
+            ->assertOk();
+
+        $activity = Activity::query()
+            ->where('description', 'summary_report.exported')
+            ->latest('id')
+            ->first();
+
+        $this->assertNotNull($activity);
+        $this->assertSame($this->admin->id, $activity->causer_id);
+        $this->assertSame('download_xlsx', $activity->properties->get('decision'));
+        $this->assertSame($report->id, $activity->properties->get('summary_report_id'));
+        $this->assertSame('weekly', $activity->properties->get('type'));
+        $this->assertSame('2026-03-30', $activity->properties->get('period_from'));
+        $this->assertSame('2026-04-05', $activity->properties->get('period_to'));
     }
 
     // -------------------------------------------------------------------------

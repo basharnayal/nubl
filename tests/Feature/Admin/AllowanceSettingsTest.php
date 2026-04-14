@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -57,6 +58,24 @@ class AllowanceSettingsTest extends TestCase
     }
 
     #[Test]
+    public function admin_without_allowance_permission_cannot_update_allowance_settings(): void
+    {
+        $admin = User::factory()->create([
+            'status' => User::STATUS_ACTIVE,
+            'is_active' => true,
+        ]);
+        $admin->assignRole('admin');
+
+        $this->actingAs($admin)
+            ->put(route('admin.settings.allowances.update'), [
+                'weekly_allowance_sar' => 300,
+            ])
+            ->assertForbidden();
+
+        $this->assertNull(SystemSetting::getValue(WeeklyAllowanceSettings::KEY_PENDING_VALUE));
+    }
+
+    #[Test]
     public function admin_can_schedule_weekly_allowance_change(): void
     {
         Notification::fake();
@@ -83,6 +102,16 @@ class AllowanceSettingsTest extends TestCase
         $this->assertNotNull($storedAt);
         $expected = WeeklyAllowanceSettings::nextEffectiveBoundary();
         $this->assertSame($expected->toIso8601String(), Carbon::parse($storedAt)->toIso8601String());
+
+        $activity = Activity::query()
+            ->where('description', 'allowance_settings.weekly_limit_scheduled')
+            ->latest('id')
+            ->first();
+        $this->assertNotNull($activity);
+        $this->assertSame($this->admin->id, $activity->causer_id);
+        $this->assertSame('schedule_pending_weekly_allowance', $activity->properties->get('decision'));
+        $this->assertEqualsWithDelta(300.0, (float) $activity->properties->get('weekly_allowance_sar'), 0.001);
+        $this->assertSame($storedAt, $activity->properties->get('effective_at'));
 
         Notification::assertSentTo(
             $recipient,
