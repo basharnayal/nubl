@@ -57,6 +57,24 @@ class AllowanceSettingsTest extends TestCase
     }
 
     #[Test]
+    public function admin_without_allowance_permission_cannot_update_allowance_settings(): void
+    {
+        $admin = User::factory()->create([
+            'status' => User::STATUS_ACTIVE,
+            'is_active' => true,
+        ]);
+        $admin->assignRole('admin');
+
+        $this->actingAs($admin)
+            ->put(route('admin.settings.allowances.update'), [
+                'weekly_allowance_sar' => 300,
+            ])
+            ->assertForbidden();
+
+        $this->assertNull(SystemSetting::getValue(WeeklyAllowanceSettings::KEY_PENDING_VALUE));
+    }
+
+    #[Test]
     public function admin_can_schedule_weekly_allowance_change(): void
     {
         Notification::fake();

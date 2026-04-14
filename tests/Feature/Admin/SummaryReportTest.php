@@ -10,6 +10,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 /**
@@ -114,6 +115,16 @@ class SummaryReportTest extends TestCase
         $response->assertSee('Weekly & Monthly Summary Reports');
         $response->assertSee('Download as Excel');
         $response->assertSee('2026-03-30');
+    }
+
+    #[Test]
+    public function admin_without_report_export_permission_cannot_view_summary_reports(): void
+    {
+        Role::findByName('admin')->revokePermissionTo('reports.export_csv');
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.finances.summary-reports.index'))
+            ->assertForbidden();
     }
 
     // -------------------------------------------------------------------------
