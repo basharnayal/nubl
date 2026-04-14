@@ -2,11 +2,20 @@
 
 namespace Tests\Feature\Provider;
 
+use App\Models\Ewallet;
+use App\Models\FundTransaction;
+use App\Models\Payment;
+use App\Models\ProviderMenuItem;
+use App\Models\ProviderProfile;
+use App\Models\Request as RequestModel;
 use App\Models\User;
+use App\Services\RedemptionService;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Crypt;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class ProviderQrRedemptionTest extends TestCase
@@ -28,6 +37,150 @@ class ProviderQrRedemptionTest extends TestCase
         ]);
         $this->provider->assignRole('provider');
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Helper: build the minimal DB state required for a redeemable request.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private function createRedeemableRequest(): RequestModel
+    {
+        Role::firstOrCreate(['name' => 'recipient', 'guard_name' => 'web']);
+
+        // Provider profile (creates provider ewallet via model boot)
+        ProviderProfile::firstOrCreate(
+            ['user_id' => $this->provider->id],
+            [
+                'full_name_ar'      => 'مزود',
+                'full_name_en'      => 'Provider',
+                'phone_number'      => '966501234567',
+                'email'             => $this->provider->email,
+                'business_name_ar'  => 'متجر',
+                'business_name_en'  => 'Shop',
+                'unified_number'    => '7000123456',
+                'business_category' => ['restaurant'],
+                'address_ar'        => 'عنوان',
+                'address_en'        => 'Address',
+                'city'              => 'Riyadh',
+                'region'            => 'central',
+            ]
+        );
+
+        $recipient = User::factory()->create(['status' => User::STATUS_ACTIVE]);
+        $recipient->assignRole('recipient');
+
+        $menuItem = ProviderMenuItem::create([
+            'provider_id' => $this->provider->id,
+            'name'        => 'Meal',
+            'price'       => 30.00,
+            'category'    => 'food',
+            'is_active'   => true,
+        ]);
+
+        // System wallet + donor payment so transfer at redemption can succeed
+        $systemWallet = Ewallet::create([
+            'owner_type' => 'SYSTEM',
+            'owner_id'   => null,
+            'balance'    => 0,
+            'status'     => true,
+        ]);
+
+        $donor   = User::factory()->create();
+        $payment = Payment::create([
+            'sponsor_id'         => $donor->id,
+            'gateway'            => Payment::GATEWAY_MYFATOORAH,
+            'status'             => Payment::STATUS_SUCCEEDED,
+            'amount'             => 100,
+        ]);
+        FundTransaction::create([
+            'wallet_id'          => $systemWallet->id,
+            'sponsor_id'         => $donor->id,
+            'source'             => FundTransaction::SOURCE_DONATION,
+            'amount'             => 100,
+            'direction'          => FundTransaction::DIRECTION_IN,
+            'payment_id'         => $payment->id,
+            'request_id'         => null,
+            'order_redemption_id' => null,
+        ]);
+        $systemWallet->syncBalance();
+
+        $request = RequestModel::create([
+            'recipient_id'    => $recipient->id,
+            'provider_id'     => $this->provider->id,
+            'reserved_amount' => 30.00,
+            'status'          => 'REDEEMABLE',
+            'funding_source'  => 'CITY_FUND',
+        ]);
+        $request->items()->create([
+            'menu_item_id'   => $menuItem->id,
+            'quantity'       => 1,
+            'price_snapshot' => 30.00,
+        ]);
+
+        return $request;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // FR-9.1: Valid token → 200, status changes, audit logged
+    // ─────────────────────────────────────────────────────────────────────────
+
+    #[Test]
+    public function valid_token_is_redeemed_and_returns_200_fr_9_1(): void
+    {
+        $request    = $this->createRedeemableRequest();
+        $redemption = RedemptionService::generateForRequest($request);
+        $this->assertNotNull($redemption, 'Redemption token must be generated for REDEEMABLE request.');
+
+        // ProviderQrController hashes the submitted token with SHA-256 before lookup; DB stores hash(raw).
+        $rawQrToken = Crypt::decryptString($redemption->token_ciphertext);
+        $response = $this->actingAs($this->provider)
+            ->postJson(route('provider.qr.redeem'), [
+                'token' => $rawQrToken,
+            ]);
+
+        $response->assertStatus(200);
+        $response->assertJsonFragment(['success' => __('Successfully redeemed!')]);
+
+        // DB: redemption is now REDEEMED
+        $this->assertDatabaseHas('order_redemptions', [
+            'id'     => $redemption->id,
+            'status' => 'REDEEMED',
+        ]);
+
+        // Audit log must exist
+        $this->assertDatabaseHas('activity_log', [
+            'description' => 'redemption.redeemed',
+        ]);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // FR-9.1: Second redemption of the same token → 409 Conflict
+    // ─────────────────────────────────────────────────────────────────────────
+
+    #[Test]
+    public function already_redeemed_token_returns_409_fr_9_1(): void
+    {
+        $request    = $this->createRedeemableRequest();
+        $redemption = RedemptionService::generateForRequest($request);
+        $this->assertNotNull($redemption);
+
+        $rawQrToken = Crypt::decryptString($redemption->token_ciphertext);
+
+        // First redemption
+        $this->actingAs($this->provider)
+            ->postJson(route('provider.qr.redeem'), ['token' => $rawQrToken])
+            ->assertStatus(200);
+
+        // Second attempt on the same token
+        $response = $this->actingAs($this->provider)
+            ->postJson(route('provider.qr.redeem'), ['token' => $rawQrToken]);
+
+        $response->assertStatus(409);
+        $response->assertJsonFragment(['error' => __('This code has already been used.')]);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // FR-9.2 / FR-9.3 (existing tests)
+    // ─────────────────────────────────────────────────────────────────────────
 
     #[Test]
     public function invalid_token_returns_404_within_one_second_fr_9_2(): void

@@ -123,6 +123,13 @@ class SummaryReportTest extends TestCase
     #[Test]
     public function admin_can_download_summary_report_excel_fr_19_1(): void
     {
+        if (! extension_loaded('zip')) {
+            $this->markTestSkipped('PHP ext-zip is required to generate XLSX (PhpSpreadsheet).');
+        }
+        if (! class_exists(\PhpOffice\PhpSpreadsheet\Spreadsheet::class)) {
+            $this->markTestSkipped('phpoffice/phpspreadsheet is not available (autoload / install).');
+        }
+
         $report = SummaryReport::create([
             'type'         => 'monthly',
             'period_from'  => '2026-03-01',

@@ -27,9 +27,20 @@ class AuditServiceTest extends TestCase
 
         $this->assertSame(1, Activity::query()->count());
         $latest = Activity::query()->latest('id')->first();
-        $this->assertStringContainsString('user', (string) $latest->description);
+
+        // AuditService formats description as "{entity}.{action}"
+        $this->assertSame('user.updated', $latest->description);
+
         $props = $latest->properties?->toArray() ?? [];
         $this->assertSame('user', $props['entity'] ?? null);
         $this->assertSame('updated', $props['action'] ?? null);
+        $this->assertSame(5, $props['user_id'] ?? null);
+
+        // Causer must be the user whose ID was passed explicitly
+        $this->assertSame($user->id, $latest->causer_id);
+
+        // FR-13.2: every audit entry must carry a SHA-256 hash
+        $this->assertNotNull($latest->sha256_hash, 'sha256_hash must be set on every audit entry (FR-13.2).');
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $latest->sha256_hash);
     }
 }

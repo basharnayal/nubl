@@ -148,5 +148,9 @@ class RecipientInterfaceTest extends TestCase
         $this->assertCount(1, $this->provider->notifications);
         $this->assertSame('provider_request_status_changed', $this->provider->notifications->first()->data['type']);
         $this->assertSame('CANCELLED', $this->provider->notifications->first()->data['status']);
+
+        // Cancelling a CITY_FUND REQUESTED order must free the weekly allowance
+        $used = \App\Services\RecipientAllowanceService::getWeeklyUsed($this->recipient->id);
+        $this->assertSame(0.0, $used, 'Cancelled request must not count toward weekly allowance.');
     }
 }

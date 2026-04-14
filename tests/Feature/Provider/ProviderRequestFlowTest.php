@@ -166,6 +166,19 @@ class ProviderRequestFlowTest extends TestCase
             'status' => 'REDEEMABLE',
             'funding_source' => 'CITY_FUND',
         ]);
+
+        // A QR redemption token must have been created
+        $this->request->refresh();
+        $this->assertNotNull($this->request->redemption, 'RedemptionService must create a token on approval.');
+
+        // Audit log for city-fund approval
+        $this->assertTrue(
+            Activity::query()
+                ->where('description', 'request.approved_city_fund')
+                ->where('causer_id', $this->provider->id)
+                ->exists(),
+            'Audit entry "request.approved_city_fund" must be created.'
+        );
     }
 
     #[Test]

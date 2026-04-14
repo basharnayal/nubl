@@ -389,4 +389,34 @@ class AccountApprovalTest extends TestCase
 
         $response->assertForbidden();
     }
+
+    #[Test]
+    public function guest_cannot_access_pending_users(): void
+    {
+        $response = $this->get(route('admin.users.pending'));
+
+        $response->assertRedirect(route('login'));
+    }
+
+    #[Test]
+    public function non_admin_cannot_approve_user(): void
+    {
+        $provider = User::factory()->create([
+            'status' => User::STATUS_PENDING_APPROVAL,
+            'membership_type' => User::MEMBERSHIP_PROVIDER,
+        ]);
+        $provider->assignRole('provider');
+
+        $recipient = User::factory()->create([
+            'status' => User::STATUS_ACTIVE,
+        ]);
+        $recipient->assignRole('recipient');
+
+        $response = $this->actingAs($recipient)->post(route('admin.users.approve', $provider));
+
+        $response->assertForbidden();
+        $provider->refresh();
+        // Status must be unchanged
+        $this->assertSame(User::STATUS_PENDING_APPROVAL, $provider->status);
+    }
 }
