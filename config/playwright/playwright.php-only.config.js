@@ -16,6 +16,8 @@ export default defineConfig({
   },
   webServer: {
     command: 'php artisan serve --host=127.0.0.1 --port=8001',
+    // cwd must point to the project root so PHP can find the `artisan` file.
+    cwd: path.resolve(__dirname, '../..'),
     url: 'http://127.0.0.1:8001',
     env: {
       ...process.env,

@@ -22,6 +22,10 @@ export default defineConfig({
   webServer: [
     {
       command: 'php artisan serve --host=127.0.0.1 --port=8001',
+      // cwd must point to the project root so PHP can find the `artisan` file.
+      // Without this, Playwright defaults to the config file's directory (config/playwright/)
+      // and PHP fails with "Could not open input file: artisan".
+      cwd: path.resolve(__dirname, '../..'),
       url: 'http://127.0.0.1:8001',
       env: {
         ...process.env,
@@ -33,6 +37,8 @@ export default defineConfig({
     },
     {
       command: 'npm run dev',
+      // cwd must point to the project root so npm can find package.json.
+      cwd: path.resolve(__dirname, '../..'),
       // Use `port` (TCP check), not `url` (HTTP check): Vite often returns 404 for GET `/`,
       // and Playwright treats that as "not ready" until timeout.
       port: 5173,
