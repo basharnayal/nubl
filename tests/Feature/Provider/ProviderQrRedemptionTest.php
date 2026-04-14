@@ -4,11 +4,13 @@ namespace Tests\Feature\Provider;
 
 use App\Models\Ewallet;
 use App\Models\FundTransaction;
+use App\Models\OrderRedemption;
 use App\Models\Payment;
 use App\Models\ProviderMenuItem;
 use App\Models\ProviderProfile;
 use App\Models\Request as RequestModel;
 use App\Models\RequestPaymentLink;
+use App\Models\SystemSetting;
 use App\Models\User;
 use App\Services\RedemptionService;
 use Database\Seeders\PermissionSeeder;
@@ -123,6 +125,62 @@ class ProviderQrRedemptionTest extends TestCase
     // ─────────────────────────────────────────────────────────────────────────
     // FR-9.1: Valid token → 200, status changes, audit logged
     // ─────────────────────────────────────────────────────────────────────────
+
+    #[Test]
+    public function generated_redemption_tokens_store_raw_and_short_token_contracts(): void
+    {
+        $request = $this->createRedeemableRequest();
+
+        $redemption = RedemptionService::generateForRequest($request);
+        $this->assertNotNull($redemption);
+
+        $rawToken = Crypt::decryptString($redemption->token_ciphertext);
+        $shortToken = Crypt::decryptString($redemption->short_code_ciphertext);
+
+        $this->assertSame(32, strlen($rawToken));
+        $this->assertSame(9, strlen($shortToken));
+        $this->assertSame(strtoupper($shortToken), $shortToken);
+        $this->assertSame(hash('sha256', $rawToken), $redemption->token_code);
+        $this->assertSame(hash('sha256', $shortToken), $redemption->short_code_hash);
+    }
+
+    #[Test]
+    public function generated_redemption_ttl_is_clamped_to_configured_bounds(): void
+    {
+        config([
+            'qr.ttl_minutes' => 180,
+            'qr.ttl_minutes_min' => 15,
+            'qr.ttl_minutes_max' => 720,
+        ]);
+
+        SystemSetting::setValue('qr.ttl_minutes', '1');
+        $low = RedemptionService::generateForRequest($this->createRedeemableRequest());
+        $this->assertNotNull($low);
+        $this->assertSame(15, $low->ttl_minutes);
+
+        SystemSetting::setValue('qr.ttl_minutes', '9999');
+        $high = RedemptionService::generateForRequest($this->createRedeemableRequest());
+        $this->assertNotNull($high);
+        $this->assertSame(720, $high->ttl_minutes);
+    }
+
+    #[Test]
+    public function recipient_request_detail_backfills_legacy_redeemable_request_without_token(): void
+    {
+        $request = $this->createRedeemableRequest();
+        $this->assertFalse(OrderRedemption::where('request_id', $request->id)->exists());
+
+        $this->actingAs($request->recipient)
+            ->get(route('recipient.requests.show', $request->id))
+            ->assertOk();
+
+        $redemption = OrderRedemption::where('request_id', $request->id)->first();
+        $this->assertNotNull($redemption);
+        $this->assertSame('PENDING', $redemption->status);
+        $this->assertSame($request->provider_id, $redemption->provider_id);
+        $this->assertSame(32, strlen(Crypt::decryptString($redemption->token_ciphertext)));
+        $this->assertSame(9, strlen(Crypt::decryptString($redemption->short_code_ciphertext)));
+    }
 
     #[Test]
     public function valid_token_is_redeemed_and_returns_200_fr_9_1(): void
