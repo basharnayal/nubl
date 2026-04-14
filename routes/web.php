@@ -148,6 +148,13 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin'
             Route::post('/provider-payouts/{provider_payout}/reject', [ProviderPayoutController::class, 'reject'])->name('provider-payouts.reject');
             Route::post('/provider-payouts/{provider_payout}/cancel', [ProviderPayoutController::class, 'cancel'])->name('provider-payouts.cancel');
         });
+
+        // Admin Menu Management
+        Route::prefix('menus')->name('menus.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdminMenuController::class, 'index'])->name('index');
+            Route::get('/{provider}', [\App\Http\Controllers\Admin\AdminMenuController::class, 'show'])->name('show');
+            Route::post('/{item}/toggle-block', [\App\Http\Controllers\Admin\AdminMenuController::class, 'toggleBlock'])->name('toggle-block');
+        });
     });
 
 // Provider routes

@@ -36,6 +36,11 @@ class SidebarPanel
                         'title' => __('Requests'),
                         'route_name' => 'admin.requests.index',
                     ],
+                    'admin_provider_menus' => [
+                        'title' => __('admin.nav.provider_menus'),
+                        'route_name' => 'admin.menus.index',
+                        'route_match' => 'admin.menus.*',
+                    ],
                     'admin_finances' => [
                         'title' => __('finance.nav.module'),
                         'submenu' => [

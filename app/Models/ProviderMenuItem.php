@@ -20,6 +20,7 @@ class ProviderMenuItem extends Model
         'category_id',
         'is_active',
         'image_path',
+        'is_admin_blocked',
     ];
 
     protected function casts(): array
@@ -27,6 +28,7 @@ class ProviderMenuItem extends Model
         return [
             'price' => 'decimal:2',
             'is_active' => 'boolean',
+            'is_admin_blocked' => 'boolean',
         ];
     }
 
@@ -38,10 +40,10 @@ class ProviderMenuItem extends Model
         }
 
         $normalized = str_replace('\\', '/', $path);
-        $segments = array_values(array_filter(explode('/', $normalized), static fn ($s) => $s !== ''));
-        $encoded = array_map(static fn (string $segment): string => rawurlencode($segment), $segments);
+        $segments = array_values(array_filter(explode('/', $normalized), static fn($s) => $s !== ''));
+        $encoded = array_map(static fn(string $segment): string => rawurlencode($segment), $segments);
 
-        return asset('storage/'.implode('/', $encoded));
+        return asset('storage/' . implode('/', $encoded));
     }
 
     public function provider(): BelongsTo
@@ -59,7 +61,7 @@ class ProviderMenuItem extends Model
      */
     public function scopeActive($query)
     {
-        return $query->where('is_active', true);
+        return $query->where('is_active', true)->where('is_admin_blocked', false);
     }
 
     /**

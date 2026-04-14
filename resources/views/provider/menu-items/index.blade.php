@@ -35,7 +35,7 @@
                                 <option value="">{{ __('All Categories') }}</option>
                                 @foreach($categories as $category)
                                     <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
+                                        {{ __($category->name) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -93,32 +93,38 @@
                                                     </div>
                                                 </div>
                                             </td>
-                                            <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $item->category }}</td>
+                                            <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ __($item->category) }}</td>
                                             <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                                 <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100">{{ number_format($item->price, 2) }} {{ __('SAR') }}</p>
                                             </td>
                                             <td class="px-4 py-3 sm:px-5">
-                                                @if($item->is_active)
+                                                @if($item->is_admin_blocked)
+                                                    <span class="badge rounded-full bg-error/10 text-error dark:bg-error/15">{{ __('Blocked by Admin') }}</span>
+                                                @elseif($item->is_active)
                                                     <span class="badge rounded-full bg-success/10 text-success dark:bg-success/15">{{ __('Active') }}</span>
                                                 @else
                                                     <span class="badge rounded-full bg-error/10 text-error dark:bg-error/15">{{ __('Inactive') }}</span>
                                                 @endif
                                             </td>
                                             <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                                <a href="{{ route('provider.menu-items.edit', $item) }}"
-                                                    class="font-medium text-primary outline-hidden transition-colors hover:text-primary-focus dark:text-accent-light dark:hover:text-accent-light/80">
-                                                    {{ __('Edit') }}
-                                                </a>
-                                                <span class="mx-2 text-slate-300 dark:text-navy-500">|</span>
-                                                <form action="{{ route('provider.menu-items.destroy', $item) }}" method="POST" class="inline-block"
-                                                    onsubmit="return confirm('{{ __('Are you sure you want to deactivate this item?') }}');">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit"
-                                                        class="font-medium text-error outline-hidden transition-colors hover:text-error-focus dark:hover:text-error/80">
-                                                        {{ __('Deactivate') }}
-                                                    </button>
-                                                </form>
+                                                @if($item->is_admin_blocked)
+                                                    <span class="text-xs text-slate-400 dark:text-navy-400 italic">{{ __('Actions disabled by admin') }}</span>
+                                                @else
+                                                    <a href="{{ route('provider.menu-items.edit', $item) }}"
+                                                        class="font-medium text-primary outline-hidden transition-colors hover:text-primary-focus dark:text-accent-light dark:hover:text-accent-light/80">
+                                                        {{ __('Edit') }}
+                                                    </a>
+                                                    <span class="mx-2 text-slate-300 dark:text-navy-500">|</span>
+                                                    <form action="{{ route('provider.menu-items.destroy', $item) }}" method="POST" class="inline-block"
+                                                        onsubmit="return confirm('{{ __('Are you sure you want to deactivate this item?') }}');">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                            class="font-medium text-error outline-hidden transition-colors hover:text-error-focus dark:hover:text-error/80">
+                                                            {{ __('Deactivate') }}
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
