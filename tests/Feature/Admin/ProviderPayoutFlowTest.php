@@ -189,6 +189,83 @@ class ProviderPayoutFlowTest extends TestCase
     }
 
     #[Test]
+    public function cannot_confirm_when_payout_items_no_longer_match_payout_amount(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-04-06 00:00:00', config('app.timezone')));
+        $ids = app(ProviderPayoutGenerationService::class)->generateWeeklyAt(Carbon::now());
+        Carbon::setTestNow();
+
+        $payout = ProviderPayout::findOrFail($ids[0]);
+        $payout->items()->firstOrFail()->update(['amount' => 59.00]);
+
+        $outCountBefore = FundTransaction::where('wallet_id', $this->providerWallet->id)
+            ->where('direction', FundTransaction::DIRECTION_OUT)
+            ->count();
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.finances.provider-payouts.confirm', $payout), [
+                'reference_number' => 'REF-MISMATCH',
+                'receipt' => UploadedFile::fake()->create('receipt.pdf', 100, 'application/pdf'),
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $payout->refresh();
+        $this->assertSame(ProviderPayout::STATUS_PENDING_ADMIN_REVIEW, $payout->status);
+        $this->assertNull($payout->fund_transaction_out_id);
+        $this->assertSame(
+            $outCountBefore,
+            FundTransaction::where('wallet_id', $this->providerWallet->id)
+                ->where('direction', FundTransaction::DIRECTION_OUT)
+                ->count()
+        );
+        $this->assertDatabaseMissing('fund_transactions', [
+            'wallet_id' => $this->providerWallet->id,
+            'source' => FundTransaction::SOURCE_PROVIDER_BANK_PAYOUT,
+            'provider_payout_id' => $payout->id,
+        ]);
+    }
+
+    #[Test]
+    public function cannot_confirm_when_provider_wallet_balance_is_insufficient(): void
+    {
+        Carbon::setTestNow(Carbon::parse('2026-04-06 00:00:00', config('app.timezone')));
+        $ids = app(ProviderPayoutGenerationService::class)->generateWeeklyAt(Carbon::now());
+        Carbon::setTestNow();
+
+        $payout = ProviderPayout::findOrFail($ids[0]);
+        $this->providerWallet->update(['balance' => 10.00]);
+
+        $outCountBefore = FundTransaction::where('wallet_id', $this->providerWallet->id)
+            ->where('direction', FundTransaction::DIRECTION_OUT)
+            ->count();
+
+        $this->actingAs($this->admin)
+            ->post(route('admin.finances.provider-payouts.confirm', $payout), [
+                'reference_number' => 'REF-LOW-BALANCE',
+                'receipt' => UploadedFile::fake()->create('receipt.pdf', 100, 'application/pdf'),
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('error');
+
+        $payout->refresh();
+        $this->assertSame(ProviderPayout::STATUS_PENDING_ADMIN_REVIEW, $payout->status);
+        $this->assertNull($payout->fund_transaction_out_id);
+        $this->assertSame('10.00', (string) $this->providerWallet->fresh()->balance);
+        $this->assertSame(
+            $outCountBefore,
+            FundTransaction::where('wallet_id', $this->providerWallet->id)
+                ->where('direction', FundTransaction::DIRECTION_OUT)
+                ->count()
+        );
+        $this->assertDatabaseMissing('fund_transactions', [
+            'wallet_id' => $this->providerWallet->id,
+            'source' => FundTransaction::SOURCE_PROVIDER_BANK_PAYOUT,
+            'provider_payout_id' => $payout->id,
+        ]);
+    }
+
+    #[Test]
     public function rejected_payout_makes_earnings_eligible_again(): void
     {
         Carbon::setTestNow(Carbon::parse('2026-04-06 00:00:00', config('app.timezone')));

@@ -142,6 +142,48 @@ class PaymentFlowTest extends TestCase
     }
 
     #[Test]
+    public function callback_with_invoice_id_uses_invoice_key_and_credits_system_wallet(): void
+    {
+        $payment = Payment::create([
+            'sponsor_id' => $this->donor->id,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'external_payment_id' => 'inv-777',
+            'status' => Payment::STATUS_PENDING,
+            'amount' => 125.50,
+        ]);
+
+        $mockMyFatoorah = $this->createMock(MyFatoorahService::class);
+        $mockMyFatoorah->expects($this->once())
+            ->method('getPaymentStatus')
+            ->with('inv-777', 'InvoiceId')
+            ->willReturn([
+                'status' => 'Paid',
+                'invoice_id' => 'inv-777',
+                'raw_response' => [],
+            ]);
+
+        $this->app->instance(MyFatoorahService::class, $mockMyFatoorah);
+
+        $this->get(route('payments.callback', ['invoiceId' => 'inv-777']))
+            ->assertRedirect(route('donor.payments.success', ['payment_id' => $payment->id]));
+
+        $payment->refresh();
+        $this->assertSame(Payment::STATUS_SUCCEEDED, $payment->status);
+
+        $systemWallet = Ewallet::where('owner_type', 'SYSTEM')->firstOrFail();
+        $this->assertSame('125.50', (string) $systemWallet->fresh()->balance);
+
+        $this->assertDatabaseHas('fund_transactions', [
+            'wallet_id' => $systemWallet->id,
+            'sponsor_id' => $this->donor->id,
+            'source' => FundTransaction::SOURCE_DONATION,
+            'amount' => 125.50,
+            'direction' => FundTransaction::DIRECTION_IN,
+            'payment_id' => $payment->id,
+        ]);
+    }
+
+    #[Test]
     public function initiate_validates_minimum_amount(): void
     {
         $response = $this->actingAs($this->donor)->post(route('donor.payments.initiate'), [

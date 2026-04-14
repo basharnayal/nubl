@@ -8,6 +8,7 @@ use App\Models\Payment;
 use App\Models\ProviderMenuItem;
 use App\Models\ProviderProfile;
 use App\Models\Request as RequestModel;
+use App\Models\RequestPaymentLink;
 use App\Models\User;
 use App\Services\RedemptionService;
 use Database\Seeders\PermissionSeeder;
@@ -150,11 +151,147 @@ class ProviderQrRedemptionTest extends TestCase
         $this->assertDatabaseHas('activity_log', [
             'description' => 'redemption.redeemed',
         ]);
+
+        $systemWallet = Ewallet::where('owner_type', 'SYSTEM')->firstOrFail();
+        $providerWallet = ProviderProfile::where('user_id', $this->provider->id)->firstOrFail()->ewallet;
+
+        $this->assertSame('70.00', (string) $systemWallet->fresh()->balance);
+        $this->assertSame('30.00', (string) $providerWallet->fresh()->balance);
+
+        $this->assertDatabaseHas('fund_transactions', [
+            'wallet_id' => $systemWallet->id,
+            'source' => FundTransaction::SOURCE_PAYOUT,
+            'direction' => FundTransaction::DIRECTION_OUT,
+            'amount' => 30.00,
+            'request_id' => $request->id,
+            'order_redemption_id' => $redemption->id,
+        ]);
+
+        $this->assertDatabaseHas('fund_transactions', [
+            'wallet_id' => $providerWallet->id,
+            'source' => FundTransaction::SOURCE_PAYOUT,
+            'direction' => FundTransaction::DIRECTION_IN,
+            'amount' => 30.00,
+            'request_id' => $request->id,
+            'order_redemption_id' => $redemption->id,
+        ]);
+
+        // Allocation links this request to the succeeded payment pool (FIFO pool is used in AllocationService;
+        // this scenario uses a single payment, so one link is expected — multi-payment ordering is covered in AllocationFifoTest.)
+        $this->assertDatabaseHas('request_payment_links', [
+            'request_id' => $request->id,
+            'amount' => 30.00,
+        ]);
+
+        $this->assertSame(1, RequestPaymentLink::where('request_id', $request->id)->count());
     }
 
     // ─────────────────────────────────────────────────────────────────────────
     // FR-9.1: Second redemption of the same token → 409 Conflict
     // ─────────────────────────────────────────────────────────────────────────
+
+    #[Test]
+    public function token_for_another_provider_returns_403_without_ledger_side_effects(): void
+    {
+        $request = $this->createRedeemableRequest();
+        $redemption = RedemptionService::generateForRequest($request);
+        $this->assertNotNull($redemption);
+
+        $otherProvider = User::factory()->create([
+            'status' => User::STATUS_ACTIVE,
+            'is_active' => true,
+        ]);
+        $otherProvider->assignRole('provider');
+
+        $rawQrToken = Crypt::decryptString($redemption->token_ciphertext);
+
+        $response = $this->actingAs($otherProvider)
+            ->postJson(route('provider.qr.redeem'), [
+                'token' => $rawQrToken,
+            ]);
+
+        $response->assertStatus(403);
+        $response->assertJsonFragment(['error' => __('This code is not valid for your account.')]);
+
+        $this->assertDatabaseHas('order_redemptions', [
+            'id' => $redemption->id,
+            'status' => 'PENDING',
+        ]);
+        $this->assertSame(0, RequestPaymentLink::where('request_id', $request->id)->count());
+        $this->assertSame(
+            0,
+            FundTransaction::where('request_id', $request->id)
+                ->where('source', FundTransaction::SOURCE_PAYOUT)
+                ->count()
+        );
+    }
+
+    #[Test]
+    public function provider_adopted_redemption_does_not_touch_city_fund_or_provider_wallet(): void
+    {
+        $request = $this->createRedeemableRequest();
+        $request->update([
+            'status' => 'APPROVED',
+            'funding_source' => 'PROVIDER_ADOPTION',
+        ]);
+
+        $redemption = RedemptionService::generateForRequest($request->fresh());
+        $this->assertNotNull($redemption);
+
+        $systemWallet = Ewallet::where('owner_type', 'SYSTEM')->firstOrFail();
+        $providerWallet = ProviderProfile::where('user_id', $this->provider->id)->firstOrFail()->ewallet;
+        $systemBalanceBefore = (string) $systemWallet->fresh()->balance;
+        $providerBalanceBefore = (string) $providerWallet->fresh()->balance;
+
+        $rawQrToken = Crypt::decryptString($redemption->token_ciphertext);
+
+        $this->actingAs($this->provider)
+            ->postJson(route('provider.qr.redeem'), ['token' => $rawQrToken])
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('order_redemptions', [
+            'id' => $redemption->id,
+            'status' => 'REDEEMED',
+        ]);
+        $this->assertSame($systemBalanceBefore, (string) $systemWallet->fresh()->balance);
+        $this->assertSame($providerBalanceBefore, (string) $providerWallet->fresh()->balance);
+        $this->assertSame(0, RequestPaymentLink::where('request_id', $request->id)->count());
+        $this->assertSame(
+            0,
+            FundTransaction::where('request_id', $request->id)
+                ->where('source', FundTransaction::SOURCE_PAYOUT)
+                ->count()
+        );
+    }
+
+    #[Test]
+    public function expired_token_returns_422_without_redeeming_or_transferring_funds(): void
+    {
+        $request = $this->createRedeemableRequest();
+        $redemption = RedemptionService::generateForRequest($request);
+        $this->assertNotNull($redemption);
+        $redemption->update(['redeem_expires_at' => now()->subMinute()]);
+
+        $rawQrToken = Crypt::decryptString($redemption->token_ciphertext);
+
+        $response = $this->actingAs($this->provider)
+            ->postJson(route('provider.qr.redeem'), ['token' => $rawQrToken]);
+
+        $response->assertStatus(422);
+        $response->assertJsonFragment(['error' => __('This QR code has expired.')]);
+
+        $this->assertDatabaseHas('order_redemptions', [
+            'id' => $redemption->id,
+            'status' => 'PENDING',
+        ]);
+        $this->assertSame(0, RequestPaymentLink::where('request_id', $request->id)->count());
+        $this->assertSame(
+            0,
+            FundTransaction::where('request_id', $request->id)
+                ->where('source', FundTransaction::SOURCE_PAYOUT)
+                ->count()
+        );
+    }
 
     #[Test]
     public function already_redeemed_token_returns_409_fr_9_1(): void

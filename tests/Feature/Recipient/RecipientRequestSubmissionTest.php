@@ -9,6 +9,7 @@ use App\Models\ProviderMenuItem;
 use App\Models\ProviderOperatingInfo;
 use App\Models\Request as RequestModel;
 use App\Models\User;
+use App\Support\RecipientFundRetryCache;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Queue;
@@ -269,6 +270,51 @@ class RecipientRequestSubmissionTest extends TestCase
         });
 
         Carbon::setTestNow();
+    }
+
+    #[Test]
+    public function fund_retry_job_creates_request_when_city_fund_is_replenished(): void
+    {
+        Queue::fake();
+        Payment::query()->delete();
+
+        $this->actingAs($this->recipient)
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 1],
+                    ['id' => $this->menuItem2->id, 'quantity' => 1],
+                ],
+            ])
+            ->assertSessionHas('info');
+
+        Queue::assertPushed(ProcessRecipientFundRetryJob::class, function (ProcessRecipientFundRetryJob $job) {
+            return $job->userId === $this->recipient->id;
+        });
+        $this->assertNotNull(RecipientFundRetryCache::getPayload($this->recipient->id));
+        $this->assertDatabaseCount('requests', 0);
+
+        Payment::factory()->create([
+            'amount' => 70.00,
+            'status' => Payment::STATUS_SUCCEEDED,
+        ]);
+
+        $job = new ProcessRecipientFundRetryJob($this->recipient->id);
+        $job->handle(
+            app(\App\Services\RecipientRequestSubmissionService::class),
+            app(\App\Services\AllocationService::class),
+            app(\App\Services\AuditService::class)
+        );
+
+        $request = RequestModel::where('recipient_id', $this->recipient->id)->first();
+        $this->assertNotNull($request);
+        $this->assertSame('REQUESTED', $request->status);
+        $this->assertEquals(70.00, (float) $request->reserved_amount);
+        $this->assertNull(RecipientFundRetryCache::getPayload($this->recipient->id));
+
+        $this->provider->refresh();
+        $this->assertCount(1, $this->provider->notifications);
+        $this->assertSame('provider_new_request', $this->provider->notifications->first()->data['type'] ?? null);
     }
 
     #[Test]
