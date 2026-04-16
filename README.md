@@ -1,8 +1,6 @@
-# NUBL - Neighborhood-Based Digital Food Assistance Platform
+# NUBL - Digital Assistance Platform
 
-A digital platform for neighborhood-based food assistance (sadaqah) that connects donors, beneficiaries, and providers in a dignified, private, and transparent manner.
-
-**Further documentation:** Internal or extended developer guides (Git conventions, email/Mailtrap, Lineone usage) may live in [`docs/README_DEV.md`](docs/README_DEV.md). That path is listed in `.gitignore` in some setups; keep a copy alongside the codebase if your team relies on it.
+A digital platform for assistance (sadaqah) that connects donors, beneficiaries, and providers in a dignified, private, and transparent manner.
 
 ---
 
