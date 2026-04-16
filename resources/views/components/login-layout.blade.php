@@ -1,4 +1,9 @@
 {{-- Login layout – Lineone sign-in-2 style (split layout with illustration) --}}
+@props([
+    // 'auth' (default): split layout with illustration + narrow form panel
+    // 'legal': no illustration + wide readable panel
+    'variant' => 'auth',
+])
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
     <head>
@@ -15,11 +20,17 @@
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet" />
+        @if ($variant === 'legal' && app()->getLocale() === 'ar')
+            <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        @endif
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         <style>[x-cloak]{display:none!important}</style>
     </head>
     <body class="font-sans text-slate-700 antialiased bg-slate-50 dark:bg-navy-900 dark:text-navy-200" x-data x-bind="$store.global.documentBody">
+        @php
+            $isLegal = $variant === 'legal';
+        @endphp
         <div id="root" class="min-h-screen flex flex-col lg:flex-row">
             {{-- Fixed top logo (desktop) --}}
             <div class="fixed top-0 z-10 hidden p-6 lg:block lg:px-12">
@@ -39,29 +50,33 @@
             </div>
 
             {{-- Left: Illustration (hidden on mobile) --}}
-            <div class="hidden w-full place-items-center lg:grid lg:flex-1">
-                <div class="w-full max-w-lg p-6">
-                    <img class="w-full" x-show="!$store.global.isDarkModeEnabled" src="{{ asset('images/illustrations/dashboard-check.svg') }}" alt="" />
-                    <img class="w-full" x-show="$store.global.isDarkModeEnabled" x-cloak src="{{ asset('images/illustrations/dashboard-check-dark.svg') }}" alt="" />
+            @unless ($isLegal)
+                <div class="hidden w-full place-items-center lg:grid lg:flex-1">
+                    <div class="w-full max-w-lg p-6">
+                        <img class="w-full" x-show="!$store.global.isDarkModeEnabled" src="{{ asset('images/illustrations/dashboard-check.svg') }}" alt="" />
+                        <img class="w-full" x-show="$store.global.isDarkModeEnabled" x-cloak src="{{ asset('images/illustrations/dashboard-check-dark.svg') }}" alt="" />
+                    </div>
                 </div>
-            </div>
+            @endunless
 
-            {{-- Right: Form panel --}}
-            <main class="flex w-full flex-col items-center justify-center bg-white dark:bg-navy-700 lg:max-w-md lg:min-h-screen">
-                <div class="flex w-full max-w-sm grow flex-col justify-center p-5">
+            {{-- Right: panel — legal pages use full remaining width for readable long-form content --}}
+            <main class="flex w-full flex-col items-center justify-center bg-white dark:bg-navy-700 {{ $isLegal ? 'lg:flex-1 lg:max-w-none' : 'lg:max-w-md' }} lg:min-h-screen">
+                <div class="flex w-full {{ $isLegal ? 'max-w-6xl grow flex-col justify-start py-8 px-4 sm:px-8' : 'max-w-sm grow flex-col justify-center p-5' }}">
                     {{-- Mobile logo --}}
                     <div class="text-center">
                         <x-application-logo class="mx-auto size-16 w-auto object-contain lg:hidden" />
                         <div class="mt-4">
-                            <h2 class="text-2xl font-semibold text-slate-600 dark:text-navy-100">
-                                {{ $heading ?? __('Welcome Back') }}
-                            </h2>
-                            <p class="text-slate-400 dark:text-navy-300">
-                                {{ $subheading ?? __('Please sign in to continue') }}
-                            </p>
+                            @unless ($isLegal)
+                                <h2 class="text-2xl font-semibold text-slate-600 dark:text-navy-100">
+                                    {{ $heading ?? __('Welcome Back') }}
+                                </h2>
+                                <p class="text-slate-400 dark:text-navy-300">
+                                    {{ $subheading ?? __('Please sign in to continue') }}
+                                </p>
+                            @endunless
                         </div>
                     </div>
-                    <div class="mt-10">
+                    <div class="{{ $isLegal ? 'mt-6' : 'mt-10' }}">
                         {{ $slot }}
                     </div>
                 </div>

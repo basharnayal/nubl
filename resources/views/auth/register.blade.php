@@ -358,10 +358,24 @@
             <a class="text-sm text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent font-medium" href="{{ route('login') }}">
                 {{ __('Already registered?') }}
             </a>
-            <button type="submit" x-show="membershipType && membershipType !== 'provider'"
-                class="btn w-full sm:w-auto bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90 px-5 py-2.5 rounded-lg">
-                {{ __('Register') }}
-            </button>
+            <div class="w-full sm:w-auto">
+                <p class="mb-3 text-xs leading-5 text-slate-500 dark:text-navy-300">
+                    {{ __('auth.legal.consent_register') }}
+                    <a class="font-semibold text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent"
+                        href="{{ route('legal.terms', ['return' => request()->getRequestUri()]) }}">
+                        {{ __('auth.legal.terms') }}
+                    </a>
+                    {{ __('auth.legal.and') }}
+                    <a class="font-semibold text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent"
+                        href="{{ route('legal.privacy', ['return' => request()->getRequestUri()]) }}">
+                        {{ __('auth.legal.privacy') }}
+                    </a>.
+                </p>
+                <button type="submit" x-show="membershipType && membershipType !== 'provider'"
+                    class="btn w-full sm:w-auto bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90 px-5 py-2.5 rounded-lg">
+                    {{ __('Register') }}
+                </button>
+            </div>
         </div>
     </form>
 

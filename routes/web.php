@@ -46,6 +46,10 @@ Route::get('/locale/{locale}', function (string $locale) {
     return redirect()->back();
 })->name('locale.switch');
 
+// Legal (public)
+Route::view('/terms', 'legal.terms')->name('legal.terms');
+Route::view('/privacy-policy', 'legal.privacy')->name('legal.privacy');
+
 // Redirect by role
 Route::get('/dashboard', function () {
     return view('dashboard');
