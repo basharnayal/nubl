@@ -6,6 +6,7 @@ use App\Models\MenuItemCategory;
 use App\Models\ProviderMenuItem;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
 
 class ProviderMenuItemSeeder extends Seeder
 {
@@ -17,6 +18,19 @@ class ProviderMenuItemSeeder extends Seeder
      */
     public function run(): void
     {
+        // Copy seed images from public/images/seed/ (git-tracked) into storage/app/public/seed/
+        // so every team member gets the images automatically when they run db:seed.
+        $seedImagesSource = public_path('images/seed');
+        $seedImagesDest   = storage_path('app/public/seed');
+
+        if (File::isDirectory($seedImagesSource)) {
+            File::ensureDirectoryExists($seedImagesDest);
+            File::copyDirectory($seedImagesSource, $seedImagesDest);
+            $this->command->info('Seed images copied to storage.');
+        } else {
+            $this->command->warn('Seed images folder not found at public/images/seed — skipping image copy.');
+        }
+
         $providerEmails = [
             'provider@nubl.com',
             'community@nubl.com',
