@@ -8,6 +8,7 @@ use App\Models\ProviderOperatingInfo;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
@@ -18,6 +19,19 @@ class ProviderSeeder extends Seeder
      */
     public function run(): void
     {
+        // Copy provider logos from public/images/seed/provider-logos/ (git-tracked)
+        // into storage/app/public/provider-logos/ so teammates get them automatically on db:seed.
+        $logosSource = public_path('images/seed/provider-logos');
+        $logosDest   = storage_path('app/public/provider-logos');
+
+        if (File::isDirectory($logosSource)) {
+            File::ensureDirectoryExists($logosDest);
+            File::copyDirectory($logosSource, $logosDest);
+            $this->command->info('Provider logos copied to storage.');
+        } else {
+            $this->command->warn('Provider logos folder not found at public/images/seed/provider-logos — skipping.');
+        }
+
         $providerRole = Role::firstOrCreate(['name' => 'provider', 'guard_name' => 'web']);
 
         $providers = [
