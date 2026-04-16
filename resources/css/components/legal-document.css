@@ -9,7 +9,7 @@
     }
 
     .legal-page__title {
-        @apply text-balance text-3xl font-bold tracking-tight text-nubl-navy-900 dark:text-navy-50 sm:text-[2rem];
+        @apply text-balance text-3xl font-bold tracking-tight text-primary dark:text-accent-light sm:text-[2rem];
         text-wrap: balance;
     }
 
