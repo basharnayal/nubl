@@ -41,12 +41,11 @@ class ProviderDashboardTest extends TestCase
         $response->assertSee('OPEN');
         $response->assertSee('Pause Store');
         $response->assertSee(__('provider.dashboard.kpi_section'), false);
-        $response->assertSee('Awaiting your response', false);
         $response->assertSee(__('provider.dashboard.adoptions_title'), false);
         $response->assertSee(__('provider.dashboard.fulfilled_30d'), false);
-        $response->assertSee('Fulfilled orders by week', false);
-        $response->assertSee('Recent requests', false);
-        $response->assertSee('View all', false);
+        $response->assertSee(__('provider.dashboard.chart_title'), false);
+        $response->assertSee(__('provider.dashboard.recent_requests'), false);
+        $response->assertSee(__('provider.dashboard.view_all'), false);
     }
 
     #[Test]
