@@ -37,7 +37,7 @@ class ProviderDashboardTest extends TestCase
             ->get(route('provider.dashboard'));
 
         $response->assertStatus(200);
-        $response->assertSee('Store Status');
+        $response->assertSee('Welcome back,');
         $response->assertSee('OPEN');
         $response->assertSee('Pause Store');
         $response->assertSee(__('provider.dashboard.kpi_section'), false);
