@@ -56,7 +56,6 @@
     .legal-doc {
         --legal-body: var(--color-slate-600);
         --legal-body-soft: var(--color-slate-500);
-        --legal-h2: var(--color-nubl-navy-900);
         --legal-h3: var(--color-nubl-navy-800);
         --legal-list-dot: var(--color-primary);
         --legal-list-row-gap: 0.625rem;
@@ -79,7 +78,6 @@
     .dark .legal-doc {
         --legal-body: var(--color-navy-200);
         --legal-body-soft: var(--color-navy-300);
-        --legal-h2: var(--color-navy-50);
         --legal-h3: var(--color-nubl-navy-200);
         --legal-list-dot: var(--color-accent);
     }
@@ -118,10 +116,9 @@
         @apply flex flex-col gap-5;
     }
 
-    /* Section title: institutional navy + inline-start rule (logical for RTL) */
+    /* Section title: brand gold + inline-start rule (logical for RTL) */
     .legal-doc :where(h2) {
-        @apply mb-0 scroll-mt-24 border-s-[3px] border-primary/35 ps-4 text-balance text-[1.125rem] font-bold leading-snug tracking-tight dark:border-accent/45;
-        color: var(--legal-h2);
+        @apply mb-0 scroll-mt-24 border-s-[3px] border-primary/45 ps-4 text-balance text-[1.125rem] font-bold leading-snug tracking-tight text-primary dark:border-accent/50 dark:text-accent-light;
     }
 
     .legal-doc--ar :where(h2) {
