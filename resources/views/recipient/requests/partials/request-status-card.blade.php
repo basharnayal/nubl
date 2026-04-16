@@ -143,7 +143,7 @@
                 <div
                     class="mx-auto mt-6 max-w-lg rounded-lg border border-error/30 bg-error/10 p-4 text-start text-sm dark:border-error/20 dark:bg-error/15">
                     <p class="font-bold text-slate-800 dark:text-navy-100">{{ __('Reason for Rejection') }}:</p>
-                    <p class="text-slate-700 dark:text-navy-200">{{ $request->rejection_reason_code }}</p>
+                    <p class="text-slate-700 dark:text-navy-200">{{ __($request->rejection_reason_code) }}</p>
                     @if($request->rejection_reason_note)
                         <p class="mt-1 text-slate-600 dark:text-navy-300">{{ $request->rejection_reason_note }}</p>
                     @endif
@@ -153,8 +153,17 @@
             {{-- Four steps: each column = circle + labels (centered); connectors flex between columns --}}
             <div class="mt-10 border-t border-slate-200/80 pt-10 dark:border-navy-600">
                 <div class="w-full">
+                    @php
+                        $cols = '';
+                        foreach($steps as $idx => $step) {
+                            $cols .= 'minmax(0,1fr)';
+                            if ($idx < count($steps) - 1) {
+                                $cols .= ' minmax(0.5rem,1.25rem) ';
+                            }
+                        }
+                    @endphp
                     <div
-                        class="grid w-full grid-cols-[minmax(0,1fr)_minmax(0.5rem,1.25rem)_minmax(0,1fr)_minmax(0.5rem,1.25rem)_minmax(0,1fr)_minmax(0.5rem,1.25rem)_minmax(0,1fr)] items-start gap-x-0">
+                        class="grid w-full items-start gap-x-0" style="grid-template-columns: {{ $cols }};">
                         @foreach($steps as $idx => $step)
                             @if($idx > 0)
                                 @php
@@ -180,7 +189,7 @@
 
                             @php
                                 $st = $step['state'];
-                                $labelKeys = \App\Support\RecipientRequestStatusPresenter::STEP_LABELS[$idx];
+                                $labelKey = $step['labelKey'] ?? (\App\Support\RecipientRequestStatusPresenter::STEP_LABELS[$idx]['label'] ?? '');
                                 $titleClass = $st === 'pending'
                                     ? 'text-slate-500 dark:text-navy-400'
                                     : ($st === 'current'
@@ -218,7 +227,7 @@
                                 </div>
                                 <div class="mt-3 w-full px-0.5 text-center">
                                     <p class="text-[0.7rem] font-semibold leading-tight sm:text-sm {{ $titleClass }}">
-                                        {{ __($labelKeys['label']) }}</p>
+                                        {{ __($labelKey) }}</p>
                                     <p class="mt-0.5 text-[0.6rem] leading-tight sm:text-xs {{ $hintClass }}">
                                         {{ __($step['hintKey']) }}</p>
                                 </div>

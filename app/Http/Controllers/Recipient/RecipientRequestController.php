@@ -25,7 +25,8 @@ class RecipientRequestController extends Controller
         private AuditService $auditService,
         private RecipientRequestSubmissionService $submissionService,
         private NotificationServiceInterface $notificationService
-    ) {}
+    ) {
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -49,35 +50,24 @@ class RecipientRequestController extends Controller
         $computed = $this->submissionService->computeLineItems($providerId, $itemsData);
         $totalAmount = $computed['total'];
 
-        // --- Weekly allowance (FR-6.1 / FR-6.3): if over limit, queue retry (FR-6.4) ---
+        if ($request->boolean('force_admin_review')) {
+            $created = $this->submissionService->createRequest($user, $providerId, $itemsData, 'ADMIN_PENDING');
+            RecipientRequestSubmitCooldown::clear($user->id);
+            return redirect()
+                ->route('recipient.requests.show', $created->id)
+                ->with('request_submitted', true)
+                ->with('success', __('Request submitted for admin review successfully.'));
+        }
+
+        // --- Weekly allowance check ---
+        // If over limit and no force_admin_review flag, prompt user to decide
         if (RecipientAllowanceService::wouldExceedAllowance($user->id, $totalAmount)) {
-            RecipientAllowanceRetryCache::storePayload($user->id, [
-                'provider_id' => $providerId,
-                'items' => $itemsData,
-            ]);
-
-            $delaySeconds = (int) config('recipient.allowance_retry_delay_seconds', 60);
-            if (RecipientAllowanceRetryCache::tryScheduleJobLock($user->id, $delaySeconds + 10)) {
-                ProcessRecipientAllowanceRetryJob::dispatch($user->id)
-                    ->delay(now()->addSeconds($delaySeconds));
-            }
-
-            $this->auditService->log('request', 'allowance_retry_queued', [
-                'recipient_id' => $user->id,
-                'provider_id' => $providerId,
-                'amount' => $totalAmount,
-            ], $user->id);
-
-            RecipientRequestSubmitCooldown::start($user->id, $delaySeconds);
-
-            return back()
-                ->with('info', __('Your request could not be placed now due to your weekly allowance. It has been queued and will be retried automatically within :seconds seconds.', ['seconds' => $delaySeconds]))
-                ->withInput();
+            return back()->with('exceeds_allowance', true)->withInput();
         }
 
         RecipientAllowanceRetryCache::clear($user->id);
 
-        if (! $this->allocationService->canCoverRequestAmount($totalAmount)) {
+        if (!$this->allocationService->canCoverRequestAmount($totalAmount)) {
             RecipientFundRetryCache::storePayload($user->id, [
                 'provider_id' => $providerId,
                 'items' => $itemsData,
@@ -136,7 +126,7 @@ class RecipientRequestController extends Controller
             ->findOrFail($id);
 
         // Ensure redemption token exists for APPROVED/REDEEMABLE (e.g. legacy APPROVED orders)
-        if (in_array($request->status, ['APPROVED', 'REDEEMABLE']) && ! $request->redemption) {
+        if (in_array($request->status, ['APPROVED', 'REDEEMABLE']) && !$request->redemption) {
             \App\Services\RedemptionService::generateForRequest($request);
             $request->load('redemption');
         }
@@ -154,7 +144,7 @@ class RecipientRequestController extends Controller
             ->where('recipient_id', auth()->id())
             ->findOrFail($id);
 
-        if (! $requestModel->isCancellableByRecipient()) {
+        if (!$requestModel->isCancellableByRecipient()) {
             return back()->with('error', __('This request cannot be cancelled.'));
         }
 
@@ -178,5 +168,15 @@ class RecipientRequestController extends Controller
         ]);
 
         return back()->with('success', __('Request cancelled successfully.'));
+    }
+
+    /**
+     * Cancel an over-limit request and apply a 60-second throttle.
+     */
+    public function cancelThrottle(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        RecipientRequestSubmitCooldown::start($user->id, 60);
+        return back()->with('success', __('Request cancelled. You must wait 60 seconds before trying again.'));
     }
 }

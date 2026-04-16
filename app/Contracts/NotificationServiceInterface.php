@@ -21,4 +21,6 @@ interface NotificationServiceInterface
     public function sendNewRequestToProvider(RequestModel $request): void;
 
     public function sendRequestStatusChangedToProvider(RequestModel $request, string $status): void;
+
+    public function sendNewRequestToAdmins(RequestModel $request): void;
 }

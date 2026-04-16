@@ -11,29 +11,46 @@
             {{-- Left: Request Details --}}
             <div class="space-y-4 lg:col-span-2 lg:space-y-6">
                 <div class="card p-6">
-                    <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Ordered Items') }}</h3>
+                    <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Ordered Items') }}
+                    </h3>
                     <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
                         <table class="is-hoverable w-full text-left">
                             <thead>
                                 <tr>
-                                    <th class="whitespace-nowrap rounded-tl-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Item') }}</th>
-                                    <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Qty') }}</th>
-                                    <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Price') }}</th>
-                                    <th class="whitespace-nowrap rounded-tr-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Total') }}</th>
+                                    <th
+                                        class="whitespace-nowrap rounded-tl-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
+                                        {{ __('Item') }}</th>
+                                    <th
+                                        class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
+                                        {{ __('Qty') }}</th>
+                                    <th
+                                        class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
+                                        {{ __('Price') }}</th>
+                                    <th
+                                        class="whitespace-nowrap rounded-tr-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
+                                        {{ __('Total') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($request->items as $item)
                                     <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
-                                        <td class="px-4 py-3 font-medium text-slate-700 dark:text-navy-100 sm:px-5">{{ $item->menuItem->name ?? __('Unknown') }}</td>
+                                        <td class="px-4 py-3 font-medium text-slate-700 dark:text-navy-100 sm:px-5">
+                                            {{ $item->menuItem->name ?? __('Unknown') }}</td>
                                         <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $item->quantity }}</td>
                                         <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $item->price_snapshot }}</td>
-                                        <td class="whitespace-nowrap px-4 py-3 font-bold text-slate-700 dark:text-navy-100 sm:px-5">{{ number_format($item->price_snapshot * $item->quantity, 2) }}</td>
+                                        <td
+                                            class="whitespace-nowrap px-4 py-3 font-bold text-slate-700 dark:text-navy-100 sm:px-5">
+                                            {{ number_format($item->price_snapshot * $item->quantity, 2) }}</td>
                                     </tr>
                                 @endforeach
-                                <tr class="border-t border-slate-200 bg-slate-100 font-bold dark:border-navy-600 dark:bg-navy-700/50">
-                                    <td colspan="3" class="px-4 py-3 text-right text-slate-700 dark:text-navy-100 sm:px-5">{{ __('Grand Total') }}</td>
-                                    <td class="whitespace-nowrap px-4 py-3 text-lg text-primary dark:text-accent-light sm:px-5">{{ number_format($request->reserved_amount, 2) }} {{ __('SAR') }}</td>
+                                <tr
+                                    class="border-t border-slate-200 bg-slate-100 font-bold dark:border-navy-600 dark:bg-navy-700/50">
+                                    <td colspan="3"
+                                        class="px-4 py-3 text-right text-slate-700 dark:text-navy-100 sm:px-5">
+                                        {{ __('Grand Total') }}</td>
+                                    <td
+                                        class="whitespace-nowrap px-4 py-3 text-lg text-primary dark:text-accent-light sm:px-5">
+                                        {{ number_format($request->reserved_amount, 2) }} {{ __('SAR') }}</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -41,17 +58,24 @@
                 </div>
 
                 <div class="card p-6">
-                    <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Request reference') }}</h3>
-                    <p class="mb-4 text-xs text-slate-500 dark:text-navy-400">{{ __('Anonymous neighbor — no personal data.') }}</p>
+                    <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">
+                        {{ __('Request reference') }}</h3>
+                    <p class="mb-4 text-xs text-slate-500 dark:text-navy-400">
+                        {{ __('Anonymous neighbor — no personal data.') }}</p>
                     <div class="grid grid-cols-2 gap-4">
                         <div dir="ltr" class="text-start">
-                            <span class="block text-xs uppercase text-slate-500 dark:text-navy-400">{{ __('Reference') }}</span>
-                            <span class="font-mono text-sm font-medium text-slate-700 dark:text-navy-100">{{ \App\Support\PseudonymousRequestId::make($request->id) }}</span>
-                            <p class="mt-1 text-xs text-slate-500 dark:text-navy-400">{{ \App\Support\RequestTypeLabel::forRequest($request) }}</p>
+                            <span
+                                class="block text-xs uppercase text-slate-500 dark:text-navy-400">{{ __('Reference') }}</span>
+                            <span
+                                class="font-mono text-sm font-medium text-slate-700 dark:text-navy-100">{{ \App\Support\PseudonymousRequestId::make($request->id) }}</span>
+                            <p class="mt-1 text-xs text-slate-500 dark:text-navy-400">
+                                {{ \App\Support\RequestTypeLabel::forRequest($request) }}</p>
                         </div>
                         <div>
-                            <span class="block text-xs uppercase text-slate-500 dark:text-navy-400">{{ __('Request Date') }}</span>
-                            <span class="text-slate-700 dark:text-navy-100">{{ $request->created_at->format('M d, Y H:i') }}</span>
+                            <span
+                                class="block text-xs uppercase text-slate-500 dark:text-navy-400">{{ __('Request Date') }}</span>
+                            <span
+                                class="text-slate-700 dark:text-navy-100">{{ $request->created_at->format('M d, Y H:i') }}</span>
                         </div>
                     </div>
                 </div>
@@ -62,7 +86,7 @@
                 <div class="card sticky top-6 p-6">
                     <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Actions') }}</h3>
 
-                    @if($request->status === 'REQUESTED')
+                    @if(in_array($request->status, ['REQUESTED', 'ADMIN_APPROVED']))
                         <div class="space-y-4">
                             <form action="{{ route('provider.requests.update', $request->id) }}" method="POST">
                                 @csrf
@@ -94,18 +118,21 @@
 
                             <div class="my-4 h-px bg-slate-200 dark:bg-navy-500"></div>
 
-                            <button type="button" onclick="document.getElementById('reject-form').classList.toggle('hidden')"
+                            <button type="button"
+                                onclick="document.getElementById('reject-form').classList.toggle('hidden')"
                                 class="btn w-full border-2 border-error bg-transparent text-error hover:bg-error/10 focus:bg-error/10 dark:hover:bg-error/15 dark:focus:bg-error/15">
                                 {{ __('Reject Request') }}
                             </button>
 
                             <form id="reject-form" action="{{ route('provider.requests.update', $request->id) }}"
-                                method="POST" class="mt-4 hidden rounded-lg border border-error/30 bg-error/10 p-4 dark:bg-error/15 dark:border-error/20">
+                                method="POST"
+                                class="mt-4 hidden rounded-lg border border-error/30 bg-error/10 p-4 dark:bg-error/15 dark:border-error/20">
                                 @csrf
                                 @method('PUT')
                                 <input type="hidden" name="action" value="reject">
 
-                                <label for="reason" class="mb-2 block text-sm font-medium text-slate-700 dark:text-navy-100">{{ __('Reason') }}</label>
+                                <label for="reason"
+                                    class="mb-2 block text-sm font-medium text-slate-700 dark:text-navy-100">{{ __('Reason') }}</label>
                                 <select id="reason" name="rejection_reason_code" required
                                     class="form-select form-select-lineone">
                                     <option value="">{{ __('Select a reason...') }}</option>
@@ -138,8 +165,10 @@
                         </div>
                     @else
                         <div class="rounded-lg bg-slate-100 p-4 text-center dark:bg-navy-700/50">
-                            <span class="block font-bold text-slate-700 dark:text-navy-100">{{ __('Request') }} {{ $request->status }}</span>
-                            <span class="text-sm text-slate-500 dark:text-navy-400">{{ __('No further actions available.') }}</span>
+                            <span class="block font-bold text-slate-700 dark:text-navy-100">{{ __('Request') }}
+                                {{ $request->status }}</span>
+                            <span
+                                class="text-sm text-slate-500 dark:text-navy-400">{{ __('No further actions available.') }}</span>
                         </div>
                     @endif
                 </div>

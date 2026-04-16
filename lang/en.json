@@ -807,5 +807,22 @@
     "Open bypass link": "Open bypass link",
     "Copy URL": "Copy URL",
     "Copied": "Copied",
-    "Back to maintenance settings": "Back to maintenance settings"
+    "Back to maintenance settings": "Back to maintenance settings",
+    "Insufficient overall city fund allocation to approve this request.": "Insufficient overall city fund allocation to approve this request.",
+    "Request submitted for admin review successfully.": "Request submitted for admin review successfully.",
+    "Request cancelled. You must wait 60 seconds before trying again.": "Request cancelled. You must wait 60 seconds before trying again.",
+    "City Fund Balance": "City Fund Balance",
+    "Weekly Limit Exceeded": "Weekly Limit Exceeded",
+    "Your request amount exceeds the available weekly allowance. You can cancel to reconsider, or send the request for manual admin review.": "Your request amount exceeds the available weekly allowance. You can cancel to reconsider, or send the request for manual admin review.",
+    "Send Request Review": "Send Request Review",
+    "New Pending Request Needs Approval": "New Pending Request Needs Approval",
+    "Request #:id from :name exceeds their limit and requires admin approval.": "Request #:id from :name exceeds their limit and requires admin approval.",
+    "recipient.request_progress.admin_review": "recipient.request_progress.admin_review",
+    "recipient.request_progress.hint_admin_review_pending": "recipient.request_progress.hint_admin_review_pending",
+    "recipient.request_progress.hint_admin_review_done": "recipient.request_progress.hint_admin_review_done",
+    "recipient.request_progress.title_admin_rejected": "recipient.request_progress.title_admin_rejected",
+    "recipient.request_progress.subtitle_admin_rejected": "recipient.request_progress.subtitle_admin_rejected",
+    "recipient.request_progress.badge_admin_rejected": "recipient.request_progress.badge_admin_rejected",
+    "recipient.request_progress.hint_admin_rejected": "recipient.request_progress.hint_admin_rejected",
+    "recipient.request_progress.hint_provider_review": "recipient.request_progress.hint_provider_review"
 }

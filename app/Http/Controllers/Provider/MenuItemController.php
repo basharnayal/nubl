@@ -111,6 +111,11 @@ class MenuItemController extends Controller
     {
         $menuItem = ProviderMenuItem::ownedBy(Auth::id())->findOrFail($id);
 
+        if ($menuItem->is_admin_blocked) {
+            return redirect()->route('provider.menu-items.index')
+                ->with('error', __('This item is blocked by admin and cannot be edited.'));
+        }
+
         $provider = Auth::user();
         $profile = $provider->providerProfile;
         $businessCategories = $profile?->business_category ?? ['Other'];
@@ -133,6 +138,11 @@ class MenuItemController extends Controller
     public function update(UpdateMenuItemRequest $request, $id)
     {
         $menuItem = ProviderMenuItem::ownedBy(Auth::id())->findOrFail($id);
+
+        if ($menuItem->is_admin_blocked) {
+            return redirect()->route('provider.menu-items.index')
+                ->with('error', __('This item is blocked by admin and cannot be modified.'));
+        }
         $data = $request->validated();
 
         $category = \App\Models\MenuItemCategory::find($data['category_id']);
@@ -167,6 +177,11 @@ class MenuItemController extends Controller
     public function destroy($id)
     {
         $menuItem = ProviderMenuItem::ownedBy(Auth::id())->findOrFail($id);
+
+        if ($menuItem->is_admin_blocked) {
+            return redirect()->route('provider.menu-items.index')
+                ->with('error', __('This item is blocked by admin and cannot be deactivated.'));
+        }
 
         // Soft delete implementation as requested (deactivate)
         // Or actual delete. The user said: "Prefer soft approach: set is_active = 0"

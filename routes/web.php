@@ -46,6 +46,10 @@ Route::get('/locale/{locale}', function (string $locale) {
     return redirect()->back();
 })->name('locale.switch');
 
+// Legal (public)
+Route::view('/terms', 'legal.terms')->name('legal.terms');
+Route::view('/privacy-policy', 'legal.privacy')->name('legal.privacy');
+
 // Redirect by role
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -148,6 +152,13 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin'
             Route::post('/provider-payouts/{provider_payout}/reject', [ProviderPayoutController::class, 'reject'])->name('provider-payouts.reject');
             Route::post('/provider-payouts/{provider_payout}/cancel', [ProviderPayoutController::class, 'cancel'])->name('provider-payouts.cancel');
         });
+
+        // Admin Menu Management
+        Route::prefix('menus')->name('menus.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\AdminMenuController::class, 'index'])->name('index');
+            Route::get('/{provider}', [\App\Http\Controllers\Admin\AdminMenuController::class, 'show'])->name('show');
+            Route::post('/{item}/toggle-block', [\App\Http\Controllers\Admin\AdminMenuController::class, 'toggleBlock'])->name('toggle-block');
+        });
     });
 
 // Provider routes
@@ -215,6 +226,8 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:recipi
         })->whereNumber('id')->name('requests.submitted');
         Route::resource('requests', \App\Http\Controllers\Recipient\RecipientRequestController::class)
             ->only(['index', 'show', 'store']);
+        Route::post('requests/cancel-throttle', [\App\Http\Controllers\Recipient\RecipientRequestController::class, 'cancelThrottle'])
+            ->name('requests.cancel-throttle');
         Route::post('requests/{id}/cancel', [\App\Http\Controllers\Recipient\RecipientRequestController::class, 'cancel'])
             ->name('requests.cancel');
     });
@@ -271,7 +284,7 @@ Route::middleware(array_merge($authMiddleware, ['account.approved:pending_only']
 
 // Test: debug roles (admin only - remove in production)
 Route::get('/test-roles', function () {
-    if (! auth()->user()->hasRole('admin')) {
+    if (!auth()->user()->hasRole('admin')) {
         abort(403);
     }
 
@@ -289,4 +302,4 @@ Route::get('/test-roles', function () {
 //     return 'تم تعيينك كـ admin بنجاح!';
 // });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

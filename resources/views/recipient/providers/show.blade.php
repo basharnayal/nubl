@@ -140,6 +140,31 @@
                         </div>
                     @endif
 
+                    @if(session('exceeds_allowance'))
+                        <div x-data="{ popupOpen: true }" x-show="popupOpen" class="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/50 backdrop-blur-sm px-4">
+                            <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-soft dark:bg-navy-700">
+                                <h3 class="text-lg font-semibold text-slate-800 dark:text-navy-100 mb-2">
+                                    {{ __('Weekly Limit Exceeded') }}
+                                </h3>
+                                <p class="text-slate-600 dark:text-navy-300 text-sm mb-6">
+                                    {{ __('Your request amount exceeds the available weekly allowance. You can cancel to reconsider, or send the request for manual admin review.') }}
+                                </p>
+                                <div class="flex justify-end gap-3">
+                                    <form action="{{ route('recipient.requests.cancel-throttle') }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn border border-slate-300 bg-white font-medium text-slate-700 hover:bg-slate-50 dark:border-navy-600 dark:bg-navy-700 dark:text-navy-100 dark:hover:bg-navy-600">
+                                            {{ __('Cancel') }}
+                                        </button>
+                                    </form>
+                                    <button type="button" class="btn bg-primary font-medium text-white hover:bg-primary-focus dark:bg-accent dark:hover:bg-accent-focus"
+                                        onclick="document.getElementById('force-admin-input').value = '1'; document.getElementById('submit-request-form').submit();">
+                                        {{ __('Send Request Review') }}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
                     {{-- Filters --}}
                     <div class="card mb-4 p-4">
                         <form method="GET" action="{{ route('recipient.providers.show', $provider) }}"
@@ -369,6 +394,7 @@
                                     method="POST">
                                     @csrf
                                     <input type="hidden" name="provider_id" value="{{ $provider->id }}">
+                                    <input type="hidden" id="force-admin-input" name="force_admin_review" value="0">
                                     <div id="form-items-container"></div>
 
                                     <button type="submit" id="submit-btn" disabled
@@ -518,14 +544,14 @@
             const submitBtn = document.getElementById('submit-btn');
             const mobileSubmitBtn = document.getElementById('mobile-submit-btn');
 
-            if (exceeds) {
-                warningEl.classList.remove('hidden');
-                submitBtn.disabled = false;
-                mobileSubmitBtn.disabled = false;
-            } else if (cart.length === 0) {
+            if (cart.length === 0) {
                 warningEl.classList.add('hidden');
                 submitBtn.disabled = true;
                 mobileSubmitBtn.disabled = true;
+            } else if (exceeds) {
+                warningEl.classList.remove('hidden');
+                submitBtn.disabled = false;
+                mobileSubmitBtn.disabled = false;
             } else {
                 warningEl.classList.add('hidden');
                 submitBtn.disabled = false;
@@ -560,5 +586,19 @@
         }
 
         renderCart();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            @if(old('items'))
+                @foreach(old('items') as $idx => $item)
+                    (function() {
+                        const meta = getMenuMeta({{ $item['id'] }});
+                        if (meta) {
+                            cart.push({ id: meta.id, name: meta.name, price: meta.price, max: meta.max, qty: {{ $item['quantity'] }} });
+                        }
+                    })();
+                @endforeach
+                renderCart();
+            @endif
+        });
     </script>
 </x-app-layout>

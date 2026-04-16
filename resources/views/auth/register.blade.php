@@ -354,12 +354,25 @@
             </div>
         </div>
 
-        <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-4 mt-8 pt-6 border-t border-slate-200 dark:border-navy-500">
-            <a class="text-sm text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent font-medium" href="{{ route('login') }}">
+        <div class="mt-8 flex flex-col gap-4 border-t border-slate-200 pt-6 dark:border-navy-500">
+            <a class="text-sm font-medium text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent"
+                href="{{ route('login') }}">
                 {{ __('Already registered?') }}
             </a>
+            <p class="text-pretty text-xs leading-relaxed text-slate-600 dark:text-navy-300">
+                {{ __('auth.legal.consent_register') }}
+                <a class="font-semibold text-primary underline decoration-primary/30 underline-offset-2 hover:text-primary-focus hover:decoration-primary/50 dark:text-accent-light dark:decoration-accent/30 dark:hover:text-accent dark:hover:decoration-accent/50"
+                    href="{{ route('legal.terms', ['return' => request()->getRequestUri()]) }}">
+                    {{ __('auth.legal.terms') }}
+                </a>
+                {{ __('auth.legal.and') }}
+                <a class="font-semibold text-primary underline decoration-primary/30 underline-offset-2 hover:text-primary-focus hover:decoration-primary/50 dark:text-accent-light dark:decoration-accent/30 dark:hover:text-accent dark:hover:decoration-accent/50"
+                    href="{{ route('legal.privacy', ['return' => request()->getRequestUri()]) }}">
+                    {{ __('auth.legal.privacy') }}
+                </a>.
+            </p>
             <button type="submit" x-show="membershipType && membershipType !== 'provider'"
-                class="btn w-full sm:w-auto bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90 px-5 py-2.5 rounded-lg">
+                class="btn w-full bg-primary px-5 py-2.5 font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90 sm:w-auto">
                 {{ __('Register') }}
             </button>
         </div>

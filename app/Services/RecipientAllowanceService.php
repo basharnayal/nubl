@@ -146,7 +146,7 @@ class RecipientAllowanceService
             ->join('requests', 'request_items.request_id', '=', 'requests.id')
             ->where('requests.recipient_id', $recipientId)
             ->whereBetween('requests.created_at', [$weekStart, $weekEnd])
-            ->whereIn('requests.status', ['REQUESTED', 'REDEEMABLE', 'FULFILLED'])
+            ->whereIn('requests.status', ['REQUESTED', 'ADMIN_APPROVED', 'REDEEMABLE', 'FULFILLED'])
             ->where(function ($q) {
                 $q->whereNull('requests.funding_source')
                     ->orWhere('requests.funding_source', '!=', 'PROVIDER_ADOPTION');
