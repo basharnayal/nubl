@@ -2,11 +2,8 @@ import './bootstrap';
 import { initFormSubmitGuard } from './form-submit-guard';
 import '../css/app.css';
 
-try {
-    initFormSubmitGuard();
-} catch (error) {
-    console.error('initFormSubmitGuard() failed:', error);
-}
+initFormSubmitGuard();
+
 import Alpine from 'alpinejs';
 import persist from '@alpinejs/persist';
 import collapse from '@alpinejs/collapse';
@@ -76,29 +73,14 @@ Alpine.data('usePopper', usePopper);
 Alpine.data('accordionItem', accordionItem);
 Alpine.data('notificationPanel', notificationPanel);
 
-try {
-    breakpoints.init();
-} catch (error) {
-    console.error('breakpoints.init() failed:', error);
-}
+breakpoints.init();
 
 // Page-specific modules: add data-module="key" to the page container
 const PAGE_MODULES = {
     'provider-registration': () => import('./pages/provider-registration'),
     'recipient-providers': () => import('./pages/recipient-providers'),
 };
-
 const moduleName = document.querySelector('[data-module]')?.getAttribute('data-module');
+const loadModule = moduleName && PAGE_MODULES[moduleName] ? PAGE_MODULES[moduleName]() : Promise.resolve();
 
-const loadModule =
-    moduleName && PAGE_MODULES[moduleName]
-        ? PAGE_MODULES[moduleName]()
-        : Promise.resolve();
-
-Promise.resolve(loadModule)
-    .catch((error) => {
-        console.error('Dynamic page module failed:', error);
-    })
-    .finally(() => {
-        Alpine.start();
-    });
+loadModule.then(() => Alpine.start());

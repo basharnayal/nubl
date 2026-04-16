@@ -24,8 +24,7 @@
         </div>
 
         {{-- Email + Password Login (default) --}}
-        {{-- x-cloak only on the non-default tab so panels stay visible if Alpine/JS never loads (tunnel, broken automation). --}}
-        <div id="panel-email" role="tabpanel" aria-labelledby="tab-email" x-show="tab === 'email'" @if ($defaultTab === 'otp') x-cloak @endif x-transition:enter="transition ease-out duration-200"
+        <div id="panel-email" role="tabpanel" aria-labelledby="tab-email" x-show="tab === 'email'" x-cloak x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             class="space-y-4">
 
@@ -109,7 +108,7 @@
         </div>
 
         {{-- OTP Login --}}
-        <div id="panel-otp" role="tabpanel" aria-labelledby="tab-otp" x-show="tab === 'otp'" @if ($defaultTab === 'email') x-cloak @endif x-transition:enter="transition ease-out duration-200"
+        <div id="panel-otp" role="tabpanel" aria-labelledby="tab-otp" x-show="tab === 'otp'" x-cloak x-transition:enter="transition ease-out duration-200"
             x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
             class="space-y-4">
 
