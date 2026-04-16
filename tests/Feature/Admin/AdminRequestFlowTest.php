@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Models\Ewallet;
+use App\Models\Payment;
 use App\Models\ProviderMenuItem;
 use App\Models\Request as RequestModel;
 use App\Models\User;
@@ -38,6 +40,23 @@ class AdminRequestFlowTest extends TestCase
 
         $this->recipient = User::factory()->create(['status' => User::STATUS_ACTIVE]);
         $this->recipient->assignRole('recipient');
+
+        // System wallet required by admin requests index (city fund balance UI)
+        Ewallet::create([
+            'owner_type' => 'SYSTEM',
+            'owner_id' => null,
+            'balance' => 0,
+            'status' => true,
+        ]);
+
+        // City fund pool for AllocationService::canCoverRequestAmount (admin approve)
+        $donor = User::factory()->create();
+        Payment::create([
+            'sponsor_id' => $donor->id,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'status' => Payment::STATUS_SUCCEEDED,
+            'amount' => 500,
+        ]);
 
         // Menu Item
         $item = ProviderMenuItem::create([

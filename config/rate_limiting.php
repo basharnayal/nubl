@@ -2,6 +2,7 @@
 
 /**
  * Central HTTP rate limiting configuration (named limiters via RateLimiter::for).
+ * Limiter registrations live in App\Providers\RateLimiterServiceProvider.
  * Set RATE_LIMITING_ENABLED=false to disable all route throttling at once (e.g. local debugging).
  */
 return [
