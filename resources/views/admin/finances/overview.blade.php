@@ -378,7 +378,7 @@
                         <a href="{{ route('admin.finances.fund-transactions.export-pdf') }}"
                            class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-navy-600 dark:bg-navy-800 dark:text-navy-100 dark:hover:border-navy-500 dark:hover:bg-navy-700">
                             <i class="fa-solid fa-file-pdf text-rose-600 dark:text-rose-400" aria-hidden="true"></i>
-                            PDF
+                            PDF.
                         </a>
                     </div>
                 </div>
