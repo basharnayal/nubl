@@ -155,6 +155,9 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin'
             Route::post('/provider-payouts/{provider_payout}/cancel', [ProviderPayoutController::class, 'cancel'])->name('provider-payouts.cancel');
         });
 
+        // Audit Logs
+        Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+
         // Admin Menu Management
         Route::prefix('menus')->name('menus.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\AdminMenuController::class, 'index'])->name('index');

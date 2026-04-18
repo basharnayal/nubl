@@ -126,25 +126,64 @@
 
         {{-- E. Quick actions --}}
         <section class="card p-5 sm:p-6" aria-labelledby="finance-actions-heading">
-            <h2 id="finance-actions-heading" class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">
+            <h2 id="finance-actions-heading" class="mb-5 text-base font-semibold text-slate-800 dark:text-navy-100">
                 {{ __('finance.overview.section_actions_title') }}
             </h2>
-            <div class="flex flex-wrap gap-3">
-                <x-lineone-button :href="route('admin.finances.payments.index', ['status' => 'PROBLEM_GROUP'])" variant="primary" :outline="true" size="sm">
-                    {{ __('finance.overview.quick_problem') }}
-                </x-lineone-button>
-                <x-lineone-button :href="route('admin.finances.payments.export')" variant="primary" :outline="true" size="sm">
-                    {{ __('finance.overview.export_payments_csv') }}
-                </x-lineone-button>
-                <x-lineone-button :href="route('admin.finances.payments.export-pdf')" variant="primary" :outline="true" size="sm">
-                    {{ __('finance.overview.export_payments_pdf') }}
-                </x-lineone-button>
-                <x-lineone-button :href="route('admin.finances.fund-transactions.export')" variant="primary" :outline="true" size="sm">
-                    {{ __('finance.overview.export_ledger_csv') }}
-                </x-lineone-button>
-                <x-lineone-button :href="route('admin.finances.fund-transactions.export-pdf')" variant="primary" :outline="true" size="sm">
-                    {{ __('finance.overview.export_ledger_pdf') }}
-                </x-lineone-button>
+            <div class="flex flex-wrap items-start gap-4">
+
+                {{-- Problem filter --}}
+                <div class="flex flex-col gap-2">
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-navy-400">
+                        {{ __('finance.overview.quick_problem_label') }}
+                    </p>
+                    <x-lineone-button :href="route('admin.finances.payments.index', ['status' => 'PROBLEM_GROUP'])" variant="danger" :outline="true" size="sm">
+                        <i class="fa-solid fa-triangle-exclamation me-1.5"></i>
+                        {{ __('finance.overview.quick_problem') }}
+                    </x-lineone-button>
+                </div>
+
+                <div class="hidden h-10 w-px self-center bg-slate-200 dark:bg-navy-600 sm:block"></div>
+
+                {{-- Payments exports --}}
+                <div class="flex flex-col gap-2">
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-navy-400">
+                        <i class="fa-solid fa-credit-card me-1"></i>{{ __('finance.nav.payments') }}
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{{ route('admin.finances.payments.export') }}"
+                           class="inline-flex items-center gap-1.5 rounded-lg border-2 border-emerald-500 px-3 py-1.5 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-50 dark:border-emerald-500/70 dark:text-emerald-400 dark:hover:bg-emerald-500/10">
+                            <i class="fa-solid fa-file-csv text-base"></i>
+                            CSV
+                        </a>
+                        <a href="{{ route('admin.finances.payments.export-pdf') }}"
+                           class="inline-flex items-center gap-1.5 rounded-lg border-2 border-error px-3 py-1.5 text-sm font-medium text-error transition-colors hover:bg-error/5 dark:border-error/70 dark:hover:bg-error/10">
+                            <i class="fa-solid fa-file-pdf text-base"></i>
+                            PDF
+                        </a>
+                    </div>
+                </div>
+
+                <div class="hidden h-10 w-px self-center bg-slate-200 dark:bg-navy-600 sm:block"></div>
+
+                {{-- Ledger exports --}}
+                <div class="flex flex-col gap-2">
+                    <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-navy-400">
+                        <i class="fa-solid fa-book me-1"></i>{{ __('finance.nav.fund_ledger') }}
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <a href="{{ route('admin.finances.fund-transactions.export') }}"
+                           class="inline-flex items-center gap-1.5 rounded-lg border-2 border-emerald-500 px-3 py-1.5 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-50 dark:border-emerald-500/70 dark:text-emerald-400 dark:hover:bg-emerald-500/10">
+                            <i class="fa-solid fa-file-csv text-base"></i>
+                            CSV
+                        </a>
+                        <a href="{{ route('admin.finances.fund-transactions.export-pdf') }}"
+                           class="inline-flex items-center gap-1.5 rounded-lg border-2 border-error px-3 py-1.5 text-sm font-medium text-error transition-colors hover:bg-error/5 dark:border-error/70 dark:hover:bg-error/10">
+                            <i class="fa-solid fa-file-pdf text-base"></i>
+                            PDF
+                        </a>
+                    </div>
+                </div>
+
             </div>
         </section>
     </div>

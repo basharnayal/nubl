@@ -70,6 +70,10 @@ class SidebarPanel
                             ],
                         ],
                     ],
+                    'admin_audit_logs' => [
+                        'title' => __('audit_logs.nav.title'),
+                        'route_name' => 'admin.audit-logs.index',
+                    ],
                     'admin_settings' => [
                         'title' => __('Settings'),
                         'submenu' => [
