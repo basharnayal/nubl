@@ -136,8 +136,14 @@
                 <x-lineone-button :href="route('admin.finances.payments.export')" variant="primary" :outline="true" size="sm">
                     {{ __('finance.overview.export_payments_csv') }}
                 </x-lineone-button>
+                <x-lineone-button :href="route('admin.finances.payments.export-pdf')" variant="primary" :outline="true" size="sm">
+                    {{ __('finance.overview.export_payments_pdf') }}
+                </x-lineone-button>
                 <x-lineone-button :href="route('admin.finances.fund-transactions.export')" variant="primary" :outline="true" size="sm">
                     {{ __('finance.overview.export_ledger_csv') }}
+                </x-lineone-button>
+                <x-lineone-button :href="route('admin.finances.fund-transactions.export-pdf')" variant="primary" :outline="true" size="sm">
+                    {{ __('finance.overview.export_ledger_pdf') }}
                 </x-lineone-button>
             </div>
         </section>

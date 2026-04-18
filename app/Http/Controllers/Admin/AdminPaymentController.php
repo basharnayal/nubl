@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Queries\Admin\AdminPaymentIndexQuery;
 use App\Models\Payment;
 use App\Services\AuditService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Spatie\Activitylog\Models\Activity;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -89,5 +91,25 @@ class AdminPaymentController extends Controller
         }, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
+    }
+
+    public function exportPdf(Request $request): Response
+    {
+        $query = $this->paymentIndexQuery->buildQuery($request);
+        $query->with('sponsor')->reorder()->orderBy('id');
+
+        $payments = $query->get();
+        $filename = 'payments-'.now()->format('Y-m-d-His').'.pdf';
+
+        $this->auditService->log('finance', 'payments_exported', [
+            'decision' => 'export',
+            'export_type' => 'payments_pdf',
+            'filters' => $request->query(),
+        ]);
+
+        return Pdf::loadView('admin.finances.exports.payments-pdf', [
+            'payments' => $payments,
+            'generated_at' => now(),
+        ])->setPaper('a4', 'landscape')->download($filename);
     }
 }

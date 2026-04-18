@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Queries\Admin\AdminFundTransactionIndexQuery;
 use App\Models\FundTransaction;
 use App\Services\AuditService;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
 use Spatie\Activitylog\Models\Activity;
@@ -116,5 +118,25 @@ class AdminFundTransactionController extends Controller
         }, $filename, [
             'Content-Type' => 'text/csv; charset=UTF-8',
         ]);
+    }
+
+    public function exportPdf(Request $request): Response
+    {
+        $query = $this->fundTransactionIndexQuery->buildQuery($request);
+        $query->with('wallet')->reorder()->orderBy('id');
+
+        $transactions = $query->get();
+        $filename = 'fund-transactions-'.now()->format('Y-m-d-His').'.pdf';
+
+        $this->auditService->log('finance', 'fund_transactions_exported', [
+            'decision' => 'export',
+            'export_type' => 'fund_transactions_pdf',
+            'filters' => $request->query(),
+        ]);
+
+        return Pdf::loadView('admin.finances.exports.fund-transactions-pdf', [
+            'transactions' => $transactions,
+            'generated_at' => now(),
+        ])->setPaper('a4', 'landscape')->download($filename);
     }
 }

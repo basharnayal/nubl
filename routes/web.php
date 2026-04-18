@@ -134,9 +134,11 @@ Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin'
         Route::prefix('finances')->name('finances.')->group(function () {
             Route::get('/', [FinancialOverviewController::class, 'index'])->name('overview');
             Route::get('/payments/export', [AdminPaymentController::class, 'export'])->name('payments.export');
+            Route::get('/payments/export-pdf', [AdminPaymentController::class, 'exportPdf'])->name('payments.export-pdf');
             Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
             Route::get('/payments/{payment}', [AdminPaymentController::class, 'show'])->name('payments.show');
             Route::get('/fund-transactions/export', [AdminFundTransactionController::class, 'export'])->name('fund-transactions.export');
+            Route::get('/fund-transactions/export-pdf', [AdminFundTransactionController::class, 'exportPdf'])->name('fund-transactions.export-pdf');
             Route::get('/fund-transactions', [AdminFundTransactionController::class, 'index'])->name('fund-transactions.index');
             Route::get('/fund-transactions/{fund_transaction}', [AdminFundTransactionController::class, 'show'])->name('fund-transactions.show');
             Route::get('/reports', [FinancialReportController::class, 'index'])->name('reports.index');
