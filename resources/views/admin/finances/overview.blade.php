@@ -27,7 +27,7 @@
                         <li class="flex gap-3">
                             <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-primary dark:bg-accent" aria-hidden="true"></span>
                             <span>{{ __('finance.overview.intro_gateway') }}</span>
-                        </li>
+                        </li> 
                         <li class="flex gap-3">
                             <span class="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400 dark:bg-navy-400" aria-hidden="true"></span>
                             <span>{{ __('finance.overview.intro_ledger') }}</span>
