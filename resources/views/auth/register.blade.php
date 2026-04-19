@@ -4,6 +4,13 @@
     Design: Lineone sign-up-1 style.
 --}}
 <x-register-layout :title="__('Register')">
+    @php
+        $requestedMembershipType = request()->query('type');
+        $initialMembershipType = in_array($requestedMembershipType, ['donor', 'recipient', 'provider'], true)
+            ? $requestedMembershipType
+            : '';
+    @endphp
+
     <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data" x-data="registerForm()" x-init="init()" x-on:submit="validateBeforeSubmit($event)">
         @csrf
 
@@ -384,7 +391,7 @@
     <script>
         function registerForm() {
             return {
-                membershipType: '{{ old('membership_type', '') }}' || '',
+                membershipType: @json(old('membership_type', $initialMembershipType)) || '',
                 cameraActive: false,
                 idPhotoCaptured: false,
                 idPhotoBase64: '',
