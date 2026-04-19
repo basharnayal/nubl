@@ -828,7 +828,7 @@
     "recipient.request_progress.badge_admin_rejected": "recipient.request_progress.badge_admin_rejected",
     "recipient.request_progress.hint_admin_rejected": "recipient.request_progress.hint_admin_rejected",
     "recipient.request_progress.hint_provider_review": "recipient.request_progress.hint_provider_review",
-
+    "admin.nav.provider_menus": "Provider Menus",
     "audit_logs.nav.title": "Audit Logs",
     "audit_logs.page.title": "Audit Logs",
     "audit_logs.page.subtitle": "Track important system actions, admin decisions, exports, authentication events, and security-related activities.",

@@ -13,9 +13,11 @@ class SidebarPanel
                     'admin_dashboard' => [
                         'title' => __('Dashboard'),
                         'route_name' => 'admin.dashboard',
+                        'icon' => 'home',
                     ],
                     'admin_users' => [
                         'title' => __('Users'),
+                        'icon' => 'users-round',
                         'submenu' => [
                             'admin_users_manage' => [
                                 'title' => __('User Management'),
@@ -35,14 +37,17 @@ class SidebarPanel
                     'admin_requests' => [
                         'title' => __('Requests'),
                         'route_name' => 'admin.requests.index',
+                        'icon' => 'clipboard-list',
                     ],
                     'admin_provider_menus' => [
                         'title' => __('admin.nav.provider_menus'),
                         'route_name' => 'admin.menus.index',
                         'route_match' => 'admin.menus.*',
+                        'icon' => 'utensils',
                     ],
                     'admin_finances' => [
                         'title' => __('finance.nav.module'),
+                        'icon' => 'credit-card',
                         'submenu' => [
                             'admin_finances_overview' => [
                                 'title' => __('finance.nav.overview'),
@@ -73,9 +78,11 @@ class SidebarPanel
                     'admin_audit_logs' => [
                         'title' => __('audit_logs.nav.title'),
                         'route_name' => 'admin.audit-logs.index',
+                        'icon' => 'file-clock',
                     ],
                     'admin_settings' => [
                         'title' => __('Settings'),
+                        'icon' => 'cog',
                         'submenu' => [
                             'admin_settings_qr' => [
                                 'title' => __('QR code validity'),
@@ -110,30 +117,37 @@ class SidebarPanel
                     'provider_dashboard' => [
                         'title' => __('Dashboard'),
                         'route_name' => 'provider.dashboard',
+                        'icon' => 'home',
                     ],
                     'provider_wallet' => [
                         'title' => __('provider.wallet.nav'),
                         'route_name' => 'provider.wallet.index',
+                        'icon' => 'wallet',
                     ],
                     'provider_requests' => [
                         'title' => __('Fulfillments'),
                         'route_name' => 'provider.requests.index',
+                        'icon' => 'clipboard-list',
                     ],
                     'provider_qr' => [
                         'title' => __('Scan QR Code'),
                         'route_name' => 'provider.qr.scan',
+                        'icon' => 'qr-code',
                     ],
                     'provider_menu' => [
                         'title' => __('Inventory'),
                         'route_name' => 'provider.menu-items.index',
+                        'icon' => 'cube',
                     ],
                     'provider_profile_edit' => [
                         'title' => __('provider.sidebar.hours_notes'),
                         'route_name' => 'provider.profile.edit',
+                        'icon' => 'user-clock',
                     ],
                     'provider_analytics' => [
                         'title' => __('Analytics'),
                         'route_name' => '',
+                        'icon' => 'analytics',
                     ],
                 ],
             ],
@@ -149,14 +163,17 @@ class SidebarPanel
                     'recipient_dashboard' => [
                         'title' => __('Dashboard'),
                         'route_name' => 'recipient.dashboard',
+                        'icon' => 'home',
                     ],
                     'recipient_providers' => [
                         'title' => __('Available providers'),
                         'route_name' => 'recipient.providers.index',
+                        'icon' => 'storefront',
                     ],
                     'recipient_requests' => [
                         'title' => __('My Requests'),
                         'route_name' => 'recipient.requests.index',
+                        'icon' => 'clipboard-list',
                     ],
                 ],
             ],
@@ -172,18 +189,22 @@ class SidebarPanel
                     'donor_dashboard' => [
                         'title' => __('Dashboard'),
                         'route_name' => 'donor.dashboard',
+                        'icon' => 'home',
                     ],
                     'donor_donations_new' => [
                         'title' => __('New Donation'),
                         'route_name' => 'donor.donations.new',
+                        'icon' => 'heart',
                     ],
                     'donor_donations_history' => [
                         'title' => __('My Donations'),
                         'route_name' => 'donor.donations.index',
+                        'icon' => 'list-bullet',
                     ],
                     'donor_statistics' => [
                         'title' => __('Statistics'),
                         'route_name' => '',
+                        'icon' => 'statistics',
                     ],
                 ],
             ],
