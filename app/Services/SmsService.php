@@ -29,7 +29,6 @@ class SmsService
     {
         if (empty($this->bearer)) {
             Log::warning('SmsService: TAQNYAT_BEARER_TOKEN not configured. Skipping SMS send.');
-            Log::info('SmsService [no-token]: Would send to ' . $to . ' | Body: ' . $body);
             return false;
         }
 
