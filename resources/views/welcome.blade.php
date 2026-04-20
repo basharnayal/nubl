@@ -202,6 +202,17 @@
   .cta:hover { transform: translateY(-1px); background: var(--charcoal); }
   .cta.accent { background: var(--accent); color: var(--navy-dk); }
   .cta.accent:hover { background: var(--accent-dk); color: var(--off-white); }
+  /* nav .links a sets charcoal + opacity; needs higher specificity than .cta alone */
+  nav .links a.cta {
+    color: var(--off-white);
+    opacity: 1;
+  }
+  nav .links a.cta:hover {
+    color: var(--off-white);
+    opacity: 1;
+  }
+  nav .links a.cta.accent { color: var(--navy-dk); }
+  nav .links a.cta.accent:hover { color: var(--off-white); }
   .cta svg { width: 14px; height: 14px; }
   [dir="rtl"] .cta svg { transform: scaleX(-1); }
   @media (max-width: 560px) {
@@ -224,8 +235,9 @@
   @media (max-width: 900px) { .hero-grid { grid-template-columns: 1fr; align-items: start; } }
 
   .hero h1 {
-    font-size: 5.75rem;
+    font-size: clamp(2.25rem, 2vw + 1.75rem, 4.25rem);
     max-width: 11ch;
+    line-height: 1.08;
   }
   [lang="ar"] .hero h1 { font-size: 5.3rem; max-width: 13ch; }
 
@@ -859,32 +871,40 @@
 </style>
 </head>
 <body>
-<a class="skip-link" href="#main-content">{{ app()->getLocale() === 'ar' ? 'تجاوز إلى المحتوى' : 'Skip to content' }}</a>
+<a class="skip-link" href="#main-content">{{ __('welcome.skip_link') }}</a>
 
 <!-- ========== NAV ========== -->
-<nav class="site" id="nav" aria-label="{{ app()->getLocale() === 'ar' ? 'التنقل الرئيسي' : 'Primary navigation' }}">
+<nav class="site" id="nav" aria-label="{{ __('welcome.nav.aria') }}">
   <div class="inner">
     <a href="{{ url('/') }}" class="logo" aria-label="{{ config('app.name', 'NUBL') }}">
       <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name', 'NUBL') }}" class="brand-logo" />
     </a>
 
     <div class="links">
-      <a href="#idea" data-i18n="nav_idea">The idea</a>
-      <a href="#how" data-i18n="nav_how">How it works</a>
-      <a href="#trust" data-i18n="nav_trust">Trust</a>
-      <a href="#providers" data-i18n="nav_providers">Providers</a>
-      <button class="lang" id="langToggle" type="button" aria-label="{{ app()->getLocale() === 'ar' ? 'التبديل إلى الإنجليزية' : 'Switch to Arabic' }}" data-en-url="{{ route('locale.switch', 'en') }}" data-ar-url="{{ route('locale.switch', 'ar') }}">
-        <span id="langLabel">{{ app()->getLocale() === 'ar' ? 'English' : 'العربية' }}</span>
+      <a href="#idea">{{ __('welcome.nav.idea') }}</a>
+      <a href="#how">{{ __('welcome.nav.how') }}</a>
+      <a href="#trust">{{ __('welcome.nav.trust') }}</a>
+      <a href="#providers">{{ __('welcome.nav.providers') }}</a>
+      <button class="lang" id="langToggle" type="button" aria-label="{{ __('welcome.nav.lang_aria') }}" data-en-url="{{ route('locale.switch', 'en') }}" data-ar-url="{{ route('locale.switch', 'ar') }}">
+        <span id="langLabel">{{ __('welcome.nav.lang_label') }}</span>
       </button>
-      <a href="{{ route('register', ['type' => 'donor']) }}" class="cta accent">
-        <span data-i18n="nav_give">Give support</span>
+      @if (auth()->check())  
+      <a href="{{ url('/dashboard') }}" class="cta" style="background: var(--rose); color: var(--white); border: 1px solid var(--rose);">
+    <span>{{ __('welcome.nav.dashboard') }}</span>
+<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" fill="currentColor" style="enable-background:new 0 0 512 512;" xml:space="preserve"> <g> <g> <path d="M64.671,146.502C27.711,188.049,3.457,241.62,0,300.62h60.76c3.259-42.488,20.112-81.161,46.32-111.709L64.671,146.502z" /> </g> </g> <g> <g> <path d="M249.305,332.188L249.305,332.188L249.305,332.188c-5.113,2.581-8.305,7.726-8.305,13.432 c0.015,12.598,17.783,19.438,26.191,9.99l52.427-58.608L249.305,332.188z"/> </g> </g> <g> <g> <path d="M85.882,125.291l42.409,42.409c30.548-26.208,70.221-43.061,112.709-46.32v-60C182,64.836,127.43,88.331,85.882,125.291z" /> </g> </g> <g> <g> <path d="M271,61.38v60c42.488,3.259,82.161,20.112,112.709,46.32l42.409-42.409C384.57,88.331,330,64.836,271,61.38z"/> </g> </g> <g> <g> <path d="M447.329,146.502l-42.409,42.409c26.208,30.547,43.061,69.221,46.32,111.709H512 C508.543,241.62,484.289,188.049,447.329,146.502z"/> </g> </g> <g> <g> <path d="M450.731,330.62c-1.307,17.011-4.142,33.83-9.835,49.98c-2.752,7.775-11.239,11.918-19.131,9.17 c-7.822-2.754-11.924-11.323-9.17-19.131c6.24-17.71,9.404-36.211,9.404-55.02c0-45.487-18.501-86.733-48.375-116.611 c-0.002-0.002-0.007-0.004-0.007-0.004s-0.005-0.009-0.007-0.011C343.733,169.12,301.487,150.62,256,150.62 s-87.733,18.501-117.611,48.375c-0.002,0.002-0.004,0.007-0.004,0.007s-0.009,0.005-0.011,0.007 C108.501,228.886,90,270.133,90,315.62c0,18.809,3.164,37.31,9.404,55.02c2.754,7.808-1.348,16.377-9.17,19.131 c-7.749,2.739-16.362-1.362-19.131-9.17c-5.693-16.15-8.527-32.968-9.835-49.98H0c2.146,36.632,11.7,67.637,25.107,95.464 c7.178,14.897,22.939,24.536,40.151,24.536h381.468c17.227,0,32.988-9.639,40.181-24.551 c13.239-27.556,23.031-60.256,25.093-95.449H450.731z M395.398,258.403L289.545,375.62c-27.25,30.48-78.545,11.411-78.545-30 c0-17.124,9.525-32.536,24.838-40.23c0.02-0.009,0.029-0.029,0.049-0.038l141.625-70.371c0.049-0.024,0.101-0.016,0.15-0.04 C392.17,227.869,406.451,245.693,395.398,258.403z"/> </g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> <g> </g> </svg>      
+ </a>
+      @else
+ <a href="{{ route('register', ['type' => 'donor']) }}" class="cta accent">
+        <span>{{ __('welcome.nav.give') }}</span>
         <svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
-      <a href="{{ url('/dashboard') }}" class="cta accent">
-        <span data-i18n="nav_give">Dashboard</span>
+      <a href="{{ route('login') }}" class="cta">
+        <span>{{ __('welcome.nav.login') }}</span>
         <svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
-    </div>
+      @endif
+
+</div>
   </div>
 </nav>
 
@@ -907,18 +927,18 @@
 
   <div class="wrap hero-grid">
     <div>
-      <span class="eyebrow reveal" data-i18n="hero_eyebrow">A platform for dignified food support</span>
+      <span class="eyebrow reveal">{{ __('welcome.hero.eyebrow') }}</span>
       <h1 class="display reveal" style="margin-top: 28px;">
-        <span data-i18n="hero_h1_1">Support,</span> <i data-i18n="hero_h1_2">delivered quietly</i> <span data-i18n="hero_h1_3">by people who already care.</span>
+        {{ __('welcome.hero.h1_1') }} <i>{{ __('welcome.hero.h1_2') }}</i> {{ __('welcome.hero.h1_3') }}
       </h1>
-      <p class="sub reveal" data-i18n="hero_sub">NUBL routes food support through <strong>trusted local providers</strong> already in your city — so help arrives with dignity, not a label.</p>
+      <p class="sub reveal">{!! __('welcome.hero.sub') !!}</p>
       <div class="hero-ctas reveal">
         <a href="{{ route('register', ['type' => 'donor']) }}" class="cta accent">
-          <span data-i18n="hero_cta1">Support a family</span>
+          <span>{{ __('welcome.hero.cta1') }}</span>
           <svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
         <a href="{{ route('register', ['type' => 'recipient']) }}" class="cta" style="background: var(--white); color: var(--charcoal); border: 1px solid var(--border);">
-          <span data-i18n="hero_cta2">Request support</span>
+          <span>{{ __('welcome.hero.cta2') }}</span>
           <svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </a>
       </div>
@@ -927,28 +947,28 @@
     <div class="reveal hero-impact" style="transition-delay: .15s;">
       <div class="agg-card">
         <div class="agg-head">
-          <span class="stamp"><span class="dot"></span><span data-i18n="impact_live">Impact · updated live</span></span>
-          <span class="stamp" style="font-family: var(--mono);" data-i18n="impact_q">Q2 · 2026</span>
+          <span class="stamp"><span class="dot"></span><span>{{ __('welcome.impact.live') }}</span></span>
+          <span class="stamp" style="font-family: var(--mono);">{{ __('welcome.impact.q') }}</span>
         </div>
-        <div class="agg-big" data-counter="1842360"><span class="unit" data-i18n="amount_unit">SAR</span>0</div>
-        <div class="agg-label" data-i18n="amount_label">delivered this quarter across the network</div>
+        <div class="agg-big" data-counter="1842360"><span class="unit">{{ __('welcome.impact.amount_unit') }}</span>0</div>
+        <div class="agg-label">{{ __('welcome.impact.amount_label') }}</div>
 
         <div class="agg-split">
           <div>
             <div class="num" data-counter="2184">0</div>
-            <div class="tag" data-i18n="families_tag">families supported</div>
+            <div class="tag">{{ __('welcome.impact.families_tag') }}</div>
           </div>
           <div>
             <div class="num" data-counter="347">0</div>
-            <div class="tag" data-i18n="providers_tag">local providers</div>
+            <div class="tag">{{ __('welcome.impact.providers_tag') }}</div>
           </div>
         </div>
       </div>
 
       <div class="feed" aria-live="off">
         <div class="feed-head">
-          <span class="live"><span class="dot"></span><span data-i18n="live">Live ledger</span></span>
-          <span data-i18n="anonymized">anonymized · verified</span>
+          <span class="live"><span class="dot"></span><span>{{ __('welcome.impact.live_feed') }}</span></span>
+          <span>{{ __('welcome.impact.anonymized') }}</span>
         </div>
         <div class="feed-list" id="feedList"></div>
       </div>
@@ -960,18 +980,16 @@
 <section class="manifesto" id="idea">
   <div class="wrap manifesto-grid">
     <aside class="manifesto-aside">
-      <span data-i18n="chapter1">Chapter 01</span>
+      {{ __('welcome.manifesto.chapter') }}
       <hr/>
-      <span data-i18n="chapter1_label">The idea</span>
+      {{ __('welcome.manifesto.chapter_label') }}
     </aside>
     <div>
-      <span class="eyebrow" data-i18n="manifesto_eyebrow">Why we built NUBL</span>
+      <span class="eyebrow">{{ __('welcome.manifesto.eyebrow') }}</span>
       <h2 class="display" style="margin-top: 24px;">
-        <span data-i18n="manifesto_h_1">Need is private.</span> <em data-i18n="manifesto_h_2">So is dignity.</em> <span data-i18n="manifesto_h_3">Support should honor both.</span>
+        {{ __('welcome.manifesto.h1') }} <em>{{ __('welcome.manifesto.h2') }}</em> {{ __('welcome.manifesto.h3') }}
       </h2>
-      <p class="lede" data-i18n="manifesto_p">
-        Asking for help shouldn't cost you your privacy. NUBL routes everyday grocery credit to eligible households through the shops they already use — quietly, documented, and accountable to everyone.
-      </p>
+      <p class="lede">{{ __('welcome.manifesto.p') }}</p>
     </div>
   </div>
 </section>
@@ -981,14 +999,12 @@
   <div class="wrap">
     <div class="flow-head">
       <div>
-        <span class="eyebrow" data-i18n="chapter2">Chapter 02 · How it works</span>
+        <span class="eyebrow">{{ __('welcome.how.chapter') }}</span>
         <h2 class="display" style="margin-top: 20px;">
-          <span data-i18n="how_h_1">Three people.</span> <i data-i18n="how_h_2">One quiet circuit.</i>
+          {{ __('welcome.how.h1') }} <i>{{ __('welcome.how.h2') }}</i>
         </h2>
       </div>
-      <p data-i18n="how_p">
-        Every transaction on NUBL travels through a structured path. Supporters contribute, providers fulfill, recipients receive — each role protected, each step documented.
-      </p>
+      <p>{{ __('welcome.how.p') }}</p>
     </div>
 
     <div class="flow-diagram">
@@ -997,16 +1013,16 @@
 
         <article class="role-card supporter">
           <span class="accent-dot"></span>
-          <span class="step" data-i18n="step1">Step 01 · Supporter</span>
+          <span class="step">{{ __('welcome.how.step1') }}</span>
           <div class="icon">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
               <path d="M14 25S4 18 4 11a6 6 0 0 1 10-4.5A6 6 0 0 1 24 11c0 7-10 14-10 14z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
             </svg>
           </div>
-          <h3 data-i18n="role1_h">Choose how to give.</h3>
-          <p class="role-body" data-i18n="role1_p">One-time, monthly, or directed to a category. Every contribution shows up in your impact summary.</p>
+          <h3>{{ __('welcome.how.role1_h') }}</h3>
+          <p class="role-body">{{ __('welcome.how.role1_p') }}</p>
           <div class="role-actions">
-            <a href="{{ route('register', ['type' => 'donor']) }}"><span data-i18n="role1_cta">Become a supporter</span>
+            <a href="{{ route('register', ['type' => 'donor']) }}"><span>{{ __('welcome.how.role1_cta') }}</span>
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </a>
           </div>
@@ -1014,17 +1030,17 @@
 
         <article class="role-card provider">
           <span class="accent-dot"></span>
-          <span class="step" data-i18n="step2">Step 02 · Provider</span>
+          <span class="step">{{ __('welcome.how.step2') }}</span>
           <div class="icon">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
               <path d="M4 10h20l-1.5 12a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 10z" stroke="currentColor" stroke-width="1.6"/>
               <path d="M9 10V7a5 5 0 0 1 10 0v3" stroke="currentColor" stroke-width="1.6"/>
             </svg>
           </div>
-          <h3 data-i18n="role2_h">Fulfill in-store, quietly.</h3>
-          <p class="role-body" data-i18n="role2_p">Verified providers receive credit directly. Recipients shop normally, at the same till, with the same dignity as any other customer.</p>
+          <h3>{{ __('welcome.how.role2_h') }}</h3>
+          <p class="role-body">{{ __('welcome.how.role2_p') }}</p>
           <div class="role-actions">
-            <a href="{{ route('register.provider') }}"><span data-i18n="role2_cta">Join as a provider</span>
+            <a href="{{ route('register.provider') }}"><span>{{ __('welcome.how.role2_cta') }}</span>
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </a>
           </div>
@@ -1032,17 +1048,17 @@
 
         <article class="role-card recipient">
           <span class="accent-dot"></span>
-          <span class="step" data-i18n="step3">Step 03 · Recipient</span>
+          <span class="step">{{ __('welcome.how.step3') }}</span>
           <div class="icon">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
               <circle cx="14" cy="10" r="4" stroke="currentColor" stroke-width="1.6"/>
               <path d="M5 24c0-4.5 4-8 9-8s9 3.5 9 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
             </svg>
           </div>
-          <h3 data-i18n="role3_h">Shop with dignity.</h3>
-          <p class="role-body" data-i18n="role3_p">Eligible households use a simple code at any partner provider. No labels. No lines. Just the week's shopping, covered.</p>
+          <h3>{{ __('welcome.how.role3_h') }}</h3>
+          <p class="role-body">{{ __('welcome.how.role3_p') }}</p>
           <div class="role-actions">
-            <a href="{{ route('register', ['type' => 'recipient']) }}"><span data-i18n="role3_cta">Request support</span>
+            <a href="{{ route('register', ['type' => 'recipient']) }}"><span>{{ __('welcome.how.role3_cta') }}</span>
               <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
             </a>
           </div>
@@ -1057,69 +1073,69 @@
 <section class="privacy">
   <div class="wrap privacy-grid">
     <div>
-      <span class="eyebrow" data-i18n="privacy_eyebrow">Chapter 03 · Privacy & dignity</span>
+      <span class="eyebrow">{{ __('welcome.privacy.eyebrow') }}</span>
       <h2 class="display" style="margin-top: 22px;">
-        <span data-i18n="privacy_h_1">What the supporter sees</span><br/>
-        <em data-i18n="privacy_h_2">is never who the recipient is.</em>
+        {{ __('welcome.privacy.h1') }}<br/>
+        <em>{{ __('welcome.privacy.h2') }}</em>
       </h2>
-      <p class="body" data-i18n="privacy_p">Every recipient record is split in two. Identifying details are held only for eligibility and are never shown to supporters. You see the impact, never the person.</p>
+      <p class="body">{{ __('welcome.privacy.p') }}</p>
       <div class="privacy-pills">
-        <span class="pill" data-i18n="pill1">Split-storage architecture</span>
-        <span class="pill" data-i18n="pill2">Tokenized recipient IDs</span>
-        <span class="pill" data-i18n="pill3">Zero supporter-side PII</span>
-        <span class="pill" data-i18n="pill4">Third-party annual audit</span>
+        <span class="pill">{{ __('welcome.privacy.pill1') }}</span>
+        <span class="pill">{{ __('welcome.privacy.pill2') }}</span>
+        <span class="pill">{{ __('welcome.privacy.pill3') }}</span>
+        <span class="pill">{{ __('welcome.privacy.pill4') }}</span>
       </div>
     </div>
 
     <div class="card-pair reveal">
       <div class="id-card clear">
         <div class="title-line">
-          <span data-i18n="id_held">Held securely</span>
+          <span>{{ __('welcome.privacy.id_held') }}</span>
           <span>01 · RAW</span>
         </div>
         <div class="id-row" style="margin-top: 6px;">
-          <span class="k" data-i18n="id_name">Name</span>
+          <span class="k">{{ __('welcome.privacy.id_name') }}</span>
           <span class="v redacted">Fatima Al-Hashimi</span>
         </div>
         <div class="id-row">
-          <span class="k" data-i18n="id_area">Area</span>
+          <span class="k">{{ __('welcome.privacy.id_area') }}</span>
           <span class="v redacted">Ras Beirut — Block 04</span>
         </div>
         <div class="id-row">
-          <span class="k" data-i18n="id_family">Family</span>
+          <span class="k">{{ __('welcome.privacy.id_family') }}</span>
           <span class="v redacted">4 adults, 2 children</span>
         </div>
         <div class="id-row">
-          <span class="k" data-i18n="id_status">Status</span>
-          <span class="v" style="color: #2AAE5F;" data-i18n="id_verified">Verified eligible</span>
+          <span class="k">{{ __('welcome.privacy.id_status') }}</span>
+          <span class="v" style="color: #2AAE5F;">{{ __('welcome.privacy.id_verified') }}</span>
         </div>
       </div>
 
       <div class="arrow-down">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 2v10M3 8l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span data-i18n="tokenized">What supporters see — tokenized</span>
+        <span>{{ __('welcome.privacy.tokenized') }}</span>
       </div>
 
       <div class="id-card protected">
         <div class="title-line">
-          <span data-i18n="id_shown">Shown to supporters</span>
+          <span>{{ __('welcome.privacy.id_shown') }}</span>
           <span>02 · TOKEN</span>
         </div>
         <div class="id-row" style="margin-top: 6px;">
-          <span class="k" data-i18n="id_ref">Reference</span>
+          <span class="k">{{ __('welcome.privacy.id_ref') }}</span>
           <span class="v token">NBL-7F3A-QR</span>
         </div>
         <div class="id-row">
-          <span class="k" data-i18n="id_region">Region</span>
-          <span class="v" data-i18n="id_region_v">Beirut (metro)</span>
+          <span class="k">{{ __('welcome.privacy.id_region') }}</span>
+          <span class="v">{{ __('welcome.privacy.id_region_v') }}</span>
         </div>
         <div class="id-row">
-          <span class="k" data-i18n="id_household">Household</span>
-          <span class="v" data-i18n="id_household_v">Family of 6</span>
+          <span class="k">{{ __('welcome.privacy.id_household') }}</span>
+          <span class="v">{{ __('welcome.privacy.id_household_v') }}</span>
         </div>
         <div class="id-row">
-          <span class="k" data-i18n="id_fulfillment">Fulfillment</span>
-          <span class="v" data-i18n="id_fulfillment_v">Weekly staples basket</span>
+          <span class="k">{{ __('welcome.privacy.id_fulfillment') }}</span>
+          <span class="v">{{ __('welcome.privacy.id_fulfill_v') }}</span>
         </div>
       </div>
     </div>
@@ -1130,68 +1146,68 @@
 <section class="trust" id="trust">
   <div class="wrap trust-grid">
     <div class="trust-left">
-      <span class="eyebrow" data-i18n="trust_eyebrow">Chapter 04 · Trust & transparency</span>
+      <span class="eyebrow">{{ __('welcome.trust.eyebrow') }}</span>
       <h2 class="display" style="margin-top: 22px;">
-        <span data-i18n="trust_h_1">Every halala,</span> <i data-i18n="trust_h_2">accounted for.</i>
+        {{ __('welcome.trust.h1') }} <i>{{ __('welcome.trust.h2') }}</i>
       </h2>
-      <p data-i18n="trust_p">NUBL publishes a live ledger of every transaction across the network — without ever exposing who received support.</p>
+      <p>{{ __('welcome.trust.p') }}</p>
 
       <div class="trust-badges" style="grid-template-columns: 1fr 1fr;">
         <div class="badge-card">
           <div class="n">97.9<span style="font-size:.6em;color:var(--muted);">%</span></div>
-          <div class="t" data-i18n="badge1">of funds reach recipients directly</div>
+          <div class="t">{{ __('welcome.trust.badge1') }}</div>
         </div>
         <div class="badge-card">
           <div class="n">2.1<span style="font-size:.6em;color:var(--muted);">%</span></div>
-          <div class="t" data-i18n="badge2">currently held in the system</div>
+          <div class="t">{{ __('welcome.trust.badge2') }}</div>
         </div>
       </div>
     </div>
 
     <div class="transparency-ledger" aria-label="Live ledger preview">
       <div class="ledger-head">
-        <h4 data-i18n="ledger_h">Live ledger — last 24 hours</h4>
+        <h4>{{ __('welcome.trust.ledger_h') }}</h4>
         <span class="date" id="ledgerDate">19 APR 2026</span>
       </div>
       <div class="ledger-row">
         <div>
-          <div class="desc" data-i18n="ledger_1">Weekly staples basket · Riyadh</div>
+          <div class="desc">{{ __('welcome.trust.ledger_1') }}</div>
           <div class="meta">08:42 · NBL-7F3A-QR · Tamimi Markets</div>
         </div>
-        <div class="amt">158<span class="u" data-i18n="usd">SAR</span></div>
+        <div class="amt">158<span class="u">{{ __('welcome.trust.sar') }}</span></div>
       </div>
       <div class="ledger-row">
         <div>
-          <div class="desc" data-i18n="ledger_2">Bakery allowance · Jeddah</div>
+          <div class="desc">{{ __('welcome.trust.ledger_2') }}</div>
           <div class="meta">09:17 · NBL-2K8H-LP · Al Rahmaniah Bakery</div>
         </div>
-        <div class="amt">68<span class="u" data-i18n="usd2">SAR</span></div>
+        <div class="amt">68<span class="u">{{ __('welcome.trust.sar') }}</span></div>
       </div>
       <div class="ledger-row">
         <div>
-          <div class="desc" data-i18n="ledger_3">Family meal fund · Dammam</div>
+          <div class="desc">{{ __('welcome.trust.ledger_3') }}</div>
           <div class="meta">10:03 · NBL-9T1B-MX · Najd Village</div>
         </div>
-        <div class="amt">105<span class="u" data-i18n="usd3">SAR</span></div>
+        <div class="amt">105<span class="u">{{ __('welcome.trust.sar') }}</span></div>
       </div>
       <div class="ledger-row">
         <div>
-          <div class="desc" data-i18n="ledger_4">Weekly produce · Makkah</div>
+          <div class="desc">{{ __('welcome.trust.ledger_4') }}</div>
           <div class="meta">11:22 · NBL-4E6D-ZS · Panda Retail</div>
         </div>
-        <div class="amt">132<span class="u" data-i18n="usd4">SAR</span></div>
+        <div class="amt">132<span class="u">{{ __('welcome.trust.sar') }}</span></div>
       </div>
       <div class="ledger-row">
         <div>
-          <div class="desc" data-i18n="ledger_5">Weekly staples basket · Madinah</div>
+          <div class="desc">{{ __('welcome.trust.ledger_5') }}</div>
           <div class="meta">12:51 · NBL-8C2A-WV · Nahdi Markets</div>
         </div>
-        <div class="amt">172<span class="u" data-i18n="usd5">SAR</span></div>
+        <div class="amt">172<span class="u">{{ __('welcome.trust.sar') }}</span></div>
       </div>
 
       <div class="ledger-foot">
-        <span style="font-family: var(--mono); font-size: 11px; color: var(--muted);" data-i18n="ledger_count">Showing 5 of 1,284 today</span>
-        <a href="#trust" data-i18n="ledger_full">View full transparency report →</a>
+        <span style="font-family: var(--mono); font-size: 11px; color: var(--muted);">{{ __('welcome.trust.ledger_count') }}</span>
+        <a href="#trust">{{ __('welcome.trust.ledger_full') }}</a>
       </div>
     </div>
   </div>
@@ -1201,11 +1217,11 @@
 <section class="providers" id="providers">
   <div class="wrap">
     <div class="providers-intro">
-      <span class="eyebrow" data-i18n="providers_eyebrow">Chapter 05 · Local providers</span>
+      <span class="eyebrow">{{ __('welcome.providers.eyebrow') }}</span>
       <h2 class="display" style="margin-top: 22px;">
-        <span data-i18n="providers_h_1">The shops already</span> <em data-i18n="providers_h_2">serving your city.</em>
+        {{ __('welcome.providers.h1') }} <em>{{ __('welcome.providers.h2') }}</em>
       </h2>
-      <p data-i18n="providers_p">NUBL doesn't build warehouses or fleets. We partner with trusted shops and restaurants already serving each community — so the money stays local and the shopping feels normal.</p>
+      <p>{{ __('welcome.providers.p') }}</p>
     </div>
 
     <div class="provider-types">
@@ -1219,9 +1235,9 @@
             <circle cx="23" cy="22" r="1.5" fill="currentColor"/>
           </svg>
         </div>
-        <h4 data-i18n="prov1_h">Supermarkets</h4>
-        <p data-i18n="prov1_p">Full weekly baskets, staple goods, fresh produce.</p>
-        <div class="cnt"><b data-counter-inline="142">142</b><span data-i18n="prov1_cnt">partners</span></div>
+        <h4>{{ __('welcome.providers.prov1_h') }}</h4>
+        <p>{{ __('welcome.providers.prov1_p') }}</p>
+        <div class="cnt"><b data-counter-inline="142">142</b><span>{{ __('welcome.providers.prov1_cnt') }}</span></div>
       </div>
 
       <div class="provider-cell">
@@ -1231,9 +1247,9 @@
             <path d="M13 14h10" stroke="currentColor" stroke-width="1.5"/>
           </svg>
         </div>
-        <h4 data-i18n="prov2_h">Grocers</h4>
-        <p data-i18n="prov2_p">Neighborhood shops offering familiar brands and friendly faces.</p>
-        <div class="cnt"><b data-counter-inline="118">118</b><span data-i18n="prov2_cnt">partners</span></div>
+        <h4>{{ __('welcome.providers.prov2_h') }}</h4>
+        <p>{{ __('welcome.providers.prov2_p') }}</p>
+        <div class="cnt"><b data-counter-inline="118">118</b><span>{{ __('welcome.providers.prov2_cnt') }}</span></div>
       </div>
 
       <div class="provider-cell">
@@ -1244,9 +1260,9 @@
             <path d="M14 8v4M18 6v6M22 8v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </div>
-        <h4 data-i18n="prov3_h">Bakeries</h4>
-        <p data-i18n="prov3_p">Daily bread, pastries, and the rituals that make a home feel whole.</p>
-        <div class="cnt"><b data-counter-inline="54">54</b><span data-i18n="prov3_cnt">partners</span></div>
+        <h4>{{ __('welcome.providers.prov3_h') }}</h4>
+        <p>{{ __('welcome.providers.prov3_p') }}</p>
+        <div class="cnt"><b data-counter-inline="54">54</b><span>{{ __('welcome.providers.prov3_cnt') }}</span></div>
       </div>
 
       <div class="provider-cell">
@@ -1257,18 +1273,18 @@
             <path d="M24 6c-2 0-3 4-3 8s1 5 3 5v11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
         </div>
-        <h4 data-i18n="prov4_h">Restaurants</h4>
-        <p data-i18n="prov4_p">Cooked meals for families without a kitchen, or for the days a warm plate matters most.</p>
-        <div class="cnt"><b data-counter-inline="33">33</b><span data-i18n="prov4_cnt">partners</span></div>
+        <h4>{{ __('welcome.providers.prov4_h') }}</h4>
+        <p>{{ __('welcome.providers.prov4_p') }}</p>
+        <div class="cnt"><b data-counter-inline="33">33</b><span>{{ __('welcome.providers.prov4_cnt') }}</span></div>
       </div>
     </div>
 
     <div class="provider-strip">
       <div class="big display">
-        <span data-i18n="strip_1">Own a shop or restaurant?</span> <em data-i18n="strip_2">Join the NUBL provider network.</em>
+        {{ __('welcome.providers.strip_1') }} <em>{{ __('welcome.providers.strip_2') }}</em>
       </div>
       <a href="{{ route('register.provider') }}" class="cta" style="background: var(--navy-dk); color: var(--off-white);">
-        <span data-i18n="strip_cta">Apply as a provider</span>
+        <span>{{ __('welcome.providers.strip_cta') }}</span>
         <svg viewBox="0 0 16 16" width="14" height="14" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
     </div>
@@ -1280,36 +1296,36 @@
   <div class="wrap">
     <div class="stories-head">
       <div>
-        <span class="eyebrow" data-i18n="stories_eyebrow">Chapter 06 · From the network</span>
+        <span class="eyebrow">{{ __('welcome.stories.eyebrow') }}</span>
         <h2 class="display" style="margin-top: 20px;">
-          <span data-i18n="stories_h_1">Recipient, donor,</span> <i data-i18n="stories_h_2">and provider voices.</i>
+          {{ __('welcome.stories.h1') }} <i>{{ __('welcome.stories.h2') }}</i>
         </h2>
       </div>
-      <span style="font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0; text-transform: uppercase;" data-i18n="stories_consent">All stories shared with consent. Identifying details redacted.</span>
+      <span style="font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0; text-transform: uppercase;">{{ __('welcome.stories.consent') }}</span>
     </div>
 
     <div class="stories-grid">
       <article class="story feature">
-        <p class="quote" data-i18n="story1">What relieved me the most was that I did not have to explain my situation to anyone or ask directly. The support reached me with dignity, and I used it when I truly needed to buy basic household essentials. Knowing that someone is standing with you without even knowing who you are… it means a lot.</p>
+        <p class="quote">{{ __('welcome.stories.story1') }}</p>
         <div class="story-meta">
-          <span class="role" data-i18n="story1_role">Recipient / Beneficiary Voice</span>
-          <span data-i18n="story1_loc">Beneficiary — Madinah</span>
+          <span class="role">{{ __('welcome.stories.story1_role') }}</span>
+          <span>{{ __('welcome.stories.story1_loc') }}</span>
         </div>
       </article>
 
       <article class="story">
-        <p class="quote" data-i18n="story2">I always used to wonder: did my donation really reach someone who needed it? With NUBL, things felt clearer. I do not know the people, to protect their privacy, but I can see the impact in a reassuring way. That made me donate with peace of mind.</p>
+        <p class="quote">{{ __('welcome.stories.story2') }}</p>
         <div class="story-meta">
-          <span class="role" data-i18n="story2_role">Donor Voice</span>
-          <span data-i18n="story2_loc">Donor — Riyadh</span>
+          <span class="role">{{ __('welcome.stories.story2_role') }}</span>
+          <span>{{ __('welcome.stories.story2_loc') }}</span>
         </div>
       </article>
 
       <article class="story feature-2">
-        <p class="quote" data-i18n="story3">Sometimes someone comes in and you can tell they are in need, but they do not want anyone to notice. With NUBL, the process became respectful and simple; they receive what they need without embarrassment, and we serve them just like any other customer.</p>
+        <p class="quote">{{ __('welcome.stories.story3') }}</p>
         <div class="story-meta">
-          <span class="role" data-i18n="story3_role">Provider Voice</span>
-          <span data-i18n="story3_loc">Food Provider — Jeddah</span>
+          <span class="role">{{ __('welcome.stories.story3_role') }}</span>
+          <span>{{ __('welcome.stories.story3_loc') }}</span>
         </div>
       </article>
     </div>
@@ -1319,36 +1335,36 @@
 <!-- ========== CTA BAND ========== -->
 <section class="cta-band" id="cta">
   <div class="wrap">
-    <span class="eyebrow" data-i18n="cta_eyebrow">Chapter 07 · Your part</span>
+    <span class="eyebrow">{{ __('welcome.cta.eyebrow') }}</span>
     <h2 class="display">
-      <span data-i18n="cta_h_1">Three ways in.</span><br/>
-      <em data-i18n="cta_h_2">One quiet circuit of care.</em>
+      {{ __('welcome.cta.h1') }}<br/>
+      <em>{{ __('welcome.cta.h2') }}</em>
     </h2>
 
     <div class="cta-triad">
       <a href="{{ route('register', ['type' => 'donor']) }}" class="cta-card donate">
         <span class="num">01</span>
-        <h3 data-i18n="ctaA_h">Give support</h3>
-        <p data-i18n="ctaA_p">One-time, monthly, or directed. Every contribution is traceable to impact, invisible to the person you help.</p>
-        <span class="go"><span data-i18n="ctaA_cta">Become a supporter</span>
+        <h3>{{ __('welcome.cta.a_h') }}</h3>
+        <p>{{ __('welcome.cta.a_p') }}</p>
+        <span class="go"><span>{{ __('welcome.cta.a_cta') }}</span>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </span>
       </a>
 
       <a href="{{ route('register', ['type' => 'recipient']) }}" class="cta-card request">
         <span class="num">02</span>
-        <h3 data-i18n="ctaB_h">Request support</h3>
-        <p data-i18n="ctaB_p">A short, confidential form. Reviewed within 7 days. No one in your community sees you asking.</p>
-        <span class="go"><span data-i18n="ctaB_cta">Apply privately</span>
+        <h3>{{ __('welcome.cta.b_h') }}</h3>
+        <p>{{ __('welcome.cta.b_p') }}</p>
+        <span class="go"><span>{{ __('welcome.cta.b_cta') }}</span>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </span>
       </a>
 
       <a href="{{ route('register.provider') }}" class="cta-card join">
         <span class="num">03</span>
-        <h3 data-i18n="ctaC_h">Join as a provider</h3>
-        <p data-i18n="ctaC_p">Shops and restaurants — keep serving your community, get paid directly by the platform.</p>
-        <span class="go"><span data-i18n="ctaC_cta">Apply to partner</span>
+        <h3>{{ __('welcome.cta.c_h') }}</h3>
+        <p>{{ __('welcome.cta.c_p') }}</p>
+        <span class="go"><span>{{ __('welcome.cta.c_cta') }}</span>
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </span>
       </a>
@@ -1366,30 +1382,30 @@
         <a href="{{ url('/') }}" class="logo" aria-label="{{ config('app.name', 'NUBL') }}">
           <img src="{{ asset('images/logo.png') }}" alt="{{ config('app.name', 'NUBL') }}" class="brand-logo" />
         </a>
-        <p data-i18n="foot_tag">A digital platform for dignified food support, connecting supporters, recipients and local providers.</p>
+        <p>{{ __('welcome.footer.tagline') }}</p>
       </div>
       <div>
-        <h5 data-i18n="foot_platform">Platform</h5>
-        <a href="#how" data-i18n="foot_how">How it works</a>
-        <a href="#trust" data-i18n="foot_transparency">Transparency</a>
-        <a href="#providers" data-i18n="foot_coverage">Coverage areas</a>
+        <h5>{{ __('welcome.footer.platform') }}</h5>
+        <a href="#how">{{ __('welcome.footer.how') }}</a>
+        <a href="#trust">{{ __('welcome.footer.transparency') }}</a>
+        <a href="#providers">{{ __('welcome.footer.coverage') }}</a>
       </div>
       <div>
-        <h5 data-i18n="foot_join">Join</h5>
-        <a href="{{ route('register', ['type' => 'donor']) }}" data-i18n="foot_support">Support a family</a>
-        <a href="{{ route('register', ['type' => 'recipient']) }}" data-i18n="foot_request">Request support</a>
-        <a href="{{ route('register.provider') }}" data-i18n="foot_partner">Become a partner</a>
+        <h5>{{ __('welcome.footer.join') }}</h5>
+        <a href="{{ route('register', ['type' => 'donor']) }}">{{ __('welcome.footer.support') }}</a>
+        <a href="{{ route('register', ['type' => 'recipient']) }}">{{ __('welcome.footer.request') }}</a>
+        <a href="{{ route('register.provider') }}">{{ __('welcome.footer.partner') }}</a>
       </div>
       <div>
-        <h5 data-i18n="foot_org">Organization</h5>
-        <a href="#idea" data-i18n="foot_about">About</a>
-        <a href="#stories" data-i18n="foot_press">Press</a>
-        <a href="#cta" data-i18n="foot_contact">Contact</a>
+        <h5>{{ __('welcome.footer.org') }}</h5>
+        <a href="#idea">{{ __('welcome.footer.about') }}</a>
+        <a href="#stories">{{ __('welcome.footer.press') }}</a>
+        <a href="#cta">{{ __('welcome.footer.contact') }}</a>
       </div>
     </div>
     <div class="bottom">
-      <span data-i18n="foot_copy">© 2026 NUBL Platform · All rights reserved</span>
-      <span data-i18n="foot_legal">Privacy · Terms · Audited annually by Baker Tilly MENA</span>
+      <span>{{ __('welcome.footer.copy') }}</span>
+      <span>{{ __('welcome.footer.legal') }}</span>
     </div>
   </div>
 </footer>
@@ -1430,6 +1446,10 @@
 </div>
 
 <script>
+  // -------- Locale (server-side) --------
+  const CURRENT_LOCALE = "{{ app()->getLocale() }}";
+  const FEED_ITEMS = @json(__('welcome.feed'));
+
   // -------- Tweak defaults (editmode block) --------
   const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
     "lang": "{{ app()->getLocale() === 'ar' ? 'ar' : 'en' }}",
@@ -1439,204 +1459,6 @@
 
   let TWEAKS = { ...TWEAK_DEFAULTS };
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  // -------- i18n strings --------
-  const I18N = {
-    en: {
-      brand: "NUBL",
-      nav_idea: "The idea", nav_how: "How it works", nav_trust: "Trust", nav_providers: "Providers", nav_give: "Give support",
-      hero_eyebrow: "A platform for dignified food support",
-      hero_h1_1: "Nourishment,", hero_h1_2: "delivered quietly", hero_h1_3: "through people who already care.",
-      hero_sub: 'NUBL connects supporters with eligible recipients through <strong>trusted local providers</strong> — the supermarkets, grocers, bakeries and restaurants already rooted in your neighborhood. No packages on doorsteps. No identities exposed. Just a quiet line of care.',
-      hero_cta1: "Support a family", hero_cta2: "Request support",
-      impact_live: "Impact · updated live", impact_q: "Q2 · 2026",
-      meals_unit: "SAR", meals_label: "delivered this quarter across the network",
-      amount_unit: "SAR", amount_label: "delivered this quarter across the network",
-      families_tag: "families supported", providers_tag: "local providers",
-      live: "Live ledger", anonymized: "anonymized · verified",
-      chapter1: "Chapter 01", chapter1_label: "The idea",
-      manifesto_eyebrow: "Why we built NUBL",
-      manifesto_h_1: "Hunger is private.", manifesto_h_2: "So is dignity.", manifesto_h_3: "Support should honor both.",
-      manifesto_p: "Asking for help shouldn't cost you your privacy. NUBL routes everyday grocery credit to eligible households through the shops they already use — quietly, documented, and accountable to everyone.",
-      chapter2: "Chapter 02 · How it works",
-      how_h_1: "Three people.", how_h_2: "One quiet circuit.",
-      how_p: "Every transaction on NUBL travels through a structured path. Supporters contribute, providers fulfill, recipients receive — each role protected, each step documented.",
-      step1: "Step 01 · Supporter", step2: "Step 02 · Provider", step3: "Step 03 · Recipient",
-      role1_h: "Choose how to give.",
-      role1_p: "One-time, monthly, or directed to a category. Every contribution shows up in your impact summary.",
-      role1_cta: "Become a supporter",
-      role2_h: "Fulfill in-store, quietly.",
-      role2_p: "Verified providers receive credit directly. Recipients shop normally, at the same till, with the same dignity as any other customer.",
-      role2_cta: "Join as a provider",
-      role3_h: "Shop with dignity.",
-      role3_p: "Eligible households use a simple code at any partner provider. No labels. No lines. Just the week's shopping, covered.",
-      role3_cta: "Request support",
-      privacy_eyebrow: "Chapter 03 · Privacy & dignity",
-      privacy_h_1: "What the supporter sees", privacy_h_2: "is never who the recipient is.",
-      privacy_p: "Every recipient record is split in two. Identifying details are held only for eligibility and are never shown to supporters. You see the impact, never the person.",
-      pill1: "Split-storage architecture", pill2: "Tokenized recipient IDs", pill3: "Zero supporter-side PII", pill4: "Third-party annual audit",
-      id_held: "Held securely", id_name: "Name", id_area: "Area", id_family: "Family", id_status: "Status", id_verified: "Verified eligible",
-      tokenized: "What supporters see — tokenized",
-      id_shown: "Shown to supporters", id_ref: "Reference", id_region: "Region", id_region_v: "Beirut (metro)",
-      id_household: "Household", id_household_v: "Family of 6", id_fulfillment: "Fulfillment", id_fulfillment_v: "Weekly staples basket",
-      trust_eyebrow: "Chapter 04 · Trust & transparency",
-      trust_h_1: "Every halala,", trust_h_2: "accounted for.",
-      trust_p: "NUBL publishes a live ledger of every transaction across the network — without ever exposing who received support.",
-      badge1: "of funds reach recipients directly", badge2: "platform & verification costs", badge3: "marketing overhead",
-      ledger_h: "Live ledger — last 24 hours",
-      ledger_1: "Weekly staples basket · Riyadh",
-      ledger_2: "Bakery allowance · Jeddah",
-      ledger_3: "Family meal fund · Dammam",
-      ledger_4: "Weekly produce · Makkah",
-      ledger_5: "Weekly staples basket · Madinah",
-      usd: "SAR", usd2: "SAR", usd3: "SAR", usd4: "SAR", usd5: "SAR",
-      ledger_count: "Showing 5 of 1,284 today", ledger_full: "View full transparency report →",
-      providers_eyebrow: "Chapter 05 · Local providers",
-      providers_h_1: "The shops already", providers_h_2: "serving your city.",
-      providers_p: "NUBL doesn't build warehouses or fleets. We partner with trusted shops and restaurants already serving each community — so the money stays local and the shopping feels normal.",
-      prov1_h: "Supermarkets", prov1_p: "Full weekly baskets, staple goods, fresh produce.", prov1_cnt: "partners",
-      prov2_h: "Grocers", prov2_p: "Neighborhood shops offering familiar brands and friendly faces.", prov2_cnt: "partners",
-      prov3_h: "Bakeries", prov3_p: "Daily bread, pastries, and the rituals that make a home feel whole.", prov3_cnt: "partners",
-      prov4_h: "Restaurants", prov4_p: "Cooked meals for families without a kitchen, or for the days a warm plate matters most.", prov4_cnt: "partners",
-      strip_1: "Own a shop or restaurant?", strip_2: "Join the NUBL provider network.", strip_cta: "Apply as a provider",
-      stories_eyebrow: "Chapter 06 · From the network",
-      stories_h_1: "Recipient, donor,", stories_h_2: "and provider voices.",
-      stories_consent: "All stories shared with consent. Identifying details redacted.",
-      story1: "What relieved me the most was that I did not have to explain my situation to anyone or ask directly. The support reached me with dignity, and I used it when I truly needed to buy basic household essentials. Knowing that someone is standing with you without even knowing who you are… it means a lot.",
-      story1_role: "Recipient / Beneficiary Voice", story1_loc: "Beneficiary — Madinah",
-      story2: "I always used to wonder: did my donation really reach someone who needed it? With NUBL, things felt clearer. I do not know the people, to protect their privacy, but I can see the impact in a reassuring way. That made me donate with peace of mind.",
-      story2_role: "Donor Voice", story2_loc: "Donor — Riyadh",
-      story3: "Sometimes someone comes in and you can tell they are in need, but they do not want anyone to notice. With NUBL, the process became respectful and simple; they receive what they need without embarrassment, and we serve them just like any other customer.",
-      story3_role: "Provider Voice", story3_loc: "Food Provider — Jeddah",
-      cta_eyebrow: "Chapter 07 · Your part",
-      cta_h_1: "Three ways in.", cta_h_2: "One quiet circuit of care.",
-      ctaA_h: "Give support", ctaA_p: "One-time, monthly, or directed. Every contribution is traceable to impact, invisible to the person you help.", ctaA_cta: "Become a supporter",
-      ctaB_h: "Request support", ctaB_p: "A short, confidential form. Reviewed within 7 days. No one in your community sees you asking.", ctaB_cta: "Apply privately",
-      ctaC_h: "Join as a provider", ctaC_p: "Shops and restaurants — keep serving your community, get paid directly by the platform.", ctaC_cta: "Apply to partner",
-      foot_tag: "A digital platform for dignified food support, connecting supporters, recipients and local providers.",
-      foot_platform: "Platform", foot_how: "How it works", foot_transparency: "Transparency", foot_coverage: "Coverage areas",
-      foot_join: "Join", foot_support: "Support a family", foot_request: "Request support", foot_partner: "Become a partner",
-      foot_org: "Organization", foot_about: "About", foot_press: "Press", foot_contact: "Contact",
-      foot_copy: "© 2026 NUBL Platform · All rights reserved",
-      foot_legal: "Privacy · Terms · Audited annually by Baker Tilly MENA",
-      feed: [
-        { row1: "A family of 5 received a weekly staples basket in Riyadh.", row2: "NBL-A2F9-KR · Tamimi Markets · 2 min ago" },
-        { row1: "A household received the week's bread allowance in Jeddah.", row2: "NBL-7T3L-WQ · Al Rahmaniah Bakery · 4 min ago" },
-        { row1: "A household of 6 picked up fresh produce in Dammam.", row2: "NBL-D8H2-MX · Panda Retail · 6 min ago" },
-        { row1: "A family received a warm Friday meal in Makkah.", row2: "NBL-3K1S-BN · Najd Village · 8 min ago" },
-        { row1: "A household received the month's staples in Madinah.", row2: "NBL-9E4C-TV · Nahdi Markets · 11 min ago" }
-      ]
-    },
-    ar: {
-      brand: "نبل",
-      nav_idea: "الفكرة", nav_how: "كيف تعمل", nav_trust: "الشفافية", nav_providers: "المزودون", nav_give: "قدم الدعم",
-      hero_eyebrow: "منصة للدعم ",
-      hero_h1_1: "الدعم", hero_h1_2: "يصل بكرامة", hero_h1_3: "عبر من يهتمون بك",
-      hero_sub: 'توصل <strong>نبل</strong> الدعم الغذائي عبر <strong>مزودين محليين موثوقين</strong> في مدينتك — عندما يكون العون بكرامة، لا بشعار.',
-      hero_cta1: "ادعم عائلة", hero_cta2: "اطلب الدعم",
-      impact_live: "الأثر · يحدث مباشرة", impact_q: "الربع الثاني · 2026",
-      meals_unit: "ريال", meals_label: "قدمت هذا الربع عبر الشبكة",
-      amount_unit: "ريال", amount_label: "وصلت هذا الربع عبر الشبكة",
-      families_tag: "عائلة مدعومة", providers_tag: "مزود محلي",
-      live: "السجل المباشر", anonymized: "مجهول الهوية · موثق",
-      chapter1: "الفصل الأول", chapter1_label: "الفكرة",
-      manifesto_eyebrow: "لماذا أنشأنا نبل",
-      manifesto_h_1: "الحاجة شأن خاص.", manifesto_h_2: "والكرامة كذلك.", manifesto_h_3: "فليكن الدعم محترما للاثنين.",
-      manifesto_p: "طلب المساعدة لا ينبغي أن يكلفك خصوصيتك. توصل نبل رصيد التسوق اليومي إلى الأسر المؤهلة عبر المحلات التي يرتادونها أصلا — بهدوء، وموثق، ومحاسب عليه أمام الجميع.",
-      chapter2: "الفصل الثاني · كيف تعمل",
-      how_h_1: "ثلاثة أشخاص.", how_h_2: "دائرة واحدة هادئة.",
-      how_p: "كل عملية في نبل تسير عبر مسار منظم. الداعم يسهم، والمزود ينفذ، والمستفيد يتلقى — كل دور محمي، وكل خطوة موثقة.",
-      step1: "الخطوة 01 · الداعم", step2: "الخطوة 02 · المزود", step3: "الخطوة 03 · المستفيد",
-      role1_h: "اختر طريقتك في العطاء.",
-      role1_p: "مرة واحدة، أو شهريا، أو موجها لفئة. كل مساهمة تظهر في ملخص أثرك.",
-      role1_cta: "كن داعما",
-      role2_h: "نفذ بهدوء داخل المحل.",
-      role2_p: "يتلقى المزودون المعتمدون الرصيد مباشرة. يتسوق المستفيدون كأي زبون، عند نفس الصندوق، بنفس الكرامة.",
-      role2_cta: "انضم كمزود",
-      role3_h: "تسوق بكرامة.",
-      role3_p: "الأسر المؤهلة تستخدم رمزا بسيطا عند أي مزود شريك. لا ملصقات. لا طوابير. فقط تسوق الأسبوع، مغطى.",
-      role3_cta: "اطلب الدعم",
-      privacy_eyebrow: "الفصل الثالث · الخصوصية والكرامة",
-      privacy_h_1: "ما يراه الداعم", privacy_h_2: "ليس هوية المستفيد.",
-      privacy_p: "كل ملف مستفيد مقسوم إلى شطرين. البيانات الشخصية محفوظة فقط للتحقق من الأهلية، ولا تظهر للداعمين أبدا. ترى الأثر، لا الشخص.",
-      pill1: "تخزين مجزأ", pill2: "معرفات مستفيدين مرمزة", pill3: "لا بيانات شخصية للداعمين", pill4: "تدقيق سنوي خارجي",
-      id_held: "محفوظ بأمان", id_name: "الاسم", id_area: "المنطقة", id_family: "العائلة", id_status: "الحالة", id_verified: "مؤهل مؤكد",
-      tokenized: "ما يراه الداعمون — مرمز",
-      id_shown: "يعرض للداعمين", id_ref: "المرجع", id_region: "المدينة", id_region_v: "الرياض",
-      id_household: "حجم الأسرة", id_household_v: "عائلة من 6", id_fulfillment: "نوع الدعم", id_fulfillment_v: "سلة مؤن أسبوعية",
-      trust_eyebrow: "الفصل الرابع · الثقة والشفافية",
-      trust_h_1: "كل هللة،", trust_h_2: "محسوبة ومعلنة.",
-      trust_p: "تنشر نبل سجلا حيا لكل عملية في الشبكة — دون الكشف أبدا عن هوية من تلقى الدعم.",
-      badge1: "من التبرعات تصل للمستفيدين مباشرة", badge2: "موجودة حاليا في النظام",
-      ledger_h: "السجل المباشر — آخر 24 ساعة",
-      ledger_1: "سلة مؤن أسبوعية · الرياض",
-      ledger_2: "مخصص مخبز · جدة",
-      ledger_3: "وجبة عائلية · الدمام",
-      ledger_4: "خضار أسبوعية · مكة",
-      ledger_5: "سلة مؤن أسبوعية · المدينة",
-      usd: "ريال", usd2: "ريال", usd3: "ريال", usd4: "ريال", usd5: "ريال",
-      ledger_count: "5 من 1٬284 اليوم", ledger_full: "عرض تقرير الشفافية الكامل ←",
-      providers_eyebrow: "الفصل الخامس · المزودون المحليون",
-      providers_h_1: "المحلات التي تخدم", providers_h_2: "مدينتك من قبل.",
-      providers_p: "لا تبني نبل مستودعات ولا أساطيل نقل. نتشارك مع المحلات والمطاعم الموثوقة التي تخدم كل مجتمع أصلا — فيبقى المال محليا والتسوق طبيعيا.",
-      prov1_h: "السوبرماركت", prov1_p: "سلال مؤن أسبوعية، ومواد أساسية، وخضار طازجة.", prov1_cnt: "شريك",
-      prov2_h: "البقالات", prov2_p: "محلات المجتمع بعلاماتها المألوفة ووجوهها الأليفة.", prov2_cnt: "شريك",
-      prov3_h: "المخابز", prov3_p: "خبز كل يوم، ومعجنات، وطقوس تشعرك أن البيت بيت.", prov3_cnt: "شريك",
-      prov4_h: "المطاعم", prov4_p: "وجبات مطبوخة للأسر، أو لأيام يحتاج فيها الصحن الدافئ أكثر.", prov4_cnt: "شريك",
-      strip_1: "تملك محلا أو مطعما؟", strip_2: "انضم إلى شبكة مزودي نبل.", strip_cta: "تقدم كمزود",
-      stories_eyebrow: "الفصل السادس · من داخل الشبكة",
-      stories_h_1: "أصوات المستفيدين،", stories_h_2: "الداعمين والمزودين.",
-      stories_consent: "كل القصص مشاركة بموافقة مكتوبة. التفاصيل التعريفية مخفاة.",
-      story1: "أكثر شيء ريّحني أني ما اضطرّيت أشرح ظروفي لأحد أو أطلب بشكل مباشر. وصلني الدعم بكرامة، واستخدمته وقت ما كنت فعلًا محتاج أشتري أساسيات البيت. الشعور إن فيه أحد واقف معك بدون ما يعرفك… يفرق كثير.",
-      story1_role: "صوت المحتاج / المستفيد", story1_loc: "مستفيد — المدينة المنورة",
-      story2: "كنت دائمًا أتردد: هل تبرعي وصل فعلًا لمن يحتاج؟ في نوبل حسّيت أن الموضوع أوضح. ما أعرف الأشخاص حفاظًا على خصوصيتهم، لكن أشوف الأثر بشكل مطمئن. هذا خلاني أتبرع وأنا مرتاح.",
-      story2_role: "صوت الداعم / المتبرع", story2_loc: "داعم — الرياض",
-      story3: "أحيانًا يجيك شخص ويبان عليه أنه محتاج، لكن ما يبي أحد يحس فيه. مع نوبل صارت العملية محترمة وسهلة؛ يستلم احتياجه بدون إحراج، ونحن نخدمه مثل أي عميل ثاني.",
-      story3_role: "صوت المزود / المتجر", story3_loc: "مزود غذائي — جدة",
-      cta_eyebrow: "الفصل السابع · دورك",
-      cta_h_1: "ثلاثة أبواب.", cta_h_2: "دائرة هادئة واحدة من العناية.",
-      ctaA_h: "قدم الدعم", ctaA_p: "مرة، أو شهريا، أو موجها. كل مساهمة يمكن تتبع أثرها، دون أن يراك من تساعده.", ctaA_cta: "كن داعما",
-      ctaB_h: "اطلب الدعم", ctaB_p: "استمارة قصيرة وسرية. تراجع خلال 7 أيام. لن يراك أحد في مجتمعك وأنت تطلب.", ctaB_cta: "قدم طلبا خاصا",
-      ctaC_h: "انضم كمزود", ctaC_p: "المحلات والمطاعم — أكمل خدمة مجتمعك واستلم مستحقاتك مباشرة من المنصة.", ctaC_cta: "تقدم للشراكة",
-      foot_tag: "منصة رقمية للدعم الغذائي بكرامة، تربط الداعمين بالمستفيدين والمزودين المحليين.",
-      foot_platform: "المنصة", foot_how: "كيف تعمل", foot_transparency: "الشفافية", foot_coverage: "مناطق التغطية",
-      foot_join: "انضم", foot_support: "ادعم عائلة", foot_request: "اطلب الدعم", foot_partner: "كن شريكا",
-      foot_org: "المؤسسة", foot_about: "عن نبل", foot_press: "الصحافة", foot_contact: "تواصل",
-      foot_copy: "© 2026 منصة نبل · جميع الحقوق محفوظة",
-      foot_legal: "الخصوصية · الشروط · تدقيق سنوي خارجي",
-      feed: [
-        { row1: "عائلة من 5 أفراد تلقت سلة مؤن أسبوعية في الرياض.", row2: "NBL-A2F9-KR · أسواق التميمي · قبل دقيقتين" },
-        { row1: "أسرة تلقت مخصص الخبز لهذا الأسبوع في جدة.", row2: "NBL-7T3L-WQ · مخبز الرحمانية · قبل 4 دقائق" },
-        { row1: "أسرة من 6 أفراد استلمت خضارا طازجة في الدمام.", row2: "NBL-D8H2-MX · بنده · قبل 6 دقائق" },
-        { row1: "عائلة تلقت وجبة جمعة دافئة في مكة.", row2: "NBL-3K1S-BN · قرية نجد · قبل 8 دقائق" },
-        { row1: "أسرة تلقت مؤن الشهر في المدينة.", row2: "NBL-9E4C-TV · أسواق النهدي · قبل 11 دقيقة" }
-      ]
-    }
-  };
-
-  // -------- Apply language --------
-  function applyLang(lang) {
-    const html = document.documentElement;
-    html.lang = lang;
-    html.dir = lang === 'ar' ? 'rtl' : 'ltr';
-    const dict = I18N[lang];
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.dataset.i18n;
-      if (dict[key] != null) {
-        if (dict[key].includes('<')) el.innerHTML = dict[key];
-        else el.textContent = dict[key];
-      }
-    });
-    // feed
-    renderFeed();
-    // lang toggle label shows the OTHER language
-    const lbl = document.getElementById('langLabel');
-    if (lbl) lbl.textContent = lang === 'en' ? 'العربية' : 'English';
-    if (langToggle) {
-      langToggle.setAttribute('aria-label', lang === 'en' ? 'Switch to Arabic' : 'التبديل إلى الإنجليزية');
-    }
-    updateLedgerDate(lang);
-  }
 
   // -------- Apply accent --------
   function applyAccent(name) {
@@ -1663,9 +1485,9 @@
   let feedTimer = null;
   function renderFeed() {
     const list = document.getElementById('feedList');
-    const items = (I18N[TWEAKS.lang] || I18N.en).feed;
+    if (!list) return;
     list.innerHTML = '';
-    items.forEach((it, i) => {
+    FEED_ITEMS.forEach((it, i) => {
       const d = document.createElement('div');
       d.className = 'feed-item' + (i === 0 ? ' active' : '');
       d.innerHTML = `<div class="row1">${it.row1}</div><div class="row2">${it.row2}</div>`;
@@ -1687,19 +1509,20 @@
   function animateCounter(el, target) {
     const duration = 1800;
     const start = performance.now();
+    const locale = CURRENT_LOCALE === 'ar' ? 'ar-EG' : 'en-US';
     // find the text node (last child) to animate; keeps leading <span class="unit"> intact
     const textNode = el.childNodes[el.childNodes.length - 1];
     if (reduceMotion) {
-      textNode.nodeValue = target.toLocaleString(TWEAKS.lang === 'ar' ? 'ar-EG' : 'en-US');
+      textNode.nodeValue = target.toLocaleString(locale);
       return;
     }
     function tick(now) {
       const t = Math.min(1, (now - start) / duration);
       const eased = 1 - Math.pow(1 - t, 3);
       const v = Math.floor(target * eased);
-      textNode.nodeValue = v.toLocaleString(TWEAKS.lang === 'ar' ? 'ar-EG' : 'en-US');
+      textNode.nodeValue = v.toLocaleString(locale);
       if (t < 1) requestAnimationFrame(tick);
-      else textNode.nodeValue = target.toLocaleString(TWEAKS.lang === 'ar' ? 'ar-EG' : 'en-US');
+      else textNode.nodeValue = target.toLocaleString(locale);
     }
     requestAnimationFrame(tick);
   }
@@ -1719,7 +1542,7 @@
 
   document.querySelectorAll('.reveal, [data-counter]').forEach(el => io.observe(el));
 
-  // Ensure anything already in the viewport on load reveals immediately (IO fires asynchronously)
+  // Ensure anything already in the viewport on load reveals immediately
   requestAnimationFrame(() => {
     const vh = window.innerHeight;
     document.querySelectorAll('.reveal, [data-counter]').forEach(el => {
@@ -1744,16 +1567,9 @@
   const langToggle = document.getElementById('langToggle');
   if (langToggle) {
     langToggle.addEventListener('click', () => {
-      const next = TWEAKS.lang === 'en' ? 'ar' : 'en';
+      const next = CURRENT_LOCALE === 'en' ? 'ar' : 'en';
       const target = next === 'ar' ? langToggle.dataset.arUrl : langToggle.dataset.enUrl;
-      if (target) {
-        window.location.href = target;
-        return;
-      }
-      TWEAKS.lang = next;
-      applyLang(next);
-      updateTweakUI();
-      persist({ lang: next });
+      if (target) window.location.href = target;
     });
   }
 
@@ -1773,7 +1589,10 @@
       const key = btn.parentElement.dataset.tweak;
       const val = btn.dataset.val;
       TWEAKS[key] = val;
-      if (key === 'lang') applyLang(val);
+      if (key === 'lang') {
+        const url = val === 'ar' ? langToggle?.dataset.arUrl : langToggle?.dataset.enUrl;
+        if (url) { window.location.href = url; return; }
+      }
       if (key === 'accent') applyAccent(val);
       if (key === 'density') applyDensity(val);
       updateTweakUI();
@@ -1795,23 +1614,22 @@
   });
   window.parent.postMessage({ type: '__edit_mode_available' }, '*');
 
-  function updateLedgerDate(lang = TWEAKS.lang) {
+  // -------- Ledger date --------
+  function updateLedgerDate() {
     const el = document.getElementById('ledgerDate');
     if (!el) return;
-    const locale = lang === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-GB';
+    const locale = CURRENT_LOCALE === 'ar' ? 'ar-SA-u-ca-gregory' : 'en-GB';
     const formatted = new Intl.DateTimeFormat(locale, {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
     }).format(new Date());
-    el.textContent = lang === 'ar' ? formatted : formatted.toUpperCase();
+    el.textContent = CURRENT_LOCALE === 'ar' ? formatted : formatted.toUpperCase();
   }
 
   // -------- Init --------
-  // Use Laravel locale first, then fall back to the browser.
-  const browserLang = (navigator.language || '').toLowerCase().startsWith('ar') ? 'ar' : 'en';
-  TWEAKS.lang = TWEAK_DEFAULTS.lang || browserLang;
-  applyLang(TWEAKS.lang);
+  renderFeed();
+  updateLedgerDate();
   applyAccent(TWEAKS.accent);
   applyDensity(TWEAKS.density);
   updateTweakUI();
