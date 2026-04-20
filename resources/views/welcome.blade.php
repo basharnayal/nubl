@@ -880,6 +880,10 @@
         <span data-i18n="nav_give">Give support</span>
         <svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
+      <a href="{{ url('/dashboard') }}" class="cta accent">
+        <span data-i18n="nav_give">Dashboard</span>
+        <svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
     </div>
   </div>
 </nav>

@@ -1,7 +1,7 @@
 @props([
     'title' => null,
     /** التحكم بالشريط الجانبي */
-    'isSidebarOpen' => 'false',
+    'isSidebarOpen' => 'true',
     'isHeaderBlur' => 'true',
     'hasMinSidebar' => null,
     'headerSticky' => null,

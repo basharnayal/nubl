@@ -8,6 +8,7 @@
  */
 
 use App\Http\Controllers\Admin\AccountApprovalController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFundTransactionController;
 use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\AllowanceSettingsController;
@@ -72,9 +73,7 @@ Route::middleware(array_merge($authMiddleware, ['account.approved']))->group(fun
 // Admin routes
 Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin']))->prefix('admin')->name('admin.')
     ->group(function () {
-        Route::get('/dashboard', function () {
-            return view('admin.dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
         Route::get('/users/pending', [AccountApprovalController::class, 'index'])->name('users.pending');
         Route::post('/users/{user}/approve', [AccountApprovalController::class, 'approve'])->name('users.approve');
