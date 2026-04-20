@@ -37,9 +37,8 @@ test.describe('recipient request flow', () => {
     await expect(page.locator('h1')).toContainText(seeded.businessName);
     await expect(page.getByText(seeded.itemName)).toBeVisible();
 
-    await page.locator(`button[onclick^="openItemModal(${seeded.itemId},"]`).click();
-    await expect(page.locator('#item-modal')).toBeVisible();
-    await page.locator('button[onclick="addToCart()"]').click();
+    const itemControls = page.locator(`#menu-controls-${seeded.itemId}`);
+    await itemControls.getByRole('button', { name: 'Add to Cart' }).click();
 
     await expect(page.locator('#submit-btn')).toBeEnabled();
 

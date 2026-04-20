@@ -29,28 +29,33 @@ class SmsService
     {
         if (empty($this->bearer)) {
             Log::warning('SmsService: TAQNYAT_BEARER_TOKEN not configured. Skipping SMS send.');
+
             return false;
         }
 
         try {
             $taqnyat = new \TaqnyatSms($this->bearer);
             $recipient = PhoneHelper::normalize($to);
+            $maskedRecipient = PhoneHelper::maskForLog($recipient);
             $recipients = [$recipient];
             $result = $taqnyat->sendMsg($body, $recipients, $this->sender, '');
 
             if (is_string($result) && (str_contains($result, 'error') || str_contains($result, 'Error'))) {
-                Log::error('SmsService: Taqnyat error', ['response' => $result, 'to' => $to]);
+                Log::error('SmsService: Taqnyat error', ['response' => $result, 'to' => $maskedRecipient]);
+
                 return false;
             }
 
-            Log::info('SmsService: SMS sent successfully', ['to' => $to]);
+            Log::info('SmsService: SMS sent successfully', ['to' => $maskedRecipient]);
+
             return true;
         } catch (\Throwable $e) {
             Log::error('SmsService: Failed to send SMS', [
-                'to' => $to,
+                'to' => PhoneHelper::maskForLog($to),
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
+
             return false;
         }
     }

@@ -9,6 +9,7 @@ use App\Models\ProviderMenuItem;
 use App\Models\ProviderOperatingInfo;
 use App\Models\Request as RequestModel;
 use App\Models\User;
+use App\Support\RecipientAllowanceRetryCache;
 use App\Support\RecipientFundRetryCache;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -143,7 +144,7 @@ class RecipientRequestSubmissionTest extends TestCase
     }
 
     #[Test]
-    public function weekly_allowance_exceeded_queues_retry_job_fr_6_4()
+    public function weekly_allowance_exceeded_prompts_for_admin_review_without_creating_request()
     {
         Queue::fake();
 
@@ -157,10 +158,10 @@ class RecipientRequestSubmissionTest extends TestCase
             'status' => 'REDEEMABLE',
             'funding_source' => 'CITY_FUND',
         ])->items()->create([
-                    'menu_item_id' => $this->menuItem1->id,
-                    'quantity' => 6,
-                    'price_snapshot' => 50.00,
-                ]);
+            'menu_item_id' => $this->menuItem1->id,
+            'quantity' => 6,
+            'price_snapshot' => 50.00,
+        ]);
 
         // Try to add 120 SAR (300 + 120 = 420 > 400)
         $response = $this->actingAs($this->recipient)
@@ -172,17 +173,15 @@ class RecipientRequestSubmissionTest extends TestCase
                 ],
             ]);
 
-        $response->assertSessionHas('info');
+        $response->assertSessionHas('exceeds_allowance');
         $response->assertSessionHasNoErrors();
         $this->assertDatabaseCount('requests', 1); // Only the setup one — no immediate row
 
-        Queue::assertPushed(ProcessRecipientAllowanceRetryJob::class, function (ProcessRecipientAllowanceRetryJob $job) {
-            return $job->userId === $this->recipient->id;
-        });
+        Queue::assertNotPushed(ProcessRecipientAllowanceRetryJob::class);
     }
 
     #[Test]
-    public function submit_cooldown_blocks_new_request_after_allowance_retry_queued(): void
+    public function allowance_prompt_does_not_start_submit_cooldown(): void
     {
         config(['recipient.allowance_retry_delay_seconds' => 2]);
         config(['recipient.fund_retry_delay_seconds' => 2]);
@@ -197,10 +196,10 @@ class RecipientRequestSubmissionTest extends TestCase
             'status' => 'REDEEMABLE',
             'funding_source' => 'CITY_FUND',
         ])->items()->create([
-                    'menu_item_id' => $this->menuItem1->id,
-                    'quantity' => 6,
-                    'price_snapshot' => 50.00,
-                ]);
+            'menu_item_id' => $this->menuItem1->id,
+            'quantity' => 6,
+            'price_snapshot' => 50.00,
+        ]);
 
         $this->actingAs($this->recipient)
             ->post(route('recipient.requests.store'), [
@@ -210,22 +209,9 @@ class RecipientRequestSubmissionTest extends TestCase
                     ['id' => $this->menuItem2->id, 'quantity' => 1],
                 ],
             ])
-            ->assertSessionHas('info');
+            ->assertSessionHas('exceeds_allowance');
 
         $this->assertDatabaseCount('requests', 1);
-
-        $this->actingAs($this->recipient)
-            ->post(route('recipient.requests.store'), [
-                'provider_id' => $this->provider->id,
-                'items' => [
-                    ['id' => $this->menuItem2->id, 'quantity' => 1],
-                ],
-            ])
-            ->assertSessionHas('error');
-
-        $this->assertDatabaseCount('requests', 1);
-
-        $this->travel(3)->seconds();
 
         $secondResponse = $this->actingAs($this->recipient)
             ->post(route('recipient.requests.store'), [
@@ -337,16 +323,15 @@ class RecipientRequestSubmissionTest extends TestCase
 
         Queue::fake();
 
-        $this->actingAs($this->recipient)
-            ->post(route('recipient.requests.store'), [
-                'provider_id' => $this->provider->id,
-                'items' => [
-                    ['id' => $this->menuItem1->id, 'quantity' => 2],
-                    ['id' => $this->menuItem2->id, 'quantity' => 1],
-                ],
-            ]);
+        RecipientAllowanceRetryCache::storePayload($this->recipient->id, [
+            'provider_id' => $this->provider->id,
+            'items' => [
+                ['id' => $this->menuItem1->id, 'quantity' => 2],
+                ['id' => $this->menuItem2->id, 'quantity' => 1],
+            ],
+        ]);
 
-        Queue::assertPushed(ProcessRecipientAllowanceRetryJob::class);
+        Queue::assertNotPushed(ProcessRecipientAllowanceRetryJob::class);
 
         // Free allowance (e.g. prior order cancelled) before retry runs
         $existingReq->update(['status' => 'CANCELLED']);
@@ -587,6 +572,7 @@ class RecipientRequestSubmissionTest extends TestCase
             ->get(route('recipient.requests.show', $request->id))
             ->assertNotFound();
     }
+
     #[Test]
     public function recipient_can_force_admin_review_when_exceeding_allowance()
     {
@@ -600,10 +586,10 @@ class RecipientRequestSubmissionTest extends TestCase
             'status' => 'REDEEMABLE',
             'funding_source' => 'CITY_FUND',
         ])->items()->create([
-                    'menu_item_id' => $this->menuItem1->id,
-                    'quantity' => 6,
-                    'price_snapshot' => 50.00,
-                ]);
+            'menu_item_id' => $this->menuItem1->id,
+            'quantity' => 6,
+            'price_snapshot' => 50.00,
+        ]);
 
         // Try to add 120 SAR (300 + 120 = 420 > 400)
         // With force_admin_review set to true
