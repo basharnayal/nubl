@@ -8,6 +8,7 @@
  */
 
 use App\Http\Controllers\Admin\AccountApprovalController;
+use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFundTransactionController;
 use App\Http\Controllers\Admin\AdminPaymentController;
@@ -33,9 +34,7 @@ $authMiddleware = config('app.phone_verification_enabled', true)
     ? ['auth', 'phone.verified']
     : ['auth'];
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', LandingPageController::class)->name('home');
 
 // Locale switch (default: English, user can switch to Arabic)
 Route::get('/locale/{locale}', function (string $locale) {

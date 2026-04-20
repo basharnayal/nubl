@@ -287,7 +287,7 @@
     letter-spacing: 0;
     font-feature-settings: "tnum";
   }
-  .agg-big .unit { font-size: 0.3em; color: var(--muted); margin-inline-end: 10px; vertical-align: super; font-family: var(--mono); letter-spacing: 0; }
+  .agg-big .unit { font-size: 0.3em; color: var(--muted); margin-inline-start: 10px; vertical-align: super; font-family: var(--mono); letter-spacing: 0; }
   [lang="ar"] .agg-big .unit { font-family: var(--sans); }
 
   .agg-label { font-size: 14px; color: var(--muted); margin-top: 6px; }
@@ -950,16 +950,16 @@
           <span class="stamp"><span class="dot"></span><span>{{ __('welcome.impact.live') }}</span></span>
           <span class="stamp" style="font-family: var(--mono);">{{ __('welcome.impact.q') }}</span>
         </div>
-        <div class="agg-big" data-counter="1842360"><span class="unit">{{ __('welcome.impact.amount_unit') }}</span>0</div>
+        <div class="agg-big" data-counter="{{ $heroStats['totalDelivered'] }}"><span class="agg-value">0</span><span class="unit">{{ __('welcome.impact.amount_unit') }}</span></div>
         <div class="agg-label">{{ __('welcome.impact.amount_label') }}</div>
 
         <div class="agg-split">
           <div>
-            <div class="num" data-counter="2184">0</div>
+            <div class="num" data-counter="{{ $heroStats['familiesSupported'] }}">0</div>
             <div class="tag">{{ __('welcome.impact.families_tag') }}</div>
           </div>
           <div>
-            <div class="num" data-counter="347">0</div>
+            <div class="num" data-counter="{{ $heroStats['localProviders'] }}">0</div>
             <div class="tag">{{ __('welcome.impact.providers_tag') }}</div>
           </div>
         </div>
@@ -1152,61 +1152,45 @@
       </h2>
       <p>{{ __('welcome.trust.p') }}</p>
 
+      @if($heroStats['trustBadges'] !== null)
       <div class="trust-badges" style="grid-template-columns: 1fr 1fr;">
         <div class="badge-card">
-          <div class="n">97.9<span style="font-size:.6em;color:var(--muted);">%</span></div>
+          <div class="n">{{ $heroStats['trustBadges']['delivered'] }}<span style="font-size:.6em;color:var(--muted);">%</span></div>
           <div class="t">{{ __('welcome.trust.badge1') }}</div>
         </div>
         <div class="badge-card">
-          <div class="n">2.1<span style="font-size:.6em;color:var(--muted);">%</span></div>
+          <div class="n">{{ $heroStats['trustBadges']['held'] }}<span style="font-size:.6em;color:var(--muted);">%</span></div>
           <div class="t">{{ __('welcome.trust.badge2') }}</div>
         </div>
       </div>
+      @endif
     </div>
 
     <div class="transparency-ledger" aria-label="Live ledger preview">
       <div class="ledger-head">
-        <h4>{{ __('welcome.trust.ledger_h') }}</h4>
+        <h4>{{ $heroStats['trustLedger']['is_live'] ? __('welcome.trust.ledger_h') : __('welcome.trust.ledger_h_preview') }}</h4>
         <span class="date" id="ledgerDate">19 APR 2026</span>
       </div>
+      @foreach($heroStats['trustLedger']['rows'] as $row)
       <div class="ledger-row">
         <div>
-          <div class="desc">{{ __('welcome.trust.ledger_1') }}</div>
-          <div class="meta">08:42 · NBL-7F3A-QR · Tamimi Markets</div>
+          <div class="desc">{{ $row['desc'] }}</div>
+          @if($heroStats['trustLedger']['is_live'])
+          <div class="meta">{{ $row['meta'] }}</div>
+          @endif
         </div>
-        <div class="amt">158<span class="u">{{ __('welcome.trust.sar') }}</span></div>
+        <div class="amt">{{ $row['amount'] }}<span class="u">{{ __('welcome.trust.sar') }}</span></div>
       </div>
-      <div class="ledger-row">
-        <div>
-          <div class="desc">{{ __('welcome.trust.ledger_2') }}</div>
-          <div class="meta">09:17 · NBL-2K8H-LP · Al Rahmaniah Bakery</div>
-        </div>
-        <div class="amt">68<span class="u">{{ __('welcome.trust.sar') }}</span></div>
-      </div>
-      <div class="ledger-row">
-        <div>
-          <div class="desc">{{ __('welcome.trust.ledger_3') }}</div>
-          <div class="meta">10:03 · NBL-9T1B-MX · Najd Village</div>
-        </div>
-        <div class="amt">105<span class="u">{{ __('welcome.trust.sar') }}</span></div>
-      </div>
-      <div class="ledger-row">
-        <div>
-          <div class="desc">{{ __('welcome.trust.ledger_4') }}</div>
-          <div class="meta">11:22 · NBL-4E6D-ZS · Panda Retail</div>
-        </div>
-        <div class="amt">132<span class="u">{{ __('welcome.trust.sar') }}</span></div>
-      </div>
-      <div class="ledger-row">
-        <div>
-          <div class="desc">{{ __('welcome.trust.ledger_5') }}</div>
-          <div class="meta">12:51 · NBL-8C2A-WV · Nahdi Markets</div>
-        </div>
-        <div class="amt">172<span class="u">{{ __('welcome.trust.sar') }}</span></div>
-      </div>
+      @endforeach
 
       <div class="ledger-foot">
-        <span style="font-family: var(--mono); font-size: 11px; color: var(--muted);">{{ __('welcome.trust.ledger_count') }}</span>
+        <span style="font-family: var(--mono); font-size: 11px; color: var(--muted);">
+          @if($heroStats['trustLedger']['is_live'])
+            {{ __('welcome.trust.ledger_count_live', ['shown' => $heroStats['trustLedger']['shown'], 'total' => $heroStats['trustLedger']['total']]) }}
+          @else
+            {{ __('welcome.trust.ledger_count_preview') }}
+          @endif
+        </span>
         <a href="#trust">{{ __('welcome.trust.ledger_full') }}</a>
       </div>
     </div>
@@ -1237,32 +1221,7 @@
         </div>
         <h4>{{ __('welcome.providers.prov1_h') }}</h4>
         <p>{{ __('welcome.providers.prov1_p') }}</p>
-        <div class="cnt"><b data-counter-inline="142">142</b><span>{{ __('welcome.providers.prov1_cnt') }}</span></div>
-      </div>
-
-      <div class="provider-cell">
-        <div class="glyph">
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-            <path d="M6 28h24M8 28V14c0-4 4-8 10-8s10 4 10 8v14" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M13 14h10" stroke="currentColor" stroke-width="1.5"/>
-          </svg>
-        </div>
-        <h4>{{ __('welcome.providers.prov2_h') }}</h4>
-        <p>{{ __('welcome.providers.prov2_p') }}</p>
-        <div class="cnt"><b data-counter-inline="118">118</b><span>{{ __('welcome.providers.prov2_cnt') }}</span></div>
-      </div>
-
-      <div class="provider-cell">
-        <div class="glyph">
-          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
-            <path d="M6 22c0-6 5-10 12-10s12 4 12 10H6z" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M4 26h28" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M14 8v4M18 6v6M22 8v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-        <h4>{{ __('welcome.providers.prov3_h') }}</h4>
-        <p>{{ __('welcome.providers.prov3_p') }}</p>
-        <div class="cnt"><b data-counter-inline="54">54</b><span>{{ __('welcome.providers.prov3_cnt') }}</span></div>
+        <div class="cnt"><b data-counter-inline="{{ $heroStats['providerCounts']['grocery'] }}">{{ $heroStats['providerCounts']['grocery'] }}</b><span>{{ __('welcome.providers.prov1_cnt') }}</span></div>
       </div>
 
       <div class="provider-cell">
@@ -1275,8 +1234,37 @@
         </div>
         <h4>{{ __('welcome.providers.prov4_h') }}</h4>
         <p>{{ __('welcome.providers.prov4_p') }}</p>
-        <div class="cnt"><b data-counter-inline="33">33</b><span>{{ __('welcome.providers.prov4_cnt') }}</span></div>
+        <div class="cnt"><b data-counter-inline="{{ $heroStats['providerCounts']['restaurant'] }}">{{ $heroStats['providerCounts']['restaurant'] }}</b><span>{{ __('welcome.providers.prov4_cnt') }}</span></div>
       </div>
+      
+      <div class="provider-cell">
+        <div class="glyph">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <path d="M6 28h24M8 28V14c0-4 4-8 10-8s10 4 10 8v14" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M13 14h10" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+        </div>
+        <h4>{{ __('welcome.providers.prov2_h') }}</h4>
+        <p>{{ __('welcome.providers.prov2_p') }}</p>
+        <div class="cnt"><b data-counter-inline="{{ $heroStats['providerCounts']['catering'] }}">{{ $heroStats['providerCounts']['catering'] }}</b><span>{{ __('welcome.providers.prov2_cnt') }}</span></div>
+      </div>
+
+
+      
+      <div class="provider-cell">
+        <div class="glyph">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <path d="M6 22c0-6 5-10 12-10s12 4 12 10H6z" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M4 26h28" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M14 8v4M18 6v6M22 8v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h4>{{ __('welcome.providers.prov3_h') }}</h4>
+        <p>{{ __('welcome.providers.prov3_p') }}</p>
+        <div class="cnt"><b data-counter-inline="{{ $heroStats['providerCounts']['bakery'] }}">{{ $heroStats['providerCounts']['bakery'] }}</b><span>{{ __('welcome.providers.prov3_cnt') }}</span></div>
+      </div>
+
+   
     </div>
 
     <div class="provider-strip">
@@ -1448,7 +1436,7 @@
 <script>
   // -------- Locale (server-side) --------
   const CURRENT_LOCALE = "{{ app()->getLocale() }}";
-  const FEED_ITEMS = @json(__('welcome.feed'));
+  const FEED_ITEMS = @json($heroStats['feedItems']);
 
   // -------- Tweak defaults (editmode block) --------
   const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
@@ -1490,7 +1478,14 @@
     FEED_ITEMS.forEach((it, i) => {
       const d = document.createElement('div');
       d.className = 'feed-item' + (i === 0 ? ' active' : '');
-      d.innerHTML = `<div class="row1">${it.row1}</div><div class="row2">${it.row2}</div>`;
+      const r1 = document.createElement('div');
+      r1.className = 'row1';
+      r1.textContent = it.row1;
+      const r2 = document.createElement('div');
+      r2.className = 'row2';
+      r2.textContent = it.row2;
+      d.appendChild(r1);
+      d.appendChild(r2);
       list.appendChild(d);
     });
     feedIdx = 0;
@@ -1510,19 +1505,24 @@
     const duration = 1800;
     const start = performance.now();
     const locale = CURRENT_LOCALE === 'ar' ? 'ar-EG' : 'en-US';
-    // find the text node (last child) to animate; keeps leading <span class="unit"> intact
-    const textNode = el.childNodes[el.childNodes.length - 1];
+    const valueEl = el.querySelector(':scope > .agg-value');
+    const textNode = valueEl ? null : el.childNodes[el.childNodes.length - 1];
+    function setFormatted(n) {
+      const s = n.toLocaleString(locale);
+      if (valueEl) valueEl.textContent = s;
+      else textNode.nodeValue = s;
+    }
     if (reduceMotion) {
-      textNode.nodeValue = target.toLocaleString(locale);
+      setFormatted(target);
       return;
     }
     function tick(now) {
       const t = Math.min(1, (now - start) / duration);
       const eased = 1 - Math.pow(1 - t, 3);
       const v = Math.floor(target * eased);
-      textNode.nodeValue = v.toLocaleString(locale);
+      setFormatted(v);
       if (t < 1) requestAnimationFrame(tick);
-      else textNode.nodeValue = target.toLocaleString(locale);
+      else setFormatted(target);
     }
     requestAnimationFrame(tick);
   }

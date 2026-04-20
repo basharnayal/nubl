@@ -29,9 +29,9 @@ return [
 
     'impact' => [
         'live'         => 'Impact · updated live',
-        'q'            => 'Q2 · 2026',
+        'q'            => 'All-time',
         'amount_unit'  => 'SAR',
-        'amount_label' => 'delivered this quarter across the network',
+        'amount_label' => 'delivered through the network',
         'families_tag' => 'families supported',
         'providers_tag'=> 'local providers',
         'live_feed'    => 'Live ledger',
@@ -100,15 +100,17 @@ return [
         'p'            => 'NUBL publishes a live ledger of every transaction across the network — without ever exposing who received support.',
         'badge1'       => 'of funds reach recipients directly',
         'badge2'       => 'currently held in the system',
-        'ledger_h'     => 'Live ledger — last 24 hours',
-        'ledger_1'     => 'Weekly staples basket · Riyadh',
-        'ledger_2'     => 'Bakery allowance · Jeddah',
-        'ledger_3'     => 'Family meal fund · Dammam',
-        'ledger_4'     => 'Weekly produce · Makkah',
-        'ledger_5'     => 'Weekly staples basket · Madinah',
-        'sar'          => 'SAR',
-        'ledger_count' => 'Showing 5 of 1,284 today',
-        'ledger_full'  => 'View full transparency report →',
+        'ledger_h'             => 'Live ledger — last 24 hours',
+        'ledger_h_preview'     => 'Ledger preview',
+        'ledger_1'             => 'Weekly staples basket · Riyadh',
+        'ledger_2'             => 'Bakery allowance · Jeddah',
+        'ledger_3'             => 'Family meal fund · Dammam',
+        'ledger_4'             => 'Weekly produce · Makkah',
+        'ledger_5'             => 'Weekly staples basket · Madinah',
+        'sar'                  => 'SAR',
+        'ledger_count_live'    => 'Showing :shown of :total today',
+        'ledger_count_preview' => 'Sample only — no live transactions in the last 24 hours',
+        'ledger_full'          => 'View full transparency report →',
     ],
 
     'providers' => [
@@ -116,11 +118,11 @@ return [
         'h1'        => 'The shops already',
         'h2'        => 'serving your city.',
         'p'         => "NUBL doesn't build warehouses or fleets. We partner with trusted shops and restaurants already serving each community — so the money stays local and the shopping feels normal.",
-        'prov1_h'   => 'Supermarkets',
+        'prov1_h'   => 'Grocers & Supermarkets',
         'prov1_p'   => 'Full weekly baskets, staple goods, fresh produce.',
         'prov1_cnt' => 'partners',
-        'prov2_h'   => 'Grocers',
-        'prov2_p'   => 'Neighborhood shops offering familiar brands and friendly faces.',
+        'prov2_h'   => 'Catering',
+        'prov2_p'   => 'Caterers and food services providing prepared meals for families and events.',
         'prov2_cnt' => 'partners',
         'prov3_h'   => 'Bakeries',
         'prov3_p'   => 'Daily bread, pastries, and the rituals that make a home feel whole.',
@@ -171,7 +173,7 @@ return [
         'transparency' => 'Transparency',
         'coverage'     => 'Coverage areas',
         'join'         => 'Join',
-        'support'      => 'Support a family',
+        'support' => 'Support with dignity',
         'request'      => 'Request support',
         'partner'      => 'Become a partner',
         'org'          => 'Organization',
@@ -182,12 +184,34 @@ return [
         'legal'        => 'Privacy · Terms · Audited annually by Baker Tilly MENA',
     ],
 
+    'feed_live' => [
+        // Template for dynamically generated feed rows (real DB data).
+        // :type = category label below; :city = provider city from DB.
+        'template'         => 'A family received :type in :city.',
+
+        // Category labels
+        'type_supermarket' => 'a weekly staples basket',
+        'type_grocery'     => 'grocery essentials',
+        'type_bakery'      => 'bakery items',
+        'type_restaurant'  => 'a warm meal',
+        'type_general'     => 'food support',
+
+        // Relative time labels
+        'just_now'         => 'just now',
+        'min_ago'          => ':n min ago',
+        'hr_ago'           => ':n hr ago',
+        'day_ago'          => ':n day ago',
+
+        // Fallback city when provider profile has no city recorded
+        'city_fallback'    => 'Saudi Arabia',
+    ],
+
     'feed' => [
-        ['row1' => 'A family of 5 received a weekly staples basket in Riyadh.',       'row2' => 'NBL-A2F9-KR · Tamimi Markets · 2 min ago'],
-        ['row1' => "A household received the week's bread allowance in Jeddah.",       'row2' => 'NBL-7T3L-WQ · Al Rahmaniah Bakery · 4 min ago'],
-        ['row1' => 'A household of 6 picked up fresh produce in Dammam.',              'row2' => 'NBL-D8H2-MX · Panda Retail · 6 min ago'],
-        ['row1' => 'A family received a warm Friday meal in Makkah.',                  'row2' => 'NBL-3K1S-BN · Najd Village · 8 min ago'],
-        ['row1' => 'A household received the month\'s staples in Madinah.',            'row2' => 'NBL-9E4C-TV · Nahdi Markets · 11 min ago'],
+        ['row1' => 'A family of 5 received a weekly staples basket in Riyadh.',       'row2' => 'NBL-A2F9-KR · Riyadh · 2 min ago'],
+        ['row1' => "A household received the week's bread allowance in Jeddah.",       'row2' => 'NBL-7T3L-WQ · Jeddah · 4 min ago'],
+        ['row1' => 'A household of 6 picked up fresh produce in Dammam.',              'row2' => 'NBL-D8H2-MX · Dammam · 6 min ago'],
+        ['row1' => 'A family received a warm Friday meal in Makkah.',                  'row2' => 'NBL-3K1S-BN · Makkah · 8 min ago'],
+        ['row1' => 'A household received the month\'s staples in Madinah.',            'row2' => 'NBL-9E4C-TV · Madinah · 11 min ago'],
     ],
 
 ];
