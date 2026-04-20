@@ -991,5 +991,6 @@
     "dashboard.audit.action.engine_resumed": "Distribution engine resumed",
     "dashboard.audit.action.provider_allocation_paused": "Provider allocation paused",
     "dashboard.audit.action.provider_allocation_resumed": "Provider allocation resumed",
-    "dashboard.audit.action.menu_item_updated": "Menu item updated"
+    "dashboard.audit.action.menu_item_updated": "Menu item updated",
+    "Your donation will automatically go to the most needy cases": "Your donation will automatically go to the most needy cases"
 }
