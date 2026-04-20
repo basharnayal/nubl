@@ -6,6 +6,7 @@ use App\Models\FundTransaction;
 use App\Models\Request;
 use App\Models\User;
 use Carbon\Carbon;
+use Spatie\Permission\Models\Role;
 
 /**
  * Aggregates real database figures for the public landing page.
@@ -35,13 +36,13 @@ class LandingPageStatsService
     public function getHeroStats(): array
     {
         return [
-            'totalDelivered'    => $this->totalDelivered(),
+            'totalDelivered' => $this->totalDelivered(),
             'familiesSupported' => $this->familiesSupported(),
-            'localProviders'    => $this->localProviders(),
-            'feedItems'         => $this->liveFeedItems(),
-            'trustLedger'       => $this->trustLedgerEntries(),
-            'trustBadges'       => $this->trustBadges(),
-            'providerCounts'    => $this->providerCategoryCounts(),
+            'localProviders' => $this->localProviders(),
+            'feedItems' => $this->liveFeedItems(),
+            'trustLedger' => $this->trustLedgerEntries(),
+            'trustBadges' => $this->trustBadges(),
+            'providerCounts' => $this->providerCategoryCounts(),
         ];
     }
 
@@ -83,10 +84,7 @@ class LandingPageStatsService
      */
     private function localProviders(): int
     {
-        return User::role('provider')
-            ->openForRecipients()
-            ->whereHas('providerProfile')
-            ->count();
+        return $this->visibleProviderQuery()->count();
     }
 
     /**
@@ -104,16 +102,28 @@ class LandingPageStatsService
     private function providerCategoryCounts(): array
     {
         $categories = ['grocery', 'catering', 'bakery', 'restaurant'];
-        $counts     = [];
+        $counts = [];
 
         foreach ($categories as $cat) {
-            $counts[$cat] = User::role('provider')
-                ->openForRecipients()
+            $counts[$cat] = $this->visibleProviderQuery()
                 ->whereHas('providerProfile', fn ($q) => $q->whereJsonContains('business_category', $cat))
                 ->count();
         }
 
         return $counts;
+    }
+
+    private function visibleProviderQuery()
+    {
+        $query = User::query()
+            ->openForRecipients()
+            ->whereHas('providerProfile');
+
+        if (Role::where('name', 'provider')->where('guard_name', 'web')->exists()) {
+            return $query->role('provider');
+        }
+
+        return $query->where('membership_type', User::MEMBERSHIP_PROVIDER);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -143,10 +153,10 @@ class LandingPageStatsService
         }
 
         return $fulfilled->map(function (Request $req): array {
-            $profile  = $req->provider?->providerProfile;
-            $city     = $profile?->city ?? (string) __('welcome.feed_live.city_fallback');
+            $profile = $req->provider?->providerProfile;
+            $city = $profile?->city ?? (string) __('welcome.feed_live.city_fallback');
             $category = $profile?->business_category; // cast to array by the model
-            $type     = $this->categoryLabel(is_array($category) ? $category : null);
+            $type = $this->categoryLabel(is_array($category) ? $category : null);
 
             return [
                 'row1' => (string) __('welcome.feed_live.template', [
@@ -164,8 +174,8 @@ class LandingPageStatsService
      */
     private function buildFeedRow2(Request $req, string $city): string
     {
-        $hash = sha1('nubl-feed-' . $req->id);
-        $ref  = 'NBL-' . strtoupper(substr($hash, 0, 4)) . '-' . strtoupper(substr($hash, 4, 2));
+        $hash = sha1('nubl-feed-'.$req->id);
+        $ref = 'NBL-'.strtoupper(substr($hash, 0, 4)).'-'.strtoupper(substr($hash, 4, 2));
         $when = $this->humanDiff($req->updated_at ?? $req->created_at ?? now());
 
         return "{$ref} · {$city} · {$when}";
@@ -202,28 +212,28 @@ class LandingPageStatsService
         }
 
         $rows = $recent->map(function (Request $req): array {
-            $profile   = $req->provider?->providerProfile;
-            $city      = $profile?->city ?? (string) __('welcome.feed_live.city_fallback');
+            $profile = $req->provider?->providerProfile;
+            $city = $profile?->city ?? (string) __('welcome.feed_live.city_fallback');
             $typeLabel = $this->categoryLabel(
                 is_array($profile?->business_category) ? $profile->business_category : null
             );
 
-            $hash = sha1('nubl-ledger-' . $req->id);
-            $ref  = 'NBL-' . strtoupper(substr($hash, 0, 4)) . '-' . strtoupper(substr($hash, 4, 2));
+            $hash = sha1('nubl-ledger-'.$req->id);
+            $ref = 'NBL-'.strtoupper(substr($hash, 0, 4)).'-'.strtoupper(substr($hash, 4, 2));
             $time = ($req->updated_at ?? $req->created_at ?? now())->format('H:i');
 
             return [
-                'desc'   => $typeLabel . ' · ' . $city,
-                'meta'   => $time . ' · ' . $ref . ' · ' . $city,
+                'desc' => $typeLabel.' · '.$city,
+                'meta' => $time.' · '.$ref.' · '.$city,
                 'amount' => (int) $req->reserved_amount,
             ];
         })->all();
 
         return [
             'is_live' => true,
-            'rows'    => $rows,
-            'shown'   => count($rows),
-            'total'   => $total,
+            'rows' => $rows,
+            'shown' => count($rows),
+            'total' => $total,
         ];
     }
 
@@ -250,12 +260,12 @@ class LandingPageStatsService
         }
 
         $totalFulfilled = (float) Request::where('status', 'FULFILLED')->sum('reserved_amount');
-        $deliveredPct   = round(min($totalFulfilled / $totalDonated * 100, 100), 1);
-        $heldPct        = round(100 - $deliveredPct, 1);
+        $deliveredPct = round(min($totalFulfilled / $totalDonated * 100, 100), 1);
+        $heldPct = round(100 - $deliveredPct, 1);
 
         return [
             'delivered' => $deliveredPct,
-            'held'      => $heldPct,
+            'held' => $heldPct,
         ];
     }
 
@@ -270,15 +280,15 @@ class LandingPageStatsService
     {
         return [
             'is_live' => false,
-            'rows'    => [
+            'rows' => [
                 ['desc' => (string) __('welcome.trust.ledger_1'), 'meta' => '', 'amount' => 158],
                 ['desc' => (string) __('welcome.trust.ledger_2'), 'meta' => '', 'amount' => 68],
                 ['desc' => (string) __('welcome.trust.ledger_3'), 'meta' => '', 'amount' => 105],
                 ['desc' => (string) __('welcome.trust.ledger_4'), 'meta' => '', 'amount' => 132],
                 ['desc' => (string) __('welcome.trust.ledger_5'), 'meta' => '', 'amount' => 172],
             ],
-            'shown'   => 0,
-            'total'   => 0,
+            'shown' => 0,
+            'total' => 0,
         ];
     }
 
@@ -290,15 +300,15 @@ class LandingPageStatsService
      * Resolve a provider's business_category array to a `feed_live.*` translation
      * key suffix (e.g. 'type_supermarket').  Returns 'type_general' as fallback.
      *
-     * @param array<int|string, string>|null $categories
+     * @param  array<int|string, string>|null  $categories
      */
     private function resolveCategoryKey(?array $categories): string
     {
         $map = [
             'supermarket' => 'type_supermarket',
-            'grocery'     => 'type_grocery',
-            'bakery'      => 'type_bakery',
-            'restaurant'  => 'type_restaurant',
+            'grocery' => 'type_grocery',
+            'bakery' => 'type_bakery',
+            'restaurant' => 'type_restaurant',
         ];
 
         foreach ((array) $categories as $cat) {
@@ -315,11 +325,11 @@ class LandingPageStatsService
      * Translate a provider's business_category array to a human-readable label.
      * Never exposes the provider name — only a generic category description.
      *
-     * @param array<int|string, string>|null $categories
+     * @param  array<int|string, string>|null  $categories
      */
     private function categoryLabel(?array $categories): string
     {
-        return (string) __('welcome.feed_live.' . $this->resolveCategoryKey($categories));
+        return (string) __('welcome.feed_live.'.$this->resolveCategoryKey($categories));
     }
 
     /**
