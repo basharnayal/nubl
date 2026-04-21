@@ -329,7 +329,7 @@ class PaymentService
                     'status' => Payment::STATUS_FAILED,
                     'notes' => array_merge($payment->notes ?? [], [
                         'error_url' => true,
-                        'callback_status' => $normalized['status'] ?? null,
+                        'callback_status' => $normalized !== null ? $normalized['status'] : null,
                     ]),
                 ]);
 
