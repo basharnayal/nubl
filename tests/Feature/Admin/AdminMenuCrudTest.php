@@ -4,6 +4,7 @@ namespace Tests\Feature\Admin;
 
 use App\Models\MenuItemCategory;
 use App\Models\ProviderMenuItem;
+use App\Models\ProviderProfile;
 use App\Models\User;
 use App\Notifications\AdminToggleMenuItemNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -135,6 +136,26 @@ class AdminMenuCrudTest extends TestCase
         $response->assertSee($inactiveProvider->name);
     }
 
+    public function test_admin_can_filter_providers_by_search_and_business_category()
+    {
+        $matchedProvider = User::factory()->create(['name' => 'Filtered Bakery']);
+        $matchedProvider->assignRole('provider');
+        $this->createProviderProfile($matchedProvider, ['bakery'], 'Filtered Bakery');
+
+        $unmatchedProvider = User::factory()->create(['name' => 'Filtered Grocery']);
+        $unmatchedProvider->assignRole('provider');
+        $this->createProviderProfile($unmatchedProvider, ['grocery'], 'Filtered Grocery');
+
+        $response = $this->actingAs($this->admin)->get(route('admin.menus.index', [
+            'search' => 'Bakery',
+            'category' => 'bakery',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee($matchedProvider->name);
+        $response->assertDontSee($unmatchedProvider->name);
+    }
+
     public function test_admin_can_filter_items_by_status()
     {
         $blockedItem = ProviderMenuItem::create([
@@ -154,6 +175,21 @@ class AdminMenuCrudTest extends TestCase
         $response = $this->actingAs($this->admin)->get(route('admin.menus.show', [$this->provider, 'status' => 'blocked']));
         $response->assertDontSee($this->menuItem->name);
         $response->assertSee($blockedItem->name);
+
+        $inactiveItem = ProviderMenuItem::create([
+            'provider_id' => $this->provider->id,
+            'name' => 'Inactive Item',
+            'price' => 12.00,
+            'category' => 'Test Category',
+            'category_id' => $this->category->id,
+            'is_active' => false,
+            'is_admin_blocked' => false,
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.menus.show', [$this->provider, 'status' => 'inactive']));
+        $response->assertDontSee($this->menuItem->name);
+        $response->assertDontSee($blockedItem->name);
+        $response->assertSee($inactiveItem->name);
     }
 
     public function test_admin_can_filter_items_by_category()
@@ -177,5 +213,72 @@ class AdminMenuCrudTest extends TestCase
         $response = $this->actingAs($this->admin)->get(route('admin.menus.show', [$this->provider, 'category_id' => $this->category->id]));
         $response->assertSee($this->menuItem->name);
         $response->assertDontSee($otherItem->name);
+    }
+
+    public function test_admin_show_rejects_non_provider_users()
+    {
+        $donor = User::factory()->create();
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.menus.show', $donor))
+            ->assertNotFound();
+    }
+
+    public function test_admin_can_search_provider_items_and_filter_categories_by_primary_business_category()
+    {
+        $this->createProviderProfile($this->provider, ['restaurant'], 'Provider Restaurant');
+
+        $restaurantCategory = MenuItemCategory::create([
+            'name' => 'Restaurant Category',
+            'slug' => 'restaurant-category',
+            'business_category' => 'restaurant',
+            'is_active' => true,
+        ]);
+        MenuItemCategory::create([
+            'name' => 'Hidden Grocery Category',
+            'slug' => 'hidden-grocery-category',
+            'business_category' => 'grocery',
+            'is_active' => true,
+        ]);
+
+        $searchedItem = ProviderMenuItem::create([
+            'provider_id' => $this->provider->id,
+            'name' => 'Searchable Soup',
+            'price' => 18.00,
+            'category' => 'Restaurant Category',
+            'category_id' => $restaurantCategory->id,
+            'is_active' => true,
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.menus.show', [
+            $this->provider,
+            'search' => 'Soup',
+        ]));
+
+        $response->assertOk();
+        $response->assertSee($searchedItem->name);
+        $response->assertDontSee($this->menuItem->name);
+        $response->assertSee('Restaurant Category');
+        $response->assertSee('Test Category');
+        $response->assertDontSee('Hidden Grocery Category');
+    }
+
+    private function createProviderProfile(User $provider, array $businessCategories, string $businessName): ProviderProfile
+    {
+        return ProviderProfile::create([
+            'user_id' => $provider->id,
+            'full_name_ar' => 'مزود',
+            'full_name_en' => $provider->name,
+            'phone_number' => '966500000000',
+            'email' => $provider->email,
+            'business_name_ar' => 'متجر',
+            'business_name_en' => $businessName,
+            'unified_number' => '7000000000',
+            'business_category' => $businessCategories,
+            'address_ar' => 'عنوان',
+            'address_en' => 'Address',
+            'city' => 'Riyadh',
+            'region' => 'Central',
+        ]);
     }
 }

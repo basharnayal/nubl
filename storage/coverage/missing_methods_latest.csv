@@ -1,0 +1,7 @@
+"file","linePct","method","line"
+"C:\Users\basha\SE\nubl\app\Http\Controllers\Recipient\RecipientRequestController.php","90.24","cancelThrottle","176"
+"C:\Users\basha\SE\nubl\app\Services\ProviderPayoutLedgerService.php","90.91","sumEligibleAmount","44"
+"C:\Users\basha\SE\nubl\app\Services\AllocationEngineService.php","92.11","isGloballyPaused","80"
+"C:\Users\basha\SE\nubl\app\Services\AllocationEngineService.php","92.11","isProviderPaused","85"
+"C:\Users\basha\SE\nubl\app\Notifications\NewPendingAdminRequestNotification.php","92.31","via","21"
+"C:\Users\basha\SE\nubl\app\Http\Controllers\Provider\ProviderQrController.php","93.33","scan","16"

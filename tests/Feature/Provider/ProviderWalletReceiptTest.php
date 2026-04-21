@@ -24,6 +24,89 @@ class ProviderWalletReceiptTest extends TestCase
     }
 
     #[Test]
+    public function provider_can_view_wallet_index_with_own_transactions_and_payouts(): void
+    {
+        $provider = $this->provider();
+        $otherProvider = $this->provider();
+
+        $wallet = $provider->providerProfile->ewallet;
+        $otherWallet = $otherProvider->providerProfile->ewallet;
+
+        $ownTx = \App\Models\FundTransaction::create([
+            'wallet_id' => $wallet->id,
+            'sponsor_id' => null,
+            'source' => \App\Models\FundTransaction::SOURCE_PAYOUT,
+            'amount' => 80.00,
+            'direction' => \App\Models\FundTransaction::DIRECTION_IN,
+            'payment_id' => null,
+            'request_id' => null,
+            'order_redemption_id' => null,
+        ]);
+
+        $otherTx = \App\Models\FundTransaction::create([
+            'wallet_id' => $otherWallet->id,
+            'sponsor_id' => null,
+            'source' => \App\Models\FundTransaction::SOURCE_PAYOUT,
+            'amount' => 50.00,
+            'direction' => \App\Models\FundTransaction::DIRECTION_IN,
+            'payment_id' => null,
+            'request_id' => null,
+            'order_redemption_id' => null,
+        ]);
+
+        $ownPayout = $this->payoutFor($provider, ProviderPayout::STATUS_PENDING_ADMIN_REVIEW, null);
+        $otherPayout = $this->payoutFor($otherProvider, ProviderPayout::STATUS_PENDING_ADMIN_REVIEW, null);
+
+        $response = $this->actingAs($provider)->get(route('provider.wallet.index'));
+
+        $response->assertOk();
+        $response->assertViewIs('provider.wallet.index');
+        $response->assertViewHas('wallet', fn ($v) => $v !== null && (int) $v->id === (int) $wallet->id);
+        $response->assertViewHas('profile', fn ($v) => $v !== null && (int) $v->user_id === (int) $provider->id);
+        $response->assertViewHas('transactions', function ($paginator) use ($ownTx, $otherTx): bool {
+            if (! $paginator instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator) {
+                return false;
+            }
+            $ids = collect($paginator->items())->pluck('id')->all();
+
+            return in_array($ownTx->id, $ids, true)
+                && ! in_array($otherTx->id, $ids, true)
+                && $paginator->getPageName() === 'tx_page'
+                && $paginator->perPage() === 15;
+        });
+        $response->assertViewHas('payouts', function ($paginator) use ($ownPayout, $otherPayout): bool {
+            if (! $paginator instanceof \Illuminate\Contracts\Pagination\LengthAwarePaginator) {
+                return false;
+            }
+            $ids = collect($paginator->items())->pluck('id')->all();
+
+            return in_array($ownPayout->id, $ids, true)
+                && ! in_array($otherPayout->id, $ids, true)
+                && $paginator->getPageName() === 'payout_page'
+                && $paginator->perPage() === 10;
+        });
+    }
+
+    #[Test]
+    public function provider_without_profile_can_open_wallet_page_with_empty_data(): void
+    {
+        $provider = User::factory()->create([
+            'status' => User::STATUS_ACTIVE,
+            'is_active' => true,
+        ]);
+        $provider->assignRole('provider');
+
+        $response = $this->actingAs($provider)->get(route('provider.wallet.index'));
+
+        $response->assertOk();
+        $response->assertViewIs('provider.wallet.index');
+        $response->assertViewHas('wallet', fn ($wallet) => $wallet === null);
+        $response->assertViewHas('profile', fn ($profile) => $profile === null);
+        $response->assertViewHas('transactions', fn ($paginator) => $paginator->total() === 0 && $paginator->getPageName() === 'tx_page');
+        $response->assertViewHas('payouts', fn ($paginator) => $paginator->total() === 0 && $paginator->getPageName() === 'payout_page');
+    }
+
+    #[Test]
     public function provider_can_download_own_transferred_payout_receipt(): void
     {
         $provider = $this->provider();
@@ -60,6 +143,28 @@ class ProviderWalletReceiptTest extends TestCase
             ->assertNotFound();
     }
 
+    #[Test]
+    public function transferred_payout_without_receipt_path_is_not_downloadable(): void
+    {
+        $provider = $this->provider();
+        $payout = $this->payoutFor($provider, ProviderPayout::STATUS_TRANSFERRED, null);
+
+        $this->actingAs($provider)
+            ->get(route('provider.wallet.payout-receipt', $payout))
+            ->assertNotFound();
+    }
+
+    #[Test]
+    public function transferred_payout_receipt_returns_not_found_when_file_is_missing(): void
+    {
+        $provider = $this->provider();
+        $payout = $this->payoutFor($provider, ProviderPayout::STATUS_TRANSFERRED, 'receipts/missing.pdf');
+
+        $this->actingAs($provider)
+            ->get(route('provider.wallet.payout-receipt', $payout))
+            ->assertNotFound();
+    }
+
     private function provider(): User
     {
         $provider = User::factory()->create([
@@ -87,7 +192,7 @@ class ProviderWalletReceiptTest extends TestCase
         return $provider;
     }
 
-    private function payoutFor(User $provider, string $status, string $receiptPath): ProviderPayout
+    private function payoutFor(User $provider, string $status, ?string $receiptPath): ProviderPayout
     {
         $wallet = $provider->providerProfile->ewallet;
 

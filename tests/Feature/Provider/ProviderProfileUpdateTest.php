@@ -23,6 +23,59 @@ class ProviderProfileUpdateTest extends TestCase
     }
 
     #[Test]
+    public function provider_can_open_operating_profile_edit_page(): void
+    {
+        $provider = User::factory()->create([
+            'status' => User::STATUS_ACTIVE,
+            'is_active' => true,
+            'accepting_orders' => true,
+        ]);
+        $provider->assignRole('provider');
+
+        ProviderProfile::create([
+            'user_id' => $provider->id,
+            'full_name_ar' => 'Provider',
+            'full_name_en' => 'Provider',
+            'phone_number' => '966501111111',
+            'email' => $provider->email,
+            'business_name_ar' => 'Shop',
+            'business_name_en' => 'Shop',
+            'unified_number' => '7000000001',
+            'business_category' => ['restaurant'],
+            'address_ar' => 'Address',
+            'address_en' => 'Address',
+            'city' => 'medina',
+            'region' => 'western',
+        ]);
+
+        $weekdays = array_keys(config('provider.weekdays'));
+        $operatingHours = [];
+        foreach ($weekdays as $day) {
+            $operatingHours[$day] = ['open' => '09:00', 'close' => '17:00', 'closed' => false];
+        }
+
+        ProviderOperatingInfo::create([
+            'user_id' => $provider->id,
+            'operating_hours' => $operatingHours,
+            'daily_capacity' => 50,
+            'service_type' => ['delivery'],
+            'estimated_preparation_order_time' => '30 minutes',
+            'adoption_support' => 'yes',
+            'pickup_notes' => null,
+        ]);
+
+        $response = $this->actingAs($provider)->get(route('provider.profile.edit'));
+
+        $response->assertOk();
+        $response->assertViewIs('provider.profile.edit');
+        $response->assertViewHas('profile', fn (ProviderProfile $profile): bool => $profile->user_id === $provider->id);
+        $response->assertViewHas('operatingInfo', fn (ProviderOperatingInfo $info): bool => $info->user_id === $provider->id);
+        $response->assertViewHas('serviceTypes');
+        $response->assertViewHas('weekdayKeys');
+        $response->assertViewHas('adoptionSupportOptions');
+    }
+
+    #[Test]
     public function provider_can_update_operating_profile_and_pickup_notes(): void
     {
         $provider = User::factory()->create([

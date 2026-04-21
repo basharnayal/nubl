@@ -2,6 +2,7 @@
 
 namespace Tests\Unit\Provider;
 
+use App\Models\MenuItemCategory;
 use App\Models\ProviderMenuItem;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -59,5 +60,58 @@ class ProviderMenuItemScopesTest extends TestCase
 
         $this->assertSame(1, ProviderMenuItem::active()->where('provider_id', $provider->id)->count());
         $this->assertTrue(ProviderMenuItem::active()->where('name', 'On')->exists());
+    }
+
+    #[Test]
+    public function image_url_accessor_encodes_paths_and_returns_null_for_empty_values(): void
+    {
+        $provider = User::factory()->create();
+
+        $itemWithoutImage = ProviderMenuItem::create([
+            'provider_id' => $provider->id,
+            'name' => 'No Image',
+            'price' => 1,
+            'category' => 'x',
+            'is_active' => true,
+            'image_path' => null,
+        ]);
+        $this->assertNull($itemWithoutImage->image_url);
+
+        $itemWithImage = ProviderMenuItem::create([
+            'provider_id' => $provider->id,
+            'name' => 'With Image',
+            'price' => 1,
+            'category' => 'x',
+            'is_active' => true,
+            'image_path' => 'menu-items/special item.jpg',
+        ]);
+
+        $this->assertStringContainsString(
+            'storage/menu-items/special%20item.jpg',
+            (string) $itemWithImage->image_url
+        );
+    }
+
+    #[Test]
+    public function menu_item_category_relationship_resolves_category_record(): void
+    {
+        $provider = User::factory()->create();
+        $category = MenuItemCategory::create([
+            'business_category' => 'Other',
+            'name' => 'General',
+            'slug' => 'general',
+            'is_active' => true,
+        ]);
+
+        $item = ProviderMenuItem::create([
+            'provider_id' => $provider->id,
+            'name' => 'Categorized',
+            'price' => 5,
+            'category' => 'General',
+            'category_id' => $category->id,
+            'is_active' => true,
+        ]);
+
+        $this->assertTrue($item->menuItemCategory->is($category));
     }
 }

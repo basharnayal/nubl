@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Support\RecipientRequestStatusPresenter;
 use App\Support\RequestTypeLabel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
@@ -82,6 +83,75 @@ class RequestTypeAndStatusPresenterTest extends TestCase
     }
 
     #[Test]
+    public function request_type_label_uses_ucfirst_for_unknown_legacy_category_values(): void
+    {
+        [$request, $menuItem] = $this->createRequestWithMenuItem('12345', '12345', 'snacks');
+        $menuItem->update(['category_id' => null]);
+
+        RequestItem::create([
+            'request_id' => $request->id,
+            'menu_item_id' => $menuItem->id,
+            'quantity' => 1,
+            'price_snapshot' => 10.00,
+        ]);
+
+        $label = RequestTypeLabel::forRequest($request->fresh('items.menuItem.menuItemCategory'));
+
+        $this->assertSame('Snacks', $label);
+    }
+
+    #[Test]
+    #[DataProvider('knownLegacyCategories')]
+    public function request_type_label_maps_known_legacy_categories(string $legacyCategory, string $expected): void
+    {
+        [$request, $menuItem] = $this->createRequestWithMenuItem('12345', '12345', $legacyCategory);
+        $menuItem->update(['category_id' => null]);
+
+        RequestItem::create([
+            'request_id' => $request->id,
+            'menu_item_id' => $menuItem->id,
+            'quantity' => 1,
+            'price_snapshot' => 10.00,
+        ]);
+
+        $label = RequestTypeLabel::forRequest($request->fresh('items.menuItem.menuItemCategory'));
+
+        $this->assertSame((string) __($expected), $label);
+    }
+
+    /**
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public static function knownLegacyCategories(): array
+    {
+        return [
+            'meal singular' => ['meal', 'Meals'],
+            'meal plural' => ['meals', 'Meals'],
+            'bakery' => ['bakery', 'Bakery'],
+            'catering' => ['catering', 'Catering'],
+            'grocery' => ['grocery', 'Grocery'],
+        ];
+    }
+
+    #[Test]
+    public function request_type_label_returns_generic_request_when_legacy_and_item_values_are_numeric(): void
+    {
+        [$request, $menuItem] = $this->createRequestWithMenuItem('12345', '12345', '67890');
+        $menuItem->update(['category_id' => null]);
+
+        RequestItem::create([
+            'request_id' => $request->id,
+            'menu_item_id' => $menuItem->id,
+            'quantity' => 1,
+            'price_snapshot' => 10.00,
+        ]);
+
+        $label = RequestTypeLabel::forRequest($request->fresh('items.menuItem.menuItemCategory'));
+
+        $this->assertSame((string) __('Request'), $label);
+    }
+
+    #[Test]
     public function status_presenter_returns_expected_card_for_requested_state(): void
     {
         $request = new RequestModel(['status' => 'REQUESTED']);
@@ -107,6 +177,83 @@ class RequestTypeAndStatusPresenterTest extends TestCase
         $this->assertSame('simple', $card['footer']);
         $this->assertSame('recipient.request_progress.badge_admin_pending', $card['badgeLabelKey']);
         $this->assertGreaterThanOrEqual(4, count($card['steps']));
+    }
+
+    #[Test]
+    public function status_presenter_returns_fulfilled_card(): void
+    {
+        $request = new RequestModel(['status' => 'FULFILLED']);
+
+        $card = RecipientRequestStatusPresenter::card($request, false);
+
+        $this->assertSame('success', $card['accent']);
+        $this->assertSame('fulfilled', $card['footer']);
+        $this->assertSame('recipient.request_progress.badge_fulfilled', $card['badgeLabelKey']);
+        $this->assertSame('done', $card['steps'][3]['state']);
+    }
+
+    #[Test]
+    public function status_presenter_returns_rejected_card(): void
+    {
+        $request = new RequestModel(['status' => 'REJECTED']);
+
+        $card = RecipientRequestStatusPresenter::card($request, false);
+
+        $this->assertSame('error', $card['accent']);
+        $this->assertSame('simple', $card['footer']);
+        $this->assertSame('recipient.request_progress.badge_rejected', $card['badgeLabelKey']);
+        $this->assertSame('current', $card['steps'][2]['state']);
+    }
+
+    #[Test]
+    public function status_presenter_returns_admin_rejected_card(): void
+    {
+        $request = new RequestModel(['status' => 'ADMIN_REJECTED']);
+
+        $card = RecipientRequestStatusPresenter::card($request, false);
+
+        $this->assertSame('error', $card['accent']);
+        $this->assertSame('simple', $card['footer']);
+        $this->assertSame('recipient.request_progress.badge_admin_rejected', $card['badgeLabelKey']);
+        $this->assertSame('current', $card['steps'][1]['state']);
+    }
+
+    #[Test]
+    public function status_presenter_returns_cancelled_card(): void
+    {
+        $request = new RequestModel(['status' => 'CANCELLED']);
+
+        $card = RecipientRequestStatusPresenter::card($request, false);
+
+        $this->assertSame('slate', $card['accent']);
+        $this->assertSame('simple', $card['footer']);
+        $this->assertSame('recipient.request_progress.badge_cancelled', $card['badgeLabelKey']);
+        $this->assertSame('current', $card['steps'][1]['state']);
+    }
+
+    #[Test]
+    public function status_presenter_returns_admin_approved_card(): void
+    {
+        $request = new RequestModel(['status' => 'ADMIN_APPROVED']);
+
+        $card = RecipientRequestStatusPresenter::card($request, false);
+
+        $this->assertSame('success', $card['accent']);
+        $this->assertSame('simple', $card['footer']);
+        $this->assertSame('recipient.request_progress.badge_admin_approved', $card['badgeLabelKey']);
+        $this->assertSame('current', $card['steps'][2]['state']);
+    }
+
+    #[Test]
+    public function status_presenter_redeem_ready_uses_approved_or_redeemable_badge_based_on_status(): void
+    {
+        $approved = RecipientRequestStatusPresenter::card(new RequestModel(['status' => 'APPROVED']), false);
+        $redeemable = RecipientRequestStatusPresenter::card(new RequestModel(['status' => 'REDEEMABLE']), false);
+
+        $this->assertSame('recipient.request_progress.badge_approved', $approved['badgeLabelKey']);
+        $this->assertSame('recipient.request_progress.badge_redeemable', $redeemable['badgeLabelKey']);
+        $this->assertSame('redeem', $approved['footer']);
+        $this->assertSame('redeem', $redeemable['footer']);
     }
 
     #[Test]
@@ -185,4 +332,3 @@ class RequestTypeAndStatusPresenterTest extends TestCase
         ])->id;
     }
 }
-

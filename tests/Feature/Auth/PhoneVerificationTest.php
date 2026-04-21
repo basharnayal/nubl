@@ -53,6 +53,42 @@ class PhoneVerificationTest extends TestCase
         $response->assertStatus(200);
     }
 
+    public function test_verify_phone_page_redirects_guest_to_login(): void
+    {
+        $this->get(route('verification.phone'))
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_already_verified_pending_user_is_redirected_to_approval_pending(): void
+    {
+        $user = User::factory()->create([
+            'status' => User::STATUS_PENDING_APPROVAL,
+            'phone_number' => '966501234567',
+            'phone_verified_at' => now(),
+        ]);
+        $user->assignRole('donor');
+
+        $this->actingAs($user)
+            ->get(route('verification.phone'))
+            ->assertRedirect(route('approval.pending'));
+    }
+
+    public function test_already_verified_user_with_unverified_email_is_redirected_to_email_notice_when_enabled(): void
+    {
+        config(['app.email_verification_enabled' => true]);
+
+        $user = User::factory()->unverified()->create([
+            'status' => User::STATUS_ACTIVE,
+            'phone_number' => '966501234567',
+            'phone_verified_at' => now(),
+        ]);
+        $user->assignRole('donor');
+
+        $this->actingAs($user)
+            ->get(route('verification.phone'))
+            ->assertRedirect(route('verification.notice'));
+    }
+
     public function test_otp_verification_succeeds_and_redirects(): void
     {
         $user = User::factory()->create([

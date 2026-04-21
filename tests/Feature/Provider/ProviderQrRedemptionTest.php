@@ -13,10 +13,14 @@ use App\Models\RequestPaymentLink;
 use App\Models\SystemSetting;
 use App\Models\User;
 use App\Services\RedemptionService;
+use App\Services\AuditService;
+use App\Services\SystemWalletService;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\DB;
+use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -39,6 +43,13 @@ class ProviderQrRedemptionTest extends TestCase
             'is_active' => true,
         ]);
         $this->provider->assignRole('provider');
+    }
+
+    protected function tearDown(): void
+    {
+        Mockery::close();
+
+        parent::tearDown();
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -162,6 +173,28 @@ class ProviderQrRedemptionTest extends TestCase
         $high = RedemptionService::generateForRequest($this->createRedeemableRequest());
         $this->assertNotNull($high);
         $this->assertSame(720, $high->ttl_minutes);
+    }
+
+    #[Test]
+    public function redemption_generation_skips_unsupported_request_statuses(): void
+    {
+        $request = $this->createRedeemableRequest();
+        $request->update(['status' => 'REQUESTED']);
+
+        $this->assertNull(RedemptionService::generateForRequest($request->fresh()));
+    }
+
+    #[Test]
+    public function redemption_generation_reuses_existing_token_for_request(): void
+    {
+        $request = $this->createRedeemableRequest();
+
+        $first = RedemptionService::generateForRequest($request);
+        $second = RedemptionService::generateForRequest($request->fresh('redemption'));
+
+        $this->assertNotNull($first);
+        $this->assertNotNull($second);
+        $this->assertTrue($first->is($second));
     }
 
     #[Test]
@@ -349,6 +382,53 @@ class ProviderQrRedemptionTest extends TestCase
                 ->where('source', FundTransaction::SOURCE_PAYOUT)
                 ->count()
         );
+    }
+
+    #[Test]
+    public function non_pending_token_status_returns_422_without_side_effects(): void
+    {
+        $request = $this->createRedeemableRequest();
+        $redemption = RedemptionService::generateForRequest($request);
+        $this->assertNotNull($redemption);
+        DB::statement('PRAGMA ignore_check_constraints = ON');
+        $redemption->forceFill(['status' => 'CANCELLED'])->save();
+
+        $rawQrToken = Crypt::decryptString($redemption->token_ciphertext);
+
+        $response = $this->actingAs($this->provider)
+            ->postJson(route('provider.qr.redeem'), ['token' => $rawQrToken]);
+
+        $response->assertStatus(422);
+        $response->assertJsonFragment(['error' => __('This code cannot be redeemed.')]);
+        $this->assertSame(0, RequestPaymentLink::where('request_id', $request->id)->count());
+        $this->assertSame(
+            0,
+            FundTransaction::where('request_id', $request->id)
+                ->where('source', FundTransaction::SOURCE_PAYOUT)
+                ->count()
+        );
+    }
+
+    #[Test]
+    public function redemption_rolls_back_and_returns_500_when_transfer_service_fails(): void
+    {
+        $request = $this->createRedeemableRequest();
+        $redemption = RedemptionService::generateForRequest($request);
+        $this->assertNotNull($redemption);
+
+        $walletService = Mockery::mock(SystemWalletService::class);
+        $walletService->shouldReceive('transferToProviderForRequest')
+            ->once()
+            ->withArgs(fn (RequestModel $requestModel, int $redemptionId): bool => $requestModel->is($request) && $redemptionId === $redemption->id)
+            ->andThrow(new \RuntimeException('forced transfer failure'));
+
+        $service = new RedemptionService(app(AuditService::class), $walletService);
+
+        $result = $service->redeem($redemption->token_code, $this->provider->id);
+
+        $this->assertSame(500, $result['status']);
+        $this->assertSame('forced transfer failure', $result['body']['error']);
+        $this->assertSame('PENDING', $redemption->fresh()->status);
     }
 
     #[Test]
