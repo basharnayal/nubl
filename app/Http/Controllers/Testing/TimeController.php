@@ -85,12 +85,15 @@ class TimeController extends Controller
             'datetime' => ['required', 'date'],
         ]);
 
-        $time = Carbon::parse($request->input('datetime'));
+        $time    = Carbon::parse($request->input('datetime'));
+        $realNow = Carbon::now()->toIso8601String();
         $this->persist($time);
 
         return response()->json([
-            'message' => 'Application time set successfully.',
-            ...$this->timePayload($time),
+            'message'     => 'Application time set successfully.',
+            'is_mocked'   => true,
+            'mocked_time' => $time->toIso8601String(),
+            'real_time'   => $realNow,
         ]);
     }
 
@@ -138,11 +141,14 @@ class TimeController extends Controller
         $now->addMonths($request->integer('months', 0));
         $now->addYears($request->integer('years',   0));
 
+        $realNow = Carbon::now()->toIso8601String();
         $this->persist($now);
 
         return response()->json([
-            'message' => 'Application time advanced successfully.',
-            ...$this->timePayload($now),
+            'message'      => 'Application time advanced successfully.',
+            'is_mocked'    => true,
+            'mocked_time'  => $now->toIso8601String(),
+            'real_time'    => $realNow,
         ]);
     }
 
