@@ -9,6 +9,8 @@ use App\Models\ProviderPayout;
 use App\Models\ProviderPayoutItem;
 use App\Models\Request as RequestModel;
 use App\Models\RequestItem;
+use App\Models\RequestPaymentLink;
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -121,5 +123,38 @@ class P0FinancialModelsTest extends TestCase
         $this->assertSame('30.00', (string) $item->line_total);
         $this->assertTrue($item->request->is($request));
         $this->assertTrue($item->menuItem->is($menuItem));
+    }
+
+    #[Test]
+    public function request_payment_link_model_casts_amount_and_resolves_payment_and_request_relations(): void
+    {
+        $provider = User::factory()->create();
+        $recipient = User::factory()->create();
+        $donor = User::factory()->create();
+
+        $payment = Payment::create([
+            'sponsor_id' => $donor->id,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'status' => Payment::STATUS_SUCCEEDED,
+            'amount' => 40.00,
+        ]);
+
+        $request = RequestModel::create([
+            'recipient_id' => $recipient->id,
+            'provider_id' => $provider->id,
+            'reserved_amount' => 40.00,
+            'status' => 'REDEEMABLE',
+            'funding_source' => 'CITY_FUND',
+        ]);
+
+        $link = RequestPaymentLink::create([
+            'payment_id' => $payment->id,
+            'request_id' => $request->id,
+            'amount' => 40.00,
+        ])->fresh();
+
+        $this->assertSame('40.00', (string) $link->amount);
+        $this->assertTrue($link->payment->is($payment));
+        $this->assertTrue($link->request->is($request));
     }
 }

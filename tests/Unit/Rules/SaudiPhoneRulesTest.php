@@ -92,4 +92,16 @@ class SaudiPhoneRulesTest extends TestCase
 
         $this->assertFalse($validator->fails(), implode(', ', $validator->errors()->all()));
     }
+
+    #[Test]
+    public function saudi_phone_unique_rejects_non_string_values(): void
+    {
+        $validator = Validator::make(
+            ['phone_number' => 501234567],
+            ['phone_number' => [new SaudiPhoneUnique()]]
+        );
+
+        $this->assertTrue($validator->fails());
+        $this->assertArrayHasKey('phone_number', $validator->errors()->toArray());
+    }
 }

@@ -14,7 +14,8 @@ class SmsService
 {
     public function __construct(
         private ?string $bearer = null,
-        private ?string $sender = null
+        private ?string $sender = null,
+        private ?\Closure $gatewayFactory = null
     ) {
         $this->bearer = $bearer ?? config('services.taqnyat.bearer');
         $this->sender = $sender ?? config('services.taqnyat.sender', 'NUBL');
@@ -34,7 +35,8 @@ class SmsService
         }
 
         try {
-            $taqnyat = new \TaqnyatSms($this->bearer);
+            $gatewayFactory = $this->gatewayFactory ?? static fn (string $bearer): \TaqnyatSms => new \TaqnyatSms($bearer);
+            $taqnyat = $gatewayFactory($this->bearer);
             $recipient = PhoneHelper::normalize($to);
             $maskedRecipient = PhoneHelper::maskForLog($recipient);
             $recipients = [$recipient];

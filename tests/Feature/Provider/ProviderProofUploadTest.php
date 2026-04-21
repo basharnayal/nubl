@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Provider;
 
+use App\Contracts\NotificationServiceInterface;
 use App\Models\OrderProof;
 use App\Models\OrderRedemption;
 use App\Models\ProviderMenuItem;
@@ -138,6 +139,102 @@ class ProviderProofUploadTest extends TestCase
         );
         $this->assertSame(1, OrderProof::where('order_redemption_id', $redemption->id)->count());
         $this->assertSame('REDEEMABLE', $request->fresh()->status);
+    }
+
+    #[Test]
+    public function provider_can_open_proof_upload_page_for_redeemed_redemption(): void
+    {
+        [, $redemption] = $this->createRedeemedRequest('CITY_FUND');
+
+        $this->actingAs($this->provider)
+            ->get(route('provider.proof.index', $redemption))
+            ->assertOk()
+            ->assertViewIs('provider.qr.proof')
+            ->assertViewHas('redemption', fn (OrderRedemption $value): bool => $value->is($redemption));
+    }
+
+    #[Test]
+    public function proof_page_redirects_when_redemption_status_is_not_redeemed_or_proof_exists(): void
+    {
+        [, $notRedeemed] = $this->createRedeemedRequest('CITY_FUND');
+        $notRedeemed->update(['status' => 'PENDING']);
+
+        $this->actingAs($this->provider)
+            ->get(route('provider.proof.index', $notRedeemed))
+            ->assertRedirect(route('provider.qr.scan'))
+            ->assertSessionHas('error');
+
+        [, $hasProof] = $this->createRedeemedRequest('CITY_FUND');
+        OrderProof::create([
+            'order_redemption_id' => $hasProof->id,
+            'proof_url' => "private/proofs/{$hasProof->id}/existing.jpg",
+            'is_provider_donation' => false,
+            'fulfilled_at' => now(),
+        ]);
+
+        $this->actingAs($this->provider)
+            ->get(route('provider.proof.index', $hasProof))
+            ->assertRedirect(route('provider.requests.index'))
+            ->assertSessionHas('success');
+    }
+
+    #[Test]
+    public function proof_upload_returns_error_for_missing_or_invalid_base64_payloads(): void
+    {
+        [, $redemption] = $this->createRedeemedRequest('CITY_FUND');
+
+        $this->actingAs($this->provider)
+            ->from(route('provider.proof.index', $redemption))
+            ->post(route('provider.proof.store', $redemption), [])
+            ->assertRedirect(route('provider.proof.index', $redemption))
+            ->assertSessionHas('error');
+
+        $this->actingAs($this->provider)
+            ->from(route('provider.proof.index', $redemption))
+            ->post(route('provider.proof.store', $redemption), [
+                'proof_photo_base64' => 'data:image/gif;base64,'.base64_encode('gif-data'),
+            ])
+            ->assertRedirect(route('provider.proof.index', $redemption))
+            ->assertSessionHasErrors('proof_photo_base64');
+
+        $this->actingAs($this->provider)
+            ->from(route('provider.proof.index', $redemption))
+            ->post(route('provider.proof.store', $redemption), [
+                'proof_photo_base64' => 'data:image/png;base64,@@@',
+            ])
+            ->assertRedirect(route('provider.proof.index', $redemption))
+            ->assertSessionHasErrors('proof_photo_base64');
+
+        $this->actingAs($this->provider)
+            ->from(route('provider.proof.index', $redemption))
+            ->post(route('provider.proof.store', $redemption), [
+                'proof_photo_base64' => 'not-a-data-url',
+            ])
+            ->assertRedirect(route('provider.proof.index', $redemption))
+            ->assertSessionHasErrors('proof_photo_base64');
+    }
+
+    #[Test]
+    public function proof_upload_base64_path_is_cleaned_up_when_transaction_fails(): void
+    {
+        [, $redemption] = $this->createRedeemedRequest('CITY_FUND');
+
+        $failingNotifications = \Mockery::mock(NotificationServiceInterface::class);
+        $failingNotifications->shouldReceive('sendRequestStatusChanged')
+            ->andThrow(new \RuntimeException('notification failed'));
+        $this->app->instance(NotificationServiceInterface::class, $failingNotifications);
+        app('router')->getRoutes()->getByName('provider.proof.store')->flushController();
+
+        $this->actingAs($this->provider)
+            ->from(route('provider.proof.index', $redemption))
+            ->post(route('provider.proof.store', $redemption), [
+                'proof_photo_base64' => 'data:image/png;base64,'.base64_encode('proof-bytes'),
+            ])
+            ->assertRedirect(route('provider.proof.index', $redemption))
+            ->assertSessionHas('error');
+
+        $this->assertSame(0, OrderProof::where('order_redemption_id', $redemption->id)->count());
+        $this->assertSame([], Storage::disk('local')->allFiles("private/proofs/{$redemption->id}"));
     }
 
     /**

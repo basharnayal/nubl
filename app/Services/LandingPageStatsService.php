@@ -51,24 +51,26 @@ class LandingPageStatsService
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * Total SAR delivered: sum of `reserved_amount` across all FULFILLED requests.
-     * All-time figure — the UI label has been updated to match (no "this quarter").
+     * Total SAR delivered: sum of `reserved_amount` across all REDEEMABLE and
+     * FULFILLED requests.  REDEEMABLE means the funds have been committed and the
+     * recipient can redeem them; FULFILLED means physical delivery is confirmed.
+     * Both represent delivered impact for the landing-page counter.
      *
      * Returned as an integer (floor) so the JS counter animation receives a
      * clean whole-number value.
      */
     private function totalDelivered(): int
     {
-        return (int) Request::where('status', 'FULFILLED')->sum('reserved_amount');
+        return (int) Request::whereIn('status', ['REDEEMABLE', 'FULFILLED'])->sum('reserved_amount');
     }
 
     /**
      * Unique recipient families who have received support: count of distinct
-     * recipient_id values among FULFILLED requests.
+     * recipient_id values among REDEEMABLE and FULFILLED requests.
      */
     private function familiesSupported(): int
     {
-        return Request::where('status', 'FULFILLED')
+        return Request::whereIn('status', ['REDEEMABLE', 'FULFILLED'])
             ->distinct('recipient_id')
             ->count('recipient_id');
     }
@@ -132,16 +134,16 @@ class LandingPageStatsService
 
     /**
      * Build up to 5 privacy-safe live-feed entries from the most recently
-     * fulfilled requests.  Falls back to the static translation copy when
-     * there are no FULFILLED records yet (e.g. development / staging with an
-     * empty database).
+     * funded requests (REDEEMABLE or FULFILLED).  Falls back to the static
+     * translation copy when no such records exist yet (e.g. development /
+     * staging with an empty database).
      *
      * @return list<array{row1: string, row2: string}>
      */
     private function liveFeedItems(int $limit = 5): array
     {
         $fulfilled = Request::with(['provider.providerProfile'])
-            ->where('status', 'FULFILLED')
+            ->whereIn('status', ['REDEEMABLE', 'FULFILLED'])
             ->latest('updated_at')
             ->limit($limit)
             ->get();
@@ -187,8 +189,9 @@ class LandingPageStatsService
 
     /**
      * Returns up to 5 privacy-safe trust-ledger rows from the last 24 hours.
-     * Falls back to `staticLedgerPreview()` when no FULFILLED requests exist
-     * in that window; the `is_live` flag tells the view which heading/footer to use.
+     * Falls back to `staticLedgerPreview()` when no REDEEMABLE or FULFILLED
+     * requests exist in that window; the `is_live` flag tells the view which
+     * heading/footer to use.
      *
      * @return array{is_live: bool, rows: list<array{desc: string, meta: string, amount: int}>, shown: int, total: int}
      */
@@ -197,13 +200,13 @@ class LandingPageStatsService
         $cutoff = now()->subHours(24);
 
         $recent = Request::with(['provider.providerProfile'])
-            ->where('status', 'FULFILLED')
+            ->whereIn('status', ['REDEEMABLE', 'FULFILLED'])
             ->where('updated_at', '>=', $cutoff)
             ->latest('updated_at')
             ->limit(5)
             ->get();
 
-        $total = Request::where('status', 'FULFILLED')
+        $total = Request::whereIn('status', ['REDEEMABLE', 'FULFILLED'])
             ->where('updated_at', '>=', $cutoff)
             ->count();
 
@@ -240,8 +243,8 @@ class LandingPageStatsService
     /**
      * Compute the two trust-badge percentages shown in the transparency section.
      *
-     * - badge1 ("of funds reach recipients directly"): FULFILLED reserved_amount
-     *   as a share of all DONATION-IN fund transactions.
+     * - badge1 ("of funds reach recipients directly"): REDEEMABLE + FULFILLED
+     *   reserved_amount as a share of all DONATION-IN fund transactions.
      * - badge2 ("currently held in the system"): 100 − badge1.
      *
      * Returns null when no donation income has been recorded yet so the view
@@ -259,7 +262,7 @@ class LandingPageStatsService
             return null;
         }
 
-        $totalFulfilled = (float) Request::where('status', 'FULFILLED')->sum('reserved_amount');
+        $totalFulfilled = (float) Request::whereIn('status', ['REDEEMABLE', 'FULFILLED'])->sum('reserved_amount');
         $deliveredPct = round(min($totalFulfilled / $totalDonated * 100, 100), 1);
         $heldPct = round(100 - $deliveredPct, 1);
 

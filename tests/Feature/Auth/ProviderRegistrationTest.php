@@ -3,6 +3,10 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
+use App\Models\ProviderDocuments;
+use App\Models\ProviderFinancialInfo;
+use App\Models\ProviderOperatingInfo;
+use App\Models\ProviderProfile;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -25,6 +29,76 @@ class ProviderRegistrationTest extends TestCase
         $response = $this->get(route('register.provider'));
 
         $response->assertStatus(200);
+    }
+
+    public function test_provider_application_page_redirects_when_profile_is_missing(): void
+    {
+        $provider = User::factory()->create([
+            'status' => User::STATUS_ACTIVE,
+            'is_active' => true,
+            'membership_type' => User::MEMBERSHIP_PROVIDER,
+        ]);
+        $provider->assignRole('provider');
+
+        $this->actingAs($provider)
+            ->get(route('provider.application'))
+            ->assertRedirect(route('register.provider'));
+    }
+
+    public function test_provider_application_page_displays_existing_application_data(): void
+    {
+        $provider = User::factory()->create([
+            'status' => User::STATUS_PENDING_APPROVAL,
+            'is_active' => true,
+            'membership_type' => User::MEMBERSHIP_PROVIDER,
+            'phone_number' => '966500123123',
+        ]);
+        $provider->assignRole('provider');
+
+        ProviderProfile::create([
+            'user_id' => $provider->id,
+            'full_name_ar' => 'Provider',
+            'full_name_en' => 'Provider',
+            'phone_number' => '966500123123',
+            'email' => $provider->email,
+            'business_name_ar' => 'Provider Shop',
+            'business_name_en' => 'Provider Shop',
+            'unified_number' => '7000000555',
+            'business_category' => ['restaurant'],
+            'address_ar' => 'Address',
+            'address_en' => 'Address',
+            'city' => 'Riyadh',
+            'region' => 'central',
+            'location' => null,
+        ]);
+        ProviderOperatingInfo::create([
+            'user_id' => $provider->id,
+            'operating_hours' => ['sun' => ['closed' => true]],
+            'daily_capacity' => 20,
+            'service_type' => ['delivery'],
+            'estimated_preparation_order_time' => '30 minutes',
+            'adoption_support' => 'yes',
+            'pickup_notes' => null,
+        ]);
+        ProviderFinancialInfo::create([
+            'user_id' => $provider->id,
+            'bank_name' => 'Bank',
+            'iban' => 'SA0380000000608010167519',
+            'account_holder_name' => 'Provider',
+        ]);
+        ProviderDocuments::create([
+            'user_id' => $provider->id,
+            'business_license_path' => 'provider_documents/license.pdf',
+            'id_or_iqama_path' => 'provider_documents/id.pdf',
+        ]);
+
+        $response = $this->actingAs($provider)->get(route('provider.application'));
+
+        $response->assertOk();
+        $response->assertViewIs('auth.provider-application');
+        $response->assertViewHas('providerData', function (array $providerData) use ($provider): bool {
+            return ($providerData['profile']->user_id ?? null) === $provider->id;
+        });
     }
 
     public function test_new_providers_can_register(): void

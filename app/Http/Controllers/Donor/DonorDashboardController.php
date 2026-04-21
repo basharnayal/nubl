@@ -44,10 +44,10 @@ class DonorDashboardController extends Controller
             ->unique()
             ->filter();
 
-        // Delivered means proof completed; REDEEMABLE only means the recipient can redeem.
+        // Delivered = request is redeemable or fully fulfilled (funded and in recipient's hands).
         $donorRequestsDelivered = $donorRequestIds->isNotEmpty()
             ? (int) RequestModel::whereIn('id', $donorRequestIds)
-                ->where('status', 'FULFILLED')
+                ->whereIn('status', ['REDEEMABLE', 'FULFILLED'])
                 ->count()
             : 0;
 
@@ -79,7 +79,7 @@ class DonorDashboardController extends Controller
 
         $donorTransparency = [
             'requests_from_your_funds' => $donorRequestsFunded,  // Unique requests funded by donor
-            'requests_delivered' => $donorRequestsDelivered,     // FULFILLED only — proof of delivery confirmed
+            'requests_delivered' => $donorRequestsDelivered,     // REDEEMABLE or FULFILLED — funded and in recipient's hands
             'amount_allocated' => $donorAmountAllocated,          // Sum from request_payment_links
         ];
 

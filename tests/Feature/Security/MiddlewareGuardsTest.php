@@ -153,6 +153,29 @@ class MiddlewareGuardsTest extends TestCase
     }
 
     #[Test]
+    public function phone_verified_middleware_redirects_guests_to_login(): void
+    {
+        config(['app.phone_verification_enabled' => true]);
+
+        $this->get('/_test/middleware/phone-verified')
+            ->assertRedirect(route('login'));
+    }
+
+    #[Test]
+    public function phone_verified_middleware_allows_requests_when_phone_verification_is_disabled(): void
+    {
+        config(['app.phone_verification_enabled' => false]);
+
+        $guestResponse = $this->get('/_test/middleware/phone-verified');
+        $guestResponse->assertOk();
+
+        $unverified = $this->makeUser('donor', ['phone_verified_at' => null]);
+        $this->actingAs($unverified)
+            ->get('/_test/middleware/phone-verified')
+            ->assertOk();
+    }
+
+    #[Test]
     public function email_verified_middleware_behaves_for_enabled_and_disabled_modes(): void
     {
         config(['app.email_verification_enabled' => true]);

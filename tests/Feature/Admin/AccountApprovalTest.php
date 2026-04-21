@@ -9,6 +9,7 @@ use App\Models\ProviderProfile;
 use App\Models\RecipientKycDetails;
 use App\Models\RecipientProfile;
 use App\Models\User;
+use App\Http\Controllers\Admin\AccountApprovalController;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
@@ -122,6 +123,25 @@ class AccountApprovalTest extends TestCase
         $provider->refresh();
         $this->assertSame(User::STATUS_ACTIVE, $provider->status);
         $this->assertNull($provider->rejection_reason);
+    }
+
+    #[Test]
+    public function admin_approving_recipient_sends_account_status_notification_audit(): void
+    {
+        $recipient = User::factory()->create([
+            'status' => User::STATUS_PENDING_APPROVAL,
+            'membership_type' => User::MEMBERSHIP_RECIPIENT,
+        ]);
+        $recipient->assignRole('recipient');
+
+        $response = $this->actingAs($this->admin)->post(route('admin.users.approve', $recipient));
+
+        $response->assertRedirect(route('admin.users.pending'));
+        $this->assertSame(User::STATUS_ACTIVE, $recipient->fresh()->status);
+        $this->assertDatabaseHas('activity_log', [
+            'description' => 'notification.sent',
+            'causer_id' => $this->admin->id,
+        ]);
     }
 
     #[Test]
@@ -339,6 +359,67 @@ class AccountApprovalTest extends TestCase
     }
 
     #[Test]
+    public function serve_file_returns_provider_id_document_when_exists(): void
+    {
+        Storage::fake('local');
+        $path = 'provider_documents/test-id.png';
+        Storage::disk('local')->put($path, 'fake id content');
+
+        $provider = User::factory()->create([
+            'status' => User::STATUS_PENDING_APPROVAL,
+            'membership_type' => User::MEMBERSHIP_PROVIDER,
+        ]);
+        $provider->assignRole('provider');
+        $this->createProviderProfile($provider);
+        ProviderDocuments::create([
+            'user_id' => $provider->id,
+            'business_license_path' => 'provider_documents/license.pdf',
+            'id_or_iqama_path' => $path,
+        ]);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.users.file', [$provider, 'id_or_iqama']))
+            ->assertOk();
+    }
+
+    #[Test]
+    public function serve_file_returns_recipient_documents_when_exists(): void
+    {
+        Storage::fake('local');
+        Storage::disk('local')->put('recipient_docs/id.png', 'id');
+        Storage::disk('local')->put('recipient_docs/address.png', 'address');
+
+        $recipient = User::factory()->create([
+            'status' => User::STATUS_PENDING_APPROVAL,
+            'membership_type' => User::MEMBERSHIP_RECIPIENT,
+        ]);
+        $recipient->assignRole('recipient');
+        RecipientProfile::create([
+            'user_id' => $recipient->id,
+            'nationality' => 'SA',
+            'short_address' => 'Riyadh',
+            'id_type' => 'national_id',
+            'id_photo_path' => 'recipient_docs/id.png',
+        ]);
+        RecipientKycDetails::create([
+            'user_id' => $recipient->id,
+            'income_band' => '1000-1500',
+            'household_size' => 2,
+            'marital_status' => 'single',
+            'is_student' => false,
+            'address_confirmation' => 'recipient_docs/address.png',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.users.file', [$recipient, 'id_photo']))
+            ->assertOk();
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.users.file', [$recipient, 'address_confirmation']))
+            ->assertOk();
+    }
+
+    #[Test]
     public function serve_file_returns_404_for_invalid_type(): void
     {
         Storage::fake('local');
@@ -358,6 +439,27 @@ class AccountApprovalTest extends TestCase
         $response = $this->actingAs($this->admin)->get(route('admin.users.file', [$provider, 'invalid_type']));
 
         $response->assertStatus(404);
+    }
+
+    #[Test]
+    public function direct_application_methods_redirect_when_expected_profile_is_missing(): void
+    {
+        $controller = app(AccountApprovalController::class);
+
+        $provider = User::factory()->create([
+            'status' => User::STATUS_PENDING_APPROVAL,
+            'membership_type' => User::MEMBERSHIP_PROVIDER,
+        ]);
+        $provider->assignRole('provider');
+
+        $recipient = User::factory()->create([
+            'status' => User::STATUS_PENDING_APPROVAL,
+            'membership_type' => User::MEMBERSHIP_RECIPIENT,
+        ]);
+        $recipient->assignRole('recipient');
+
+        $this->assertTrue($controller->showProviderApplication($provider)->isRedirect(route('admin.users.pending')));
+        $this->assertTrue($controller->showRecipientApplication($recipient)->isRedirect(route('admin.users.pending')));
     }
 
     protected function createProviderProfile(User $user, array $overrides = []): ProviderProfile
