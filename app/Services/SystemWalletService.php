@@ -7,6 +7,7 @@ use App\Models\FundTransaction;
 use App\Models\ProviderProfile;
 use App\Models\Request as RequestModel;
 use App\Support\FinancialMath;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Handles operations on the system's default wallet (Ewallet with owner_type = SYSTEM).
@@ -22,10 +23,11 @@ class SystemWalletService
         private AuditService $auditService,
         private AllocationService $allocationService
     ) {}
+
     /**
      * Add funds to the system wallet when a donor's payment is confirmed.
      *
-     * IMPORTANT — This method is designed to be called from within an existing
+     * IMPORTANT - This method is designed to be called from within an existing
      * DB::transaction (e.g. PaymentService::processCallbackPaymentState) that
      * already holds a lockForUpdate on the Payment row. The lock on Payment
      * serialises concurrent callbacks for the same payment_id, so the
@@ -107,56 +109,83 @@ class SystemWalletService
      */
     public function transferToProviderForRequest(RequestModel $request, ?int $orderRedemptionId = null): void
     {
-        $amount = FinancialMath::normalize(
-            (string) ($request->getRawOriginal('reserved_amount') ?? $request->reserved_amount)
-        );
+        DB::transaction(function () use ($request, $orderRedemptionId): void {
+            $request = RequestModel::query()->whereKey($request->id)->lockForUpdate()->firstOrFail();
 
-        if (FinancialMath::compare($amount, '0.00') <= 0) {
-            return;
-        }
+            if ($request->funding_source !== 'CITY_FUND') {
+                return;
+            }
 
-        if (! $this->hasSufficientBalance((float) $amount)) {
-            throw new \RuntimeException('City fund has insufficient balance for this request.');
-        }
+            $amount = FinancialMath::normalize(
+                (string) ($request->getRawOriginal('reserved_amount') ?? $request->reserved_amount)
+            );
 
-        $this->allocationService->allocateToRequest($request->id, (float) $amount);
+            if (FinancialMath::compare($amount, '0.00') <= 0) {
+                return;
+            }
 
-        $systemWallet = $this->getSystemWallet();
+            $alreadyTransferred = FundTransaction::where('request_id', $request->id)
+                ->where('source', FundTransaction::SOURCE_PAYOUT)
+                ->where('direction', FundTransaction::DIRECTION_OUT)
+                ->exists();
 
-        $providerProfile = ProviderProfile::where('user_id', $request->provider_id)->firstOrFail();
-        $providerWallet = $providerProfile->ewallet ?? $providerProfile->ewallet()->create([
-            'owner_type' => 'PROVIDER',
-            'balance' => 0,
-            'status' => true,
-        ]);
+            if ($alreadyTransferred) {
+                return;
+            }
 
-        // Create FundTransactions (balance calculated from transactions: sum(IN) - sum(OUT))
-        FundTransaction::create([
-            'wallet_id' => $systemWallet->id,
-            'sponsor_id' => null,
-            'source' => FundTransaction::SOURCE_PAYOUT,
-            'amount' => (float) $amount,
-            'direction' => FundTransaction::DIRECTION_OUT,
-            'payment_id' => null,
-            'request_id' => $request->id,
-            'order_redemption_id' => $orderRedemptionId,
-        ]);
+            $systemWallet = Ewallet::where('owner_type', 'SYSTEM')->lockForUpdate()->firstOrFail();
+            $systemBalance = FinancialMath::normalize(
+                (string) ($systemWallet->getRawOriginal('balance') ?? $systemWallet->balance)
+            );
 
-        FundTransaction::create([
-            'wallet_id' => $providerWallet->id,
-            'sponsor_id' => null,
-            'source' => FundTransaction::SOURCE_PAYOUT,
-            'amount' => (float) $amount,
-            'direction' => FundTransaction::DIRECTION_IN,
-            'payment_id' => null,
-            'request_id' => $request->id,
-            'order_redemption_id' => $orderRedemptionId,
-        ]);
+            if (FinancialMath::compare($systemBalance, $amount) < 0) {
+                throw new \RuntimeException('City fund has insufficient balance for this request.');
+            }
 
-        $this->auditService->log('wallet', 'payout_to_provider', [
-            'request_id' => $request->id,
-            'amount' => (float) $amount,
-            'provider_id' => $request->provider_id,
-        ], auth()->id());
+            $this->allocationService->allocateToRequest($request->id, (float) $amount);
+
+            $providerProfile = ProviderProfile::where('user_id', $request->provider_id)->firstOrFail();
+            $providerWallet = Ewallet::where('owner_type', 'PROVIDER')
+                ->where('owner_id', $providerProfile->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (! $providerWallet) {
+                $providerWallet = $providerProfile->ewallet()->create([
+                    'owner_type' => 'PROVIDER',
+                    'balance' => 0,
+                    'status' => true,
+                ]);
+            }
+
+            // Create FundTransactions (balance calculated from transactions: sum(IN) - sum(OUT)).
+            FundTransaction::create([
+                'wallet_id' => $systemWallet->id,
+                'sponsor_id' => null,
+                'source' => FundTransaction::SOURCE_PAYOUT,
+                'amount' => $amount,
+                'direction' => FundTransaction::DIRECTION_OUT,
+                'payment_id' => null,
+                'request_id' => $request->id,
+                'order_redemption_id' => $orderRedemptionId,
+            ]);
+
+            FundTransaction::create([
+                'wallet_id' => $providerWallet->id,
+                'sponsor_id' => null,
+                'source' => FundTransaction::SOURCE_PAYOUT,
+                'amount' => $amount,
+                'direction' => FundTransaction::DIRECTION_IN,
+                'payment_id' => null,
+                'request_id' => $request->id,
+                'order_redemption_id' => $orderRedemptionId,
+            ]);
+
+            $this->auditService->log('wallet', 'payout_to_provider', [
+                'request_id' => $request->id,
+                'amount' => (float) $amount,
+                'provider_id' => $request->provider_id,
+            ], auth()->id());
+        });
     }
 }

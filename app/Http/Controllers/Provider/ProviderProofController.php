@@ -81,6 +81,9 @@ class ProviderProofController extends Controller
             $redemption->refresh();
             if ($redemption->proof) {
                 DB::rollBack();
+                if ($path !== null) {
+                    Storage::delete($path);
+                }
 
                 return redirect()->route('provider.requests.index')->with('success', __('Proof already exists.'));
             }

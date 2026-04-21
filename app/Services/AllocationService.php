@@ -8,6 +8,7 @@ use App\Models\Request as RequestModel;
 use App\Models\RequestPaymentLink;
 use App\Models\SystemSetting;
 use App\Support\FinancialMath;
+use Illuminate\Support\Facades\DB;
 
 class AllocationService
 {
@@ -71,8 +72,8 @@ class AllocationService
 
     /**
      * Allocate amount to a request from available payments (FIFO).
-     * Creates request_payment_links rows. Must be called inside DB::transaction.
-     * If the engine is paused (globally or per-provider), queues into pending_allocations (FR-24.2).
+     * Creates request_payment_links rows. If the engine is paused (globally or
+     * per-provider), queues the unallocated remainder into pending_allocations (FR-24.2).
      *
      * @throws \RuntimeException If insufficient funds across payments
      */
@@ -82,72 +83,87 @@ class AllocationService
             return;
         }
 
-        // FR-24.1 / FR-24.2: guard — queue if paused, do not throw
-        if ($this->isPaused($requestId, $amount)) {
-            return;
-        }
+        DB::transaction(function () use ($requestId, $amount): void {
+            $targetAmount = FinancialMath::normalize($amount);
+            $request = RequestModel::query()->whereKey($requestId)->lockForUpdate()->firstOrFail();
 
-        $payments = Payment::where('status', Payment::STATUS_SUCCEEDED)
-            ->orderBy('created_at')
-            ->get();
+            $alreadyAllocated = FinancialMath::normalize(
+                (string) RequestPaymentLink::where('request_id', $requestId)->sum('amount')
+            );
+            $remaining = FinancialMath::sub($targetAmount, $alreadyAllocated);
 
-        $remaining = FinancialMath::normalize($amount);
-        $allocations = [];
-
-        foreach ($payments as $payment) {
             if (FinancialMath::compare($remaining, '0.00') <= 0) {
-                break;
+                return;
             }
 
-            $used = FinancialMath::normalize(
-                (string) RequestPaymentLink::where('payment_id', $payment->id)->sum('amount')
-            );
-            $available = FinancialMath::sub(
-                FinancialMath::normalize((string) ($payment->getRawOriginal('amount') ?? $payment->amount)),
-                $used
-            );
-
-            if (FinancialMath::compare($available, '0.00') <= 0) {
-                continue;
+            if ($this->isPaused($request, $remaining)) {
+                return;
             }
 
-            $allocate = FinancialMath::min($remaining, $available);
-            $allocations[] = [
-                'payment_id' => $payment->id,
-                'amount' => (float) $allocate,
-            ];
-            $remaining = FinancialMath::sub($remaining, $allocate);
-        }
+            $payments = Payment::where('status', Payment::STATUS_SUCCEEDED)
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->lockForUpdate()
+                ->get();
 
-        if (FinancialMath::compare($remaining, '0.00') > 0) {
-            throw new \RuntimeException('Insufficient funds in city fund to allocate for this request.');
-        }
+            $allocations = [];
 
-        foreach ($allocations as $alloc) {
-            RequestPaymentLink::create([
-                'payment_id' => $alloc['payment_id'],
+            foreach ($payments as $payment) {
+                if (FinancialMath::compare($remaining, '0.00') <= 0) {
+                    break;
+                }
+
+                $used = FinancialMath::normalize(
+                    (string) RequestPaymentLink::where('payment_id', $payment->id)->sum('amount')
+                );
+                $available = FinancialMath::sub(
+                    FinancialMath::normalize((string) ($payment->getRawOriginal('amount') ?? $payment->amount)),
+                    $used
+                );
+
+                if (FinancialMath::compare($available, '0.00') <= 0) {
+                    continue;
+                }
+
+                $allocate = FinancialMath::min($remaining, $available);
+                $allocations[] = [
+                    'payment_id' => $payment->id,
+                    'amount' => $allocate,
+                ];
+                $remaining = FinancialMath::sub($remaining, $allocate);
+            }
+
+            if (FinancialMath::compare($remaining, '0.00') > 0) {
+                throw new \RuntimeException('Insufficient funds in city fund to allocate for this request.');
+            }
+
+            foreach ($allocations as $alloc) {
+                RequestPaymentLink::create([
+                    'payment_id' => $alloc['payment_id'],
+                    'request_id' => $requestId,
+                    'amount' => $alloc['amount'],
+                ]);
+            }
+
+            $allocatedNow = FinancialMath::sub($targetAmount, $alreadyAllocated);
+            $this->auditService->log('allocation', 'created', [
                 'request_id' => $requestId,
-                'amount' => $alloc['amount'],
-            ]);
-        }
-
-        $this->auditService->log('allocation', 'created', [
-            'request_id' => $requestId,
-            'amount' => $amount,
-            'allocations' => $allocations,
-        ], auth()->id());
+                'amount' => (float) $allocatedNow,
+                'target_amount' => (float) $targetAmount,
+                'already_allocated' => (float) $alreadyAllocated,
+                'allocations' => $allocations,
+            ], auth()->id());
+        });
     }
 
     /**
      * Check if allocation is paused globally or for the request's provider.
-     * If paused, stores into pending_allocations and returns true.
+     * If paused, stores the currently unallocated remainder and returns true.
      */
-    private function isPaused(int $requestId, float $amount): bool
+    private function isPaused(RequestModel $request, string $amount): bool
     {
         $globallyPaused = SystemSetting::getValue(self::GLOBAL_PAUSE_KEY) === '1';
-
-        $request = RequestModel::find($requestId);
-        $providerPaused = $request && $request->provider && $request->provider->allocation_paused;
+        $providerPaused = $request->provider && $request->provider->allocation_paused;
 
         if (! $globallyPaused && ! $providerPaused) {
             return false;
@@ -155,16 +171,17 @@ class AllocationService
 
         $pausedBy = $globallyPaused ? 'global' : 'provider';
 
-        PendingAllocation::create([
-            'request_id' => $requestId,
+        PendingAllocation::updateOrCreate([
+            'request_id' => $request->id,
+        ], [
             'provider_id' => $request->provider_id,
             'amount' => $amount,
             'paused_by' => $pausedBy,
         ]);
 
         $this->auditService->log('allocation', 'queued_pending', [
-            'request_id' => $requestId,
-            'amount' => $amount,
+            'request_id' => $request->id,
+            'amount' => (float) $amount,
             'paused_by' => $pausedBy,
         ], auth()->id());
 

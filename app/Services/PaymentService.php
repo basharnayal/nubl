@@ -302,10 +302,35 @@ class PaymentService
                 $payment = Payment::where('external_payment_id', $normalized['invoice_id'])->first();
             }
 
+            if ($payment && $normalized !== null && in_array($normalized['status'], ['Paid', 'DuplicatePayment'], true)) {
+                try {
+                    return $this->processCallbackPaymentState($normalized['invoice_id'], $normalized['status']);
+                } catch (\Throwable $e) {
+                    Log::critical('Payment critical failure: error URL paid-state processing failed', [
+                        'invoice_id' => $normalized['invoice_id'],
+                        'gateway_status' => $normalized['status'],
+                        'error' => $e->getMessage(),
+                        'exception' => $e::class,
+                    ]);
+
+                    $this->auditService->log('payment', 'callback_processing_failed', [
+                        'invoice_id' => $normalized['invoice_id'],
+                        'gateway_status' => $normalized['status'],
+                        'source' => 'error_url',
+                        'error' => $e->getMessage(),
+                    ], null);
+
+                    return $this->redirectDonorFailed($payment->fresh(), 'processing_error');
+                }
+            }
+
             if ($payment && $payment->status !== Payment::STATUS_SUCCEEDED) {
                 $payment->update([
                     'status' => Payment::STATUS_FAILED,
-                    'notes' => array_merge($payment->notes ?? [], ['error_url' => true]),
+                    'notes' => array_merge($payment->notes ?? [], [
+                        'error_url' => true,
+                        'callback_status' => $normalized !== null ? $normalized['status'] : null,
+                    ]),
                 ]);
 
                 $this->auditService->log('payment', 'failed', [

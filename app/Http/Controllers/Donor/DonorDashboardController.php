@@ -44,10 +44,10 @@ class DonorDashboardController extends Controller
             ->unique()
             ->filter();
 
-        // Requests funded by donor that reached REDEEMABLE (code scanned) or FULFILLED (delivered)
+        // Delivered means proof completed; REDEEMABLE only means the recipient can redeem.
         $donorRequestsDelivered = $donorRequestIds->isNotEmpty()
             ? (int) RequestModel::whereIn('id', $donorRequestIds)
-                ->whereIn('status', ['REDEEMABLE', 'FULFILLED'])
+                ->where('status', 'FULFILLED')
                 ->count()
             : 0;
 
@@ -79,7 +79,7 @@ class DonorDashboardController extends Controller
 
         $donorTransparency = [
             'requests_from_your_funds' => $donorRequestsFunded,  // Unique requests funded by donor
-            'requests_delivered' => $donorRequestsDelivered,     // Those with REDEEMABLE or FULFILLED
+            'requests_delivered' => $donorRequestsDelivered,     // FULFILLED only — proof of delivery confirmed
             'amount_allocated' => $donorAmountAllocated,          // Sum from request_payment_links
         ];
 
@@ -140,17 +140,21 @@ class DonorDashboardController extends Controller
                 'time' => $displayAt->translatedFormat('H:i'),
                 'amount' => (float) $link->amount,
                 'type' => $type,
-                'status' => $this->mapRequestStatusForDonor($request->status),
+                'status' => $this->mapRequestStatusForDonor($request),
                 'status_key' => $request->status,
             ];
         })->filter()->sortByDesc(fn ($r) => $r['date'].' '.$r['time'])->values()->take(15)->toArray();
     }
 
-    private function mapRequestStatusForDonor(?string $status): string
+    private function mapRequestStatusForDonor(RequestModel $request): string
     {
-        return match ($status) {
+        if ($request->status === 'REDEEMABLE' && $request->redemption?->status === 'REDEEMED') {
+            return __('Code scanned at provider');
+        }
+
+        return match ($request->status) {
             'FULFILLED' => __('Delivered'),
-            'REDEEMABLE' => __('Code scanned at provider'),
+            'REDEEMABLE' => __('Ready for redemption'),
             'APPROVED' => __('Request approved'),
             'REQUESTED' => __('Allocated'),
             default => __('Allocated'),

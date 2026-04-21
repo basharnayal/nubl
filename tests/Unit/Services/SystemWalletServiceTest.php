@@ -152,6 +152,55 @@ class SystemWalletServiceTest extends TestCase
     }
 
     #[Test]
+    public function transfer_to_provider_for_request_is_idempotent_per_request(): void
+    {
+        $systemWallet = Ewallet::create([
+            'owner_type' => 'SYSTEM',
+            'owner_id' => null,
+            'balance' => 200,
+            'status' => true,
+        ]);
+
+        $provider = User::factory()->create(['status' => User::STATUS_ACTIVE, 'is_active' => true]);
+        $recipient = User::factory()->create();
+        $this->createProviderProfile($provider);
+
+        $request = RequestModel::create([
+            'recipient_id' => $recipient->id,
+            'provider_id' => $provider->id,
+            'reserved_amount' => 75.00,
+            'status' => 'REDEEMABLE',
+            'funding_source' => 'CITY_FUND',
+        ]);
+
+        $allocationService = Mockery::mock(AllocationService::class);
+        $allocationService->shouldReceive('allocateToRequest')
+            ->once()
+            ->with($request->id, 75.0);
+
+        $auditService = Mockery::spy(AuditService::class);
+        $this->app->instance(AllocationService::class, $allocationService);
+        $this->app->instance(AuditService::class, $auditService);
+
+        $service = app(SystemWalletService::class);
+        $service->transferToProviderForRequest($request);
+        $service->transferToProviderForRequest($request->fresh());
+
+        $providerWallet = $provider->providerProfile->fresh()->ewallet;
+
+        $this->assertSame(1, FundTransaction::where('request_id', $request->id)
+            ->where('source', FundTransaction::SOURCE_PAYOUT)
+            ->where('direction', FundTransaction::DIRECTION_OUT)
+            ->count());
+        $this->assertSame(1, FundTransaction::where('request_id', $request->id)
+            ->where('source', FundTransaction::SOURCE_PAYOUT)
+            ->where('direction', FundTransaction::DIRECTION_IN)
+            ->count());
+        $this->assertSame('125.00', (string) $systemWallet->fresh()->balance);
+        $this->assertSame('75.00', (string) $providerWallet->fresh()->balance);
+    }
+
+    #[Test]
     public function transfer_to_provider_for_request_throws_when_city_fund_is_insufficient(): void
     {
         Ewallet::create([

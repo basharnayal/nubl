@@ -55,7 +55,7 @@ class UpdateResubmitApplicationRequest extends FormRequest
         }
 
         $maxMb = config('provider.document_max_size_mb', 5);
-        $maxBytes = $maxMb * 1024 * 1024;
+        $maxKilobytes = $maxMb * 1024;
 
         $weekdays = array_keys(config('provider.weekdays'));
         $operatingHoursRules = [
@@ -86,8 +86,8 @@ class UpdateResubmitApplicationRequest extends FormRequest
             'bank_name' => ['required', 'string', 'max:255'],
             'iban' => ['required', 'string', 'max:50'],
             'account_holder_name' => ['required', 'string', 'max:255'],
-            'business_license' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.$maxBytes],
-            'id_or_iqama' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.$maxBytes],
+            'business_license' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.$maxKilobytes],
+            'id_or_iqama' => ['nullable', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.$maxKilobytes],
             'password' => ['nullable', 'confirmed', Password::defaults()],
         ], $operatingHoursRules);
     }

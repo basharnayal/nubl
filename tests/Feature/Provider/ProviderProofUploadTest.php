@@ -112,6 +112,34 @@ class ProviderProofUploadTest extends TestCase
         ]);
     }
 
+    #[Test]
+    public function duplicate_proof_upload_deletes_newly_uploaded_file(): void
+    {
+        [$request, $redemption] = $this->createRedeemedRequest('CITY_FUND');
+
+        Storage::disk('local')->put("private/proofs/{$redemption->id}/existing.jpg", 'existing-proof');
+        OrderProof::create([
+            'order_redemption_id' => $redemption->id,
+            'proof_url' => "private/proofs/{$redemption->id}/existing.jpg",
+            'is_provider_donation' => false,
+            'fulfilled_at' => now(),
+        ]);
+
+        $this->actingAs($this->provider)
+            ->post(route('provider.proof.store', $redemption), [
+                'proof_file' => UploadedFile::fake()->image('duplicate.jpg'),
+            ])
+            ->assertRedirect(route('provider.requests.index'));
+
+        Storage::disk('local')->assertExists("private/proofs/{$redemption->id}/existing.jpg");
+        $this->assertSame(
+            ["private/proofs/{$redemption->id}/existing.jpg"],
+            Storage::disk('local')->allFiles("private/proofs/{$redemption->id}")
+        );
+        $this->assertSame(1, OrderProof::where('order_redemption_id', $redemption->id)->count());
+        $this->assertSame('REDEEMABLE', $request->fresh()->status);
+    }
+
     /**
      * @return array{RequestModel, OrderRedemption}
      */
