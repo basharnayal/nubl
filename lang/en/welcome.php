@@ -5,16 +5,18 @@ return [
     'skip_link' => 'Skip to content',
 
     'nav' => [
-        'aria'       => 'Primary navigation',
-        'lang_aria'  => 'Switch to Arabic',
-        'lang_label' => 'العربية',
-        'idea'       => 'The idea',
-        'how'        => 'How it works',
-        'trust'      => 'Trust',
-        'providers'  => 'Providers',
-        'give'       => 'Give support',
-        'dashboard'  => 'Dashboard',
-        'login'      => 'Login',
+        'aria'         => 'Primary navigation',
+        'lang_aria'    => 'Switch to Arabic',
+        'lang_label'   => 'العربية',
+        'idea'         => 'The idea',
+        'how'          => 'How it works',
+        'trust'        => 'Trust',
+        'providers'    => 'Providers',
+        'give'         => 'Give support',
+        'dashboard'    => 'Dashboard',
+        'login'        => 'Login',
+        'open_menu'    => 'Open menu',
+        'close_drawer' => 'Close menu',
     ],
 
     'hero' => [
