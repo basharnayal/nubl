@@ -46,9 +46,9 @@ class TimeController extends Controller
     private function timePayload(Carbon $mocked = null): array
     {
         return [
-            'is_mocked'    => $mocked !== null,
-            'mocked_time'  => $mocked?->toIso8601String(),
-            'real_time'    => Carbon::now()->toIso8601String(),   // always real wall-clock
+            'is_mocked'   => $mocked !== null,
+            'mocked_time' => $mocked?->toIso8601String(),
+            'real_time'   => Carbon::createFromTimestamp(time())->toIso8601String(),
         ];
     }
 
@@ -85,15 +85,12 @@ class TimeController extends Controller
             'datetime' => ['required', 'date'],
         ]);
 
-        $time    = Carbon::parse($request->input('datetime'));
-        $realNow = Carbon::now()->toIso8601String();
+        $time = Carbon::parse($request->input('datetime'));
         $this->persist($time);
 
         return response()->json([
-            'message'     => 'Application time set successfully.',
-            'is_mocked'   => true,
-            'mocked_time' => $time->toIso8601String(),
-            'real_time'   => $realNow,
+            'message' => 'Application time set successfully.',
+            ...$this->timePayload($time),
         ]);
     }
 
@@ -141,14 +138,11 @@ class TimeController extends Controller
         $now->addMonths($request->integer('months', 0));
         $now->addYears($request->integer('years',   0));
 
-        $realNow = Carbon::now()->toIso8601String();
         $this->persist($now);
 
         return response()->json([
-            'message'      => 'Application time advanced successfully.',
-            'is_mocked'    => true,
-            'mocked_time'  => $now->toIso8601String(),
-            'real_time'    => $realNow,
+            'message' => 'Application time advanced successfully.',
+            ...$this->timePayload($now),
         ]);
     }
 
