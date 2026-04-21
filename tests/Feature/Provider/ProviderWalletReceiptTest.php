@@ -26,8 +26,8 @@ class ProviderWalletReceiptTest extends TestCase
     #[Test]
     public function provider_can_view_wallet_index_with_own_transactions_and_payouts(): void
     {
-        $provider = $this->provider();
-        $otherProvider = $this->provider();
+        $provider = $this->providerWithProfile();
+        $otherProvider = $this->providerWithProfile();
 
         $wallet = $provider->providerProfile->ewallet;
         $otherWallet = $otherProvider->providerProfile->ewallet;
@@ -109,7 +109,7 @@ class ProviderWalletReceiptTest extends TestCase
     #[Test]
     public function provider_can_download_own_transferred_payout_receipt(): void
     {
-        $provider = $this->provider();
+        $provider = $this->providerWithProfile();
         $payout = $this->payoutFor($provider, ProviderPayout::STATUS_TRANSFERRED, 'receipts/own.pdf');
         Storage::disk('local')->put($payout->receipt_path, 'receipt-body');
 
@@ -121,8 +121,8 @@ class ProviderWalletReceiptTest extends TestCase
     #[Test]
     public function provider_cannot_download_another_providers_receipt(): void
     {
-        $owner = $this->provider();
-        $other = $this->provider();
+        $owner = $this->providerWithProfile();
+        $other = $this->providerWithProfile();
         $payout = $this->payoutFor($owner, ProviderPayout::STATUS_TRANSFERRED, 'receipts/other.pdf');
         Storage::disk('local')->put($payout->receipt_path, 'receipt-body');
 
@@ -134,7 +134,7 @@ class ProviderWalletReceiptTest extends TestCase
     #[Test]
     public function pending_payout_receipt_is_not_downloadable_by_provider(): void
     {
-        $provider = $this->provider();
+        $provider = $this->providerWithProfile();
         $payout = $this->payoutFor($provider, ProviderPayout::STATUS_PENDING_ADMIN_REVIEW, 'receipts/pending.pdf');
         Storage::disk('local')->put($payout->receipt_path, 'receipt-body');
 
@@ -146,7 +146,7 @@ class ProviderWalletReceiptTest extends TestCase
     #[Test]
     public function transferred_payout_without_receipt_path_is_not_downloadable(): void
     {
-        $provider = $this->provider();
+        $provider = $this->providerWithProfile();
         $payout = $this->payoutFor($provider, ProviderPayout::STATUS_TRANSFERRED, null);
 
         $this->actingAs($provider)
@@ -157,7 +157,7 @@ class ProviderWalletReceiptTest extends TestCase
     #[Test]
     public function transferred_payout_receipt_returns_not_found_when_file_is_missing(): void
     {
-        $provider = $this->provider();
+        $provider = $this->providerWithProfile();
         $payout = $this->payoutFor($provider, ProviderPayout::STATUS_TRANSFERRED, 'receipts/missing.pdf');
 
         $this->actingAs($provider)
@@ -165,7 +165,7 @@ class ProviderWalletReceiptTest extends TestCase
             ->assertNotFound();
     }
 
-    private function provider(): User
+    private function providerWithProfile(): User
     {
         $provider = User::factory()->create([
             'status' => User::STATUS_ACTIVE,
