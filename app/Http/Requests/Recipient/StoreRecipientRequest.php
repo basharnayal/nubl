@@ -14,7 +14,7 @@ class StoreRecipientRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return $this->user()->hasRole('recipient') && $this->user()->hasFullAccess();
+        return (bool) ($this->user()?->hasRole('recipient') && $this->user()->hasFullAccess());
     }
 
     /**
@@ -38,6 +38,10 @@ class StoreRecipientRequest extends FormRequest
     public function withValidator(Validator $validator): void
     {
         $validator->after(function ($validator) {
+            if ($validator->errors()->isNotEmpty()) {
+                return;
+            }
+
             $data = $validator->getData();
             $providerId = $data['provider_id'] ?? null;
             $items = $data['items'] ?? [];

@@ -336,6 +336,68 @@ class PaymentFlowTest extends TestCase
     }
 
     #[Test]
+    public function error_url_with_verified_paid_status_credits_payment_instead_of_marking_failed(): void
+    {
+        $payment = Payment::create([
+            'sponsor_id' => $this->donor->id,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'external_payment_id' => 'err-paid-100',
+            'status' => Payment::STATUS_PENDING,
+            'amount' => 100,
+        ]);
+
+        $mockMyFatoorah = $this->createMock(MyFatoorahService::class);
+        $mockMyFatoorah->method('getPaymentStatus')
+            ->willReturn([
+                'status' => 'Paid',
+                'invoice_id' => 'err-paid-100',
+                'raw_response' => [],
+            ]);
+        $this->app->instance(MyFatoorahService::class, $mockMyFatoorah);
+
+        $response = $this->get(route('payments.error', ['paymentId' => 'err-paid-100']));
+
+        $response->assertRedirect(route('donor.payments.success', ['payment_id' => $payment->id]));
+        $this->assertSame(Payment::STATUS_SUCCEEDED, $payment->fresh()->status);
+        $this->assertSame('100.00', (string) Ewallet::where('owner_type', 'SYSTEM')->firstOrFail()->fresh()->balance);
+        $this->assertSame(1, FundTransaction::where('payment_id', $payment->id)->count());
+    }
+
+    #[Test]
+    public function error_url_paid_processing_failure_rolls_back_without_marking_failed(): void
+    {
+        $payment = Payment::create([
+            'sponsor_id' => $this->donor->id,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'external_payment_id' => 'err-paid-rollback',
+            'status' => Payment::STATUS_PENDING,
+            'amount' => 45,
+        ]);
+
+        $mockMyFatoorah = $this->createMock(MyFatoorahService::class);
+        $mockMyFatoorah->method('getPaymentStatus')
+            ->willReturn([
+                'status' => 'Paid',
+                'invoice_id' => 'err-paid-rollback',
+                'raw_response' => [],
+            ]);
+        $this->app->instance(MyFatoorahService::class, $mockMyFatoorah);
+
+        $failingNotifications = $this->createMock(NotificationServiceInterface::class);
+        $failingNotifications->method('sendDonationReceipt')
+            ->willThrowException(new \RuntimeException('notification transport failed'));
+        $this->app->instance(NotificationServiceInterface::class, $failingNotifications);
+
+        $this->get(route('payments.error', ['paymentId' => 'err-paid-rollback']))
+            ->assertRedirect(route('donor.payments.failed', ['payment_id' => $payment->id]))
+            ->assertSessionHas('payment_reason', 'processing_error');
+
+        $this->assertSame(Payment::STATUS_PENDING, $payment->fresh()->status);
+        $this->assertSame('0.00', (string) Ewallet::where('owner_type', 'SYSTEM')->firstOrFail()->fresh()->balance);
+        $this->assertSame(0, FundTransaction::where('payment_id', $payment->id)->count());
+    }
+
+    #[Test]
     public function callback_with_ambiguous_status_sets_payment_reason(): void
     {
         $payment = Payment::create([

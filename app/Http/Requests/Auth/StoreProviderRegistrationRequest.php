@@ -39,7 +39,7 @@ class StoreProviderRegistrationRequest extends FormRequest
     public function rules(): array
     {
         $maxMb = config('provider.document_max_size_mb', 5);
-        $maxBytes = $maxMb * 1024 * 1024;
+        $maxKilobytes = $maxMb * 1024;
 
         $weekdays = array_keys(config('provider.weekdays'));
         $operatingHoursRules = [
@@ -57,7 +57,7 @@ class StoreProviderRegistrationRequest extends FormRequest
             'business_name_ar' => ['required', 'string', 'max:255'],
             'business_name_en' => ['required', 'string', 'max:255'],
             'unified_number' => ['required', 'string', 'max:50'],
-            'business_category' => ['required', 'array'],
+            'business_category' => ['required', 'array', 'min:1'],
             'business_category.*' => ['string', 'in:'.implode(',', config('provider.business_categories', []))],
             'address_ar' => ['required', 'string', 'max:1000'],
             'address_en' => ['required', 'string', 'max:1000'],
@@ -74,8 +74,8 @@ class StoreProviderRegistrationRequest extends FormRequest
             'iban' => ['required', 'string', 'max:50'],
             'account_holder_name' => ['required', 'string', 'max:255'],
             'password' => ['required', Rules\Password::defaults()],
-            'business_license' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.$maxBytes],
-            'id_or_iqama' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.$maxBytes],
+            'business_license' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.$maxKilobytes],
+            'id_or_iqama' => ['required', 'file', 'mimes:pdf,jpg,jpeg,png', 'max:'.$maxKilobytes],
         ], $operatingHoursRules);
     }
 
