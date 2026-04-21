@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests;
 
-use App\Helpers\PhoneHelper;
+use App\Support\PhoneHelper;
 use App\Rules\SaudiPhoneNumber;
 use App\Rules\SaudiPhoneUnique;
 use Illuminate\Foundation\Http\FormRequest;

@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Helpers\PhoneHelper;
+use App\Support\PhoneHelper;
 use App\Models\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -136,8 +136,8 @@ class OtpService
      */
     public function sendOtpForLogin(string $phone): array
     {
-        $normalized = \App\Helpers\PhoneHelper::normalize($phone);
-        if (! \App\Helpers\PhoneHelper::isValid($phone)) {
+        $normalized = \App\Support\PhoneHelper::normalize($phone);
+        if (! \App\Support\PhoneHelper::isValid($phone)) {
             return ['success' => false, 'message' => __('Invalid phone number.')];
         }
 
@@ -181,7 +181,7 @@ class OtpService
      */
     public function verifyOtpForLogin(string $phone, string $code): ?User
     {
-        $normalized = \App\Helpers\PhoneHelper::normalize($phone);
+        $normalized = \App\Support\PhoneHelper::normalize($phone);
         $code = preg_replace('/\D/', '', $code);
         if (strlen($code) !== self::OTP_LENGTH) {
             return null;

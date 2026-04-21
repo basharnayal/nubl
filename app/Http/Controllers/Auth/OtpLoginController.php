@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Helpers\PhoneHelper;
+use App\Support\PhoneHelper;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\AuditService;

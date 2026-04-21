@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Helpers\PhoneHelper;
+use App\Support\PhoneHelper;
 use App\Models\ProviderDocuments;
 use App\Models\ProviderFinancialInfo;
 use App\Models\ProviderOperatingInfo;

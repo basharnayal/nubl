@@ -90,7 +90,7 @@
                                 <td class="px-4 py-3 sm:px-5">
                                     <div class="font-medium text-slate-700 dark:text-navy-100">{{ $provider->name }}</div>
                                     <div class="text-xs text-slate-500 dark:text-navy-300">
-                                        {{ $provider->phone_number || $provider->providerProfile?->phone_number ? \App\Helpers\PhoneHelper::formatForDisplay($provider->phone_number ?? $provider->providerProfile?->phone_number) : '-' }}
+                                        {{ $provider->phone_number || $provider->providerProfile?->phone_number ? \App\Support\PhoneHelper::formatForDisplay($provider->phone_number ?? $provider->providerProfile?->phone_number) : '-' }}
                                     </div>
                                 </td>
                                 <td class="px-4 py-3 sm:px-5">

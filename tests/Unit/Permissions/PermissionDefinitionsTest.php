@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Permissions;
 
-use App\Permissions\PermissionDefinitions;
+use App\Support\PermissionDefinitions;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
