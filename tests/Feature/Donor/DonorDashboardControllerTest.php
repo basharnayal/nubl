@@ -163,7 +163,7 @@ class DonorDashboardControllerTest extends TestCase
     }
 
     #[Test]
-    public function donor_dashboard_does_not_count_redeemable_requests_as_delivered_before_fulfillment(): void
+    public function donor_dashboard_counts_redeemable_requests_as_delivered(): void
     {
         $donor = User::factory()->create([
             'membership_type' => User::MEMBERSHIP_DONOR,
@@ -211,7 +211,7 @@ class DonorDashboardControllerTest extends TestCase
 
         $response->assertOk();
         $this->assertSame(1, $response->viewData('donorRequestsFunded'));
-        $this->assertSame(0, $response->viewData('donorRequestsDelivered'));
+        $this->assertSame(1, $response->viewData('donorRequestsDelivered'));
 
         $timeline = $response->viewData('donorImpactTimeline');
         $this->assertSame('REDEEMABLE', $timeline[0]['status_key']);
