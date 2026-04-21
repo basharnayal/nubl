@@ -10,9 +10,6 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         using: function () {
-            Route::middleware('api')
-                 ->group(base_path('routes/api.php'));
-
             Route::middleware('web')
                  ->group(base_path('routes/web.php'));
 
