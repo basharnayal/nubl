@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Permissions;
+namespace App\Support;
 
 /**
  * Single source of truth for permission names used by seeders and the admin RBAC UI.

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Helpers;
+namespace App\Support;
 
 /**
  * Saudi phone number normalization for Taqnyat and DB storage.

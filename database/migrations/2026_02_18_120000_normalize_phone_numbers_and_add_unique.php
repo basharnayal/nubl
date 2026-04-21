@@ -1,6 +1,6 @@
 <?php
 
-use App\Helpers\PhoneHelper;
+use App\Support\PhoneHelper;
 use App\Models\ProviderProfile;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;

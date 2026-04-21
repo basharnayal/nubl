@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Permissions\PermissionDefinitions;
+use App\Support\PermissionDefinitions;
 use App\Support\ProtectedRoles;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;

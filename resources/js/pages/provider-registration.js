@@ -18,7 +18,7 @@ const STEP_CONFIG = {
   },
 };
 
-/** Mirrors App\Helpers\PhoneHelper::nationalMobileDigits (digits-only input paths). */
+/** Mirrors App\Support\PhoneHelper::nationalMobileDigits (digits-only input paths). */
 function saudiNationalMobileDigits(raw) {
   let s = String(raw || '').replace(/\D/g, '');
   if (s.startsWith('00966')) s = s.slice(5);

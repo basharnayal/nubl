@@ -2,7 +2,7 @@
 
 namespace App\Rules;
 
-use App\Helpers\PhoneHelper;
+use App\Support\PhoneHelper;
 use App\Models\User;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;

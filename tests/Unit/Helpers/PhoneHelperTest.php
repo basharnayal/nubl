@@ -2,7 +2,7 @@
 
 namespace Tests\Unit\Helpers;
 
-use App\Helpers\PhoneHelper;
+use App\Support\PhoneHelper;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;

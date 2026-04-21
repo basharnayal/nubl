@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Auth;
 
-use App\Helpers\PhoneHelper;
+use App\Support\PhoneHelper;
 use App\Models\User;
 use App\Rules\SaudiPhoneNumber;
 use App\Rules\SaudiPhoneUnique;

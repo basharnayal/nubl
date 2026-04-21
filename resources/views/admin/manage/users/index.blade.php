@@ -72,7 +72,7 @@
                                     <td class="px-4 py-3 sm:px-5">
                                         <div>{{ $user->email }}</div>
                                         <div class="text-xs text-slate-500 dark:text-navy-300">
-                                            {{ $user->phone_number || $user->providerProfile?->phone_number ? \App\Helpers\PhoneHelper::formatForDisplay($user->phone_number ?? $user->providerProfile?->phone_number) : '-' }}
+                                            {{ $user->phone_number || $user->providerProfile?->phone_number ? \App\Support\PhoneHelper::formatForDisplay($user->phone_number ?? $user->providerProfile?->phone_number) : '-' }}
                                         </div>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
