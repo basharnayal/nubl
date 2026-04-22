@@ -20,6 +20,10 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        if (! app()->environment('production')) {
+            $middleware->append(\App\Http\Middleware\ApplyMockedTime::class);
+        }
+
         // Plain XSRF-TOKEN in the browser; required for JS CSRF + axios/fetch headers.
         $middleware->encryptCookies(except: [
             'XSRF-TOKEN',
