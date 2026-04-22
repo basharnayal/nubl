@@ -1,0 +1,40 @@
+.git
+.gitignore
+.env
+.env.backup
+.env.production
+
+# IDE / editor
+.idea
+.vscode
+.fleet
+.nova
+.zed
+.phpactor.json
+
+# Build artifacts (will be generated inside container)
+/vendor
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+
+# Testing
+/playwright-report
+/test-results
+/blob-report
+.phpunit.result.cache
+.phpunit.cache
+
+# Docs
+/docs
+
+# OS
+.DS_Store
+Thumbs.db
+*.log
+output.txt
+routes_dump*.txt
+test_output.txt

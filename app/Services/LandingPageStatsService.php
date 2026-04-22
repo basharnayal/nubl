@@ -6,6 +6,7 @@ use App\Models\FundTransaction;
 use App\Models\Request;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Cache;
 use Spatie\Permission\Models\Role;
 
 /**
@@ -35,7 +36,7 @@ class LandingPageStatsService
      */
     public function getHeroStats(): array
     {
-        return [
+        return Cache::remember('landing_hero_stats', 300, fn () => [
             'totalDelivered' => $this->totalDelivered(),
             'familiesSupported' => $this->familiesSupported(),
             'localProviders' => $this->localProviders(),
@@ -43,7 +44,7 @@ class LandingPageStatsService
             'trustLedger' => $this->trustLedgerEntries(),
             'trustBadges' => $this->trustBadges(),
             'providerCounts' => $this->providerCategoryCounts(),
-        ];
+        ]);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
