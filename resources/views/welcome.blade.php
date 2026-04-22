@@ -8,9 +8,7 @@
 <meta name="theme-color" content="#F5F4F1" />
 <title>{{ config('app.name', 'NUBL') }} — Food support with dignity</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Amiri:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+@vite(['resources/css/fonts-landing.css'])
 
 <style>
   :root {

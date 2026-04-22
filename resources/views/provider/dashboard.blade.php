@@ -227,40 +227,40 @@
                     data-chart-categories="{{ json_encode($weeklyFulfilledChart['categories'] ?? []) }}"
                     data-chart-label="{{ json_encode(__('provider.dashboard.chart_series')) }}"
                     data-chart-rtl="{{ app()->getLocale() === 'ar' ? '1' : '0' }}" x-data="{
-                        init() {
-                            $nextTick(() => {
-                                if (this.$el._x_chart) return;
-                                const chartHeight = 280;
-                                const config = { ...pages.charts.incomePersonal };
-                                const series = JSON.parse(this.$el.dataset.chartSeries);
-                                const categories = JSON.parse(this.$el.dataset.chartCategories);
-                                const label = JSON.parse(this.$el.dataset.chartLabel);
-                                const isRtl = this.$el.dataset.chartRtl === '1';
-                                config.series = [{ name: label, data: series }];
-                                config.colors = ['#f0aa1f'];
-                                config.xaxis = { ...config.xaxis, categories, position: 'bottom' };
-                                config.chart = {
-                                    ...config.chart,
-                                    height: chartHeight,
-                                    parentHeightOffset: 0,
-                                    toolbar: { show: false },
-                                    padding: { top: 12, right: 0, bottom: 0, left: 0 },
-                                };
-                                config.yaxis = { ...config.yaxis, ...(isRtl ? { opposite: true } : {}) };
-                                config.dataLabels = {
-                                    ...config.dataLabels,
-                                    enabled: series.some(v => v > 0),
-                                    offsetY: -10,
-                                    formatter: function (val) {
-                                        return val >= 1000 ? (val / 1000).toFixed(2) + 'k' : val;
-                                    },
-                                };
-                                if (series.every(v => v === 0)) {
-                                    config.yaxis = { ...config.yaxis, min: 0, max: 5, forceNiceScale: true, ...(isRtl ? { opposite: true } : {}) };
-                                }
-                                this.$el._x_chart = new ApexCharts(this.$el, config);
-                                this.$el._x_chart.render();
-                            });
+                        async init() {
+                            await $nextTick();
+                            if (this.$el._x_chart) return;
+                            const ApexCharts = await window.loadApexCharts();
+                            const chartHeight = 280;
+                            const config = { ...pages.charts.incomePersonal };
+                            const series = JSON.parse(this.$el.dataset.chartSeries);
+                            const categories = JSON.parse(this.$el.dataset.chartCategories);
+                            const label = JSON.parse(this.$el.dataset.chartLabel);
+                            const isRtl = this.$el.dataset.chartRtl === '1';
+                            config.series = [{ name: label, data: series }];
+                            config.colors = ['#f0aa1f'];
+                            config.xaxis = { ...config.xaxis, categories, position: 'bottom' };
+                            config.chart = {
+                                ...config.chart,
+                                height: chartHeight,
+                                parentHeightOffset: 0,
+                                toolbar: { show: false },
+                                padding: { top: 12, right: 0, bottom: 0, left: 0 },
+                            };
+                            config.yaxis = { ...config.yaxis, ...(isRtl ? { opposite: true } : {}) };
+                            config.dataLabels = {
+                                ...config.dataLabels,
+                                enabled: series.some(v => v > 0),
+                                offsetY: -10,
+                                formatter: function (val) {
+                                    return val >= 1000 ? (val / 1000).toFixed(2) + 'k' : val;
+                                },
+                            };
+                            if (series.every(v => v === 0)) {
+                                config.yaxis = { ...config.yaxis, min: 0, max: 5, forceNiceScale: true, ...(isRtl ? { opposite: true } : {}) };
+                            }
+                            this.$el._x_chart = new ApexCharts(this.$el, config);
+                            this.$el._x_chart.render();
                         }
                      }" x-init="init()"></div>
             </div>

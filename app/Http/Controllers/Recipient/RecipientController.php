@@ -74,20 +74,22 @@ class RecipientController extends Controller
      */
     private function activityChartData(int $recipientId): array
     {
+        $startDate = Carbon::now()->subMonths(7)->startOfMonth();
+
+        $monthly = RequestModel::forRecipient($recipientId)
+            ->where('status', 'FULFILLED')
+            ->where('created_at', '>=', $startDate)
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COALESCE(SUM(reserved_amount), 0) as total")
+            ->groupByRaw("DATE_FORMAT(created_at, '%Y-%m')")
+            ->pluck('total', 'month');
+
         $categories = [];
         $series = [];
 
         for ($i = 7; $i >= 0; $i--) {
             $date = Carbon::now()->subMonths($i);
             $categories[] = $date->translatedFormat('M');
-
-            $amount = RequestModel::forRecipient($recipientId)
-                ->where('status', 'FULFILLED')
-                ->whereYear('created_at', $date->year)
-                ->whereMonth('created_at', $date->month)
-                ->sum('reserved_amount');
-
-            $series[] = (float) $amount;
+            $series[] = (float) ($monthly[$date->format('Y-m')] ?? 0);
         }
 
         return [

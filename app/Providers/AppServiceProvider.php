@@ -35,7 +35,10 @@ class AppServiceProvider extends ServiceProvider
         FundTransaction::observe(app(FundTransactionObserver::class));
         RequestModel::observe(app(RequestObserver::class));
         User::observe(UserObserver::class);
-        View::composer('*', SidebarComposer::class);
+        View::composer([
+            'components.app-partials.main-sidebar',
+            'components.app-partials.sidebar-panel',
+        ], SidebarComposer::class);
 
         config([
             'recipient.weekly_allowance_limit' => config('provider.recipient.weekly_allowance_limit', 400),

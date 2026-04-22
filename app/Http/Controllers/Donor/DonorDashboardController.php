@@ -9,7 +9,6 @@ use App\Models\RequestPaymentLink;
 use App\Support\PseudonymousRequestId;
 use App\Support\RequestTypeLabel;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 
 class DonorDashboardController extends Controller
 {
@@ -22,27 +21,33 @@ class DonorDashboardController extends Controller
     {
         $sponsorId = auth()->id();
 
-        $donorTotalDonated = (float) Payment::where('sponsor_id', $sponsorId)
-            ->where('status', Payment::STATUS_SUCCEEDED)
-            ->sum('amount');
+        // ── Donor payment aggregates (3 queries → 1 + pluck) ────────────────
+        $donorPaymentBase = Payment::where('sponsor_id', $sponsorId)
+            ->where('status', Payment::STATUS_SUCCEEDED);
 
-        $donorPaymentIds = Payment::where('sponsor_id', $sponsorId)
-            ->where('status', Payment::STATUS_SUCCEEDED)
-            ->pluck('id');
+        $donorAgg = (clone $donorPaymentBase)
+            ->selectRaw('COUNT(*) as cnt, COALESCE(SUM(amount), 0) as total, MAX(created_at) as last_at')
+            ->first();
 
-        $donorDonationCount = Payment::where('sponsor_id', $sponsorId)
-            ->where('status', Payment::STATUS_SUCCEEDED)
-            ->count();
+        $donorTotalDonated = (float) $donorAgg->total;
+        $donorDonationCount = (int) $donorAgg->cnt;
+        $donorLastContribution = $donorAgg->last_at ? Carbon::parse($donorAgg->last_at) : null;
+        $donorLastContributionHuman = $donorLastContribution
+            ? ($donorLastContribution->isPast() ? $donorLastContribution->diffForHumans() : $donorLastContribution->translatedFormat('M d, Y'))
+            : null;
 
-        $donorRequestsFunded = (int) DB::table('request_payment_links')
-            ->whereIn('payment_id', $donorPaymentIds)
-            ->selectRaw('COUNT(DISTINCT request_id) as cnt')
-            ->value('cnt');
+        $donorPaymentIds = (clone $donorPaymentBase)->pluck('id');
+
+        // ── Request payment link aggregates (3 queries → 1 + pluck) ─────────
+        $linkAgg = RequestPaymentLink::whereIn('payment_id', $donorPaymentIds)
+            ->selectRaw('COUNT(DISTINCT request_id) as funded_count, COALESCE(SUM(amount), 0) as total_allocated')
+            ->first();
+
+        $donorRequestsFunded = (int) $linkAgg->funded_count;
+        $donorAmountAllocated = (float) $linkAgg->total_allocated;
 
         $donorRequestIds = RequestPaymentLink::whereIn('payment_id', $donorPaymentIds)
-            ->pluck('request_id')
-            ->unique()
-            ->filter();
+            ->distinct()->pluck('request_id')->filter();
 
         // Delivered = request is redeemable or fully fulfilled (funded and in recipient's hands).
         $donorRequestsDelivered = $donorRequestIds->isNotEmpty()
@@ -51,28 +56,18 @@ class DonorDashboardController extends Controller
                 ->count()
             : 0;
 
-        $donorAmountAllocated = (float) RequestPaymentLink::whereIn('payment_id', $donorPaymentIds)
-            ->sum('amount');
-
-        $donorLastContribution = Payment::where('sponsor_id', $sponsorId)
-            ->where('status', Payment::STATUS_SUCCEEDED)
-            ->latest('created_at')
-            ->first()?->created_at;
-        $donorLastContributionHuman = $donorLastContribution
-            ? ($donorLastContribution->isPast() ? $donorLastContribution->diffForHumans() : $donorLastContribution->translatedFormat('M d, Y'))
-            : null;
-
         $donorImpactTimeline = $this->donorImpactTimeline($donorPaymentIds);
         $donorChartData = $this->donorImpactChartData($donorPaymentIds);
 
-        // Platform need (real-time, encouraging)
-        $pendingRequestsCount = RequestModel::whereIn('status', ['REQUESTED', 'APPROVED', 'REDEEMABLE'])
-            ->count();
-        $pendingAmount = RequestModel::whereIn('status', ['REQUESTED', 'APPROVED', 'REDEEMABLE'])
-            ->sum('reserved_amount');
-        $recipientsWaiting = RequestModel::whereIn('status', ['REQUESTED', 'APPROVED', 'REDEEMABLE'])
-            ->selectRaw('COUNT(DISTINCT recipient_id) as total')->value('total') ?? 0;
-        $fulfilledCount = RequestModel::where('status', 'FULFILLED')->count();
+        // ── Platform need aggregates (4 queries → 2) ────────────────────────
+        $platformAgg = RequestModel::whereIn('status', ['REQUESTED', 'APPROVED', 'REDEEMABLE'])
+            ->selectRaw('COUNT(*) as cnt, COALESCE(SUM(reserved_amount), 0) as total, COUNT(DISTINCT recipient_id) as waiting')
+            ->first();
+
+        $pendingRequestsCount = (int) $platformAgg->cnt;
+        $pendingAmount = (float) $platformAgg->total;
+        $recipientsWaiting = (int) $platformAgg->waiting;
+        $fulfilledCount = (int) RequestModel::where('status', 'FULFILLED')->count();
         $fundedPercent = $fulfilledCount > 0
             ? min(100, (int) (($fulfilledCount / max(1, $fulfilledCount + $pendingRequestsCount)) * 100))
             : 0;

@@ -5,7 +5,8 @@
                     <div class="card relative overflow-hidden bg-linear-to-r from-blue-500 to-indigo-600 px-5 pb-5">
                         <div>
                             <div class="ax-transparent-gridline mt-5 w-1/2">
-                                <div x-init="$nextTick(() => {
+                                <div x-init="$nextTick(async () => {
+                                    const ApexCharts = await window.loadApexCharts();
                                     $el._x_chart = new ApexCharts($el, pages.charts.earningWhite);
                                     $el._x_chart.render()
                                 });"></div>
@@ -264,21 +265,21 @@
                              data-chart-categories="{{ json_encode($activityChartData['categories'] ?? []) }}"
                              data-chart-label="{{ json_encode(__('Amount Spent')) }}"
                              x-data="{
-                                init() {
-                                    $nextTick(() => {
-                                        if (this.$el._x_chart) return;
-                                        const config = { ...pages.charts.incomePersonal };
-                                        const series = JSON.parse(this.$el.dataset.chartSeries);
-                                        const categories = JSON.parse(this.$el.dataset.chartCategories);
-                                        const label = JSON.parse(this.$el.dataset.chartLabel);
-                                        config.series = [{ name: label, data: series }];
-                                        config.xaxis = { ...config.xaxis, categories };
-                                        if (series.every(v => v === 0)) {
-                                            config.yaxis = { ...config.yaxis, min: 0, max: 5, forceNiceScale: true };
-                                        }
-                                        this.$el._x_chart = new ApexCharts(this.$el, config);
-                                        this.$el._x_chart.render();
-                                    });
+                                async init() {
+                                    await $nextTick();
+                                    if (this.$el._x_chart) return;
+                                    const ApexCharts = await window.loadApexCharts();
+                                    const config = { ...pages.charts.incomePersonal };
+                                    const series = JSON.parse(this.$el.dataset.chartSeries);
+                                    const categories = JSON.parse(this.$el.dataset.chartCategories);
+                                    const label = JSON.parse(this.$el.dataset.chartLabel);
+                                    config.series = [{ name: label, data: series }];
+                                    config.xaxis = { ...config.xaxis, categories };
+                                    if (series.every(v => v === 0)) {
+                                        config.yaxis = { ...config.yaxis, min: 0, max: 5, forceNiceScale: true };
+                                    }
+                                    this.$el._x_chart = new ApexCharts(this.$el, config);
+                                    this.$el._x_chart.render();
                                 }
                              }" x-init="init()"></div>
                     </div>

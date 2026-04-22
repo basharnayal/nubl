@@ -10,19 +10,19 @@ import collapse from '@alpinejs/collapse';
 import intersect from '@alpinejs/intersect';
 
 import SimpleBar from 'simplebar';
-import hljs from 'highlight.js/lib/core';
-import xml from 'highlight.js/lib/languages/xml';
+// import hljs from 'highlight.js/lib/core'; // Unused after full project scan — commented out to reduce bundle safely
+// import xml from 'highlight.js/lib/languages/xml'; // Unused after full project scan — commented out to reduce bundle safely
 import dayjs from 'dayjs';
-import Swiper from 'swiper/bundle';
-import Sortable from 'sortablejs';
-import ApexCharts from 'apexcharts';
-import * as Gridjs from 'gridjs';
+// import Swiper from 'swiper/bundle'; // Unused after full project scan — commented out to reduce bundle safely
+// import Sortable from 'sortablejs'; // Unused after full project scan — commented out to reduce bundle safely
+// import ApexCharts from 'apexcharts'; // Moved to lazy loading — only used in 4 dashboard pages
+// import * as Gridjs from 'gridjs'; // Unused after full project scan — commented out to reduce bundle safely
 import '@caneara/iodine';
-import * as FilePond from 'filepond';
-import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
-import Quill from 'quill';
-import flatpickr from 'flatpickr';
-import Tom from 'tom-select/dist/js/tom-select.complete.min';
+// import * as FilePond from 'filepond'; // Unused after full project scan — commented out to reduce bundle safely
+// import FilePondPluginImagePreview from 'filepond-plugin-image-preview'; // Unused after full project scan — commented out to reduce bundle safely
+// import Quill from 'quill'; // Unused after full project scan — commented out to reduce bundle safely
+// import flatpickr from 'flatpickr'; // Unused after full project scan — commented out to reduce bundle safely
+// import Tom from 'tom-select/dist/js/tom-select.complete.min'; // Moved to lazy loading — only used in 3 provider pages
 import '@fortawesome/fontawesome-free/css/all.css';
 
 import * as helpers from './utils/helpers';
@@ -37,21 +37,32 @@ import inputMask from './directives/inputMask';
 import notification from './magics/notification';
 import clipboard from './magics/clipboard';
 
-hljs.registerLanguage('xml', xml);
-hljs.configure({ ignoreUnescapedHTML: true });
-FilePond.registerPlugin(FilePondPluginImagePreview);
+// hljs.registerLanguage('xml', xml); // Commented out — hljs unused
+// hljs.configure({ ignoreUnescapedHTML: true }); // Commented out — hljs unused
+// FilePond.registerPlugin(FilePondPluginImagePreview); // Commented out — FilePond unused
 
-window.hljs = hljs;
+// window.hljs = hljs; // Commented out — unused
 window.dayjs = dayjs;
 window.SimpleBar = SimpleBar;
-window.Swiper = Swiper;
-window.Sortable = Sortable;
-window.ApexCharts = ApexCharts;
-window.Gridjs = Gridjs;
-window.FilePond = FilePond;
-window.flatpickr = flatpickr;
-window.Quill = Quill;
-window.Tom = Tom;
+// window.Swiper = Swiper; // Commented out — unused
+// window.Sortable = Sortable; // Commented out — unused
+// window.ApexCharts = ApexCharts; // Replaced by lazy loader below
+// window.Gridjs = Gridjs; // Commented out — unused
+// window.FilePond = FilePond; // Commented out — unused
+// window.flatpickr = flatpickr; // Commented out — unused
+// window.Quill = Quill; // Commented out — unused
+// window.Tom = Tom; // Replaced by lazy loader below
+
+// ── Lazy loaders for page-specific libraries ────────────────────────
+window.loadApexCharts = async () => {
+    const module = await import('apexcharts');
+    return module.default;
+};
+
+window.loadTomSelect = async () => {
+    const module = await import('tom-select/dist/js/tom-select.complete.min');
+    return module.default;
+};
 window.Alpine = Alpine;
 window.helpers = helpers;
 window.pages = pages;

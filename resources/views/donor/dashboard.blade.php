@@ -148,17 +148,13 @@
                 @json(['series' => $donorChartData['series'], 'categories' => $donorChartData['categories'], 'label' => __('Amount Donated')])
                 </script>
                 <script>
-                (function() {
-                    var retries = 0;
-                    function initDonorChart() {
+                (async function() {
+                    async function initDonorChart() {
                         var el = document.getElementById('donor-impact-chart');
                         var dataEl = document.getElementById('donor-chart-data');
                         if (!el || !dataEl) return;
-                        if (typeof ApexCharts === 'undefined' && retries++ < 20) {
-                            setTimeout(initDonorChart, 50);
-                            return;
-                        }
                         try {
+                            var ApexCharts = await window.loadApexCharts();
                             var data = JSON.parse(dataEl.textContent);
                             var config = {
                                 series: [{ name: data.label, data: data.series }],
@@ -181,7 +177,7 @@
                         } catch (e) { console.warn('Donor chart init:', e); }
                     }
                     if (document.readyState === 'loading') {
-                        document.addEventListener('DOMContentLoaded', initDonorChart);
+                        document.addEventListener('DOMContentLoaded', function() { initDonorChart(); });
                     } else {
                         initDonorChart();
                     }

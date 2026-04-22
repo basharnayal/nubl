@@ -23,53 +23,59 @@ class AdminFinancialService
      */
     public function getOverview(): array
     {
-        $systemWallet = Ewallet::where('owner_type', 'SYSTEM')->first();
+        $systemWallet   = Ewallet::where('owner_type', 'SYSTEM')->first();
         $systemWalletId = $systemWallet?->id;
 
-        $successfulCount = Payment::query()->where('status', Payment::STATUS_SUCCEEDED)->count();
-        $successfulAmount = (float) Payment::query()->where('status', Payment::STATUS_SUCCEEDED)->sum('amount');
+        // 6 individual Payment queries → 1 aggregate query
+        [$pi, $pp, $pr] = [Payment::STATUS_INITIATED, Payment::STATUS_PENDING, Payment::STATUS_PROCESSING];
 
-        $pendingStatuses = [
-            Payment::STATUS_INITIATED,
-            Payment::STATUS_PENDING,
-            Payment::STATUS_PROCESSING,
-        ];
-        $pendingBase = Payment::query()->whereIn('status', $pendingStatuses);
-        $failedBase = Payment::query()->where('status', Payment::STATUS_FAILED);
+        $paymentStats = Payment::query()
+            ->selectRaw(
+                'SUM(CASE WHEN status = ? THEN 1 ELSE 0 END)                       AS succeeded_count,
+                 COALESCE(SUM(CASE WHEN status = ? THEN amount END), 0)             AS succeeded_amount,
+                 SUM(CASE WHEN status IN (?,?,?) THEN 1 ELSE 0 END)                AS pending_count,
+                 COALESCE(SUM(CASE WHEN status IN (?,?,?) THEN amount END), 0)     AS pending_amount,
+                 SUM(CASE WHEN status = ? THEN 1 ELSE 0 END)                       AS failed_count,
+                 COALESCE(SUM(CASE WHEN status = ? THEN amount END), 0)            AS failed_amount',
+                [
+                    Payment::STATUS_SUCCEEDED,
+                    Payment::STATUS_SUCCEEDED,
+                    $pi, $pp, $pr,
+                    $pi, $pp, $pr,
+                    Payment::STATUS_FAILED,
+                    Payment::STATUS_FAILED,
+                ]
+            )
+            ->first();
 
-        $fundInbound = $systemWalletId
-            ? (float) FundTransaction::query()
+        // 3 individual FundTransaction queries → 1 aggregate query
+        $ledgerStats = $systemWalletId
+            ? FundTransaction::query()
                 ->where('wallet_id', $systemWalletId)
-                ->where('direction', FundTransaction::DIRECTION_IN)
-                ->sum('amount')
-            : 0.0;
-
-        $fundOutbound = $systemWalletId
-            ? (float) FundTransaction::query()
-                ->where('wallet_id', $systemWalletId)
-                ->where('direction', FundTransaction::DIRECTION_OUT)
-                ->sum('amount')
-            : 0.0;
-
-        $transfersToProviders = $systemWalletId
-            ? (float) FundTransaction::query()
-                ->where('wallet_id', $systemWalletId)
-                ->where('direction', FundTransaction::DIRECTION_OUT)
-                ->where('source', FundTransaction::SOURCE_PAYOUT)
-                ->sum('amount')
-            : 0.0;
+                ->selectRaw(
+                    'COALESCE(SUM(CASE WHEN direction = ? THEN amount END), 0)                AS fund_in,
+                     COALESCE(SUM(CASE WHEN direction = ? THEN amount END), 0)                AS fund_out,
+                     COALESCE(SUM(CASE WHEN direction = ? AND source = ? THEN amount END), 0) AS provider_payouts',
+                    [
+                        FundTransaction::DIRECTION_IN,
+                        FundTransaction::DIRECTION_OUT,
+                        FundTransaction::DIRECTION_OUT, FundTransaction::SOURCE_PAYOUT,
+                    ]
+                )
+                ->first()
+            : null;
 
         return [
-            'system_wallet_balance' => $systemWallet ? (float) $systemWallet->balance : 0.0,
-            'successful_payments_count' => $successfulCount,
-            'successful_payments_amount' => $successfulAmount,
-            'pending_count' => (int) (clone $pendingBase)->count(),
-            'pending_amount' => (float) (clone $pendingBase)->sum('amount'),
-            'failed_count' => (int) (clone $failedBase)->count(),
-            'failed_amount' => (float) (clone $failedBase)->sum('amount'),
-            'fund_inbound_system' => $fundInbound,
-            'fund_outbound_system' => $fundOutbound,
-            'transfers_to_providers' => $transfersToProviders,
+            'system_wallet_balance'      => $systemWallet ? (float) $systemWallet->balance : 0.0,
+            'successful_payments_count'  => (int)   ($paymentStats->succeeded_count  ?? 0),
+            'successful_payments_amount' => (float) ($paymentStats->succeeded_amount ?? 0),
+            'pending_count'              => (int)   ($paymentStats->pending_count    ?? 0),
+            'pending_amount'             => (float) ($paymentStats->pending_amount   ?? 0),
+            'failed_count'               => (int)   ($paymentStats->failed_count     ?? 0),
+            'failed_amount'              => (float) ($paymentStats->failed_amount    ?? 0),
+            'fund_inbound_system'        => (float) ($ledgerStats->fund_in           ?? 0),
+            'fund_outbound_system'       => (float) ($ledgerStats->fund_out          ?? 0),
+            'transfers_to_providers'     => (float) ($ledgerStats->provider_payouts  ?? 0),
         ];
     }
 
