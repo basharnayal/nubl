@@ -4,6 +4,13 @@
  * Mirrors sidebar, header, and main content positioning from LTR
  */
 
+/* Arabic locale: use IBM Plex Sans Arabic instead of Instrument Sans */
+[dir="rtl"] {
+    --font-sans: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif,
+        "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+        "Noto Color Emoji";
+}
+
 [dir="rtl"] .menu-toggle.active span {
     @apply mr-2 ml-0 translate-x-2 -translate-x-0;
 }
