@@ -97,7 +97,7 @@ services:
     container_name: nubl-mysql
     restart: unless-stopped
     ports:
-      - "${DOCKER_MYSQL_PORT:-3307}:3306"
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: nubl

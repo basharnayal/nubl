@@ -11,7 +11,7 @@ docker compose up -d --build
 | الخدمة | العنوان | الوصف |
 |--------|---------|-------|
 | App | http://localhost:8000 | Laravel (يُعدّ نفسه تلقائياً) |
-| MySQL | `localhost:3307` | قاعدة البيانات |
+| MySQL | `localhost:3306` | قاعدة البيانات |
 | Redis | `localhost:6379` | Cache / Session / Queue |
 
 أول تشغيل يأخذ ~2 دقيقة (composer install + npm install + build + migrations).

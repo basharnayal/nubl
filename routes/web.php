@@ -295,14 +295,14 @@ Route::get('/test-roles', function () {
 })->middleware(['auth', 'role:admin'])->name('test-roles');
 
 // Dev helper: assign admin role (remove in production)
-// Route::get('/make-me-admin', function () {
-//     $user = auth()->user();
-//     if (! \Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
-//         \Spatie\Permission\Models\Role::create(['name' => 'admin']);
-//     }
-//     $user->assignRole('admin');
+Route::get('/make-me-admin', function () {
+    $user = auth()->user();
+    if (! \Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
+        \Spatie\Permission\Models\Role::create(['name' => 'admin']);
+    }
+    $user->assignRole('admin');
 
-//     return 'تم تعيينك كـ admin بنجاح!';
-// });
+    return 'تم تعيينك كـ admin بنجاح!';
+});
 
 require __DIR__ . '/auth.php';
