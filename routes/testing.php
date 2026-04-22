@@ -33,7 +33,9 @@ Route::middleware(TestingEnvironmentOnly::class)
         // Advance the clock by a given duration
         // Body: { "days": 7 }  /  { "hours": 3, "minutes": 30 }  / etc.
         Route::post('/advance', [TimeController::class, 'advance'])->name('advance');
+        Route::get('/advance', [TimeController::class, 'advance'])->name('advance.get');
 
         // Reset the clock back to real system time
         Route::post('/reset', [TimeController::class, 'reset'])->name('reset');
+        Route::get('/reset', [TimeController::class, 'reset'])->name('reset.get');
     });
