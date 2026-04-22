@@ -388,16 +388,14 @@
 
     @if($chartPayments['has_data'] || $chartLedger['has_data'])
         <script>
-        (function() {
-            function initFinanceCharts() {
+        (async function() {
+            async function initFinanceCharts() {
                 var payEl = document.getElementById('finance-chart-payments');
                 var payDataEl = document.getElementById('finance-chart-payments-data');
                 var ledEl = document.getElementById('finance-chart-ledger');
                 var ledDataEl = document.getElementById('finance-chart-ledger-data');
-                if (typeof ApexCharts === 'undefined') {
-                    return false;
-                }
                 try {
+                    var ApexCharts = await window.loadApexCharts();
                     if (payEl && payDataEl) {
                         var payCfg = JSON.parse(payDataEl.textContent);
                         if (payEl._chart) { payEl._chart.destroy(); }
@@ -413,17 +411,11 @@
                 } catch (e) {
                     console.warn('Finance overview charts:', e);
                 }
-                return true;
-            }
-            var retries = 0;
-            function tryInit() {
-                if (initFinanceCharts()) return;
-                if (retries++ < 40) setTimeout(tryInit, 50);
             }
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', tryInit);
+                document.addEventListener('DOMContentLoaded', function() { initFinanceCharts(); });
             } else {
-                tryInit();
+                initFinanceCharts();
             }
         })();
         </script>

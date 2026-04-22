@@ -71,7 +71,7 @@
                                         *</label>
                                     <select id="category_id" name="category_id" required
                                         class="form-select form-select-lineone w-full ltr:pl-3 ltr:pr-9 rtl:pr-3 rtl:pl-10 rtl:bg-[position:left_0.5rem_center]"
-                                        onfocus="if (typeof TomSelect !== 'undefined' && !this.tomselect) new TomSelect(this, {create: false})">
+                                        onfocus="if (!this.tomselect) { var el = this; window.loadTomSelect().then(function(TS) { if (!el.tomselect) new TS(el, {create: false}); }); }">
                                         <option value="">{{ __('Select Category') }}</option>
                                         @foreach($categories as $cat)
                                             <option value="{{ $cat->id }}" {{ old('category_id', $menuItem->category_id) == $cat->id ? 'selected' : '' }}>
