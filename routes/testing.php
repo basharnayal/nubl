@@ -53,6 +53,10 @@ Route::middleware(TestingEnvironmentOnly::class)
         // Query params: search, log_name, causer_id, date_from, date_to, entity, description, per_page, page
         Route::get('/', [AuditLogController::class, 'index'])->name('index');
 
+        // Single most-recent entry (shortcut for "last event" assertions)
+        // Query params: same filters as /index
+        Route::get('/last', [AuditLogController::class, 'last'])->name('last');
+
         // Most-recent N entries (shortcut for last-event assertions)
         // Query params: same filters + limit (default 10)
         Route::get('/latest', [AuditLogController::class, 'latest'])->name('latest');

@@ -163,6 +163,30 @@ class AuditLogController extends Controller
     }
 
     /**
+     * GET /_testing/audit-log/last
+     *
+     * Same filters as /index. Returns a single most-recent entry (or null).
+     */
+    public function last(Request $request): JsonResponse
+    {
+        $request->validate([
+            'causer_id' => ['sometimes', 'integer', 'min:1'],
+            'date_from' => ['sometimes', 'date_format:Y-m-d'],
+            'date_to'   => ['sometimes', 'date_format:Y-m-d'],
+        ]);
+
+        $query = Activity::query()->latest();
+        $this->applyFilters($request, $query);
+
+        $entry = $query->with('causer')->first();
+
+        return response()->json([
+            'message' => 'Last audit log entry retrieved.',
+            'data'    => $entry ? $this->serializeEntry($entry) : null,
+        ]);
+    }
+
+    /**
      * GET /_testing/audit-log/count
      *
      * Returns summary counts useful for quick assertions:
