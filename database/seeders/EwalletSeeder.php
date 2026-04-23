@@ -7,7 +7,6 @@ use App\Models\FundTransaction;
 use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
 
 class EwalletSeeder extends Seeder
 {
@@ -21,17 +20,11 @@ class EwalletSeeder extends Seeder
                 'status' => true,
             ]);
 
-            $donor = User::firstOrCreate(
-                ['email' => 'seed-initial@nubl.com'],
-                [
-                    'name' => 'Initial Fund',
-                    'password' => Hash::make('password'),
-                    'membership_type' => User::MEMBERSHIP_DONOR,
-                    'status' => User::STATUS_ACTIVE,
-                    'phone_number' => null,
-                    'is_active' => true,
-                ]
-            );
+            // Use the seeded donor account as sponsor for the initial city-fund bootstrap.
+            // (See DatabaseSeeder -> DonorSeeder.)
+            $donor = User::query()
+                ->where('email', 'donor-seed@nubl.com')
+                ->firstOrFail();
 
             $payment = Payment::create([
                 'sponsor_id' => $donor->id,
