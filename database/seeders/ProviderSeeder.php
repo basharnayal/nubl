@@ -297,6 +297,16 @@ class ProviderSeeder extends Seeder
                 ProviderProfile::create(array_merge($data['profile'], ['user_id' => $user->id]));
             }
 
+            // Ensure provider wallet exists even if profile pre-existed before the auto-create hook.
+            $user->loadMissing('providerProfile.ewallet');
+            if ($user->providerProfile && ! $user->providerProfile->ewallet) {
+                $user->providerProfile->ewallet()->create([
+                    'owner_type' => 'PROVIDER',
+                    'balance' => 0,
+                    'status' => true,
+                ]);
+            }
+
             if (!$user->providerOperatingInfo) {
                 $operatingHours = [];
                 foreach (array_keys(config('provider.weekdays')) as $day) {
