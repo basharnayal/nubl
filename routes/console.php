@@ -5,6 +5,7 @@ use App\Console\Commands\VerifyActivityLogIntegrityCommand;
 use Carbon\Carbon;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
@@ -32,25 +33,15 @@ Schedule::command(VerifyActivityLogIntegrityCommand::class)
     ->appendOutputTo(storage_path('logs/activity-log-integrity.log'));
 
 // Weekly provider bank payout requests (Sun 00:00, app timezone — set APP_TIMEZONE=Asia/Riyadh for KSA).
-// Schedule::command('provider-payouts:generate-weekly')
-//     ->weeklyOn(Carbon::SUNDAY, '00:00')
-//     ->timezone(config('app.timezone'))
-//     ->withoutOverlapping()
-//     ->appendOutputTo(storage_path('logs/provider-payout-weekly.log'));
-
-// Every 2 minutes for local testing
 Schedule::command('provider-payouts:generate-weekly')
-    ->everyTwoMinutes()
+    ->weeklyOn(Carbon::SUNDAY, '00:00')
+    ->timezone(config('app.timezone'))
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/provider-payout-weekly.log'));
 
-/*
- * Local testing (localhost): comment out the weeklyOn(...) Schedule block above and uncomment below
- * so the command runs every 2 minutes. Then run: php artisan schedule:work
- * (or use Laravel Sail / your queue worker setup — the scheduler must be running.)
- *
- * Schedule::command('provider-payouts:generate-weekly')
- *     ->everyTwoMinutes()
- *     ->withoutOverlapping()
- *     ->appendOutputTo(storage_path('logs/provider-payout-weekly.log'));
- */
+// Forge scheduler heartbeat — proves the Laravel scheduler cron is alive.
+// Forge setting: every hour, notify after 5 minutes.
+Schedule::call(fn () => Http::get(config('services.forge.heartbeat_url')))
+    ->hourly()
+    ->name('forge-scheduler-heartbeat')
+    ->withoutOverlapping();
