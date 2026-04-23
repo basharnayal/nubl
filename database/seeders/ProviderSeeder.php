@@ -293,14 +293,17 @@ class ProviderSeeder extends Seeder
 
             $user->assignRole($providerRole);
 
-            if (!$user->providerProfile) {
-                ProviderProfile::create(array_merge($data['profile'], ['user_id' => $user->id]));
+            // Create or fetch provider profile (avoid stale relation cache).
+            $profile = $user->providerProfile;
+            if (! $profile) {
+                $profile = ProviderProfile::create(array_merge($data['profile'], ['user_id' => $user->id]));
+                $user->setRelation('providerProfile', $profile);
             }
 
-            // Ensure provider wallet exists even if profile pre-existed before the auto-create hook.
-            $user->loadMissing('providerProfile.ewallet');
-            if ($user->providerProfile && ! $user->providerProfile->ewallet) {
-                $user->providerProfile->ewallet()->create([
+            // Ensure provider wallet exists (seeders run with WithoutModelEvents, so the profile "created" hook may not fire).
+            $profile->loadMissing('ewallet');
+            if (! $profile->ewallet) {
+                $profile->ewallet()->create([
                     'owner_type' => 'PROVIDER',
                     'balance' => 0,
                     'status' => true,
