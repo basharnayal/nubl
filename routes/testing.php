@@ -15,6 +15,7 @@
 */
 
 use App\Http\Controllers\Testing\AuditLogController;
+use App\Http\Controllers\Testing\SystemWalletController;
 use App\Http\Controllers\Testing\TimeController;
 use App\Http\Middleware\TestingEnvironmentOnly;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +40,27 @@ Route::middleware(TestingEnvironmentOnly::class)
         // Reset the clock back to real system time
         Route::post('/reset', [TimeController::class, 'reset'])->name('reset');
         Route::get('/reset', [TimeController::class, 'reset'])->name('reset.get');
+    });
+
+// ── System Wallet (City Fund) ──────────────────────────────────────────────
+// Testing-only helpers to set/undo the SYSTEM wallet balance.
+// All routes return JSON and require no admin session.
+Route::middleware(TestingEnvironmentOnly::class)
+    ->prefix('_testing/system-wallet')
+    ->name('testing.system-wallet.')
+    ->group(function () {
+        // Show current system wallet balance
+        Route::get('/', [SystemWalletController::class, 'show'])->name('show');
+
+        // Set the system wallet to an exact balance
+        // Body: { "amount": 1234.56 }
+        Route::post('/set-balance', [SystemWalletController::class, 'setBalance'])->name('set-balance');
+        // Query: ?amount=1234.56  (URL-only tools / browser)
+        Route::get('/set-balance', [SystemWalletController::class, 'setBalance'])->name('set-balance.get');
+
+        // Undo last set-balance (restores the previous balance)
+        Route::post('/undo-set-balance', [SystemWalletController::class, 'undoSetBalance'])->name('undo-set-balance');
+        Route::get('/undo-set-balance', [SystemWalletController::class, 'undoSetBalance'])->name('undo-set-balance.get');
     });
 
 // ── Audit Log ─────────────────────────────────────────────────────────────
