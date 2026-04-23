@@ -46,4 +46,8 @@ return [
         'is_test' => env('MYFATOORAH_IS_TEST', true),
     ],
 
+    'forge' => [
+        'heartbeat_url' => env('FORGE_HEARTBEAT_URL'),
+    ],
+
 ];
