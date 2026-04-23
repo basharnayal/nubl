@@ -14,6 +14,7 @@
 |
 */
 
+use App\Http\Controllers\Testing\AuditLogController;
 use App\Http\Controllers\Testing\TimeController;
 use App\Http\Middleware\TestingEnvironmentOnly;
 use Illuminate\Support\Facades\Route;
@@ -38,4 +39,29 @@ Route::middleware(TestingEnvironmentOnly::class)
         // Reset the clock back to real system time
         Route::post('/reset', [TimeController::class, 'reset'])->name('reset');
         Route::get('/reset', [TimeController::class, 'reset'])->name('reset.get');
+    });
+
+// ── Audit Log ─────────────────────────────────────────────────────────────
+// Safe read-only (and flush) access to the activity log for automated tests.
+// All routes return JSON and require no admin session.
+Route::middleware(TestingEnvironmentOnly::class)
+    ->prefix('_testing/audit-log')
+    ->name('testing.audit-log.')
+    ->group(function () {
+
+        // List & filter audit log entries (paginated)
+        // Query params: search, log_name, causer_id, date_from, date_to, entity, description, per_page, page
+        Route::get('/', [AuditLogController::class, 'index'])->name('index');
+
+        // Most-recent N entries (shortcut for last-event assertions)
+        // Query params: same filters + limit (default 10)
+        Route::get('/latest', [AuditLogController::class, 'latest'])->name('latest');
+
+        // Summary counts (total, today, finance, auth, registration, by_log_name)
+        // Query params: same filters as /index for a filtered sub-count
+        Route::get('/count', [AuditLogController::class, 'count'])->name('count');
+
+        // Flush all audit log rows – use in test teardown
+        Route::post('/flush', [AuditLogController::class, 'flush'])->name('flush');
+        Route::get('/flush', [AuditLogController::class, 'flush'])->name('flush.get');
     });
