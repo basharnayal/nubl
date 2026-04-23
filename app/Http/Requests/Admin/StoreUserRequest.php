@@ -26,12 +26,12 @@ class StoreUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'membership_type' => ['required', 'in:donor,recipient,provider'],
+            'membership_type' => ['required', 'in:donor,recipient,provider,admin'],
             'roles' => ['required', 'array', 'min:1'],
             'roles.*' => ['string', Rule::exists('roles', 'name')->where('guard_name', $guard)],
         ];
 
-        if (in_array($this->membership_type, ['donor', 'recipient', 'provider'])) {
+        if (in_array($this->membership_type, ['donor', 'recipient', 'provider', 'admin'], true)) {
             $rules['phone_number'] = ['required', 'string', new SaudiPhoneNumber, new SaudiPhoneUnique];
         }
 

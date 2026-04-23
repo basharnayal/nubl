@@ -20,6 +20,14 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public const MEMBERSHIP_DONOR = 'donor';
 
+    /**
+     * Admin membership type (separate from Spatie role).
+     *
+     * Note: authorization and dashboard routing are still role-based (`admin` role).
+     * This value is mainly for consistent categorization in UI/admin tooling.
+     */
+    public const MEMBERSHIP_ADMIN = 'admin';
+
     public const MEMBERSHIP_RECIPIENT = 'recipient';
 
     public const MEMBERSHIP_PROVIDER = 'provider';

@@ -22,7 +22,7 @@ class AdminUserSeeder extends Seeder
                 'name' => '3mk Faisal',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
-                'membership_type' => User::MEMBERSHIP_DONOR,
+                'membership_type' => User::MEMBERSHIP_ADMIN,
                 'status' => User::STATUS_ACTIVE,
                 'phone_number' => '966501111111',
                 'phone_verified_at' => now(),

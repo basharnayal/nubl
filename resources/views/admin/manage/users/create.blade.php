@@ -38,6 +38,7 @@
                                         <select id="membership_type" name="membership_type" required x-model="type"
                                             class="form-select form-select-lineone mt-1.5 w-full">
                                             <option value="donor">{{ __('Donor') }}</option>
+                                            <option value="admin">{{ __('Admin') }}</option>
                                             <option value="recipient">{{ __('Recipient') }}</option>
                                             <option value="provider">{{ __('Provider') }}</option>
                                         </select>
