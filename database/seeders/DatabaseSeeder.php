@@ -25,6 +25,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call(AdminUserSeeder::class);
 
+        // Step 2.5: Create donor user
+        $this->call(DonorSeeder::class);
+
         // Step 3: Create system-level ewallet
         $this->call(EwalletSeeder::class);
 
