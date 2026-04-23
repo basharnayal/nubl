@@ -1,4 +1,4 @@
-# NUBL - Digital Assistance Platform
+# NUBL - Digital Assistance Platform [![Laravel Forge Site Deployment Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fforge.laravel.com%2Fsite-badges%2F5c873e99-e66e-4ddc-b53d-bedab32070f8&style=plastic)](https://forge.laravel.com/bashar-gbv/nubl-digitaloceanserver/3152908)
 
 A digital platform for assistance (sadaqah) that connects donors, beneficiaries, and providers in a dignified, private, and transparent manner.
 
