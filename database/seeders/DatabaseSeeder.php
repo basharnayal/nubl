@@ -41,32 +41,5 @@ class DatabaseSeeder extends Seeder
 
         // Step 6: Create allowance test data (REDEEMABLE + FULFILLED requests)
         $this->call(AllowanceTestDataSeeder::class);
-
-        // Step 7: Create other test users (optional)
-        // Uncomment if you want to create test users
-        
-        // $admin = User::factory()->create([
-        //     'name' => 'Admin User',
-        //     'email' => 'admin@nubl.com',
-        // ]);
-        // $admin->assignRole('admin');
-
-        // $donor = User::factory()->create([
-        //     'name' => 'Donor User',
-        //     'email' => 'donor@nubl.com',
-        // ]);
-        // $donor->assignRole('donor');
-
-        // $recipient = User::factory()->create([
-        //     'name' => 'Recipient User',
-        //     'email' => 'recipient@nubl.com',
-        // ]);
-        // $recipient->assignRole('recipient');
-
-        // $provider = User::factory()->create([
-        //     'name' => 'Provider User',
-        //     'email' => 'provider@nubl.com',
-        // ]);
-        // $provider->assignRole('provider');
     }
 }

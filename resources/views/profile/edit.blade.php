@@ -97,10 +97,6 @@
             <div class="card rounded-2xl border border-slate-200/90 p-6 dark:border-navy-600 dark:bg-navy-800/40 sm:p-8">
                 @include('profile.update-password-form')
             </div>
-
-            <div class="card rounded-2xl border border-slate-200/90 p-6 dark:border-navy-600 dark:bg-navy-800/40 sm:p-8">
-                @include('profile.delete-user-form')
-            </div>
         </div>
     </div>
 </x-app-layout>

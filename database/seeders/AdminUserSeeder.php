@@ -19,7 +19,7 @@ class AdminUserSeeder extends Seeder
         $admin = User::firstOrCreate(
             ['email' => 'admin@nubl.com'],
             [
-                'name' => '3mk Faisal',
+                'name' => 'NUBL Admin',
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'membership_type' => User::MEMBERSHIP_ADMIN,
