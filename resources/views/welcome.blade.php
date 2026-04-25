@@ -1294,8 +1294,10 @@
           <span class="step">{{ __('welcome.how.step2') }}</span>
           <div class="icon">
             <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-              <path d="M4 10h20l-1.5 12a2 2 0 0 1-2 1.8H7.5a2 2 0 0 1-2-1.8L4 10z" stroke="currentColor" stroke-width="1.6"/>
-              <path d="M9 10V7a5 5 0 0 1 10 0v3" stroke="currentColor" stroke-width="1.6"/>
+              <path d="M5 12.5h18V24H5V12.5z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+              <path d="M4 12.5l2.5-5.5H21.5L24 12.5" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+              <path d="M6.5 7v5.5M10 7v5.5M14 7v5.5M18 7v5.5M21.5 7v5.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              <path d="M11 24V16h6v8" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
             </svg>
           </div>
           <h3>{{ __('welcome.how.role2_h') }}</h3>
