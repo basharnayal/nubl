@@ -87,6 +87,39 @@ class AuditHashIntegrityTest extends TestCase
     }
 
     // -------------------------------------------------------------------------
+    // 2b. Hash stable after DB round-trip with multi-key properties (regression)
+    // -------------------------------------------------------------------------
+
+    #[Test]
+    public function hash_stable_after_db_round_trip_with_unordered_properties(): void
+    {
+        $user = User::factory()->create(['status' => 'active', 'is_active' => true]);
+
+        $this->actingAs($user);
+
+        // Keys intentionally NOT in alphabetical order
+        $this->auditService->log('auth_test', 'login_test', [
+            'z_last'  => 'value',
+            'a_first' => 'value',
+            'nested'  => ['beta' => 2, 'alpha' => 1],
+        ]);
+
+        $entry = Activity::latest()->first();
+        $storedHash = $entry->sha256_hash;
+
+        // Reload from DB — properties keys may be reordered by the DB engine
+        $entry->refresh();
+
+        $recomputed = Activity::computeHashFor($entry);
+
+        $this->assertSame(
+            $storedHash,
+            $recomputed,
+            'Hash must remain stable after DB round-trip regardless of JSON key order.'
+        );
+    }
+
+    // -------------------------------------------------------------------------
     // 3. Tamper detection — modifying a field makes stored hash stale
     // -------------------------------------------------------------------------
 

@@ -33,6 +33,12 @@ class Activity extends SpatieActivity
      */
     public static function computeHashFor(Activity $activity): string
     {
+        $properties = $activity->properties instanceof \Illuminate\Support\Collection
+            ? $activity->properties->toArray()
+            : Arr::wrap($activity->properties ?? []);
+
+        static::recursiveKsort($properties);
+
         $data = [
             'batch_uuid' => $activity->batch_uuid,
             'causer_id' => $activity->causer_id,
@@ -40,9 +46,7 @@ class Activity extends SpatieActivity
             'description' => $activity->description,
             'event' => $activity->event,
             'log_name' => $activity->log_name,
-            'properties' => $activity->properties instanceof \Illuminate\Support\Collection
-                ? $activity->properties->toArray()
-                : Arr::wrap($activity->properties ?? []),
+            'properties' => $properties,
             'subject_id' => $activity->subject_id,
             'subject_type' => $activity->subject_type,
         ];
@@ -50,5 +54,19 @@ class Activity extends SpatieActivity
         ksort($data);
 
         return hash('sha256', json_encode($data, JSON_UNESCAPED_UNICODE));
+    }
+
+    /**
+     * Recursively sort an array by its keys.
+     */
+    private static function recursiveKsort(array &$array): void
+    {
+        ksort($array);
+
+        foreach ($array as &$value) {
+            if (is_array($value)) {
+                static::recursiveKsort($value);
+            }
+        }
     }
 }
