@@ -81,7 +81,7 @@
         <div class="card mt-4 p-4">
             <h3 class="mb-3 text-sm font-semibold uppercase text-slate-600 dark:text-navy-200">
                 {{ __('finance.payments.notes_payload') }}</h3>
-            @if ($payment->notes && count($payment->notes))
+            @if (is_array($payment->notes) && count($payment->notes))
                 <div class="rounded-xl border border-slate-200 bg-slate-50/80 p-4 dark:border-navy-600 dark:bg-navy-800/30">
                     <x-finance.structured-data :data="$payment->notes" />
                 </div>

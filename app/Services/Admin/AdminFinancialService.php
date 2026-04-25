@@ -90,7 +90,7 @@ class AdminFinancialService
         $from = $from->copy()->startOfDay();
         $to   = $to->copy()->endOfDay();
 
-        // ── Payments (gateway) ────────────────────────────────────────────────
+        // ── Payments (gateway) — 7 queries → 1 ────────────────────────────
         $paymentRows = Payment::query()
             ->whereBetween('created_at', [$from, $to])
             ->select('status', DB::raw('COUNT(*) as cnt'), DB::raw('COALESCE(SUM(amount),0) as total'))
@@ -98,77 +98,77 @@ class AdminFinancialService
             ->get()
             ->keyBy('status');
 
-        $paymentsTotal   = (int)   Payment::query()->whereBetween('created_at', [$from, $to])->count();
-        $paymentsSuccAmt = (float) Payment::query()->whereBetween('created_at', [$from, $to])->where('status', Payment::STATUS_SUCCEEDED)->sum('amount');
-        $paymentsSuccCnt = (int)   Payment::query()->whereBetween('created_at', [$from, $to])->where('status', Payment::STATUS_SUCCEEDED)->count();
-        $paymentsFailAmt = (float) Payment::query()->whereBetween('created_at', [$from, $to])->where('status', Payment::STATUS_FAILED)->sum('amount');
-        $paymentsFailCnt = (int)   Payment::query()->whereBetween('created_at', [$from, $to])->where('status', Payment::STATUS_FAILED)->count();
-        $paymentsPendCnt = (int)   Payment::query()->whereBetween('created_at', [$from, $to])
-            ->whereIn('status', [Payment::STATUS_INITIATED, Payment::STATUS_PENDING, Payment::STATUS_PROCESSING])->count();
+        $paymentsTotal   = (int)   $paymentRows->sum('cnt');
+        $paymentsSuccCnt = (int)   ($paymentRows->get(Payment::STATUS_SUCCEEDED)?->cnt   ?? 0);
+        $paymentsSuccAmt = (float) ($paymentRows->get(Payment::STATUS_SUCCEEDED)?->total ?? 0);
+        $paymentsFailCnt = (int)   ($paymentRows->get(Payment::STATUS_FAILED)?->cnt      ?? 0);
+        $paymentsFailAmt = (float) ($paymentRows->get(Payment::STATUS_FAILED)?->total    ?? 0);
+        $paymentsPendCnt = (int) (
+            ($paymentRows->get(Payment::STATUS_INITIATED)?->cnt  ?? 0)
+            + ($paymentRows->get(Payment::STATUS_PENDING)?->cnt  ?? 0)
+            + ($paymentRows->get(Payment::STATUS_PROCESSING)?->cnt ?? 0)
+        );
 
-        // ── Fund ledger ───────────────────────────────────────────────────────
+        // ── Fund ledger — 4 queries → 1 ────────────────────────────────────
         $systemWallet   = Ewallet::where('owner_type', 'SYSTEM')->first();
         $systemWalletId = $systemWallet?->id;
 
-        $ledgerIn  = (float) FundTransaction::query()->whereBetween('created_at', [$from, $to])->where('direction', FundTransaction::DIRECTION_IN)->sum('amount');
-        $ledgerOut = (float) FundTransaction::query()->whereBetween('created_at', [$from, $to])->where('direction', FundTransaction::DIRECTION_OUT)->sum('amount');
-        $ledgerCnt = (int)   FundTransaction::query()->whereBetween('created_at', [$from, $to])->count();
-
-        $payoutsToProviders = $systemWalletId
-            ? (float) FundTransaction::query()
-                ->where('wallet_id', $systemWalletId)
-                ->whereBetween('created_at', [$from, $to])
-                ->where('direction', FundTransaction::DIRECTION_OUT)
-                ->where('source', FundTransaction::SOURCE_PAYOUT)
-                ->sum('amount')
-            : 0.0;
-
-        // ── Requests ──────────────────────────────────────────────────────────
-        $requestsByStatus = RequestModel::query()
+        $ledgerStats = FundTransaction::query()
             ->whereBetween('created_at', [$from, $to])
-            ->select('status', DB::raw('COUNT(*) as cnt'))
-            ->groupBy('status')
-            ->pluck('cnt', 'status')
-            ->toArray();
+            ->selectRaw(
+                'COUNT(*)                                                                                    AS entries_count,
+                 COALESCE(SUM(CASE WHEN direction = ? THEN amount END), 0)                                  AS total_in,
+                 COALESCE(SUM(CASE WHEN direction = ? THEN amount END), 0)                                  AS total_out,
+                 COALESCE(SUM(CASE WHEN wallet_id = ? AND direction = ? AND source = ? THEN amount END), 0) AS provider_payouts',
+                [
+                    FundTransaction::DIRECTION_IN,
+                    FundTransaction::DIRECTION_OUT,
+                    $systemWalletId ?? 0, FundTransaction::DIRECTION_OUT, FundTransaction::SOURCE_PAYOUT,
+                ]
+            )
+            ->first();
 
-        $requestsTotal     = (int) RequestModel::query()->whereBetween('created_at', [$from, $to])->count();
-        $requestsFulfilled = (int) ($requestsByStatus['FULFILLED']  ?? 0);
-        $requestsApproved  = (int) ($requestsByStatus['APPROVED']   ?? 0);
-        $requestsRedeemable= (int) ($requestsByStatus['REDEEMABLE'] ?? 0);
-        $requestsRejected  = (int) ($requestsByStatus['REJECTED']   ?? 0);
-        $requestsCancelled = (int) ($requestsByStatus['CANCELLED']  ?? 0);
-        $requestsPending   = (int) ($requestsByStatus['REQUESTED']  ?? 0);
+        $ledgerIn           = (float) ($ledgerStats->total_in          ?? 0);
+        $ledgerOut          = (float) ($ledgerStats->total_out         ?? 0);
+        $ledgerCnt          = (int)   ($ledgerStats->entries_count     ?? 0);
+        $payoutsToProviders = (float) ($ledgerStats->provider_payouts  ?? 0);
 
-        $requestsCityFund  = (int) RequestModel::query()->whereBetween('created_at', [$from, $to])->where('funding_source', 'CITY_FUND')->count();
-        $requestsAdopted   = (int) RequestModel::query()->whereBetween('created_at', [$from, $to])->where('funding_source', 'PROVIDER_ADOPTION')->count();
-
-        $requestsFulfilledAmt = (float) RequestModel::query()
+        // ── Requests — 7 queries → 1 ───────────────────────────────────────
+        $requestStats = RequestModel::query()
             ->whereBetween('created_at', [$from, $to])
-            ->where('status', 'FULFILLED')
-            ->sum('reserved_amount');
+            ->selectRaw(
+                "COUNT(*)                                                                    AS total,
+                 SUM(CASE WHEN status = 'FULFILLED'  THEN 1 ELSE 0 END)                    AS fulfilled,
+                 SUM(CASE WHEN status = 'APPROVED'   THEN 1 ELSE 0 END)                    AS approved,
+                 SUM(CASE WHEN status = 'REDEEMABLE' THEN 1 ELSE 0 END)                    AS redeemable,
+                 SUM(CASE WHEN status = 'REJECTED'   THEN 1 ELSE 0 END)                    AS rejected,
+                 SUM(CASE WHEN status = 'CANCELLED'  THEN 1 ELSE 0 END)                    AS cancelled,
+                 SUM(CASE WHEN status = 'REQUESTED'  THEN 1 ELSE 0 END)                    AS pending,
+                 SUM(CASE WHEN funding_source = 'CITY_FUND' THEN 1 ELSE 0 END)             AS city_fund,
+                 SUM(CASE WHEN funding_source = 'PROVIDER_ADOPTION' THEN 1 ELSE 0 END)     AS adopted,
+                 COALESCE(SUM(CASE WHEN status = 'FULFILLED' THEN reserved_amount END), 0)  AS fulfilled_amount,
+                 COUNT(DISTINCT provider_id)                                                 AS providers_with_requests,
+                 COUNT(DISTINCT recipient_id)                                                AS active_recipients"
+            )
+            ->first();
 
-        // ── QR Redemptions ────────────────────────────────────────────────────
-        $redemptionsTotal    = (int) OrderRedemption::query()->whereBetween('created_at', [$from, $to])->count();
-        $redemptionsRedeemed = (int) OrderRedemption::query()->whereBetween('created_at', [$from, $to])->where('status', 'REDEEMED')->count();
-        $redemptionsExpired  = (int) OrderRedemption::query()->whereBetween('created_at', [$from, $to])->where('status', 'EXPIRED')->count();
-        $redemptionsPending  = (int) OrderRedemption::query()->whereBetween('created_at', [$from, $to])->where('status', 'PENDING')->count();
+        // ── QR Redemptions — 4 queries → 1 ─────────────────────────────────
+        $redemptionStats = OrderRedemption::query()
+            ->whereBetween('created_at', [$from, $to])
+            ->selectRaw(
+                "COUNT(*)                                                AS total,
+                 SUM(CASE WHEN status = 'REDEEMED' THEN 1 ELSE 0 END)  AS redeemed,
+                 SUM(CASE WHEN status = 'EXPIRED'  THEN 1 ELSE 0 END)  AS expired,
+                 SUM(CASE WHEN status = 'PENDING'  THEN 1 ELSE 0 END)  AS pending"
+            )
+            ->first();
 
-        // ── Active providers in period ────────────────────────────────────────
+        // ── Active providers (not date-bound) ───────────────────────────────
         $activeProviders = (int) User::query()
             ->where('membership_type', User::MEMBERSHIP_PROVIDER)
             ->where('status', User::STATUS_ACTIVE)
             ->where('is_active', true)
             ->count();
-
-        $providersWithRequests = (int) RequestModel::query()
-            ->whereBetween('created_at', [$from, $to])
-            ->distinct('provider_id')
-            ->count('provider_id');
-
-        $activeRecipients = (int) RequestModel::query()
-            ->whereBetween('created_at', [$from, $to])
-            ->distinct('recipient_id')
-            ->count('recipient_id');
 
         return [
             // meta
@@ -195,27 +195,27 @@ class AdminFinancialService
             'payouts_to_providers'  => $payoutsToProviders,
 
             // requests
-            'requests_total'          => $requestsTotal,
-            'requests_fulfilled'      => $requestsFulfilled,
-            'requests_approved'       => $requestsApproved,
-            'requests_redeemable'     => $requestsRedeemable,
-            'requests_pending'        => $requestsPending,
-            'requests_rejected'       => $requestsRejected,
-            'requests_cancelled'      => $requestsCancelled,
-            'requests_city_fund'      => $requestsCityFund,
-            'requests_adopted'        => $requestsAdopted,
-            'requests_fulfilled_amount'=> $requestsFulfilledAmt,
+            'requests_total'           => (int)   ($requestStats->total                  ?? 0),
+            'requests_fulfilled'       => (int)   ($requestStats->fulfilled              ?? 0),
+            'requests_approved'        => (int)   ($requestStats->approved               ?? 0),
+            'requests_redeemable'      => (int)   ($requestStats->redeemable             ?? 0),
+            'requests_pending'         => (int)   ($requestStats->pending                ?? 0),
+            'requests_rejected'        => (int)   ($requestStats->rejected               ?? 0),
+            'requests_cancelled'       => (int)   ($requestStats->cancelled              ?? 0),
+            'requests_city_fund'       => (int)   ($requestStats->city_fund              ?? 0),
+            'requests_adopted'         => (int)   ($requestStats->adopted                ?? 0),
+            'requests_fulfilled_amount'=> (float) ($requestStats->fulfilled_amount       ?? 0),
 
             // redemptions
-            'redemptions_total'    => $redemptionsTotal,
-            'redemptions_redeemed' => $redemptionsRedeemed,
-            'redemptions_expired'  => $redemptionsExpired,
-            'redemptions_pending'  => $redemptionsPending,
+            'redemptions_total'    => (int) ($redemptionStats->total    ?? 0),
+            'redemptions_redeemed' => (int) ($redemptionStats->redeemed ?? 0),
+            'redemptions_expired'  => (int) ($redemptionStats->expired  ?? 0),
+            'redemptions_pending'  => (int) ($redemptionStats->pending  ?? 0),
 
             // participation
-            'active_providers_total'       => $activeProviders,
-            'providers_with_requests'      => $providersWithRequests,
-            'active_recipients_with_requests' => $activeRecipients,
+            'active_providers_total'          => $activeProviders,
+            'providers_with_requests'         => (int) ($requestStats->providers_with_requests  ?? 0),
+            'active_recipients_with_requests' => (int) ($requestStats->active_recipients       ?? 0),
         ];
     }
 }
