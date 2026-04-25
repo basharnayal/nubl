@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Services\RecipientAllowanceService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class RecipientController extends Controller
@@ -75,12 +76,15 @@ class RecipientController extends Controller
     private function activityChartData(int $recipientId): array
     {
         $startDate = Carbon::now()->subMonths(7)->startOfMonth();
+        $monthExpression = DB::connection()->getDriverName() === 'sqlite'
+            ? "strftime('%Y-%m', created_at)"
+            : "DATE_FORMAT(created_at, '%Y-%m')";
 
         $monthly = RequestModel::forRecipient($recipientId)
             ->where('status', 'FULFILLED')
             ->where('created_at', '>=', $startDate)
-            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month, COALESCE(SUM(reserved_amount), 0) as total")
-            ->groupByRaw("DATE_FORMAT(created_at, '%Y-%m')")
+            ->selectRaw("{$monthExpression} as month, COALESCE(SUM(reserved_amount), 0) as total")
+            ->groupByRaw($monthExpression)
             ->pluck('total', 'month');
 
         $categories = [];

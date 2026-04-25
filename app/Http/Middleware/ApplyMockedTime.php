@@ -15,6 +15,8 @@ use Symfony\Component\HttpFoundation\Response;
  * In non-production environments it reads a persisted time value from the
  * cache and calls Carbon::setTestNow() so that the whole application
  * (models, jobs, scheduled commands, etc.) sees the mocked clock.
+ * PHPUnit tests are excluded so their own Carbon::setTestNow() calls remain
+ * isolated and deterministic.
  *
  * In production this middleware is a no-op – the environment guard at the
  * top of handle() returns immediately, and Carbon is never touched.
@@ -30,8 +32,8 @@ class ApplyMockedTime
     public function handle(Request $request, Closure $next): Response
     {
         // ── Hard production guard ─────────────────────────────────────────
-        // Never apply mocked time in production, no matter what is in cache.
-        if (app()->environment('production')) {
+        // Never apply mocked time in production or PHPUnit tests, no matter what is in cache.
+        if (app()->environment(['production', 'testing'])) {
             return $next($request);
         }
 

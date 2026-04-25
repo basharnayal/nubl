@@ -20,9 +20,11 @@ class AdminDashboardServiceTest extends TestCase
 
     protected function tearDown(): void
     {
-        Mockery::close();
-
-        parent::tearDown();
+        try {
+            Mockery::close();
+        } finally {
+            parent::tearDown();
+        }
     }
 
     #[Test]
@@ -113,7 +115,7 @@ class AdminDashboardServiceTest extends TestCase
 
         $financialService = Mockery::mock(AdminFinancialService::class);
         $financialService->shouldReceive('getOverview')
-            ->twice()
+            ->once()
             ->andReturn([
                 'system_wallet_balance' => 1234.56,
                 'successful_payments_count' => 0,
