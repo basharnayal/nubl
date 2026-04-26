@@ -51,6 +51,8 @@
     $c = $accentMap[$accent] ?? $accentMap['slate'];
     $steps = $card['steps'];
     $redemption = $request->redemption;
+    $isRedeemed = (bool) ($redemption && $redemption->status === 'REDEEMED');
+    $redeemCompleted = $isRedeemed || $request->status === 'FULFILLED';
     $qrExpired = $redemption && (
         $redemption->status === 'EXPIRED'
         || ($redemption->redeem_expires_at && $redemption->redeem_expires_at->isPast())
@@ -154,6 +156,21 @@
             <div class="mt-10 border-t border-slate-200/80 pt-10 dark:border-navy-600">
                 <div class="w-full">
                     @php
+                        $lineStatic = in_array($request->status, ['FULFILLED', 'CANCELLED', 'CANCELED'], true);
+                        $solidShimmerClass = $lineStatic ? '' : 'animate-[recipient-step-line-shimmer_1.65s_linear_infinite]';
+                        $dashFlowClass = $lineStatic ? '' : 'animate-[recipient-step-dash-flow_0.95s_linear_infinite]';
+                        $isCancelled = in_array($request->status, ['CANCELLED', 'CANCELED'], true);
+                    @endphp
+                    @if($isCancelled)
+                        <div class="flex w-full items-center justify-center py-2">
+                            <div class="flex h-12 w-12 items-center justify-center rounded-full bg-slate-200/80 text-slate-600 dark:bg-navy-500 dark:text-navy-200">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M18.364 5.636 5.636 18.364M5.636 5.636l12.728 12.728" />
+                                </svg>
+                            </div>
+                        </div>
+                    @else
+                    @php
                         $cols = '';
                         foreach($steps as $idx => $step) {
                             $cols .= 'minmax(0,1fr)';
@@ -177,12 +194,12 @@
                                         <div
                                             class="relative h-1 w-full overflow-hidden rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] {{ $c['line'] }}">
                                             <span
-                                                class="pointer-events-none absolute inset-y-0 left-0 w-[min(72%,11rem)] -translate-x-full bg-gradient-to-r from-transparent via-white/95 to-transparent motion-reduce:animate-none dark:via-white/50 dark:from-transparent dark:to-transparent animate-[recipient-step-line-shimmer_1.65s_linear_infinite] [mask-image:linear-gradient(90deg,transparent_0%,black_18%,black_82%,transparent_100%)]"></span>
+                                                class="pointer-events-none absolute inset-y-0 left-0 w-[min(72%,11rem)] -translate-x-full bg-gradient-to-r from-transparent via-white/95 to-transparent motion-reduce:animate-none dark:via-white/50 dark:from-transparent dark:to-transparent {{ $solidShimmerClass }} [mask-image:linear-gradient(90deg,transparent_0%,black_18%,black_82%,transparent_100%)]"></span>
                                         </div>
                                     @else
                                         {{-- Dashed: higher-contrast marching ticks --}}
                                         <div
-                                            class="h-1 w-full rounded-full bg-[repeating-linear-gradient(90deg,rgb(148_163_184)_0px,rgb(148_163_184)_6px,transparent_6px,transparent_14px)] bg-[length:24px_100%] shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] motion-reduce:animate-none animate-[recipient-step-dash-flow_0.95s_linear_infinite] dark:bg-[repeating-linear-gradient(90deg,rgb(173_181_189)_0px,rgb(173_181_189)_6px,transparent_6px,transparent_14px)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"></div>
+                                            class="h-1 w-full rounded-full bg-[repeating-linear-gradient(90deg,rgb(148_163_184)_0px,rgb(148_163_184)_6px,transparent_6px,transparent_14px)] bg-[length:24px_100%] shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] motion-reduce:animate-none {{ $dashFlowClass }} dark:bg-[repeating-linear-gradient(90deg,rgb(173_181_189)_0px,rgb(173_181_189)_6px,transparent_6px,transparent_14px)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"></div>
                                     @endif
                                 </div>
                             @endif
@@ -203,25 +220,58 @@
                                         <div
                                             class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full sm:h-11 sm:w-11 {{ $c['done'] }}"
                                             aria-hidden="true">
-                                            <svg class="size-4 text-white sm:size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-                                                    d="m4.5 12.75 6 6 9-13.5" />
-                                            </svg>
+                                            @if($idx === 2)
+                                                @if($redeemCompleted)
+                                                    <svg class="size-4 text-white sm:size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                            d="m4.5 12.75 6 6 9-13.5" />
+                                                    </svg>
+                                                @else
+                                                    <i class="fa-solid fa-qrcode text-[0.95rem] text-white sm:text-[1.05rem]" aria-hidden="true"></i>
+                                                @endif
+                                            @else
+                                                <svg class="size-4 text-white sm:size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                        d="m4.5 12.75 6 6 9-13.5" />
+                                                </svg>
+                                            @endif
                                         </div>
                                     @elseif($st === 'current')
                                         <div
                                             class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full {{ $c['currentRing'] }} {{ $c['currentBg'] }} sm:h-11 sm:w-11"
                                             aria-hidden="true">
-                                            <svg class="size-4 animate-pulse sm:size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
-                                                    d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0Z" />
-                                            </svg>
+                                            @if($idx === 2)
+                                                @if($redeemCompleted)
+                                                    <svg class="size-4 sm:size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                            d="m4.5 12.75 6 6 9-13.5" />
+                                                    </svg>
+                                                @else
+                                                    <i class="fa-solid fa-qrcode animate-pulse text-[0.95rem] sm:text-[1.05rem]" aria-hidden="true"></i>
+                                                @endif
+                                            @else
+                                                <svg class="size-4 animate-pulse sm:size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
+                                                        d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0Z" />
+                                                </svg>
+                                            @endif
                                         </div>
                                     @else
                                         <div
                                             class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border-2 border-dashed border-slate-300 bg-slate-50 text-slate-400 dark:border-navy-500 dark:bg-navy-700/40 dark:text-navy-500 sm:h-11 sm:w-11"
                                             aria-hidden="true">
-                                            <span class="text-sm font-bold">…</span>
+                                            @if($idx === 2)
+                                                @if($redeemCompleted)
+                                                    <svg class="size-4 opacity-70 sm:size-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                            d="m4.5 12.75 6 6 9-13.5" />
+                                                    </svg>
+                                                @else
+                                                    <i class="fa-solid fa-qrcode text-[0.95rem] opacity-60 sm:text-[1.05rem]" aria-hidden="true"></i>
+                                                @endif
+                                            @else
+                                                <span class="text-sm font-bold">…</span>
+                                            @endif
                                         </div>
                                     @endif
                                 </div>
@@ -234,6 +284,7 @@
                             </div>
                         @endforeach
                     </div>
+                    @endif
                 </div>
             </div>
 
@@ -251,10 +302,7 @@
                     @elseif($canShowQr)
                         <button type="button" @click="$dispatch('open-modal', 'redeem-qr-{{ $request->id }}')"
                             class="inline-flex w-full max-w-md items-center justify-center gap-2.5 rounded-full bg-success px-6 py-3.5 text-base font-semibold text-white shadow-md transition hover:bg-emerald-600 focus:outline-hidden focus:ring-2 focus:ring-success/50 dark:bg-emerald-600 dark:hover:bg-emerald-500">
-                            <svg class="size-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
-                                    d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5zM13.5 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5z" />
-                            </svg>
+                            <i class="fa-solid fa-qrcode text-[1.05rem]" aria-hidden="true"></i>
                             {{ __('recipient.request_redeem.view_qr') }}
                         </button>
                     @else

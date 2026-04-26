@@ -106,12 +106,45 @@ class RecipientRequestController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $requests = RequestModel::with(['provider.providerProfile', 'items'])
-            ->where('recipient_id', auth()->id())
-            ->latest()
-            ->paginate(10);
+        $query = RequestModel::with(['provider.providerProfile', 'items.menuItem', 'redemption'])
+            ->where('recipient_id', auth()->id());
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhereHas('provider', function ($pq) use ($search) {
+                        $pq->where('name', 'like', "%{$search}%")
+                            ->orWhereHas('providerProfile', function ($ppq) use ($search) {
+                                $ppq->where('business_name_en', 'like', "%{$search}%")
+                                    ->orWhere('business_name_ar', 'like', "%{$search}%");
+                            });
+                    });
+            });
+        }
+
+        if ($request->filled('status')) {
+            $status = (string) $request->status;
+
+            // UI-friendly status groups for recipient orders page
+            if ($status === 'pending') {
+                $query->whereIn('status', ['REQUESTED', 'ADMIN_PENDING']);
+            } elseif ($status === 'redeemable') {
+                // Ready for QR / pickup (approved or redeemable)
+                $query->whereIn('status', ['APPROVED', 'ADMIN_APPROVED', 'REDEEMABLE']);
+            } elseif ($status === 'fulfilled') {
+                $query->where('status', 'FULFILLED');
+            } elseif ($status === 'cancelled') {
+                $query->where('status', 'CANCELLED');
+            } else {
+                // Backward-compat for direct status values
+                $query->where('status', $status);
+            }
+        }
+
+        $requests = $query->latest()->paginate(10);
 
         return view('recipient.requests.index', compact('requests'));
     }
