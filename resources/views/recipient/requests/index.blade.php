@@ -21,8 +21,29 @@
                     {{ __('Track your orders, view details, and manage cancellations.') }}
                 </p>
             </div>
+        </div>
 
-            <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end sm:gap-4">
+        <div class="mt-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div class="inline-flex flex-wrap items-center gap-2 rounded-full bg-slate-100 p-1 dark:bg-navy-600">
+                @foreach($statusTabs as $tab)
+                    @php
+                        $isActive = ($tab['key'] === null && !$statusFilter) || ($tab['key'] !== null && $statusFilter === $tab['key']);
+                        $href = route('recipient.requests.index', array_filter([
+                            'search' => request('search'),
+                            'status' => $tab['key'],
+                        ], fn ($v) => $v !== null && $v !== ''));
+                    @endphp
+                    <a href="{{ $href }}"
+                       class="btn h-9 rounded-full px-5 text-sm font-medium transition-colors
+                            {{ $isActive
+                                ? 'bg-amber-400 text-slate-900 hover:bg-amber-400 focus:bg-amber-400'
+                                : 'bg-transparent text-slate-700 hover:bg-white/70 focus:bg-white/70 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500' }}">
+                        {{ $tab['label'] }}
+                    </a>
+                @endforeach
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 sm:justify-end">
                 <form method="GET" action="{{ route('recipient.requests.index') }}" class="flex flex-wrap items-center gap-2">
                     <input
                         type="text"
@@ -59,27 +80,6 @@
                     <i class="fa-solid fa-plus text-xs"></i>
                     {{ __('New Request') }}
                 </a>
-            </div>
-        </div>
-
-        <div class="mt-4">
-            <div class="inline-flex flex-wrap items-center gap-2 rounded-full bg-slate-100 p-1 dark:bg-navy-600">
-                @foreach($statusTabs as $tab)
-                    @php
-                        $isActive = ($tab['key'] === null && !$statusFilter) || ($tab['key'] !== null && $statusFilter === $tab['key']);
-                        $href = route('recipient.requests.index', array_filter([
-                            'search' => request('search'),
-                            'status' => $tab['key'],
-                        ], fn ($v) => $v !== null && $v !== ''));
-                    @endphp
-                    <a href="{{ $href }}"
-                       class="btn h-9 rounded-full px-5 text-sm font-medium transition-colors
-                            {{ $isActive
-                                ? 'bg-amber-400 text-slate-900 hover:bg-amber-400 focus:bg-amber-400'
-                                : 'bg-transparent text-slate-700 hover:bg-white/70 focus:bg-white/70 dark:text-navy-100 dark:hover:bg-navy-500 dark:focus:bg-navy-500' }}">
-                        {{ $tab['label'] }}
-                    </a>
-                @endforeach
             </div>
         </div>
 

@@ -66,6 +66,21 @@
 @endphp
 
 <div class="w-full">
+    @php
+        $lineStatic = isset($request) && in_array($request->status, ['FULFILLED', 'CANCELLED', 'CANCELED'], true);
+        $solidShimmerClass = $lineStatic ? '' : 'animate-[recipient-step-line-shimmer_1.65s_linear_infinite]';
+        $dashFlowClass = $lineStatic ? '' : 'animate-[recipient-step-dash-flow_0.95s_linear_infinite]';
+        $isCancelled = isset($request) && in_array($request->status, ['CANCELLED', 'CANCELED'], true);
+    @endphp
+    @if($isCancelled)
+        <div class="flex w-full items-center justify-center">
+            <div class="flex h-11 w-11 items-center justify-center rounded-full bg-slate-200/80 text-slate-600 dark:bg-navy-500 dark:text-navy-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M18.364 5.636 5.636 18.364M5.636 5.636l12.728 12.728" />
+                </svg>
+            </div>
+        </div>
+    @else
     <div class="grid w-full items-start gap-x-0" style="grid-template-columns: {{ $cols }};">
         @foreach($steps as $idx => $step)
             @if($idx > 0)
@@ -77,10 +92,10 @@
                 <div class="flex h-11 items-center justify-center self-start" aria-hidden="true">
                     @if($solid)
                         <div class="relative h-1 w-full overflow-hidden rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] {{ $c['line'] }}">
-                            <span class="pointer-events-none absolute inset-y-0 left-0 w-[min(72%,11rem)] -translate-x-full bg-gradient-to-r from-transparent via-white/95 to-transparent motion-reduce:animate-none dark:via-white/50 dark:from-transparent dark:to-transparent animate-[recipient-step-line-shimmer_1.65s_linear_infinite] [mask-image:linear-gradient(90deg,transparent_0%,black_18%,black_82%,transparent_100%)]"></span>
+                            <span class="pointer-events-none absolute inset-y-0 left-0 w-[min(72%,11rem)] -translate-x-full bg-gradient-to-r from-transparent via-white/95 to-transparent motion-reduce:animate-none dark:via-white/50 dark:from-transparent dark:to-transparent {{ $solidShimmerClass }} [mask-image:linear-gradient(90deg,transparent_0%,black_18%,black_82%,transparent_100%)]"></span>
                         </div>
                     @else
-                        <div class="h-1 w-full rounded-full bg-[repeating-linear-gradient(90deg,rgb(148_163_184)_0px,rgb(148_163_184)_6px,transparent_6px,transparent_14px)] bg-[length:24px_100%] shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] motion-reduce:animate-none animate-[recipient-step-dash-flow_0.95s_linear_infinite] dark:bg-[repeating-linear-gradient(90deg,rgb(173_181_189)_0px,rgb(173_181_189)_6px,transparent_6px,transparent_14px)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"></div>
+                        <div class="h-1 w-full rounded-full bg-[repeating-linear-gradient(90deg,rgb(148_163_184)_0px,rgb(148_163_184)_6px,transparent_6px,transparent_14px)] bg-[length:24px_100%] shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] motion-reduce:animate-none {{ $dashFlowClass }} dark:bg-[repeating-linear-gradient(90deg,rgb(173_181_189)_0px,rgb(173_181_189)_6px,transparent_6px,transparent_14px)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"></div>
                     @endif
                 </div>
             @endif
@@ -155,5 +170,6 @@
             </div>
         @endforeach
     </div>
+    @endif
 </div>
 

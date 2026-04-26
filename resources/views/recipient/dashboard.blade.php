@@ -40,10 +40,13 @@
                                 </div>
                             </div>
                             <div>
-                                <div class="badge mt-2 inline-flex items-center gap-1 bg-success/10 py-1 px-1.5 text-success dark:bg-success/15">
-                                    <span>{{ $pendingCount ?? 0 }}</span>
-                                    <span class="text-tiny-plus">{{ __('Pending') }}</span>
-                                </div>
+                                <a
+                                    href="{{ route('recipient.requests.index', ['status' => 'redeemable']) }}"
+                                    class="badge mt-2 inline-flex space-x-1 bg-amber-100 py-1 px-1.5 text-amber-700 hover:bg-amber-200 dark:bg-amber-500/15 dark:text-amber-300 dark:hover:bg-amber-500/25"
+                                >
+                                    <span>{{ __('View') }}</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
+                                </a>
                             </div>
                         </div>
                         <div class="card justify-center p-4.5">
@@ -59,7 +62,7 @@
                                 </div>
                             </div>
                             <div>
-                                <a href="{{ route('recipient.requests.index') }}" class="badge mt-2 inline-flex space-x-1 bg-success/10 py-1 px-1.5 text-success dark:bg-success/15 hover:bg-success/20">
+                                <a href="{{ route('recipient.requests.index', ['status' => 'fulfilled']) }}" class="badge mt-2 inline-flex space-x-1 bg-success/10 py-1 px-1.5 text-success dark:bg-success/15 hover:bg-success/20">
                                     <span>{{ __('View') }}</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                                 </a>
@@ -97,7 +100,7 @@
                                 </div>
                             </div>
                             <div>
-                                <a href="{{ route('recipient.requests.index') }}" class="badge mt-2 inline-flex space-x-1 bg-warning/10 py-1 px-1.5 text-warning dark:bg-warning/15 hover:bg-warning/20">
+                                <a href="{{ route('recipient.requests.index', ['status' => 'pending']) }}" class="badge mt-2 inline-flex space-x-1 bg-warning/10 py-1 px-1.5 text-warning dark:bg-warning/15 hover:bg-warning/20">
                                     <span>{{ __('View') }}</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" /></svg>
                                 </a>
@@ -105,11 +108,11 @@
                         </div>
                     </div>
                 </div>
-                {{-- My Requests --}}
+                {{-- Pending & Redeemable --}}
                 <div>
                     <div class="flex items-center justify-between">
                         <h2 class="text-sm-plus font-medium tracking-wide text-slate-700 dark:text-navy-100">
-                            {{ __('My Requests') }}
+                            {{ __('Pending & Redeemable') }}
                         </h2>
                         <a href="{{ route('recipient.requests.index') }}"
                             class="border-b border-dotted border-current pb-0.5 text-xs-plus font-medium text-primary outline-hidden transition-colors duration-300 hover:text-primary/70 dark:text-accent-light dark:hover:text-accent-light/70">
@@ -127,17 +130,54 @@
                                 'FULFILLED' => __('Fulfilled'),
                                 'REJECTED' => __('Rejected'),
                                 'ADMIN_REJECTED' => __('Rejected'),
+                                'CANCELLED' => __('Cancelled'),
+                                'CANCELED' => __('Cancelled'),
                             ];
                         @endphp
-                        @forelse($recentRequests as $req)
+                        @forelse(($dashboardMyRequests ?? collect()) as $req)
                         @php
                             $reqProvider = $req->provider;
                             $reqProviderTitle = \App\Support\ProviderDisplay::businessTitle($reqProvider->providerProfile, $reqProvider->name);
+
+                            $statusCard = \App\Support\RecipientRequestStatusPresenter::card($req, false);
+                            $steps = array_slice($statusCard['steps'] ?? [], 0, 4);
+                            $doneCount = collect($steps)->filter(fn ($s) => ($s['state'] ?? 'pending') === 'done')->count();
+                            $currentIndex = collect($steps)->search(fn ($s) => ($s['state'] ?? 'pending') === 'current');
+                            $currentIndex = $currentIndex === false ? null : (int) $currentIndex;
+                            $totalSteps = max(1, count($steps));
+                            $progressIndex = $currentIndex ?? $doneCount;
+                            $progressPct = $totalSteps <= 1 ? 0 : (int) round(($progressIndex / ($totalSteps - 1)) * 100);
+
+                            $barColorClass = match ($req->status) {
+                                'FULFILLED' => 'bg-success',
+                                'REDEEMABLE', 'APPROVED', 'ADMIN_APPROVED' => 'bg-info',
+                                'CANCELLED', 'CANCELED', 'REJECTED', 'ADMIN_REJECTED' => 'bg-amber-500',
+                                default => 'bg-amber-500',
+                            };
+
+                            $statusTextClass = match ($req->status) {
+                                'FULFILLED' => 'text-success',
+                                'REDEEMABLE', 'APPROVED', 'ADMIN_APPROVED' => 'text-info',
+                                'CANCELLED', 'CANCELED', 'REJECTED', 'ADMIN_REJECTED' => 'text-amber-600 dark:text-amber-400',
+                                default => 'text-amber-600 dark:text-amber-400',
+                            };
+
+                            $iconBgClass = match ($req->status) {
+                                'FULFILLED' => 'bg-success/10',
+                                'REDEEMABLE', 'APPROVED', 'ADMIN_APPROVED' => 'bg-info/10',
+                                default => 'bg-amber-100 dark:bg-amber-500/15',
+                            };
+
+                            $iconTextClass = match ($req->status) {
+                                'FULFILLED' => 'text-success',
+                                'REDEEMABLE', 'APPROVED', 'ADMIN_APPROVED' => 'text-info',
+                                default => 'text-amber-600 dark:text-amber-300',
+                            };
                         @endphp
                         <a href="{{ route('recipient.requests.show', $req->id) }}" class="card block p-3 hover:bg-slate-50 dark:hover:bg-navy-600/50 transition-colors">
                             <div class="flex items-start gap-3">
-                                <div class="flex size-10 shrink-0 items-center justify-center rounded-lg {{ in_array($req->status, ['FULFILLED']) ? 'bg-success/10' : (in_array($req->status, ['REDEEMABLE', 'APPROVED']) ? 'bg-info/10' : 'bg-primary/10 dark:bg-accent/10') }}">
-                                    <i class="fa-solid fa-utensils {{ in_array($req->status, ['FULFILLED']) ? 'text-success' : (in_array($req->status, ['REDEEMABLE', 'APPROVED']) ? 'text-info' : 'text-primary dark:text-accent-light') }}"></i>
+                                <div class="avatar size-10 shrink-0">
+                                    <x-provider-profile-avatar :profile="$reqProvider->providerProfile" :title="$reqProviderTitle" variant="compact-primary" />
                                 </div>
                                 <div class="min-w-0 flex-1">
                                     <p class="font-medium text-slate-700 dark:text-navy-100">{{ $req->items->first()?->menuItem?->name ?? __('Request') }}</p>
@@ -147,11 +187,42 @@
                                         <span class="hidden sm:inline">{{ __('Requested:') }} {{ $req->created_at->diffForHumans() }}</span>
                                     </div>
                                 </div>
-                                <p class="max-w-[42%] shrink-0 text-end text-xs leading-snug font-medium sm:max-w-[36%] {{ $req->status === 'FULFILLED' ? 'text-success' : (in_array($req->status, ['REDEEMABLE', 'APPROVED']) ? 'text-info' : 'text-primary dark:text-accent-light') }}">{{ $statusLabels[$req->status] ?? str_replace('_', ' ', $req->status) }}</p>
+                                <p class="max-w-[42%] shrink-0 text-end text-xs leading-snug font-medium sm:max-w-[36%] {{ $statusTextClass }}">{{ $statusLabels[$req->status] ?? str_replace('_', ' ', $req->status) }}</p>
                             </div>
-                            <div class="progress mt-2 h-1.5 bg-slate-150 dark:bg-navy-500">
-                                <div class="relative overflow-hidden rounded-full {{ $req->status === 'FULFILLED' ? 'w-full bg-success' : (in_array($req->status, ['REDEEMABLE', 'APPROVED']) ? 'w-3/4 bg-info' : 'w-3/12 bg-primary dark:bg-accent') }}"></div>
-                            </div>
+                            @php
+                                // Render the same "connector line" logic as the hero (solid when left is done and right is done/current).
+                                $lineStatic = in_array($req->status, ['FULFILLED', 'CANCELLED', 'CANCELED'], true);
+                                $solidShimmerClass = $lineStatic ? '' : 'animate-[recipient-step-line-shimmer_1.65s_linear_infinite]';
+                                $dashFlowClass = $lineStatic ? '' : 'animate-[recipient-step-dash-flow_0.95s_linear_infinite]';
+                                $isCancelled = in_array($req->status, ['CANCELLED', 'CANCELED'], true);
+                                $segSolid = [];
+                                for ($i = 1; $i < count($steps); $i++) {
+                                    $left = $steps[$i - 1]['state'] ?? 'pending';
+                                    $right = $steps[$i]['state'] ?? 'pending';
+                                    $segSolid[$i] = $left === 'done' && in_array($right, ['done', 'current'], true);
+                                }
+                            @endphp
+                            @if($isCancelled)
+                                <div class="mt-2 flex items-center">
+                                    <div class="flex size-6 items-center justify-center rounded-full bg-slate-200/80 text-slate-600 dark:bg-navy-500 dark:text-navy-200">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M18.364 5.636 5.636 18.364M5.636 5.636l12.728 12.728" />
+                                        </svg>
+                                    </div>
+                                </div>
+                            @else
+                                <div class="mt-2 grid grid-cols-3 gap-x-2">
+                                    @for($i = 1; $i < 4; $i++)
+                                        @if(($segSolid[$i] ?? false) === true)
+                                            <div class="relative h-1 w-full overflow-hidden rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] {{ $barColorClass }}">
+                                                <span class="pointer-events-none absolute inset-y-0 left-0 w-[min(72%,11rem)] -translate-x-full bg-gradient-to-r from-transparent via-white/95 to-transparent motion-reduce:animate-none dark:via-white/50 dark:from-transparent dark:to-transparent {{ $solidShimmerClass }} [mask-image:linear-gradient(90deg,transparent_0%,black_18%,black_82%,transparent_100%)]"></span>
+                                            </div>
+                                        @else
+                                            <div class="h-1 w-full rounded-full bg-[repeating-linear-gradient(90deg,rgb(148_163_184)_0px,rgb(148_163_184)_6px,transparent_6px,transparent_14px)] bg-[length:24px_100%] shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] motion-reduce:animate-none {{ $dashFlowClass }} dark:bg-[repeating-linear-gradient(90deg,rgb(173_181_189)_0px,rgb(173_181_189)_6px,transparent_6px,transparent_14px)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"></div>
+                                        @endif
+                                    @endfor
+                                </div>
+                            @endif
                         </a>
                         @empty
                         <div class="card p-3 text-center text-slate-500 dark:text-navy-400">
@@ -237,23 +308,6 @@
             {{-- Sidebar --}}
             <div class="col-span-12 lg:col-span-4">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-1 lg:gap-6">
-                    <div class="card px-4 pb-4 sm:px-5">
-                        <div class="my-3 flex h-8 items-center justify-between">
-                            <h2 class="font-medium tracking-wide text-slate-700 line-clamp-1 dark:text-navy-100">
-                                {{ __('Quick Actions') }}
-                            </h2>
-                        </div>
-                        <div class="space-y-3">
-                            <a href="{{ route('recipient.providers.index') }}" class="btn flex w-full items-center justify-center space-x-2 bg-primary py-2.5 text-white dark:bg-accent hover:bg-primary-focus dark:hover:bg-accent-focus">
-                                <i class="fa-solid fa-utensils"></i>
-                                <span>{{ __('Browse Providers') }}</span>
-                            </a>
-                            <a href="{{ route('recipient.providers.index') }}" class="btn flex w-full items-center justify-center space-x-2 border-2 border-primary bg-transparent py-2.5 text-primary dark:border-accent dark:text-accent hover:bg-primary/10 dark:hover:bg-accent/10">
-                                <i class="fa-solid fa-plus"></i>
-                                <span>{{ __('New Request') }}</span>
-                            </a>
-                        </div>
-                    </div>
                     <div class="card">
                         <div class="mt-3 flex h-8 items-center justify-between px-4 sm:px-5">
                             <h2 class="font-medium tracking-wide text-slate-700 line-clamp-1 dark:text-navy-100">
@@ -281,7 +335,7 @@
                                     this.$el._x_chart = new ApexCharts(this.$el, config);
                                     this.$el._x_chart.render();
                                 }
-                             }" x-init="init()"></div>
+                             }"></div>
                     </div>
                     <div class="card p-4">
                         <div class="space-y-1 text-center font-inter text-xs-plus">
@@ -329,11 +383,25 @@
                             <div class="mt-3 space-y-2">
                                 <div class="rounded-lg bg-primary/5 dark:bg-accent/5 px-3 py-2 text-xs">
                                     <p class="font-medium text-slate-700 dark:text-navy-100">{{ __('New provider joined') }}</p>
-                                    <p class="text-slate-500 dark:text-navy-400">{{ __('recipient.dashboard.promo_new_provider_body') }}</p>
+                                    <p class="text-slate-500 dark:text-navy-400">
+                                        @if(!empty($latestProvider))
+                                            @php
+                                                $latestProviderTitle = \App\Support\ProviderDisplay::businessTitle($latestProvider->providerProfile, $latestProvider->name);
+                                            @endphp
+                                            <a href="{{ route('recipient.providers.show', $latestProvider->id) }}" class="font-medium text-primary hover:underline dark:text-accent-light">
+                                                {{ $latestProviderTitle }}
+                                            </a>
+                                            <span>— {{ __('recipient.dashboard.promo_new_provider_body', ['provider' => $latestProviderTitle]) }}</span>
+                                        @else
+                                            {{ __('recipient.dashboard.promo_new_provider_body_fallback') }}
+                                        @endif
+                                    </p>
                                 </div>
                                 <div class="rounded-lg bg-success/5 px-3 py-2 text-xs">
                                     <p class="font-medium text-slate-700 dark:text-navy-100">{{ __('Community support') }}</p>
-                                    <p class="text-slate-500 dark:text-navy-400">{{ __('recipient.dashboard.promo_community_body') }}</p>
+                                    <p class="text-slate-500 dark:text-navy-400">
+                                        {{ __('recipient.dashboard.promo_community_body', ['count' => $communityFulfilledThisWeek ?? 0]) }}
+                                    </p>
                                 </div>
                             </div>
                         </div>
