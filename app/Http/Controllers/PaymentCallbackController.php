@@ -28,7 +28,8 @@ class PaymentCallbackController extends Controller
         $payment = null;
 
         if ($paymentId && auth()->check()) {
-            $payment = Payment::where('id', $paymentId)
+            $payment = Payment::with('sponsor')
+                ->where('id', $paymentId)
                 ->where('status', Payment::STATUS_SUCCEEDED)
                 ->first();
 

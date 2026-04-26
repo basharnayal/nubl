@@ -12,7 +12,7 @@
                             {{ __('Thank you! Your donation was successful.') }}
                         </h2>
                         <p class="mt-2 text-sm text-slate-500 dark:text-navy-400">
-                            {{ __('Your contribution has been added to the city fund and will help those in need.') }}
+                            {{ __('Your contribution has been added to the city fund and will reach those most in need.') }}
                         </p>
                     </div>
 
@@ -22,16 +22,28 @@
                             <h3 class="mb-4 font-medium text-slate-700 dark:text-navy-100">{{ __('Donation Receipt') }}</h3>
                             <div class="space-y-3">
                                 <div class="flex justify-between">
+                                    <span class="text-slate-500 dark:text-navy-400">{{ __('Payment Status') }}</span>
+                                    <span class="font-semibold text-success">{{ __('Succeeded') }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500 dark:text-navy-400">{{ __('Donor') }}</span>
+                                    <span class="font-semibold text-slate-700 dark:text-navy-100">{{ $payment->sponsor?->name ?? __('Donor') }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500 dark:text-navy-400">{{ __('Donation No.') }}</span>
+                                    <span class="font-mono text-slate-700 dark:text-navy-100">DON-{{ str_pad($payment->id, 4, '0', STR_PAD_LEFT) }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-slate-500 dark:text-navy-400">{{ __('Payment Gateway Reference') }}</span>
+                                    <span class="font-mono text-slate-700 dark:text-navy-100">{{ $payment->external_payment_id ?? '—' }}</span>
+                                </div>
+                                <div class="flex justify-between">
                                     <span class="text-slate-500 dark:text-navy-400">{{ __('Amount') }}</span>
                                     <span class="font-semibold text-slate-700 dark:text-navy-100">{{ number_format($payment->amount, 2) }} {{ __('SAR') }}</span>
                                 </div>
                                 <div class="flex justify-between">
-                                    <span class="text-slate-500 dark:text-navy-400">{{ __('Date') }}</span>
-                                    <span class="text-slate-700 dark:text-navy-100">{{ $payment->created_at->translatedFormat('M d, Y H:i') }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-slate-500 dark:text-navy-400">{{ __('Receipt No.') }}</span>
-                                    <span class="font-mono text-slate-700 dark:text-navy-100">#{{ $payment->id }}</span>
+                                    <span class="text-slate-500 dark:text-navy-400">{{ __('Donation Path') }}</span>
+                                    <span class="text-slate-700 dark:text-navy-100">{{ __('Madinah City Fund') }}</span>
                                 </div>
                             </div>
                         </div>
