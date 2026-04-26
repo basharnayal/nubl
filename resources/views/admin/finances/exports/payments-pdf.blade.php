@@ -43,7 +43,7 @@
             <th>Gateway</th>
             <th>External Payment ID</th>
             <th>Status</th>
-            <th>Amount (SAR)</th>
+            <th>Amount (<x-sar-symbol />)</th>
             <th>Created At</th>
             <th>Updated At</th>
         </tr>

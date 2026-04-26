@@ -121,7 +121,7 @@
                         <select id="income_band" name="income_band" required class="{{ $sel }}">
                             <option value="">— {{ __('Select') }} —</option>
                             @foreach(\App\Models\RecipientKycDetails::INCOME_BANDS as $band)
-                                <option value="{{ $band }}" @selected(old('income_band', $k->income_band) === $band)>{{ $band }} {{ __('SAR/month') }}</option>
+                                <option value="{{ $band }}" @selected(old('income_band', $k->income_band) === $band)>{{ $band }} <x-sar-symbol />/{{ __('month') }}</option>
                             @endforeach
                         </select>
                         <span class="pointer-events-none absolute right-0 flex h-full w-10 items-center justify-center text-slate-400 peer-focus:text-primary dark:text-navy-300 dark:peer-focus:text-accent">

@@ -9,9 +9,10 @@
                     <div class="flex items-center gap-2 rounded-lg bg-slate-150 px-4 py-2 dark:bg-navy-600">
                         <span
                             class="text-xs uppercase tracking-wider text-slate-500 dark:text-navy-300">{{ __('City Fund Balance') }}</span>
-                        <span
-                            class="font-bold text-slate-800 dark:text-navy-100">{{ number_format($cityFundBalance ?? 0, 2) }}
-                            {{ __('SAR') }}</span>
+                        <x-sar-amount
+                            class="font-bold text-slate-800 dark:text-navy-100"
+                            :value="number_format($cityFundBalance ?? 0, 2)"
+                        />
                     </div>
                 </div>
 
@@ -61,8 +62,10 @@
                                                     class="font-medium text-slate-700 dark:text-navy-100">{{ $request->recipient->name }}</span>
                                             </td>
                                             <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                                <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100">
-                                                    {{ number_format($request->reserved_amount, 2) }} {{ __('SAR') }}</p>
+                                                <x-sar-amount
+                                                    class="text-sm-plus font-medium text-slate-700 dark:text-navy-100"
+                                                    :value="number_format($request->reserved_amount, 2)"
+                                                />
                                             </td>
                                             <td class="px-4 py-3 sm:px-5">
                                                 <div class="text-xs text-slate-500 dark:text-navy-300">
@@ -168,7 +171,11 @@
     <script>
         function openReviewModal(request, items) {
             document.getElementById('modal-req-id').textContent = request.id;
-            document.getElementById('modal-total').textContent = parseFloat(request.reserved_amount).toFixed(2) + ' {{ __('SAR') }}';
+            const modalTotal = document.getElementById('modal-total');
+            if (modalTotal) {
+                modalTotal.innerHTML = @json(view('components.sar-amount', ['value' => '__VALUE__'])->render());
+                modalTotal.innerHTML = modalTotal.innerHTML.replace('__VALUE__', parseFloat(request.reserved_amount).toFixed(2));
+            }
 
             const list = document.getElementById('modal-items-list');
             list.innerHTML = '';

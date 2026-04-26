@@ -44,7 +44,7 @@
                                         <span class="inline-flex items-center gap-2">
                                             <span x-text="p"></span>
                                             <span class="text-slate-400 dark:text-navy-200">
-                                                {{ app()->getLocale() === 'ar' ? 'ريال' : 'SAR' }}
+                                                <x-sar-symbol />
                                             </span>
                                         </span>
                                     </button>
@@ -52,7 +52,7 @@
                             </div>
 
                             <div>
-                                <label for="amount" class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Amount') }} ({{ __('SAR') }}) *</label>
+                                <label for="amount" class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Amount') }} (<x-sar-symbol />) *</label>
                                 <input
                                     x-ref="amountInput"
                                     x-model="amount"

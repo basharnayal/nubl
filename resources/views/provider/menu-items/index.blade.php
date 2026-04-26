@@ -95,7 +95,7 @@
                                             </td>
                                             <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ __($item->category) }}</td>
                                             <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                                <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100">{{ number_format($item->price, 2) }} {{ __('SAR') }}</p>
+                                                <p class="text-sm-plus font-medium text-slate-700 dark:text-navy-100"><x-sar-symbol /> {{ number_format($item->price, 2) }}</p>
                                             </td>
                                             <td class="px-4 py-3 sm:px-5">
                                                 @if($item->is_admin_blocked)

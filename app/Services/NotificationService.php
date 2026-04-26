@@ -14,15 +14,31 @@ use App\Notifications\NewUserRegisteredNotification;
 use App\Notifications\ProviderNewRequestNotification;
 use App\Notifications\ProviderRequestStatusChangedNotification;
 use App\Notifications\RequestStatusChangedNotification;
+use Illuminate\Support\Facades\Log;
 
 class NotificationService implements NotificationServiceInterface
 {
+    private function safeNotify(User $user, object $notification): void
+    {
+        try {
+            $user->notify($notification);
+        } catch (\Throwable $e) {
+            // Notifications should never break core flows (e.g., cancel request).
+            Log::warning('Notification failed to send', [
+                'notification' => $notification::class,
+                'user_id' => $user->id,
+                'exception' => $e::class,
+                'message' => $e->getMessage(),
+            ]);
+        }
+    }
+
     public function sendDonationReceipt(Payment $payment): void
     {
         $donor = $payment->sponsor;
 
         if ($donor) {
-            $donor->notify(new DonationReceiptNotification($payment));
+            $this->safeNotify($donor, new DonationReceiptNotification($payment));
         }
     }
 
@@ -37,25 +53,25 @@ class NotificationService implements NotificationServiceInterface
             $user->status === User::STATUS_PENDING_APPROVAL
             && in_array($user->membership_type, [User::MEMBERSHIP_RECIPIENT, User::MEMBERSHIP_PROVIDER], true)
         ) {
-            $admins->each(fn($admin) => $admin->notify(new AccountApprovalPendingNotification($user)));
+            $admins->each(fn($admin) => $this->safeNotify($admin, new AccountApprovalPendingNotification($user)));
 
             return;
         }
 
-        $admins->each(fn($admin) => $admin->notify(new NewUserRegisteredNotification($user)));
+        $admins->each(fn($admin) => $this->safeNotify($admin, new NewUserRegisteredNotification($user)));
     }
 
     /** Notify every admin when a rejected applicant resubmits (see {@see UserObserver}). */
     public function sendDocumentsResubmittedForReviewToAdmins(User $user): void
     {
         User::role('admin')->get()->each(
-            fn($admin) => $admin->notify(new DocumentsResubmittedForReviewNotification($user))
+            fn($admin) => $this->safeNotify($admin, new DocumentsResubmittedForReviewNotification($user))
         );
     }
 
     public function sendAccountStatusUpdated(User $user, bool $isApproved, ?string $rejectionReason = null): void
     {
-        $user->notify(new AccountStatusUpdatedNotification($user, $isApproved, $rejectionReason));
+        $this->safeNotify($user, new AccountStatusUpdatedNotification($user, $isApproved, $rejectionReason));
     }
 
     public function sendRequestStatusChanged(RequestModel $request, string $status): void
@@ -65,7 +81,7 @@ class NotificationService implements NotificationServiceInterface
             return;
         }
 
-        $recipient->notify(new RequestStatusChangedNotification($request, $status));
+        $this->safeNotify($recipient, new RequestStatusChangedNotification($request, $status));
     }
 
     public function sendNewRequestToProvider(RequestModel $request): void
@@ -75,7 +91,7 @@ class NotificationService implements NotificationServiceInterface
             return;
         }
 
-        $provider->notify(new ProviderNewRequestNotification($request));
+        $this->safeNotify($provider, new ProviderNewRequestNotification($request));
     }
 
     public function sendRequestStatusChangedToProvider(RequestModel $request, string $status): void
@@ -89,12 +105,12 @@ class NotificationService implements NotificationServiceInterface
             return;
         }
 
-        $provider->notify(new ProviderRequestStatusChangedNotification($request, $status));
+        $this->safeNotify($provider, new ProviderRequestStatusChangedNotification($request, $status));
     }
 
     public function sendNewRequestToAdmins(RequestModel $request): void
     {
         $admins = User::role('admin')->get();
-        $admins->each(fn($admin) => $admin->notify(new \App\Notifications\NewPendingAdminRequestNotification($request)));
+        $admins->each(fn($admin) => $this->safeNotify($admin, new \App\Notifications\NewPendingAdminRequestNotification($request)));
     }
 }

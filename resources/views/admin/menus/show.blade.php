@@ -98,7 +98,9 @@
                                         <span class="badge rounded-full bg-slate-150 py-1 px-2 text-slate-800 dark:bg-navy-500 dark:text-navy-100 text-xs">{{ __($item->category) }}</span>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        <p class="text-sm-plus font-bold text-slate-700 dark:text-navy-100">{{ number_format($item->price, 2) }} <span class="text-[10px] font-normal opacity-70">{{ __('SAR') }}</span></p>
+                                        <p class="text-sm-plus font-bold text-slate-700 dark:text-navy-100">
+                                            <x-sar-amount :value="number_format($item->price, 2)" />
+                                        </p>
                                     </td>
                                     <td class="px-4 py-3 sm:px-5">
                                         @if($item->is_admin_blocked)

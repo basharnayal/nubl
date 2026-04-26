@@ -79,7 +79,9 @@
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $payment->gateway }}</td>
                                 <td class="whitespace-nowrap px-4 py-3 sm:px-5 font-mono text-xs">{{ $payment->external_payment_id ?? '—' }}</td>
-                                <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ number_format($payment->amount, 2) }} {{ __('finance.common.sar') }}</td>
+                                <td class="whitespace-nowrap px-4 py-3 sm:px-5">
+                                    <x-sar-amount :value="number_format($payment->amount, 2)" />
+                                </td>
                                 <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                     <span @class([
                                         'badge rounded-full px-2 py-0.5 text-xs',

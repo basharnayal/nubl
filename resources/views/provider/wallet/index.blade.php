@@ -16,7 +16,9 @@
                 <dl class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div>
                         <dt class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-navy-400">{{ __('provider.wallet.balance') }}</dt>
-                        <dd class="mt-1 text-2xl font-semibold tabular-nums text-slate-900 dark:text-navy-50">{{ number_format((float) $wallet->balance, 2) }} <span class="text-base font-normal text-slate-500">{{ __('SAR') }}</span></dd>
+                        <dd class="mt-1 text-2xl font-semibold tabular-nums text-slate-900 dark:text-navy-50">
+                            <x-sar-amount class="text-base font-normal text-slate-500" :value="number_format((float) $wallet->balance, 2)" />
+                        </dd>
                     </div>
                     <div>
                         <dt class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-navy-400">{{ __('provider.wallet.wallet_id') }}</dt>

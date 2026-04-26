@@ -152,7 +152,7 @@
                 <x-slot name="icon"><i class="fa-solid fa-coins"></i></x-slot>
                 <x-slot name="value">
                     <span class="shrink-0">{{ number_format($valueFulfilledLast30 ?? 0, 0) }}</span>
-                    <span class="ms-1 text-[10px] uppercase opacity-70">{{ __('SAR') }}</span>
+                    <span class="ms-1 text-[10px] opacity-70"><x-sar-symbol /></span>
                 </x-slot>
                 <x-slot name="label">{{ __('provider.dashboard.value_delivered_30d') }}</x-slot>
                 <x-slot name="footer">

@@ -19,7 +19,7 @@
                                 <div>
                                     <div class="flex items-center gap-2">
                                         <p class="font-medium text-slate-700 dark:text-navy-100">
-                                            {{ number_format($payment->amount, 2) }} {{ __('SAR') }}
+                                            <x-sar-symbol /> {{ number_format($payment->amount, 2) }}
                                         </p>
                                         @php
                                             $statusConfig = match($payment->status) {

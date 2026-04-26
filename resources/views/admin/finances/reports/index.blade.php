@@ -36,11 +36,11 @@
                 </div>
                 <div class="flex justify-between gap-4">
                     <dt>{{ __('finance.reports.succeeded_amount') }}</dt>
-                    <dd>{{ number_format($summary['payments_succeeded_amount'], 2) }} {{ __('finance.common.sar') }}</dd>
+                    <dd><x-sar-amount :value="number_format($summary['payments_succeeded_amount'], 2)" /></dd>
                 </div>
                 <div class="flex justify-between gap-4">
                     <dt>{{ __('finance.reports.failed_amount') }}</dt>
-                    <dd>{{ number_format($summary['payments_failed_amount'], 2) }} {{ __('finance.common.sar') }}</dd>
+                    <dd><x-sar-amount :value="number_format($summary['payments_failed_amount'], 2)" /></dd>
                 </div>
             </dl>
             <h4 class="mt-4 text-xs font-semibold uppercase text-slate-500 dark:text-navy-400">{{ __('finance.reports.by_status') }}</h4>
@@ -52,7 +52,7 @@
                     @endphp
                     <li class="flex justify-between gap-4 border-b border-slate-100 py-1 dark:border-navy-600">
                         <span>{{ $stLabel !== $stKey ? $stLabel : $row->status }}</span>
-                        <span>{{ $row->cnt }} × {{ number_format($row->total, 2) }} {{ __('finance.common.sar') }}</span>
+                        <span>{{ $row->cnt }} × <x-sar-amount :value="number_format($row->total, 2)" class="gap-1.5" /></span>
                     </li>
                 @endforeach
             </ul>
@@ -67,11 +67,11 @@
                 </div>
                 <div class="flex justify-between gap-4">
                     <dt>{{ __('finance.reports.total_in') }}</dt>
-                    <dd>{{ number_format($summary['ledger_in_amount'], 2) }} {{ __('finance.common.sar') }}</dd>
+                    <dd><x-sar-amount :value="number_format($summary['ledger_in_amount'], 2)" /></dd>
                 </div>
                 <div class="flex justify-between gap-4">
                     <dt>{{ __('finance.reports.total_out') }}</dt>
-                    <dd>{{ number_format($summary['ledger_out_amount'], 2) }} {{ __('finance.common.sar') }}</dd>
+                    <dd><x-sar-amount :value="number_format($summary['ledger_out_amount'], 2)" /></dd>
                 </div>
             </dl>
         </div>

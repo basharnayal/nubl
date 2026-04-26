@@ -145,7 +145,9 @@
                                                     <span class="mx-1">•</span>
                                                     {{ $request->created_at->locale(app()->getLocale())->translatedFormat('j F Y') }}
                                                     <span class="mx-1">•</span>
-                                                    <span class="font-semibold text-slate-700 dark:text-navy-100">{{ $request->reserved_amount }} {{ __('SAR') }}</span>
+                                                    <span class="font-semibold text-slate-700 dark:text-navy-100">
+                                                        <x-sar-amount :value="$request->reserved_amount" />
+                                                    </span>
                                                 </p>
 
                                                 <p class="mt-1 line-clamp-1 text-sm text-slate-600 dark:text-navy-300">
@@ -245,23 +247,8 @@
                                         </div>
                                     </div>
 
-                                    {{-- Mini hero (always visible like screenshot) --}}
-                                    <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4 dark:border-navy-500 dark:bg-navy-700">
-                                        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                                            <div class="flex items-center gap-3">
-                                                <div class="flex size-11 items-center justify-center rounded-2xl bg-success/10 text-success dark:bg-success/15">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="size-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
-                                                    </svg>
-                                                </div>
-                                                <div class="min-w-0">
-                                                    <p class="text-sm font-semibold text-slate-800 dark:text-navy-50">{{ __('Order no') }} #{{ $request->id }}</p>
-                                                    <p class="mt-0.5 text-xs font-semibold text-slate-700 dark:text-navy-100">{{ $request->reserved_amount }} {{ __('SAR') }}</p>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="mt-5">
+                                    <div class="mt-4 rounded-2xl bg-white p-4 dark:bg-navy-700">
+                                        <div class="mt-2">
                                             @php
                                                 $miniCard = \App\Support\RecipientRequestStatusPresenter::card($request, false);
                                             @endphp

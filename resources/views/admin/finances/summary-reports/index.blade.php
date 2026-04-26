@@ -59,12 +59,10 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-sm tabular-nums text-slate-700 dark:text-navy-100">
-                                    {{ number_format($report->payload['payments_succeeded_amount'] ?? 0, 2) }}
-                                    {{ __('finance.common.sar') }}
+                                    <x-sar-amount :value="number_format($report->payload['payments_succeeded_amount'] ?? 0, 2)" />
                                 </td>
                                 <td class="px-4 py-3 text-sm tabular-nums text-slate-700 dark:text-navy-100">
-                                    {{ number_format($report->payload['ledger_out_amount'] ?? 0, 2) }}
-                                    {{ __('finance.common.sar') }}
+                                    <x-sar-amount :value="number_format($report->payload['ledger_out_amount'] ?? 0, 2)" />
                                 </td>
                                 <td class="px-4 py-3 text-sm text-slate-500 dark:text-navy-300">
                                     {{ $report->generated_at->format('Y-m-d H:i') }}

@@ -39,7 +39,7 @@
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-slate-500 dark:text-navy-400">{{ __('Amount') }}</span>
-                                    <span class="font-semibold text-slate-700 dark:text-navy-100">{{ number_format($payment->amount, 2) }} {{ __('SAR') }}</span>
+                                    <span class="font-semibold text-slate-700 dark:text-navy-100"><x-sar-amount :value="number_format($payment->amount, 2)" /></span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span class="text-slate-500 dark:text-navy-400">{{ __('Donation Path') }}</span>
