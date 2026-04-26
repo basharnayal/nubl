@@ -124,7 +124,7 @@
                     <span class="font-bold text-slate-800 dark:text-navy-100">{{ $providerTitle }}</span>
                     <span class="text-slate-400 dark:text-navy-500"> · </span>
                     <span class="tabular-nums font-bold text-primary dark:text-accent-light">
-                        {{ number_format((float) $request->reserved_amount, 2) }} {{ __('SAR') }}
+                        <x-sar-amount :value="number_format((float) $request->reserved_amount, 2)" />
                     </span>
                 </p>
                 <div class="mt-5 flex flex-col items-center">

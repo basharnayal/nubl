@@ -28,7 +28,7 @@
                                     @endif
                                 </div>
                                 <div class="flex-shrink-0 text-right">
-                                    <span class="font-semibold text-gray-900">&#x20C1; {{ number_format($item->price, 2) }}</span>
+                                    <span class="font-semibold text-gray-900"><x-sar-symbol /> {{ number_format($item->price, 2) }}</span>
                                 </div>
                             </div>
                         </li>

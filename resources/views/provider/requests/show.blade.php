@@ -50,7 +50,7 @@
                                         {{ __('Grand Total') }}</td>
                                     <td
                                         class="whitespace-nowrap px-4 py-3 text-lg text-primary dark:text-accent-light sm:px-5">
-                                        {{ number_format($request->reserved_amount, 2) }} {{ __('SAR') }}</td>
+                                        <x-sar-symbol /> {{ number_format($request->reserved_amount, 2) }}</td>
                                 </tr>
                             </tbody>
                         </table>

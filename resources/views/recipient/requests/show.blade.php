@@ -141,12 +141,12 @@
                                             </div>
                                         </td>
                                         <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $item->quantity }}</td>
-                                        <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $item->price_snapshot }}
-                                            {{ __('SAR') }}
+                                        <td class="whitespace-nowrap px-4 py-3 sm:px-5">
+                                            <x-sar-amount :value="$item->price_snapshot" />
                                         </td>
                                         <td
                                             class="whitespace-nowrap px-4 py-3 font-bold text-slate-700 dark:text-navy-100 sm:px-5">
-                                            {{ number_format($item->price_snapshot * $item->quantity, 2) }} {{ __('SAR') }}
+                                            <x-sar-amount :value="number_format($item->price_snapshot * $item->quantity, 2)" />
                                         </td>
                                     </tr>
                                 @endforeach
@@ -157,7 +157,7 @@
                                         {{ __('Grand Total') }}
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3 text-primary dark:text-accent-light sm:px-5">
-                                        {{ number_format($request->reserved_amount, 2) }} {{ __('SAR') }}
+                                        <x-sar-amount :value="number_format($request->reserved_amount, 2)" />
                                     </td>
                                 </tr>
                             </tbody>

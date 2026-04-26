@@ -19,7 +19,9 @@
                 <div><dt class="text-slate-500 dark:text-navy-300">{{ __('finance.provider_payouts.col_provider') }}</dt>
                     <dd>{{ $payout->provider?->providerProfile?->business_name_en ?? $payout->provider?->email }} ({{ $payout->provider_id }})</dd></div>
                 <div><dt class="text-slate-500 dark:text-navy-300">{{ __('finance.provider_payouts.col_amount') }}</dt>
-                    <dd class="font-mono">{{ number_format((float) $payout->amount, 2) }} {{ __('SAR') }}</dd></div>
+                    <dd class="font-mono">
+                        <x-sar-amount :value="number_format((float) $payout->amount, 2)" />
+                    </dd></div>
                 <div><dt class="text-slate-500 dark:text-navy-300">{{ __('finance.provider_payouts.col_status') }}</dt>
                     <dd>{{ __('finance.provider_payouts.status.'.$payout->status) }}</dd></div>
                 <div><dt class="text-slate-500 dark:text-navy-300">{{ __('finance.provider_payouts.col_week') }}</dt>

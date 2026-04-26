@@ -33,7 +33,7 @@
         </div>
         <div>
             <dt class="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-navy-400">{{ __('Total') }}</dt>
-            <dd class="mt-0.5 font-semibold text-slate-800 dark:text-navy-100">{{ $amount }} {{ __('SAR') }}</dd>
+            <dd class="mt-0.5 font-semibold text-slate-800 dark:text-navy-100"><x-sar-symbol /> {{ $amount }}</dd>
         </div>
     </dl>
 

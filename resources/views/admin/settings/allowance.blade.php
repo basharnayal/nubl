@@ -35,7 +35,7 @@
                 <div class="flex flex-wrap items-baseline justify-between gap-2 border-b border-slate-100 pb-3 dark:border-navy-600">
                     <dt class="font-semibold text-slate-700 dark:text-navy-200">{{ __('Current effective limit (this week)') }}</dt>
                     <dd class="tabular-nums text-lg font-bold text-slate-900 dark:text-navy-50" dir="ltr">
-                        {{ number_format($effectiveLimit, 2) }} {{ __('SAR') }}
+                        <x-sar-symbol /> {{ number_format($effectiveLimit, 2) }}
                     </dd>
                 </div>
                 @if ($pendingValue !== null && $pendingValue !== '' && $pendingEffectiveAt)
@@ -43,7 +43,7 @@
                         <dt class="font-semibold text-slate-700 dark:text-navy-200">{{ __('Scheduled limit') }}</dt>
                         <dd class="text-right">
                             <span class="tabular-nums font-bold text-warning" dir="ltr">{{ number_format((float) $pendingValue, 2) }}
-                                {{ __('SAR') }}</span>
+                                <x-sar-symbol /></span>
                             <p class="mt-1 text-xs text-slate-600 dark:text-navy-400" dir="auto">
                                 {{ __('Effective from') }}:
                                 <time class="font-medium text-slate-700 dark:text-navy-200" datetime="{{ $pendingEffectiveAt->toIso8601String() }}">{{ $pendingEffectiveFormatted }}</time>
@@ -65,7 +65,7 @@
 
                 <div>
                     <label for="weekly_allowance_sar" class="mb-2 block text-sm font-semibold text-slate-800 dark:text-navy-100">
-                        {{ __('New weekly limit (SAR)') }}
+                        {{ __('New weekly limit') }} (<x-sar-symbol />)
                     </label>
                     <div dir="ltr" class="max-w-md text-left">
                         <input type="number" name="weekly_allowance_sar" id="weekly_allowance_sar"
@@ -74,7 +74,7 @@
                             class="form-input form-input-lineone w-full min-h-[2.75rem] text-base tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:m-0 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:m-0 [&::-webkit-outer-spin-button]:appearance-none">
                     </div>
                     <p class="mt-2 text-xs text-slate-500 dark:text-navy-400" dir="auto">
-                        {{ __('Allowed range: :min–:max SAR. Config default if never saved: :default SAR.', ['min' => $min, 'max' => $max, 'default' => number_format($default, 2)]) }}
+                        {{ __('Allowed range: :min–:max. Config default if never saved: :default.', ['min' => $min, 'max' => $max, 'default' => number_format($default, 2)]) }} (<x-sar-symbol />)
                     </p>
                     <p class="mt-2 text-xs leading-relaxed text-slate-500 dark:text-navy-400" dir="auto">
                         {{ __('Saving schedules this value for the start of next allowance week (Sunday). It replaces any previous unsaved schedule.') }}

@@ -34,7 +34,13 @@
                     </div>
                     <div class="flex justify-between gap-4">
                         <dt class="text-slate-500 dark:text-navy-300">{{ __('finance.ledger.balance_cached') }}</dt>
-                        <dd>{{ $fundTransaction->wallet ? number_format($fundTransaction->wallet->balance, 2).' '.__('finance.common.sar') : '—' }}</dd>
+                        <dd>
+                            @if($fundTransaction->wallet)
+                                <x-sar-amount :value="number_format($fundTransaction->wallet->balance, 2)" />
+                            @else
+                                —
+                            @endif
+                        </dd>
                     </div>
                     @if ($fundTransaction->wallet?->owner_type === 'PROVIDER' && $fundTransaction->wallet?->provider)
                         <div class="flex justify-between gap-4">
@@ -60,7 +66,7 @@
                     </div>
                     <div class="flex justify-between gap-4">
                         <dt class="text-slate-500 dark:text-navy-300">{{ __('finance.common.amount') }}</dt>
-                        <dd>{{ number_format($fundTransaction->amount, 2) }} {{ __('finance.common.sar') }}</dd>
+                        <dd><x-sar-amount :value="number_format($fundTransaction->amount, 2)" /></dd>
                     </div>
                     <div class="flex justify-between gap-4">
                         <dt class="text-slate-500 dark:text-navy-300">{{ __('finance.ledger.donor_sponsor') }}</dt>

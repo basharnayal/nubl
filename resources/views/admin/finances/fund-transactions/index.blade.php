@@ -93,7 +93,9 @@
                                 </td>
                                 <td class="whitespace-nowrap px-3 py-2 lg:px-4">{{ $dirLabel !== $dirKey ? $dirLabel : $tx->direction }}</td>
                                 <td class="whitespace-nowrap px-3 py-2 lg:px-4">{{ $srcLabel !== $srcKey ? $srcLabel : $tx->source }}</td>
-                                <td class="whitespace-nowrap px-3 py-2 lg:px-4">{{ number_format($tx->amount, 2) }} {{ __('finance.common.sar') }}</td>
+                                <td class="whitespace-nowrap px-3 py-2 lg:px-4">
+                                    <x-sar-amount :value="number_format($tx->amount, 2)" />
+                                </td>
                                 <td class="whitespace-nowrap px-3 py-2 font-mono lg:px-4">{{ $tx->payment_id ?? '—' }}</td>
                                 <td class="whitespace-nowrap px-3 py-2 font-mono lg:px-4">{{ $tx->request_id ?? '—' }}</td>
                                 <td class="whitespace-nowrap px-3 py-2 font-mono lg:px-4">{{ $tx->order_redemption_id ?? '—' }}</td>

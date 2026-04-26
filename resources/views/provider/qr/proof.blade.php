@@ -18,7 +18,7 @@
                 </p>
                 <p class="text-sm font-semibold text-primary mt-2">
                     {{ __('Reserved Amount') }}: {{ number_format($redemption->request->reserved_amount, 2) }}
-                    {{ __('SAR') }}
+                    <x-sar-symbol />
                 </p>
             </div>
 

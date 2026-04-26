@@ -25,7 +25,7 @@
                     </div>
                     <div class="flex justify-between gap-4">
                         <dt class="text-slate-500 dark:text-navy-300">{{ __('finance.common.amount') }}</dt>
-                        <dd>{{ number_format($payment->amount, 2) }} {{ __('finance.common.sar') }}</dd>
+                        <dd><x-sar-amount :value="number_format($payment->amount, 2)" /></dd>
                     </div>
                     <div class="flex justify-between gap-4">
                         <dt class="text-slate-500 dark:text-navy-300">{{ __('finance.common.gateway') }}</dt>
@@ -121,7 +121,7 @@
                                 <td class="px-3 py-2">{{ $ft->wallet?->owner_type ? ($ftWtL !== $ftWtK ? $ftWtL : $ft->wallet->owner_type) : '—' }} #{{ $ft->wallet_id }}</td>
                                 <td class="px-3 py-2">{{ $ftDirL !== $ftDirK ? $ftDirL : $ft->direction }}</td>
                                 <td class="px-3 py-2">{{ $ftSrcL !== $ftSrcK ? $ftSrcL : $ft->source }}</td>
-                                <td class="px-3 py-2">{{ number_format($ft->amount, 2) }} {{ __('finance.common.sar') }}</td>
+                                <td class="px-3 py-2"><x-sar-amount :value="number_format($ft->amount, 2)" /></td>
                                 <td class="px-3 py-2">
                                     <a href="{{ route('admin.finances.fund-transactions.show', $ft) }}"
                                         class="text-primary dark:text-accent-light">{{ __('finance.common.open') }}</a>
@@ -159,7 +159,7 @@
                                         #{{ $link->request_id }}
                                     @endif
                                 </td>
-                                <td class="px-3 py-2">{{ number_format($link->amount, 2) }} {{ __('finance.common.sar') }}</td>
+                                <td class="px-3 py-2"><x-sar-amount :value="number_format($link->amount, 2)" /></td>
                             </tr>
                         @empty
                             <tr>

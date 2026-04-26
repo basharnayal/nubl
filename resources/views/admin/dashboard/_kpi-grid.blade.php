@@ -42,8 +42,7 @@
             <div class="mt-3 flex-1">
                 <p class="text-2xl font-bold tabular-nums tracking-tight {{ $c['value'] }}">
                     @if ($kpi['value_format'] === 'currency')
-                        {{ number_format((float) $kpi['value'], 2) }}
-                        <span class="text-sm font-medium text-slate-400 dark:text-navy-400">{{ __('SAR') }}</span>
+                        <x-sar-amount :value="number_format((float) $kpi['value'], 2)" />
                     @else
                         {{ number_format((int) $kpi['value']) }}
                     @endif

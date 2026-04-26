@@ -24,7 +24,7 @@
                     </div>
                     <div class="flex justify-between border-b border-slate-150 pb-3 dark:border-navy-600">
                         <span class="text-slate-500 dark:text-navy-400">{{ __('Amount') }}</span>
-                        <span class="text-xl font-bold text-primary dark:text-accent-light">{{ number_format($payment->amount, 2) }} {{ __('SAR') }}</span>
+                        <span class="text-xl font-bold text-primary dark:text-accent-light"><x-sar-symbol /> {{ number_format($payment->amount, 2) }}</span>
                     </div>
                     <div class="flex justify-between border-b border-slate-150 pb-3 dark:border-navy-600">
                         <span class="text-slate-500 dark:text-navy-400">{{ __('Donor') }}</span>

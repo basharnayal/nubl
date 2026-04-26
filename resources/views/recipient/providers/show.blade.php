@@ -250,7 +250,7 @@
                                         <div class="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
                                             <span
                                                 class="badge w-fit rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary dark:bg-accent-light/15 dark:text-accent-light">{{ number_format($item->price, 2) }}
-                                                {{ __('SAR') }}</span>
+                                                <x-sar-symbol /></span>
                                             @if($item->max_per_request)
                                                 <span class="text-xs font-medium text-warning sm:text-end">{{ __('Max') }}
                                                     {{ $item->max_per_request }} /{{ __('req') }}</span>
@@ -295,7 +295,7 @@
                                             </div>
                                             <span
                                                 class="menu-line-total shrink-0 whitespace-nowrap text-sm font-semibold tabular-nums text-slate-800 dark:text-navy-100">0.00
-                                                {{ __('SAR') }}</span>
+                                                <x-sar-symbol /></span>
                                             <div class="flex items-center gap-1">
                                                 <button type="button"
                                                     class="menu-minus flex size-7 shrink-0 items-center justify-center rounded-full border border-slate-300/90 bg-white text-sm font-bold leading-none text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-navy-500 dark:bg-navy-600 dark:text-navy-100 dark:hover:bg-navy-500"
@@ -349,13 +349,13 @@
                                 <span class="text-slate-600 dark:text-navy-300">{{ __('Used') }}:</span>
                                 <span
                                     class="font-bold text-slate-800 dark:text-navy-100">{{ number_format($weeklyUsed, 2) }}
-                                    {{ __('SAR') }}</span>
+                                    <x-sar-symbol /></span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-slate-600 dark:text-navy-300">{{ __('Remaining') }}:</span>
                                 <span
                                     class="font-bold {{ $remaining < 50 ? 'text-error' : 'text-success' }}">{{ number_format($remaining, 2) }}
-                                    {{ __('SAR') }}</span>
+                                    <x-sar-symbol /></span>
                             </div>
                         </div>
 
@@ -376,7 +376,7 @@
                                 <div class="mb-4 border-t border-slate-200 pt-4 dark:border-navy-600">
                                     <div class="flex justify-between font-bold text-slate-800 dark:text-navy-100">
                                         <span>{{ __('Total') }}:</span>
-                                        <span id="cart-total">0.00 {{ __('SAR') }}</span>
+                                        <span id="cart-total">0.00 <x-sar-symbol /></span>
                                     </div>
                                     <div class="mt-1 flex justify-between text-xs text-slate-500 dark:text-navy-400">
                                         <span>{{ __('After Request') }}:</span>
@@ -417,7 +417,7 @@
             <div>
                 <p class="text-xs text-slate-500 dark:text-navy-400">{{ __('Total Items') }}: <span id="mobile-count"
                         class="font-bold text-slate-800 dark:text-navy-100">0</span></p>
-                <p class="text-lg font-bold text-primary dark:text-accent-light" id="mobile-total">0.00 {{ __('SAR') }}
+                <p class="text-lg font-bold text-primary dark:text-accent-light" id="mobile-total">0.00 <x-sar-symbol />
                 </p>
             </div>
             <button type="button" onclick="document.getElementById('submit-btn').click()" id="mobile-submit-btn"
@@ -432,7 +432,7 @@
         let cart = [];
         const weeklyUsed = {{ $weeklyUsed }};
         const allowance = {{ $weeklyLimit ?? 400 }};
-        const sarLabel = @json(__('SAR'));
+        const sarLabel = '';
 
         function getMenuMeta(id) {
             const el = document.getElementById('menu-controls-' + id);

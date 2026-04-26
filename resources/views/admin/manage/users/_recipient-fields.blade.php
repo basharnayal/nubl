@@ -39,7 +39,7 @@
             <x-input-label for="income_band" :value="__('Income Band')" required />
             <select id="income_band" name="income_band" class="form-select form-select-lineone mt-1.5 w-full">
                 @foreach(\App\Models\RecipientKycDetails::INCOME_BANDS as $band)
-                    <option value="{{ $band }}" {{ ($old['income_band'] ?? '') === $band ? 'selected' : '' }}>{{ $band }} {{ __('SAR') }}</option>
+                    <option value="{{ $band }}" {{ ($old['income_band'] ?? '') === $band ? 'selected' : '' }}>{{ $band }} <x-sar-symbol /></option>
                 @endforeach
             </select>
         </div>

@@ -92,7 +92,7 @@
                                             {{ trans_choice('provider_items_line', $qty, ['count' => $qty]) }}
                                         </td>
                                         <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                            <p class="text-sm-plus font-semibold text-slate-800 dark:text-navy-100">{{ $amount }} {{ __('SAR') }}</p>
+                                            <p class="text-sm-plus font-semibold text-slate-800 dark:text-navy-100"><x-sar-symbol /> {{ $amount }}</p>
                                         </td>
                                         <td class="px-4 py-3 sm:px-5">
                                             <div class="font-medium text-slate-700 dark:text-navy-100">{{ $request->created_at->locale(app()->getLocale())->isoFormat('L') }}</div>

@@ -48,9 +48,9 @@
                 <div class="flex items-start justify-between gap-4">
                     <div class="min-w-0">
                         <p class="text-2xl font-bold tabular-nums tracking-tight text-emerald-700 dark:text-emerald-300"
-                           aria-label="{{ __('Total Donated') }}: {{ number_format($donorTotalDonated, 2) }} {{ __('SAR') }}, {{ $donorDonationCount }} {{ __('donations') }}">
+                           aria-label="{{ __('Total Donated') }}: {{ number_format($donorTotalDonated, 2) }}, {{ $donorDonationCount }} {{ __('donations') }}">
                             {{ number_format($donorTotalDonated, 2) }}
-                            <span class="text-sm font-medium text-slate-400 dark:text-navy-400">{{ __('SAR') }}</span>
+                            <span class="text-sm font-medium text-slate-400 dark:text-navy-400"><x-sar-symbol /></span>
                         </p>
                         <p class="mt-0.5 text-sm font-medium text-slate-700 dark:text-navy-100">{{ __('Total Donated') }}</p>
                         <p class="mt-0.5 line-clamp-2 text-xs leading-snug text-slate-400 dark:text-navy-400">
@@ -88,9 +88,9 @@
                 <div class="flex items-start justify-between gap-4">
                     <div class="min-w-0">
                         <p class="text-2xl font-bold tabular-nums tracking-tight text-amber-700 dark:text-amber-300"
-                           aria-label="{{ __('Amount Allocated') }}: {{ number_format($donorAmountAllocated, 2) }} {{ __('SAR') }}, {{ $donorRequestsFunded }} {{ __('requests funded') }}">
+                           aria-label="{{ __('Amount Allocated') }}: {{ number_format($donorAmountAllocated, 2) }}, {{ $donorRequestsFunded }} {{ __('requests funded') }}">
                             {{ number_format($donorAmountAllocated, 2) }}
-                            <span class="text-sm font-medium text-slate-400 dark:text-navy-400">{{ __('SAR') }}</span>
+                            <span class="text-sm font-medium text-slate-400 dark:text-navy-400"><x-sar-symbol /></span>
                         </p>
                         <p class="mt-0.5 text-sm font-medium text-slate-700 dark:text-navy-100">{{ __('Amount Allocated') }}</p>
                         <p class="mt-0.5 line-clamp-2 text-xs leading-snug text-slate-400 dark:text-navy-400">{{ $donorRequestsFunded }} {{ __('requests funded') }}</p>
@@ -114,8 +114,8 @@
                     <span class="text-slate-300 dark:text-navy-500">&middot;</span>
                     <span class="font-semibold text-slate-800 dark:text-navy-100">{{ $pendingRequestsCount }} {{ __('requests') }}</span>
                     <span class="text-slate-300 dark:text-navy-500">&middot;</span>
-                    <span class="font-medium text-slate-700 dark:text-navy-200">{{ __('SAR needed') }}:</span>
-                    <span class="font-semibold text-amber-700 dark:text-amber-300">{{ number_format($pendingAmount) }} {{ __('SAR') }}</span>
+                    <span class="font-medium text-slate-700 dark:text-navy-200">{{ __('Needed') }}:</span>
+                    <span class="font-semibold text-amber-700 dark:text-amber-300"><x-sar-symbol /> {{ number_format($pendingAmount) }}</span>
                 </div>
                 <a href="{{ route('donor.donations.new') }}"
                    class="shrink-0 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-100 dark:border-navy-500 dark:bg-navy-700 dark:text-navy-100 dark:hover:bg-navy-600 lg:ms-auto">
@@ -218,7 +218,7 @@
                                         <p class="mt-0.5 text-xs text-slate-500 dark:text-navy-400">{{ $row['type'] }}</p>
                                     </td>
                                     <td class="py-3 pr-4 text-slate-700 dark:text-navy-200">{{ $row['date'] }} {{ $row['time'] }}</td>
-                                    <td class="py-3 pr-4 font-medium text-slate-800 dark:text-navy-100">{{ number_format($row['amount'], 2) }} {{ __('SAR') }}</td>
+                                    <td class="py-3 pr-4 font-medium text-slate-800 dark:text-navy-100"><x-sar-symbol /> {{ number_format($row['amount'], 2) }}</td>
                                     <td class="py-3">
                                         @php
                                             $badgeClass = match($row['status_key'] ?? '') {

@@ -40,7 +40,7 @@
             <th>Wallet Owner Type</th>
             <th>Direction</th>
             <th>Source</th>
-            <th>Amount (SAR)</th>
+            <th>Amount (<x-sar-symbol />)</th>
             <th>Payment ID</th>
             <th>Request ID</th>
             <th>Redemption ID</th>

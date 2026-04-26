@@ -15,15 +15,16 @@
                                 {{ __('Remaining weekly limit') }}
                             </p>
                             <p class="mt-4 font-inter text-2xl font-semibold" dir="ltr">
-                                <span class="text-indigo-100">{!! '&#x20C1;' !!}</span><span class="text-white">{{ number_format($remainingLimit ?? 0, 0) }}</span>
+                                <span class="text-indigo-100"><x-sar-symbol /></span><span class="text-white">{{ number_format($remainingLimit ?? 0, 0) }}</span>
                             </p>
                             <div class="badge mt-2 rounded-full bg-black/20 text-indigo-50" dir="ltr">
-                                {{ __('Weekly limit') }} {!! '&#x20C1;' !!}{{ $weeklyLimit ?? 400 }}
+                                {{ __('Weekly limit') }} <x-sar-symbol /> {{ $weeklyLimit ?? 400 }}
                             </div>
                         </div>
                         <div class="absolute bottom-0 right-0 overflow-hidden rounded-lg">
-                            <img class="w-24 translate-x-1/4 translate-y-1/4 opacity-50"
-                                src="{{ asset('images/illustrations/the-dollar.svg') }}" alt="" />
+                            <div class="translate-x-2 translate-y-2 select-none font-inter text-7xl font-black text-white/20" aria-hidden="true">
+                                <x-sar-symbol />
+                            </div>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 gap-4 sm:col-span-2 sm:grid-cols-2 sm:gap-5 lg:gap-6">

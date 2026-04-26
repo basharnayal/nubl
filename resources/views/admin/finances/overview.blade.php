@@ -72,7 +72,7 @@
                                 {{ __('finance.overview.system_wallet_balance') }}
                             </p>
                             <p class="text-xs text-slate-400 dark:text-navy-400">
-                                {{ __('finance.common.sar') }}
+                                <x-sar-symbol />
                             </p>
                         </div>
                     </div>
@@ -82,9 +82,8 @@
                     </span>
                 </div>
 
-                <p class="mt-6 flex items-baseline gap-2 text-3xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-navy-50 sm:text-4xl">
-                    {{ number_format($overview['system_wallet_balance'], 2) }}
-                    <span class="text-base font-medium text-slate-400 dark:text-navy-300">{{ __('finance.common.sar') }}</span>
+                <p class="mt-6 text-3xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-navy-50 sm:text-4xl">
+                    <x-sar-amount :value="number_format($overview['system_wallet_balance'], 2)" />
                 </p>
 
                 {{-- Inline mini-context: in / out --}}
@@ -95,8 +94,7 @@
                             {{ __('finance.overview.ledger_in_system') }}
                         </p>
                         <p class="mt-1 text-sm font-semibold tabular-nums text-slate-800 dark:text-navy-100">
-                            {{ number_format($overview['fund_inbound_system'], 2) }}
-                            <span class="text-xs font-normal text-slate-400 dark:text-navy-400">{{ __('finance.common.sar') }}</span>
+                            <x-sar-amount :value="number_format($overview['fund_inbound_system'], 2)" class="gap-1.5" />
                         </p>
                     </div>
                     <div>
@@ -105,8 +103,7 @@
                             {{ __('finance.overview.ledger_out_system') }}
                         </p>
                         <p class="mt-1 text-sm font-semibold tabular-nums text-slate-800 dark:text-navy-100">
-                            {{ number_format($overview['fund_outbound_system'], 2) }}
-                            <span class="text-xs font-normal text-slate-400 dark:text-navy-400">{{ __('finance.common.sar') }}</span>
+                            <x-sar-amount :value="number_format($overview['fund_outbound_system'], 2)" class="gap-1.5" />
                         </p>
                     </div>
                 </div>
@@ -125,9 +122,8 @@
                 <p class="mt-5 text-sm font-medium text-slate-600 dark:text-navy-200">
                     {{ __('finance.overview.successful_payments_total') }}
                 </p>
-                <p class="mt-2 flex items-baseline gap-1.5 text-2xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-navy-50">
-                    {{ number_format($overview['successful_payments_amount'], 2) }}
-                    <span class="text-sm font-medium text-slate-400 dark:text-navy-300">{{ __('finance.common.sar') }}</span>
+                <p class="mt-2 text-2xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-navy-50">
+                    <x-sar-amount :value="number_format($overview['successful_payments_amount'], 2)" class="gap-1.5" />
                 </p>
                 <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-navy-700 dark:text-navy-300">
                     <span>{{ __('finance.overview.records_count', ['count' => $successCount]) }}</span>
@@ -153,9 +149,8 @@
                 <p class="mt-5 text-sm font-medium text-slate-600 dark:text-navy-200">
                     {{ __('finance.overview.failed_payments') }}
                 </p>
-                <p class="mt-2 flex items-baseline gap-1.5 text-2xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-navy-50">
-                    {{ number_format($overview['unsuccessful_payments_amount'], 2) }}
-                    <span class="text-sm font-medium text-slate-400 dark:text-navy-300">{{ __('finance.common.sar') }}</span>
+                <p class="mt-2 text-2xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-navy-50">
+                    <x-sar-amount :value="number_format($overview['unsuccessful_payments_amount'], 2)" class="gap-1.5" />
                 </p>
                 <div class="mt-4 flex items-center justify-between border-t border-slate-100 pt-3 text-xs text-slate-500 dark:border-navy-700 dark:text-navy-300">
                     <span>{{ __('finance.overview.records_count', ['count' => $failedCount]) }}</span>
@@ -258,8 +253,7 @@
                         <p class="text-sm font-medium text-slate-600 dark:text-navy-200">{{ __('finance.overview.ledger_in_system') }}</p>
                     </div>
                     <p class="mt-3 text-xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-navy-50">
-                        {{ number_format($overview['fund_inbound_system'], 2) }}
-                        <span class="text-sm font-medium text-slate-400 dark:text-navy-300">{{ __('finance.common.sar') }}</span>
+                        <x-sar-amount :value="number_format($overview['fund_inbound_system'], 2)" class="gap-1.5" />
                     </p>
                 </div>
                 <div class="rounded-xl border border-slate-200 bg-white p-4 transition hover:border-slate-300 dark:border-navy-600 dark:bg-navy-800 dark:hover:border-navy-500">
@@ -270,8 +264,7 @@
                         <p class="text-sm font-medium text-slate-600 dark:text-navy-200">{{ __('finance.overview.ledger_out_system') }}</p>
                     </div>
                     <p class="mt-3 text-xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-navy-50">
-                        {{ number_format($overview['fund_outbound_system'], 2) }}
-                        <span class="text-sm font-medium text-slate-400 dark:text-navy-300">{{ __('finance.common.sar') }}</span>
+                        <x-sar-amount :value="number_format($overview['fund_outbound_system'], 2)" class="gap-1.5" />
                     </p>
                 </div>
                 <div class="rounded-xl border border-slate-200 bg-white p-4 transition hover:border-slate-300 dark:border-navy-600 dark:bg-navy-800 dark:hover:border-navy-500">
@@ -282,8 +275,7 @@
                         <p class="text-sm font-medium text-slate-600 dark:text-navy-200">{{ __('finance.overview.transfers_to_providers') }}</p>
                     </div>
                     <p class="mt-3 text-xl font-semibold tabular-nums tracking-tight text-slate-900 dark:text-navy-50">
-                        {{ number_format($overview['transfers_to_providers'], 2) }}
-                        <span class="text-sm font-medium text-slate-400 dark:text-navy-300">{{ __('finance.common.sar') }}</span>
+                        <x-sar-amount :value="number_format($overview['transfers_to_providers'], 2)" class="gap-1.5" />
                     </p>
                 </div>
             </div>

@@ -49,10 +49,10 @@
                     <i class="fa-solid fa-wallet text-[10px] text-emerald-500" aria-hidden="true"></i>
                     {{ __('dashboard.financial.system_wallet') }}
                 </p>
-                <p class="text-xl font-bold tabular-nums tracking-tight text-emerald-700 dark:text-emerald-300">
-                    {{ number_format($walletBalance, 2) }}
-                    <span class="text-xs font-normal text-slate-400 dark:text-navy-400">{{ __('SAR') }}</span>
-                </p>
+                <x-sar-amount
+                    class="text-xl font-bold tabular-nums tracking-tight text-emerald-700 dark:text-emerald-300"
+                    :value="number_format($walletBalance, 2)"
+                />
                 <p class="text-[10px] text-slate-400 dark:text-navy-500">{{ __('dashboard.financial.wallet_sub') }}</p>
             </div>
 
@@ -62,10 +62,7 @@
                     <i class="fa-solid fa-circle-check text-[10px] text-emerald-500" aria-hidden="true"></i>
                     {{ __('dashboard.financial.successful') }}
                 </p>
-                <p class="text-lg font-bold tabular-nums text-slate-900 dark:text-navy-50">
-                    {{ number_format($successAmount, 0) }}
-                    <span class="text-xs font-normal text-slate-400 dark:text-navy-400">{{ __('SAR') }}</span>
-                </p>
+                <x-sar-amount class="text-lg font-bold tabular-nums text-slate-900 dark:text-navy-50" :value="number_format($successAmount, 0)" />
                 <p class="text-[10px] text-slate-400 dark:text-navy-500">
                     {{ trans_choice('dashboard.financial.payments_count', $successCount, ['count' => number_format($successCount)]) }}
                 </p>
@@ -77,10 +74,7 @@
                     <i class="fa-solid fa-hourglass-half text-[10px] text-amber-500" aria-hidden="true"></i>
                     {{ __('dashboard.financial.pending') }}
                 </p>
-                <p class="text-lg font-bold tabular-nums text-slate-900 dark:text-navy-50">
-                    {{ number_format($pendingAmount, 0) }}
-                    <span class="text-xs font-normal text-slate-400 dark:text-navy-400">{{ __('SAR') }}</span>
-                </p>
+                <x-sar-amount class="text-lg font-bold tabular-nums text-slate-900 dark:text-navy-50" :value="number_format($pendingAmount, 0)" />
                 <p class="text-[10px] text-slate-400 dark:text-navy-500">
                     {{ __('dashboard.financial.pending_sub', ['count' => number_format($pendingCount)]) }}
                 </p>
@@ -92,10 +86,7 @@
                     <i class="fa-solid fa-circle-xmark text-[10px] text-rose-500" aria-hidden="true"></i>
                     {{ __('dashboard.financial.failed') }}
                 </p>
-                <p class="text-lg font-bold tabular-nums {{ $failedCount > 0 ? 'text-rose-700 dark:text-rose-400' : 'text-slate-900 dark:text-navy-50' }}">
-                    {{ number_format($failedAmount, 0) }}
-                    <span class="text-xs font-normal text-slate-400 dark:text-navy-400">{{ __('SAR') }}</span>
-                </p>
+                <x-sar-amount class="text-lg font-bold tabular-nums {{ $failedCount > 0 ? 'text-rose-700 dark:text-rose-400' : 'text-slate-900 dark:text-navy-50' }}" :value="number_format($failedAmount, 0)" />
                 <p class="text-[10px] text-slate-400 dark:text-navy-500">
                     {{ trans_choice('dashboard.financial.failed_sub', $failedCount, ['count' => number_format($failedCount)]) }}
                 </p>
@@ -107,10 +98,7 @@
                     <i class="fa-solid fa-arrow-down text-[10px] text-emerald-500" aria-hidden="true"></i>
                     {{ __('dashboard.financial.ledger_in') }}
                 </p>
-                <p class="text-lg font-bold tabular-nums text-slate-900 dark:text-navy-50">
-                    {{ number_format($fundIn, 0) }}
-                    <span class="text-xs font-normal text-slate-400 dark:text-navy-400">{{ __('SAR') }}</span>
-                </p>
+                <x-sar-amount class="text-lg font-bold tabular-nums text-slate-900 dark:text-navy-50" :value="number_format($fundIn, 0)" />
                 <p class="text-[10px] text-slate-400 dark:text-navy-500">{{ __('dashboard.financial.ledger_in_sub') }}</p>
             </div>
 
@@ -120,10 +108,7 @@
                     <i class="fa-solid fa-arrow-up text-[10px] text-rose-500" aria-hidden="true"></i>
                     {{ __('dashboard.financial.provider_payouts') }}
                 </p>
-                <p class="text-lg font-bold tabular-nums text-slate-900 dark:text-navy-50">
-                    {{ number_format($payoutsOut, 0) }}
-                    <span class="text-xs font-normal text-slate-400 dark:text-navy-400">{{ __('SAR') }}</span>
-                </p>
+                <x-sar-amount class="text-lg font-bold tabular-nums text-slate-900 dark:text-navy-50" :value="number_format($payoutsOut, 0)" />
                 <a href="{{ route('admin.finances.provider-payouts.index') }}"
                    class="text-[10px] font-medium text-primary hover:underline dark:text-accent-light">
                     {{ __('dashboard.financial.view_payouts') }} →

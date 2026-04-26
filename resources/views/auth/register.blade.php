@@ -282,14 +282,14 @@
                         x-bind:disabled="membershipType !== 'recipient'"
                         class="form-input form-select peer w-full rounded-lg border border-slate-300 bg-transparent bg-none px-3 py-2.5 pr-9 pl-3 hover:z-10 hover:border-slate-400 focus:z-10 focus:border-primary dark:border-navy-450 dark:bg-navy-900/50 dark:hover:border-navy-400 dark:focus:border-accent">
                         <option value="">— {{ __('Select') }} —</option>
-                        <option value="0-500" {{ old('income_band') === '0-500' ? 'selected' : '' }}>0 - 500 {{ __('SAR/month') }}</option>
-                        <option value="500-1000" {{ old('income_band') === '500-1000' ? 'selected' : '' }}>500 - 1,000 {{ __('SAR/month') }}</option>
-                        <option value="1000-1500" {{ old('income_band') === '1000-1500' ? 'selected' : '' }}>1,000 - 1,500 {{ __('SAR/month') }}</option>
-                        <option value="1500-2000" {{ old('income_band') === '1500-2000' ? 'selected' : '' }}>1,500 - 2,000 {{ __('SAR/month') }}</option>
-                        <option value="2000-2500" {{ old('income_band') === '2000-2500' ? 'selected' : '' }}>2,000 - 2,500 {{ __('SAR/month') }}</option>
-                        <option value="2500-3000" {{ old('income_band') === '2500-3000' ? 'selected' : '' }}>2,500 - 3,000 {{ __('SAR/month') }}</option>
-                        <option value="3000-5000" {{ old('income_band') === '3000-5000' ? 'selected' : '' }}>3,000 - 5,000 {{ __('SAR/month') }}</option>
-                        <option value="5000+" {{ old('income_band') === '5000+' ? 'selected' : '' }}>5,000+ {{ __('SAR/month') }}</option>
+                        <option value="0-500" {{ old('income_band') === '0-500' ? 'selected' : '' }}>0 - 500 <x-sar-symbol />/{{ __('month') }}</option>
+                        <option value="500-1000" {{ old('income_band') === '500-1000' ? 'selected' : '' }}>500 - 1,000 <x-sar-symbol />/{{ __('month') }}</option>
+                        <option value="1000-1500" {{ old('income_band') === '1000-1500' ? 'selected' : '' }}>1,000 - 1,500 <x-sar-symbol />/{{ __('month') }}</option>
+                        <option value="1500-2000" {{ old('income_band') === '1500-2000' ? 'selected' : '' }}>1,500 - 2,000 <x-sar-symbol />/{{ __('month') }}</option>
+                        <option value="2000-2500" {{ old('income_band') === '2000-2500' ? 'selected' : '' }}>2,000 - 2,500 <x-sar-symbol />/{{ __('month') }}</option>
+                        <option value="2500-3000" {{ old('income_band') === '2500-3000' ? 'selected' : '' }}>2,500 - 3,000 <x-sar-symbol />/{{ __('month') }}</option>
+                        <option value="3000-5000" {{ old('income_band') === '3000-5000' ? 'selected' : '' }}>3,000 - 5,000 <x-sar-symbol />/{{ __('month') }}</option>
+                        <option value="5000+" {{ old('income_band') === '5000+' ? 'selected' : '' }}>5,000+ <x-sar-symbol />/{{ __('month') }}</option>
                     </select>
                     <span class="pointer-events-none absolute right-0 flex h-full w-10 items-center justify-center text-slate-400 peer-focus:text-primary dark:text-navy-300 dark:peer-focus:text-accent">
                         <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2 10h20M4 10v9a1 1 0 001 1h4a1 1 0 001-1v-6a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 001 1h4a1 1 0 001-1v-9M4 10V7a2 2 0 012-2h12a2 2 0 012 2v3" /></svg>
