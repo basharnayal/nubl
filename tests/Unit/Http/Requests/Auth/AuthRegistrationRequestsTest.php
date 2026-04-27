@@ -197,6 +197,7 @@ class AuthRegistrationRequestsTest extends TestCase
             'marital_status' => 'single',
             'is_student' => '1',
             'employment_status' => 'unemployed',
+            'situation_description' => 'Recipient needs assistance for food support.',
             'id_photo_base64' => 'invalid-base64',
         ], $recipient);
 

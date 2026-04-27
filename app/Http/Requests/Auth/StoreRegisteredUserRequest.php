@@ -53,7 +53,7 @@ class StoreRegisteredUserRequest extends FormRequest
                 'marital_status'         => ['required', 'string', 'in:' . implode(',', RecipientKycDetails::MARITAL_STATUSES)],
                 'is_student'             => ['required', 'boolean'],
                 'employment_status'      => ['required', 'string', 'in:' . implode(',', RecipientKycDetails::EMPLOYMENT_STATUSES)],
-                'situation_description'  => ['nullable', 'string', 'min:10', 'max:1000'],
+                'situation_description'  => ['required', 'string', 'min:10', 'max:1000'],
             ]);
         }
 
