@@ -69,16 +69,11 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <x-input-label for="nationality" :value="__('Nationality')" />
-                    <div class="relative flex mt-1">
+                    <div class="nationality-choices-wrap mt-1">
                         <select id="nationality" name="nationality" required class="{{ $sel }}">
                             <option value="">— {{ __('Select') }} —</option>
-                            @foreach(config('nationalities') as $country)
-                                <option value="{{ $country }}" @selected(old('nationality', $p->nationality) === $country)>{{ $country }}</option>
-                            @endforeach
+                            @include('partials.nationality-select-options', ['selected' => old('nationality', $p->nationality)])
                         </select>
-                        <span class="pointer-events-none absolute right-0 flex h-full w-10 items-center justify-center text-slate-400 peer-focus:text-primary dark:text-navy-300 dark:peer-focus:text-accent">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" /></svg>
-                        </span>
                     </div>
                     <x-input-error :messages="$errors->get('nationality')" class="mt-2" />
                 </div>
@@ -248,6 +243,12 @@
 
     <script>
         (function () {
+            setTimeout(function () {
+                var el = document.getElementById('nationality');
+                if (el && window.nublMountNationalityChoices) {
+                    window.nublMountNationalityChoices(el, @json(__('Search')));
+                }
+            }, 150);
             const form = document.getElementById('resubmit-recipient-form');
             if (!form) return;
             function readAsDataUrl(file) {

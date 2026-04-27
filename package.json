@@ -38,6 +38,7 @@
     "@fortawesome/fontawesome-free": "^7.1.0",
     "@popperjs/core": "^2.11.8",
     "apexcharts": "^5.3.6",
+    "choices.js": "^11.2.2",
     "cleave.js": "^1.6.0",
     "dayjs": "^1.11.19",
     "filepond": "^4.32.11",

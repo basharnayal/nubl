@@ -37,7 +37,7 @@ class AuditLogController extends Controller
     private function applyFilters(Request $request, \Illuminate\Database\Eloquent\Builder $query): void
     {
         if ($request->filled('search')) {
-            $query->where('description', 'like', '%' . $request->get('search') . '%');
+            $query->where('description', 'like', '%'.$request->get('search').'%');
         }
 
         if ($request->filled('log_name')) {
@@ -69,18 +69,18 @@ class AuditLogController extends Controller
     private function serializeEntry(Activity $activity): array
     {
         return [
-            'id'           => $activity->id,
-            'log_name'     => $activity->log_name,
-            'description'  => $activity->description,
-            'event'        => $activity->event,
+            'id' => $activity->id,
+            'log_name' => $activity->log_name,
+            'description' => $activity->description,
+            'event' => $activity->event,
             'subject_type' => $activity->subject_type,
-            'subject_id'   => $activity->subject_id,
-            'causer_type'  => $activity->causer_type,
-            'causer_id'    => $activity->causer_id,
-            'properties'   => $activity->properties,
-            'batch_uuid'   => $activity->batch_uuid,
-            'sha256_hash'  => $activity->sha256_hash,
-            'created_at'   => $activity->created_at?->toIso8601String(),
+            'subject_id' => $activity->subject_id,
+            'causer_type' => $activity->causer_type,
+            'causer_id' => $activity->causer_id,
+            'properties' => $activity->properties,
+            'batch_uuid' => $activity->batch_uuid,
+            'sha256_hash' => $activity->sha256_hash,
+            'created_at' => $activity->created_at?->toIso8601String(),
         ];
     }
 
@@ -107,9 +107,9 @@ class AuditLogController extends Controller
         $request->validate([
             'causer_id' => ['sometimes', 'integer', 'min:1'],
             'date_from' => ['sometimes', 'date_format:Y-m-d'],
-            'date_to'   => ['sometimes', 'date_format:Y-m-d'],
-            'per_page'  => ['sometimes', 'integer', 'min:1', 'max:200'],
-            'page'      => ['sometimes', 'integer', 'min:1'],
+            'date_to' => ['sometimes', 'date_format:Y-m-d'],
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:200'],
+            'page' => ['sometimes', 'integer', 'min:1'],
         ]);
 
         $perPage = $request->integer('per_page', 25);
@@ -121,11 +121,11 @@ class AuditLogController extends Controller
 
         return response()->json([
             'message' => 'Audit log entries retrieved.',
-            'meta'    => [
-                'total'        => $paginator->total(),
-                'per_page'     => $paginator->perPage(),
+            'meta' => [
+                'total' => $paginator->total(),
+                'per_page' => $paginator->perPage(),
                 'current_page' => $paginator->currentPage(),
-                'last_page'    => $paginator->lastPage(),
+                'last_page' => $paginator->lastPage(),
             ],
             'data' => collect($paginator->items())->map(fn (Activity $a) => $this->serializeEntry($a)),
         ]);
@@ -144,8 +144,8 @@ class AuditLogController extends Controller
         $request->validate([
             'causer_id' => ['sometimes', 'integer', 'min:1'],
             'date_from' => ['sometimes', 'date_format:Y-m-d'],
-            'date_to'   => ['sometimes', 'date_format:Y-m-d'],
-            'limit'     => ['sometimes', 'integer', 'min:1', 'max:200'],
+            'date_to' => ['sometimes', 'date_format:Y-m-d'],
+            'limit' => ['sometimes', 'integer', 'min:1', 'max:200'],
         ]);
 
         $limit = $request->integer('limit', 10);
@@ -157,8 +157,8 @@ class AuditLogController extends Controller
 
         return response()->json([
             'message' => 'Latest audit log entries retrieved.',
-            'count'   => $entries->count(),
-            'data'    => $entries->map(fn (Activity $a) => $this->serializeEntry($a)),
+            'count' => $entries->count(),
+            'data' => $entries->map(fn (Activity $a) => $this->serializeEntry($a)),
         ]);
     }
 
@@ -172,7 +172,7 @@ class AuditLogController extends Controller
         $request->validate([
             'causer_id' => ['sometimes', 'integer', 'min:1'],
             'date_from' => ['sometimes', 'date_format:Y-m-d'],
-            'date_to'   => ['sometimes', 'date_format:Y-m-d'],
+            'date_to' => ['sometimes', 'date_format:Y-m-d'],
         ]);
 
         $query = Activity::query()->latest();
@@ -182,7 +182,7 @@ class AuditLogController extends Controller
 
         return response()->json([
             'message' => 'Last audit log entry retrieved.',
-            'data'    => $entry ? $this->serializeEntry($entry) : null,
+            'data' => $entry ? $this->serializeEntry($entry) : null,
         ]);
     }
 
@@ -199,7 +199,7 @@ class AuditLogController extends Controller
         $request->validate([
             'causer_id' => ['sometimes', 'integer', 'min:1'],
             'date_from' => ['sometimes', 'date_format:Y-m-d'],
-            'date_to'   => ['sometimes', 'date_format:Y-m-d'],
+            'date_to' => ['sometimes', 'date_format:Y-m-d'],
         ]);
 
         // Filtered count (respects any query params supplied).
@@ -215,14 +215,14 @@ class AuditLogController extends Controller
             ->pluck('count', 'log_name');
 
         return response()->json([
-            'message'    => 'Audit log counts retrieved.',
-            'filtered'   => $filteredQuery->count(),
-            'total'      => Activity::count(),
-            'today'      => Activity::whereDate('created_at', today())->count(),
-            'finance'    => Activity::where('description', 'like', 'finance.%')->count(),
-            'auth'       => Activity::where('description', 'like', 'auth.%')->count(),
+            'message' => 'Audit log counts retrieved.',
+            'filtered' => $filteredQuery->count(),
+            'total' => Activity::count(),
+            'today' => Activity::whereDate('created_at', today())->count(),
+            'finance' => Activity::where('description', 'like', 'finance.%')->count(),
+            'auth' => Activity::where('description', 'like', 'auth.%')->count(),
             'registration' => Activity::where('description', 'like', 'registration.%')->count(),
-            'by_log_name'  => $logNameBreakdown,
+            'by_log_name' => $logNameBreakdown,
         ]);
     }
 
@@ -242,7 +242,7 @@ class AuditLogController extends Controller
         $deleted = Activity::query()->delete();
 
         return response()->json([
-            'message'       => 'Audit log flushed. All entries have been deleted.',
+            'message' => 'Audit log flushed. All entries have been deleted.',
             'deleted_count' => $deleted,
         ]);
     }

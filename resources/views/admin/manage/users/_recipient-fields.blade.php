@@ -9,12 +9,15 @@
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
             <x-input-label for="nationality" :value="__('Nationality')" required />
-            <select id="nationality" name="nationality" class="form-select form-select-lineone mt-1.5 w-full">
-                <option value="">— {{ __('Select') }} —</option>
-                @foreach($nationalities ?? config('nationalities', []) as $country)
-                    <option value="{{ $country }}" {{ ($old['nationality'] ?? '') === $country ? 'selected' : '' }}>{{ $country }}</option>
-                @endforeach
-            </select>
+            <div class="nationality-choices-wrap mt-1.5">
+                <select id="nationality" name="nationality" class="form-select form-select-lineone w-full" data-search-hint="{{ __('Search') }}" onfocus="window.nublMountNationalityChoices(this)">
+                    <option value="">— {{ __('Select') }} —</option>
+                    @include('partials.nationality-select-options', [
+                        'selected' => $old['nationality'] ?? '',
+                        'countries' => $nationalities ?? config('nationalities', []),
+                    ])
+                </select>
+            </div>
             <x-input-error :messages="$errors->get('nationality')" class="mt-2" />
         </div>
         <div>

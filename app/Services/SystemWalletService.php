@@ -37,11 +37,10 @@ class SystemWalletService
      * but is NOT race-safe on its own.
      *
      * @param  float  $amount  Amount to add (SAR)
-     * @param  int  $donorId  User ID of the donor
+     * @param  int|null  $donorId  User ID of the donor (null for guest donations)
      * @param  int|null  $paymentId  Optional payment record ID
-     * @return void
      */
-    public function addFundsFromDonation(float $amount, int $donorId, ?int $paymentId = null): void
+    public function addFundsFromDonation(float $amount, ?int $donorId, ?int $paymentId = null): void
     {
         // Idempotency: do not create duplicate fund_transaction for same payment.
         // Safe because the caller holds a FOR UPDATE lock on the Payment row,
@@ -73,8 +72,6 @@ class SystemWalletService
     /**
      * Get the system's default wallet.
      * Used when checking balance or performing operations on the pooled fund.
-     *
-     * @return Ewallet
      */
     public function getSystemWallet(): Ewallet
     {
@@ -85,7 +82,6 @@ class SystemWalletService
      * Check if the system wallet has sufficient balance for a given amount.
      *
      * @param  float  $amount  Amount to check (SAR)
-     * @return bool
      */
     public function hasSufficientBalance(float $amount): bool
     {
@@ -103,7 +99,6 @@ class SystemWalletService
      *
      * @param  RequestModel  $request  The request (must have reserved_amount and provider_id)
      * @param  int|null  $orderRedemptionId  Optional OrderRedemption ID for audit trail
-     * @return void
      *
      * @throws \RuntimeException If system wallet has insufficient balance or provider has no wallet
      */

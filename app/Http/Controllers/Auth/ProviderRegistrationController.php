@@ -29,10 +29,10 @@ class ProviderRegistrationController extends Controller
         }
 
         return view('auth.register-provider', [
-            'providerData'      => null,
+            'providerData' => null,
             'businessCategories' => config('provider.business_categories'),
-            'serviceTypes'      => config('provider.service_types'),
-            'weekdays'          => config('provider.weekdays'),
+            'serviceTypes' => config('provider.service_types'),
+            'weekdays' => config('provider.weekdays'),
             'documentMaxSizeMb' => config('provider.document_max_size_mb', 5),
         ]);
     }
@@ -46,7 +46,7 @@ class ProviderRegistrationController extends Controller
 
         return view('auth.provider-application', [
             'providerData' => [
-                'profile'   => $user->providerProfile,
+                'profile' => $user->providerProfile,
                 'operating' => $user->providerOperatingInfo,
                 'financial' => $user->providerFinancialInfo,
                 'documents' => $user->providerDocuments,

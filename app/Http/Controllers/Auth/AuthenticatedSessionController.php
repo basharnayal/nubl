@@ -45,7 +45,7 @@ class AuthenticatedSessionController extends Controller
 
         $this->auditService->log('auth', 'login', [
             'user_id' => $user->id,
-            'method'  => 'password',
+            'method' => 'password',
         ], $user->id);
 
         return $this->postAuthRedirector->redirect($user);

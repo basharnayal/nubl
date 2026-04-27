@@ -61,7 +61,7 @@ class AdminPaymentController extends Controller
             $out = fopen('php://output', 'w');
             fputcsv($out, [
                 'id',
-                'sponsor_id',
+                'donor_id',
                 'donor_name',
                 'donor_email',
                 'gateway',
@@ -74,10 +74,12 @@ class AdminPaymentController extends Controller
 
             $query->orderBy('id')->chunk(500, function ($payments) use ($out) {
                 foreach ($payments as $p) {
+                    $donorName = $p->sponsor?->name ?? ($p->is_guest ? __('Guest Donor') : null);
+
                     fputcsv($out, [
                         $p->id,
                         $p->sponsor_id,
-                        $p->sponsor?->name,
+                        $donorName,
                         $p->sponsor?->email,
                         $p->gateway,
                         $p->external_payment_id,

@@ -1124,7 +1124,7 @@
   @if (auth()->check())
   <a href="{{ url('/dashboard') }}" class="cta danger nav-drawer-cta">{{ __('welcome.nav.dashboard') }}</a>
   @else
-  <a href="{{ route('register', ['type' => 'donor']) }}" class="cta accent nav-drawer-cta">{{ __('welcome.nav.give') }}</a>
+  <a href="{{ route('register') }}" class="cta accent nav-drawer-cta">{{ __('welcome.nav.give') }}</a>
   <a href="{{ route('login') }}" class="cta nav-drawer-cta--sm">{{ __('welcome.nav.login') }}</a>
   @endif
 </nav>
@@ -1150,7 +1150,7 @@
         <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
       @else
-      <a href="{{ route('register', ['type' => 'donor']) }}" class="cta accent">
+      <a href="{{ route('register') }}" class="cta accent">
         <span>{{ __('welcome.nav.give') }}</span>
         <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </a>
@@ -1583,45 +1583,7 @@
   </div>
 </section>
 
-<!-- ========== CTA BAND ========== -->
-<section class="cta-band" id="cta">
-  <div class="wrap">
-    <span class="eyebrow">{{ __('welcome.cta.eyebrow') }}</span>
-    <h2 class="display">
-      {{ __('welcome.cta.h1') }}<br/>
-      <em>{{ __('welcome.cta.h2') }}</em>
-    </h2>
-
-    <div class="cta-triad">
-      <a href="{{ route('register', ['type' => 'donor']) }}" class="cta-card donate reveal">
-        <span class="num">01</span>
-        <h3>{{ __('welcome.cta.a_h') }}</h3>
-        <p>{{ __('welcome.cta.a_p') }}</p>
-        <span class="go"><span>{{ __('welcome.cta.a_cta') }}</span>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </span>
-      </a>
-
-      <a href="{{ route('register', ['type' => 'recipient']) }}" class="cta-card request reveal">
-        <span class="num">02</span>
-        <h3>{{ __('welcome.cta.b_h') }}</h3>
-        <p>{{ __('welcome.cta.b_p') }}</p>
-        <span class="go"><span>{{ __('welcome.cta.b_cta') }}</span>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </span>
-      </a>
-
-      <a href="{{ route('register.provider') }}" class="cta-card join reveal">
-        <span class="num">03</span>
-        <h3>{{ __('welcome.cta.c_h') }}</h3>
-        <p>{{ __('welcome.cta.c_p') }}</p>
-        <span class="go"><span>{{ __('welcome.cta.c_cta') }}</span>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </span>
-      </a>
-    </div>
-  </div>
-</section>
+{{-- CTA BAND section hidden --}}
 
 </main>
 
@@ -1909,6 +1871,334 @@
   applyAccent(TWEAKS.accent);
   applyDensity(TWEAKS.density);
   updateTweakUI();
+</script>
+
+{{-- ═══════════════════════════════════════════════════════════════════════════
+     Quick Donation Floating Widget
+     ═══════════════════════════════════════════════════════════════════════════ --}}
+<style>
+  /* ── Floating trigger button ── */
+  .qd-fab {
+    position: fixed;
+    bottom: 28px;
+    inset-inline-end: 28px;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 22px;
+    background: var(--navy-dk);
+    color: var(--off-white);
+    border-radius: var(--r-full);
+    font-family: var(--sans);
+    font-size: 15px;
+    font-weight: 600;
+    box-shadow: 0 8px 32px rgba(26,29,43,.25);
+    cursor: pointer;
+    transition: transform var(--t-fast), background var(--t-fast), box-shadow var(--t-fast);
+    border: none;
+  }
+  .qd-fab:hover { transform: translateY(-2px); background: var(--charcoal); box-shadow: 0 12px 40px rgba(26,29,43,.35); }
+  .qd-fab svg { width: 20px; height: 20px; flex-shrink: 0; }
+  @media (max-width: 560px) {
+    .qd-fab { bottom: 18px; inset-inline-end: 18px; padding: 12px 16px; font-size: 14px; }
+  }
+  .qd-fab.hidden { display: none; }
+
+  /* ── Overlay ── */
+  .qd-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(26,29,43,.45);
+    z-index: 65;
+    opacity: 0;
+    transition: opacity var(--t-base);
+  }
+  .qd-overlay.on { display: block; opacity: 1; }
+
+  /* ── Panel ── */
+  .qd-panel {
+    display: none;
+    position: fixed;
+    bottom: 0; inset-inline-end: 0;
+    z-index: 70;
+    width: min(420px, 100vw);
+    max-height: 90dvh;
+    overflow-y: auto;
+    background: var(--white);
+    border-radius: var(--r-lg) var(--r-lg) 0 0;
+    box-shadow: 0 -8px 40px rgba(26,29,43,.18);
+    transform: translateY(100%);
+    transition: transform var(--t-slow);
+    font-family: var(--sans);
+  }
+  @media (min-width: 640px) {
+    .qd-panel {
+      bottom: 28px; inset-inline-end: 28px;
+      border-radius: var(--r-lg);
+      max-height: calc(100dvh - 56px);
+    }
+  }
+  .qd-panel.on { display: block; transform: translateY(0); }
+
+  /* ── Panel header ── */
+  .qd-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .qd-header h3 {
+    font-family: var(--display); font-size: 22px; font-weight: 400; color: var(--navy-dk); margin: 0;
+  }
+  [lang="ar"] .qd-header h3 { font-weight: 600; }
+  .qd-close {
+    width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: var(--r-sm);
+    border: 1px solid var(--border);
+    background: var(--canvas);
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 18px;
+  }
+  .qd-close:hover { color: var(--charcoal); }
+
+  /* ── Panel body ── */
+  .qd-body { padding: 20px 24px 24px; }
+
+  .qd-presets { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .qd-preset {
+    height: 48px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    border: 2px solid var(--border);
+    border-radius: var(--r-md);
+    background: var(--white);
+    font-size: 16px; font-weight: 600;
+    color: var(--charcoal);
+    cursor: pointer;
+    transition: border-color var(--t-fast), background var(--t-fast);
+  }
+  .qd-preset:hover { border-color: var(--navy-lt); background: var(--navy-bg); }
+  .qd-preset.selected { border-color: var(--navy-dk); background: var(--navy-bg); color: var(--navy-dk); }
+  .qd-preset .sar-icon { width: 14px; height: 14px; fill: var(--muted); }
+
+  .qd-amount-wrap {
+    margin-top: 14px;
+    position: relative;
+  }
+  .qd-amount-wrap label {
+    display: block; font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 6px;
+  }
+  .qd-amount-input {
+    width: 100%;
+    padding: 12px 14px;
+    padding-inline-start: 38px;
+    border: 2px solid var(--border);
+    border-radius: var(--r-md);
+    font-size: 16px;
+    font-family: var(--sans);
+    color: var(--charcoal);
+    background: var(--white);
+    outline: none;
+    transition: border-color var(--t-fast);
+  }
+  .qd-amount-input:focus { border-color: var(--navy-dk); }
+  .qd-amount-prefix {
+    position: absolute;
+    bottom: 12px;
+    inset-inline-start: 14px;
+    width: 16px; height: 16px;
+    fill: var(--muted);
+    pointer-events: none;
+  }
+
+  .qd-info {
+    margin-top: 16px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px;
+    background: var(--canvas);
+    border-radius: var(--r-md);
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .qd-info svg { width: 18px; height: 18px; flex-shrink: 0; color: var(--navy-md); }
+
+  .qd-payment-icons {
+    margin-top: 16px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+  }
+  .qd-payment-icons img {
+    height: 28px; width: 28px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px;
+    background: var(--white);
+  }
+
+  .qd-error {
+    display: none;
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--rose);
+    text-align: center;
+  }
+  .qd-error.show { display: block; }
+
+  .qd-submit {
+    margin-top: 18px;
+    width: 100%;
+    padding: 14px;
+    background: var(--navy-dk);
+    color: var(--off-white);
+    border: none;
+    border-radius: var(--r-md);
+    font-size: 16px;
+    font-weight: 600;
+    font-family: var(--sans);
+    cursor: pointer;
+    transition: background var(--t-fast), transform var(--t-fast);
+  }
+  .qd-submit:hover { background: var(--charcoal); transform: translateY(-1px); }
+  .qd-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+</style>
+
+{{-- Floating button --}}
+<button class="qd-fab" id="qdFab" aria-label="{{ __('Quick Donation') }}">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+  {{ __('Quick Donation') }}
+</button>
+
+{{-- Overlay --}}
+<div class="qd-overlay" id="qdOverlay"></div>
+
+{{-- Panel --}}
+<div class="qd-panel" id="qdPanel">
+  <div class="qd-header">
+    <h3>{{ __('Quick Donation') }}</h3>
+    <button class="qd-close" id="qdClose" aria-label="{{ __('Close') }}">&times;</button>
+  </div>
+  <div class="qd-body">
+    <form method="POST" action="{{ route('guest.donation.initiate') }}" id="qdForm">
+      @csrf
+
+      {{-- Preset amounts --}}
+      <div class="qd-presets">
+        <button type="button" class="qd-preset" data-amount="10">
+          10
+          <svg class="sar-icon" viewBox="0 0 1124.14 1256.39"><path d="M699.62,1113.02h0c-20.06,44.48-33.32,92.75-38.4,143.37l424.51-90.24c20.06-44.47,33.31-92.75,38.4-143.37l-424.51,90.24Z"/><path d="M1085.73,895.8c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.33v-135.2l292.27-62.11c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.27V66.13c-50.67,28.45-95.67,66.32-132.25,110.99v403.35l-132.25,28.11V0c-50.67,28.44-95.67,66.32-132.25,110.99v525.69l-295.91,62.88c-20.06,44.47-33.33,92.75-38.42,143.37l334.33-71.05v170.26l-358.3,76.14c-20.06,44.47-33.32,92.75-38.4,143.37l375.04-79.7c30.53-6.35,56.77-24.4,73.83-49.24l68.78-101.97v-.02c7.14-10.55,11.3-23.27,11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z"/></svg>
+        </button>
+        <button type="button" class="qd-preset" data-amount="50">
+          50
+          <svg class="sar-icon" viewBox="0 0 1124.14 1256.39"><path d="M699.62,1113.02h0c-20.06,44.48-33.32,92.75-38.4,143.37l424.51-90.24c20.06-44.47,33.31-92.75,38.4-143.37l-424.51,90.24Z"/><path d="M1085.73,895.8c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.33v-135.2l292.27-62.11c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.27V66.13c-50.67,28.45-95.67,66.32-132.25,110.99v403.35l-132.25,28.11V0c-50.67,28.44-95.67,66.32-132.25,110.99v525.69l-295.91,62.88c-20.06,44.47-33.33,92.75-38.42,143.37l334.33-71.05v170.26l-358.3,76.14c-20.06,44.47-33.32,92.75-38.4,143.37l375.04-79.7c30.53-6.35,56.77-24.4,73.83-49.24l68.78-101.97v-.02c7.14-10.55,11.3-23.27,11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z"/></svg>
+        </button>
+        <button type="button" class="qd-preset" data-amount="100">
+          100
+          <svg class="sar-icon" viewBox="0 0 1124.14 1256.39"><path d="M699.62,1113.02h0c-20.06,44.48-33.32,92.75-38.4,143.37l424.51-90.24c20.06-44.47,33.31-92.75,38.4-143.37l-424.51,90.24Z"/><path d="M1085.73,895.8c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.33v-135.2l292.27-62.11c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.27V66.13c-50.67,28.45-95.67,66.32-132.25,110.99v403.35l-132.25,28.11V0c-50.67,28.44-95.67,66.32-132.25,110.99v525.69l-295.91,62.88c-20.06,44.47-33.33,92.75-38.42,143.37l334.33-71.05v170.26l-358.3,76.14c-20.06,44.47-33.32,92.75-38.4,143.37l375.04-79.7c30.53-6.35,56.77-24.4,73.83-49.24l68.78-101.97v-.02c7.14-10.55,11.3-23.27,11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z"/></svg>
+        </button>
+      </div>
+
+      {{-- Custom amount --}}
+      <div class="qd-amount-wrap">
+        <label for="qdAmountInput">{{ __('Donation Amount') }}</label>
+        <svg class="qd-amount-prefix" viewBox="0 0 1124.14 1256.39"><path d="M699.62,1113.02h0c-20.06,44.48-33.32,92.75-38.4,143.37l424.51-90.24c20.06-44.47,33.31-92.75,38.4-143.37l-424.51,90.24Z"/><path d="M1085.73,895.8c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.33v-135.2l292.27-62.11c20.06-44.47,33.32-92.75,38.4-143.37l-330.68,70.27V66.13c-50.67,28.45-95.67,66.32-132.25,110.99v403.35l-132.25,28.11V0c-50.67,28.44-95.67,66.32-132.25,110.99v525.69l-295.91,62.88c-20.06,44.47-33.33,92.75-38.42,143.37l334.33-71.05v170.26l-358.3,76.14c-20.06,44.47-33.32,92.75-38.4,143.37l375.04-79.7c30.53-6.35,56.77-24.4,73.83-49.24l68.78-101.97v-.02c7.14-10.55,11.3-23.27,11.3-36.97v-149.98l132.25-28.11v270.4l424.53-90.28Z"/></svg>
+        <input type="number" name="amount" id="qdAmountInput" class="qd-amount-input"
+               placeholder="{{ __('Donation Amount') }}" step="0.01" min="1" max="999999.99" required>
+      </div>
+
+      {{-- Validation error --}}
+      <div class="qd-error" id="qdError"></div>
+
+      {{-- Info message --}}
+      <div class="qd-info">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+        <span>{{ __('Your donation will automatically go to the most needy cases') }}</span>
+      </div>
+
+      {{-- Payment icons --}}
+      <div class="qd-payment-icons">
+        <img src="https://cdn.ehsan.sa/ehsan-ui/images/icons/visa-icon.svg" alt="Visa">
+        <img src="https://cdn.ehsan.sa/ehsan-ui/images/icons/apple-icon.svg" alt="Apple Pay">
+        <img src="https://cdn.ehsan.sa/ehsan-ui/images/icons/mastercard-icon.svg" alt="Mastercard">
+        <img src="https://cdn.ehsan.sa/ehsan-ui/images/icons/mada-icon.svg" alt="Mada">
+      </div>
+
+      {{-- Submit --}}
+      <button type="submit" class="qd-submit" id="qdSubmit">{{ __('Donate Now') }}</button>
+    </form>
+  </div>
+</div>
+
+<script>
+(function() {
+  const fab     = document.getElementById('qdFab');
+  const overlay = document.getElementById('qdOverlay');
+  const panel   = document.getElementById('qdPanel');
+  const closeBtn= document.getElementById('qdClose');
+  const form    = document.getElementById('qdForm');
+  const input   = document.getElementById('qdAmountInput');
+  const errorEl = document.getElementById('qdError');
+  const presets = panel.querySelectorAll('.qd-preset');
+  const submitBtn = document.getElementById('qdSubmit');
+
+  function open() {
+    fab.classList.add('hidden');
+    overlay.classList.add('on');
+    // Force reflow so the transition plays
+    panel.style.display = 'block';
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        panel.classList.add('on');
+      });
+    });
+  }
+
+  function close() {
+    panel.classList.remove('on');
+    overlay.classList.remove('on');
+    setTimeout(function() { panel.style.display = 'none'; fab.classList.remove('hidden'); }, 400);
+  }
+
+  fab.addEventListener('click', open);
+  overlay.addEventListener('click', close);
+  closeBtn.addEventListener('click', close);
+
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && panel.classList.contains('on')) close();
+  });
+
+  // Preset buttons
+  presets.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var val = btn.getAttribute('data-amount');
+      input.value = val;
+      presets.forEach(function(b) { b.classList.remove('selected'); });
+      btn.classList.add('selected');
+      errorEl.classList.remove('show');
+    });
+  });
+
+  input.addEventListener('input', function() {
+    presets.forEach(function(b) {
+      b.classList.toggle('selected', b.getAttribute('data-amount') === input.value);
+    });
+    errorEl.classList.remove('show');
+  });
+
+  // Client-side validation
+  form.addEventListener('submit', function(e) {
+    var val = parseFloat(input.value);
+    if (!input.value || isNaN(val) || val < 1) {
+      e.preventDefault();
+      errorEl.textContent = '{{ __("Please enter a valid donation amount (minimum 1 SAR).") }}';
+      errorEl.classList.add('show');
+      input.focus();
+      return;
+    }
+    submitBtn.disabled = true;
+    submitBtn.textContent = '{{ __("Processing...") }}';
+  });
+})();
 </script>
 </body>
 </html>

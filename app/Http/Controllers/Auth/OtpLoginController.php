@@ -61,7 +61,7 @@ class OtpLoginController extends Controller
     {
         $request->validate([
             'otp_phone' => ['required', 'string'],
-            'otp_code'  => ['required', 'string', 'size:6'],
+            'otp_code' => ['required', 'string', 'size:6'],
         ]);
 
         $user = $this->otpService->verifyOtpForLogin(
@@ -80,7 +80,7 @@ class OtpLoginController extends Controller
 
         $this->auditService->log('auth', 'login', [
             'user_id' => $user->id,
-            'method'  => 'otp',
+            'method' => 'otp',
         ], $user->id);
 
         if (config('app.phone_verification_enabled', true) && ! $user->hasVerifiedPhone()) {

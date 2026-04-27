@@ -175,4 +175,3 @@ class SystemWalletController extends Controller
         ]);
     }
 }
-

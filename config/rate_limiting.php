@@ -43,6 +43,10 @@ return [
         'per_minute' => (int) env('RATE_LIMIT_DONOR_PAYMENTS_PER_MINUTE', 15),
     ],
 
+    'guest_donations' => [
+        'per_minute' => (int) env('RATE_LIMIT_GUEST_DONATIONS_PER_MINUTE', 5),
+    ],
+
     'notifications' => [
         'per_minute' => (int) env('RATE_LIMIT_NOTIFICATIONS_PER_MINUTE', 120),
     ],

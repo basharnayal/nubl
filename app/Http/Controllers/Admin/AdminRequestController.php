@@ -13,8 +13,7 @@ class AdminRequestController extends Controller
     public function __construct(
         private AuditService $auditService,
         private NotificationServiceInterface $notificationService
-    ) {
-    }
+    ) {}
 
     public function index()
     {
@@ -47,7 +46,7 @@ class AdminRequestController extends Controller
 
         if ($validated['action'] === 'approve') {
             $allocationService = app(\App\Services\AllocationService::class);
-            if (!$allocationService->canCoverRequestAmount((float) $requestModel->reserved_amount)) {
+            if (! $allocationService->canCoverRequestAmount((float) $requestModel->reserved_amount)) {
                 return back()->with('error', 'Insufficient overall city fund allocation to approve this request.');
             }
 

@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Recipient;
 use App\Contracts\NotificationServiceInterface;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Recipient\StoreRecipientRequest;
-use App\Jobs\ProcessRecipientAllowanceRetryJob;
 use App\Jobs\ProcessRecipientFundRetryJob;
 use App\Models\Request as RequestModel;
 use App\Services\AllocationService;
@@ -25,8 +24,7 @@ class RecipientRequestController extends Controller
         private AuditService $auditService,
         private RecipientRequestSubmissionService $submissionService,
         private NotificationServiceInterface $notificationService
-    ) {
-    }
+    ) {}
 
     /**
      * Store a newly created resource in storage.
@@ -53,6 +51,7 @@ class RecipientRequestController extends Controller
         if ($request->boolean('force_admin_review')) {
             $created = $this->submissionService->createRequest($user, $providerId, $itemsData, 'ADMIN_PENDING');
             RecipientRequestSubmitCooldown::clear($user->id);
+
             return redirect()
                 ->route('recipient.requests.show', $created->id)
                 ->with('request_submitted', true)
@@ -67,7 +66,7 @@ class RecipientRequestController extends Controller
 
         RecipientAllowanceRetryCache::clear($user->id);
 
-        if (!$this->allocationService->canCoverRequestAmount($totalAmount)) {
+        if (! $this->allocationService->canCoverRequestAmount($totalAmount)) {
             RecipientFundRetryCache::storePayload($user->id, [
                 'provider_id' => $providerId,
                 'items' => $itemsData,
@@ -159,7 +158,7 @@ class RecipientRequestController extends Controller
             ->findOrFail($id);
 
         // Ensure redemption token exists for APPROVED/REDEEMABLE (e.g. legacy APPROVED orders)
-        if (in_array($request->status, ['APPROVED', 'REDEEMABLE']) && !$request->redemption) {
+        if (in_array($request->status, ['APPROVED', 'REDEEMABLE']) && ! $request->redemption) {
             \App\Services\RedemptionService::generateForRequest($request);
             $request->load('redemption');
         }
@@ -177,7 +176,7 @@ class RecipientRequestController extends Controller
             ->where('recipient_id', auth()->id())
             ->findOrFail($id);
 
-        if (!$requestModel->isCancellableByRecipient()) {
+        if (! $requestModel->isCancellableByRecipient()) {
             return back()->with('error', __('This request cannot be cancelled.'));
         }
 
@@ -210,6 +209,7 @@ class RecipientRequestController extends Controller
     {
         $user = $request->user();
         RecipientRequestSubmitCooldown::start($user->id, 60);
+
         return back()->with('success', __('Request cancelled. You must wait 60 seconds before trying again.'));
     }
 }

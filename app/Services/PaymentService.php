@@ -47,6 +47,28 @@ class PaymentService
         return $payment;
     }
 
+    public function initiateGuestPayment(float $amount): Payment
+    {
+        $payment = Payment::create([
+            'sponsor_id' => null,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'status' => Payment::STATUS_INITIATED,
+            'amount' => $amount,
+            'idempotency_key' => Str::uuid()->toString(),
+            'is_guest' => true,
+            'notes' => ['source' => 'quick_donation'],
+        ]);
+
+        $this->auditService->log('payment', 'initiated', [
+            'payment_id' => $payment->id,
+            'amount' => $amount,
+            'is_guest' => true,
+            'source' => 'quick_donation',
+        ], null);
+
+        return $payment;
+    }
+
     public function redirectToGateway(Payment $payment): RedirectResponse
     {
         $callbackUrl = route('payments.callback');
@@ -83,7 +105,7 @@ class PaymentService
         $payment->update([
             'status' => Payment::STATUS_PENDING,
             'external_payment_id' => (string) $result['invoice_id'],
-            'notes' => $result['raw_response'],
+            'notes' => array_merge($payment->notes ?? [], $result['raw_response']),
         ]);
 
         $this->auditService->log('payment', 'gateway_initiated', [
@@ -201,7 +223,7 @@ class PaymentService
 
         // ── 2. Quick idempotency check (no lock needed — read-only fast path) ─
         if ($payment->status === Payment::STATUS_SUCCEEDED) {
-            return redirect()->route('donor.payments.success', ['payment_id' => $payment->id]);
+            return $this->redirectPaymentSuccess($payment);
         }
 
         // ── 3. Gateway says "Paid" → credit funds inside a locked transaction ─
@@ -215,13 +237,13 @@ class PaymentService
 
                 // Double-check after acquiring lock (another request may have finished first)
                 if ($locked->status === Payment::STATUS_SUCCEEDED) {
-                    return redirect()->route('donor.payments.success', ['payment_id' => $locked->id]);
+                    return $this->redirectPaymentSuccess($locked);
                 }
 
                 if (FundTransaction::where('payment_id', $locked->id)->exists()) {
                     $locked->update(['status' => Payment::STATUS_SUCCEEDED]);
 
-                    return redirect()->route('donor.payments.success', ['payment_id' => $locked->id]);
+                    return $this->redirectPaymentSuccess($locked);
                 }
 
                 $locked->update([
@@ -235,14 +257,17 @@ class PaymentService
                     $locked->id
                 );
 
-                $this->notificationService->sendDonationReceipt($locked);
+                if (! $locked->is_guest) {
+                    $this->notificationService->sendDonationReceipt($locked);
+                }
 
                 $this->auditService->log('payment', 'succeeded', [
                     'payment_id' => $locked->id,
                     'amount' => $locked->amount,
+                    'is_guest' => $locked->is_guest,
                 ], $locked->sponsor_id);
 
-                return redirect()->route('donor.payments.success', ['payment_id' => $locked->id]);
+                return $this->redirectPaymentSuccess($locked);
             });
         }
 
@@ -416,6 +441,13 @@ class PaymentService
         return Payment::where('external_payment_id', $externalId)->first();
     }
 
+    private function redirectPaymentSuccess(Payment $payment): RedirectResponse
+    {
+        $route = $payment->is_guest ? 'guest.donation.success' : 'donor.payments.success';
+
+        return redirect()->route($route, ['payment_id' => $payment->id]);
+    }
+
     private function redirectDonorFailed(?Payment $payment, string $reason): RedirectResponse
     {
         $params = [];
@@ -423,7 +455,9 @@ class PaymentService
             $params['payment_id'] = $payment->id;
         }
 
-        return redirect()->route('donor.payments.failed', $params)
+        $route = ($payment?->is_guest) ? 'guest.donation.failed' : 'donor.payments.failed';
+
+        return redirect()->route($route, $params)
             ->with('payment_reason', $reason);
     }
 }

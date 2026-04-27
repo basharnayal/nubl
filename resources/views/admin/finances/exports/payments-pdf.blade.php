@@ -37,7 +37,7 @@
     <thead>
         <tr>
             <th>ID</th>
-            <th>Sponsor ID</th>
+            <th>Donor ID</th>
             <th>Donor Name</th>
             <th>Donor Email</th>
             <th>Gateway</th>
@@ -57,11 +57,12 @@
                     'PENDING', 'PROCESSING', 'INITIATED' => 'badge-warning',
                     default      => 'badge-default',
                 };
+                $donorName = $p->sponsor?->name ?? ($p->is_guest ? __('Guest Donor') : null);
             @endphp
             <tr>
                 <td>{{ $p->id }}</td>
                 <td>{{ $p->sponsor_id }}</td>
-                <td>{{ $p->sponsor?->name }}</td>
+                <td>{{ $donorName }}</td>
                 <td>{{ $p->sponsor?->email }}</td>
                 <td>{{ $p->gateway }}</td>
                 <td>{{ $p->external_payment_id }}</td>

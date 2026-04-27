@@ -144,19 +144,15 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <x-input-label for="nationality" :value="__('Nationality')" required />
-                    <div class="relative flex mt-1">
+                    {{-- Choices.js: searchable select; width locked to column via .nationality-choices-wrap --}}
+                    <div class="nationality-choices-wrap mt-1">
                         <select id="nationality" name="nationality"
                             x-bind:required="membershipType === 'recipient'"
                             x-bind:disabled="membershipType !== 'recipient'"
-                            class="form-input form-select peer w-full rounded-lg border border-slate-300 bg-transparent bg-none px-3 py-2.5 pr-9 pl-3 hover:z-10 hover:border-slate-400 focus:z-10 focus:border-primary dark:border-navy-450 dark:bg-navy-900/50 dark:hover:border-navy-400 dark:focus:border-accent">
+                            class="form-input form-select w-full min-w-0 max-w-full rounded-lg border border-slate-300 bg-transparent px-3 py-2.5 text-sm dark:border-navy-450 dark:bg-navy-900/50">
                             <option value="">— {{ __('Select') }} —</option>
-                            @foreach(config('nationalities') as $country)
-                                <option value="{{ $country }}" {{ old('nationality') === $country ? 'selected' : '' }}>{{ $country }}</option>
-                            @endforeach
+                            @include('partials.nationality-select-options', ['selected' => old('nationality')])
                         </select>
-                        <span class="pointer-events-none absolute right-0 flex h-full w-10 items-center justify-center text-slate-400 peer-focus:text-primary dark:text-navy-300 dark:peer-focus:text-accent">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" /></svg>
-                        </span>
                     </div>
                     <x-input-error :messages="$errors->get('nationality')" class="mt-2" />
                 </div>
@@ -422,8 +418,8 @@
                     {{ __('auth.legal.privacy') }}
                 </a>.
             </p>
-            <button type="submit" x-show="membershipType && membershipType !== 'provider'"
-                class="btn w-full bg-primary px-5 py-2.5 font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90 sm:w-auto">
+            <!-- <button type="submit" x-show="membershipType && membershipType !== 'provider'"
+                class="btn w-full bg-primary px-5 py-2.5 font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90 sm:w-auto"> -->
             <button type="submit" x-show="membershipType && membershipType !== 'provider'" x-cloak
                 class="btn w-full sm:w-auto bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90 px-5 py-2.5 rounded-lg">
                 {{ __('Register') }}
@@ -445,6 +441,8 @@
                 locationCaptured: false,
                 locationLoading: false,
                 locationError: '',
+                nationalityChoices: null,
+                _nationalityChoicesTimer: null,
 
                 init() {
                     if (this.membershipType && document.querySelector('[name="membership_type"]').value) {
@@ -458,6 +456,13 @@
                 },
 
                 onMembershipChange() {
+                    if (this.membershipType !== 'recipient') {
+                        if (this._nationalityChoicesTimer) {
+                            clearTimeout(this._nationalityChoicesTimer);
+                            this._nationalityChoicesTimer = null;
+                        }
+                        this.destroyNationalityChoices();
+                    }
                     if (this.membershipType === 'recipient') {
                         this.stopCamera();
                         this.idPhotoCaptured = false;
@@ -467,6 +472,57 @@
                         this.locationCaptured = false;
                         this.locationError = '';
                     }
+                    this.$nextTick(() => {
+                        if (this.membershipType === 'recipient') {
+                            this.scheduleNationalityChoices(320);
+                        }
+                    });
+                },
+
+                destroyNationalityChoices() {
+                    if (this.nationalityChoices) {
+                        try {
+                            this.nationalityChoices.destroy();
+                        } catch (e) {
+                            /* noop */
+                        }
+                        this.nationalityChoices = null;
+                    }
+                    const el = document.getElementById('nationality');
+                    if (el) {
+                        el._nublChoicesInstance = null;
+                    }
+                },
+
+                scheduleNationalityChoices(delayMs) {
+                    if (this._nationalityChoicesTimer) {
+                        clearTimeout(this._nationalityChoicesTimer);
+                    }
+                    this._nationalityChoicesTimer = setTimeout(() => {
+                        this._nationalityChoicesTimer = null;
+                        this.maybeInitNationalityChoices();
+                    }, delayMs);
+                },
+
+                maybeInitNationalityChoices(retry = 0) {
+                    if (this.membershipType !== 'recipient') {
+                        return;
+                    }
+                    const el = document.getElementById('nationality');
+                    if (!el || this.nationalityChoices || !window.nublMountNationalityChoices) {
+                        return;
+                    }
+                    if (el.offsetWidth < 2 || el.getClientRects().length === 0) {
+                        if (retry < 15) {
+                            setTimeout(() => this.maybeInitNationalityChoices(retry + 1), 80);
+                        }
+                        return;
+                    }
+                    window.nublMountNationalityChoices(el, @json(__('Search'))).then((instance) => {
+                        if (instance && this.membershipType === 'recipient') {
+                            this.nationalityChoices = instance;
+                        }
+                    });
                 },
 
                 async startCamera() {

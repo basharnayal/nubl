@@ -72,7 +72,7 @@ class AdminFundTransactionController extends Controller
     public function export(Request $request): StreamedResponse
     {
         $query = $this->fundTransactionIndexQuery->buildQuery($request);
-        $query->with('wallet')->reorder()->orderBy('id');
+        $query->with(['wallet', 'sponsor', 'payment'])->reorder()->orderBy('id');
 
         $filename = 'fund-transactions-'.now()->format('Y-m-d-His').'.csv';
 
@@ -94,12 +94,14 @@ class AdminFundTransactionController extends Controller
                 'payment_id',
                 'request_id',
                 'order_redemption_id',
-                'sponsor_id',
+                'donor_id',
+                'donor_name',
                 'created_at',
             ]);
 
             $query->chunk(500, function ($rows) use ($out) {
                 foreach ($rows as $tx) {
+                    $donorName = $tx->sponsor?->name ?? ($tx->payment?->is_guest ? __('Guest Donor') : null);
                     fputcsv($out, [
                         $tx->id,
                         $tx->wallet_id,
@@ -111,6 +113,7 @@ class AdminFundTransactionController extends Controller
                         $tx->request_id,
                         $tx->order_redemption_id,
                         $tx->sponsor_id,
+                        $donorName,
                         $tx->created_at?->toIso8601String(),
                     ]);
                 }
@@ -123,7 +126,7 @@ class AdminFundTransactionController extends Controller
     public function exportPdf(Request $request): Response
     {
         $query = $this->fundTransactionIndexQuery->buildQuery($request);
-        $query->with('wallet')->reorder()->orderBy('id');
+        $query->with(['wallet', 'sponsor', 'payment'])->reorder()->orderBy('id');
 
         $transactions = $query->get();
         $filename = 'fund-transactions-'.now()->format('Y-m-d-His').'.pdf';

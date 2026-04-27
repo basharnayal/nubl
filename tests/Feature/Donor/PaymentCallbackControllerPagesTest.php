@@ -45,7 +45,7 @@ class PaymentCallbackControllerPagesTest extends TestCase
 
         $response->assertOk();
         $response->assertSee('Donation Receipt');
-        $response->assertSee('#'.$payment->id);
+        $response->assertSee('DON-'.str_pad((string) $payment->id, 4, '0', STR_PAD_LEFT));
         $response->assertSee('125.50');
     }
 
@@ -127,4 +127,3 @@ class PaymentCallbackControllerPagesTest extends TestCase
             ->assertForbidden();
     }
 }
-

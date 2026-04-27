@@ -24,9 +24,13 @@ class Payment extends Model
     }
 
     public const STATUS_INITIATED = 'INITIATED';
+
     public const STATUS_PENDING = 'PENDING';
+
     public const STATUS_PROCESSING = 'PROCESSING';
+
     public const STATUS_SUCCEEDED = 'SUCCEEDED';
+
     public const STATUS_FAILED = 'FAILED';
 
     public const GATEWAY_MYFATOORAH = 'MYFATOORAH';
@@ -39,12 +43,14 @@ class Payment extends Model
         'amount',
         'notes',
         'idempotency_key',
+        'is_guest',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'notes' => 'array',
         'created_at' => 'datetime',
+        'is_guest' => 'boolean',
     ];
 
     public function sponsor(): BelongsTo
