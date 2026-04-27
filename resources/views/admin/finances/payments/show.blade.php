@@ -73,7 +73,24 @@
                         </div>
                     </dl>
                 @else
-                    <p class="text-sm text-slate-500">—</p>
+                    @if ($payment->is_guest)
+                        <dl class="space-y-2 text-sm">
+                            <div class="flex justify-between gap-4">
+                                <dt class="text-slate-500 dark:text-navy-300">{{ __('finance.common.name') }}</dt>
+                                <dd>{{ __('Guest Donor') }}</dd>
+                            </div>
+                            <div class="flex justify-between gap-4">
+                                <dt class="text-slate-500 dark:text-navy-300">{{ __('finance.common.user_id') }}</dt>
+                                <dd>—</dd>
+                            </div>
+                            <div class="flex justify-between gap-4">
+                                <dt class="text-slate-500 dark:text-navy-300">{{ __('finance.payments.request_col') }}</dt>
+                                <dd>{{ __('Quick Donation') }}</dd>
+                            </div>
+                        </dl>
+                    @else
+                        <p class="text-sm text-slate-500">—</p>
+                    @endif
                 @endif
             </div>
         </div>

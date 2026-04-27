@@ -73,6 +73,21 @@ class PhoneVerificationTest extends TestCase
             ->assertRedirect(route('approval.pending'));
     }
 
+    public function test_already_verified_pending_user_with_unverified_email_is_redirected_to_approval_pending(): void
+    {
+        config(['app.email_verification_enabled' => true]);
+
+        $user = User::factory()->unverified()->recipientPending()->create([
+            'phone_number' => '966501234567',
+            'phone_verified_at' => now(),
+        ]);
+        $user->assignRole('recipient');
+
+        $this->actingAs($user)
+            ->get(route('verification.phone'))
+            ->assertRedirect(route('approval.pending'));
+    }
+
     public function test_already_verified_user_with_unverified_email_is_redirected_to_email_notice_when_enabled(): void
     {
         config(['app.email_verification_enabled' => true]);
@@ -105,6 +120,28 @@ class PhoneVerificationTest extends TestCase
         ]);
 
         $response->assertRedirect();
+        $this->assertNotNull($user->fresh()->phone_verified_at);
+    }
+
+    public function test_otp_verification_for_pending_user_with_unverified_email_redirects_to_approval_pending(): void
+    {
+        config(['app.email_verification_enabled' => true]);
+
+        $user = User::factory()->unverified()->create([
+            'status' => User::STATUS_PENDING_APPROVAL,
+            'phone_number' => '966501234567',
+            'phone_verified_at' => null,
+        ]);
+        $user->assignRole('recipient');
+
+        $otp = '123456';
+        Cache::put('otp:user:' . $user->id, $otp, now()->addMinutes(5));
+
+        $response = $this->actingAs($user)->post(route('verification.phone.verify'), [
+            'otp' => $otp,
+        ]);
+
+        $response->assertRedirect(route('approval.pending'));
         $this->assertNotNull($user->fresh()->phone_verified_at);
     }
 

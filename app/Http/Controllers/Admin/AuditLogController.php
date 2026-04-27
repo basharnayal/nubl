@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Activity;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
-use App\Models\Activity;
 
 class AuditLogController extends Controller
 {
@@ -39,10 +39,10 @@ class AuditLogController extends Controller
 
         $logs = $query->with('causer')->paginate(25)->withQueryString();
 
-        $totalCount       = Activity::count();
-        $todayCount       = Activity::whereDate('created_at', today())->count();
-        $financeCount     = Activity::where('description', 'like', 'finance.%')->count();
-        $authCount        = Activity::where('description', 'like', 'auth.%')->count();
+        $totalCount = Activity::count();
+        $todayCount = Activity::whereDate('created_at', today())->count();
+        $financeCount = Activity::where('description', 'like', 'finance.%')->count();
+        $authCount = Activity::where('description', 'like', 'auth.%')->count();
         $registrationCount = Activity::where('description', 'like', 'registration.%')->count();
 
         $logNames = Activity::select('log_name')

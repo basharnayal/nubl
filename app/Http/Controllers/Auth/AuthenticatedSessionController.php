@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Auth\PostAuthRedirector;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Models\User;
 use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -12,12 +12,13 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
 
 /**
- * Login: after auth → email verify (if enabled) → pending? approval-pending → dashboard
+ * Login: after auth → PostAuthRedirector handles the full redirect chain.
  */
 class AuthenticatedSessionController extends Controller
 {
     public function __construct(
-        private AuditService $auditService
+        private AuditService $auditService,
+        private PostAuthRedirector $postAuthRedirector,
     ) {}
 
     public function create(): View
@@ -41,22 +42,13 @@ class AuthenticatedSessionController extends Controller
                 'email' => __('Your account has been deactivated. Please contact support.'),
             ]);
         }
+
         $this->auditService->log('auth', 'login', [
             'user_id' => $user->id,
             'method' => 'password',
         ], $user->id);
 
-        if (config('app.phone_verification_enabled', true) && ! $user->hasVerifiedPhone()) {
-            return redirect()->route('verification.phone');
-        }
-        if (config('app.email_verification_enabled', true) && ! $user->hasVerifiedEmail()) {
-            return redirect()->route('verification.notice');
-        }
-        if (in_array($user->status, [User::STATUS_PENDING_APPROVAL, User::STATUS_REJECTED])) {
-            return redirect()->route('approval.pending');
-        }
-
-        return redirect()->intended(route('dashboard', absolute: false));
+        return $this->postAuthRedirector->redirect($user);
     }
 
     public function destroy(Request $request): RedirectResponse
@@ -66,7 +58,6 @@ class AuthenticatedSessionController extends Controller
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         if ($userId !== null) {

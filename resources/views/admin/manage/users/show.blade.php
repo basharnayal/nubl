@@ -47,6 +47,7 @@
                         <div><dt class="text-sm text-gray-500">{{ __('Phone') }}</dt><dd class="text-gray-900">{{ $user->phone_number ? \App\Support\PhoneHelper::formatForDisplay($user->phone_number) : '-' }}</dd></div>
                         <div><dt class="text-sm text-gray-500">{{ __('Nationality') }}</dt><dd class="text-gray-900">{{ $user->recipientProfile->nationality ?? '-' }}</dd></div>
                         <div><dt class="text-sm text-gray-500">{{ __('ID Type') }}</dt><dd class="text-gray-900">{{ ucfirst(str_replace('_', ' ', $user->recipientProfile->id_type ?? '-')) }}</dd></div>
+                        <div><dt class="text-sm text-gray-500">{{ __('ID Number') }}</dt><dd class="text-gray-900">{{ $user->recipientProfile->id_number ?? '-' }}</dd></div>
                         <div><dt class="text-sm text-gray-500">{{ __('Address') }}</dt><dd class="text-gray-900">{{ $user->recipientProfile->short_address ?? '-' }}</dd></div>
                     </dl>
                 </div>
@@ -58,14 +59,19 @@
                         <div><dt class="text-sm text-gray-500">{{ __('Household Size') }}</dt><dd class="text-gray-900">{{ $user->recipientKycDetails->household_size ?? '-' }}</dd></div>
                         <div><dt class="text-sm text-gray-500">{{ __('Marital Status') }}</dt><dd class="text-gray-900">{{ ucfirst($user->recipientKycDetails->marital_status ?? '-') }}</dd></div>
                         <div><dt class="text-sm text-gray-500">{{ __('Student') }}</dt><dd class="text-gray-900">{{ $user->recipientKycDetails->is_student ? __('Yes') : __('No') }}</dd></div>
+                        @if($user->recipientKycDetails->employment_status ?? null)
+                        <div><dt class="text-sm text-gray-500">{{ __('Employment Status') }}</dt><dd class="text-gray-900">{{ ucfirst(str_replace('_', ' ', $user->recipientKycDetails->employment_status)) }}</dd></div>
+                        @endif
+                        @if($user->recipientKycDetails->situation_description ?? null)
+                        <div class="sm:col-span-2"><dt class="text-sm text-gray-500">{{ __('Situation Description') }}</dt><dd class="text-gray-900 whitespace-pre-wrap">{{ $user->recipientKycDetails->situation_description }}</dd></div>
+                        @endif
                     </dl>
                 </div>
                 @endif
-                @if(($user->recipientProfile->id_photo_path ?? null) || ($user->recipientKycDetails?->address_confirmation ?? null))
+                @if($user->recipientProfile->id_photo_path ?? null)
                 <div class="bg-white rounded-lg shadow p-6">
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ __('Documents') }}</h3>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        @if($user->recipientProfile->id_photo_path ?? null)
                         <div>
                             <dt class="text-sm text-gray-500 mb-1">{{ __('ID Photo') }}</dt>
                             <dd>
@@ -79,22 +85,6 @@
                                 </a>
                             </dd>
                         </div>
-                        @endif
-                        @if($user->recipientKycDetails?->address_confirmation ?? null)
-                        <div>
-                            <dt class="text-sm text-gray-500 mb-1">{{ __('Address Confirmation') }}</dt>
-                            <dd>
-                                <a href="{{ route('admin.users.file', [$user, 'address_confirmation']) }}" target="_blank" class="block mt-2">
-                                    @php $ext = strtolower(pathinfo($user->recipientKycDetails->address_confirmation, PATHINFO_EXTENSION)); @endphp
-                                    @if(in_array($ext, ['jpg','jpeg','png','gif','webp']))
-                                        <img src="{{ route('admin.users.file', [$user, 'address_confirmation']) }}" alt="Address Confirmation" class="max-w-full max-h-64 rounded-lg border object-contain" />
-                                    @else
-                                        <span class="text-primary dark:text-accent-light hover:underline">{{ __('Address Confirmation') }}</span>
-                                    @endif
-                                </a>
-                            </dd>
-                        </div>
-                        @endif
                     </div>
                 </div>
                 @endif

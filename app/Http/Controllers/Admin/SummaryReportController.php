@@ -43,16 +43,16 @@ class SummaryReportController extends Controller
             'period_to' => $summaryReport->period_to?->toDateString(),
         ], $request->user()->id);
 
-        $isAr     = app()->getLocale() === 'ar';
+        $isAr = app()->getLocale() === 'ar';
         $filename = $this->exporter->filename($summaryReport);
 
         return response()->streamDownload(function () use ($summaryReport, $isAr) {
             $spreadsheet = $this->exporter->build($summaryReport, $isAr);
             (new Xlsx($spreadsheet))->save('php://output');
         }, $filename, [
-            'Content-Type'        => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            'Cache-Control'       => 'max-age=0',
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'Cache-Control' => 'max-age=0',
         ]);
     }
 }

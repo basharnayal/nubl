@@ -16,14 +16,14 @@ class LanguageController extends Controller
     {
         // Validate locale
         $supportedLocales = config('app.supported_locales', ['en', 'ar']);
-        
-        if (!in_array($locale, $supportedLocales)) {
+
+        if (! in_array($locale, $supportedLocales)) {
             $locale = config('app.fallback_locale', 'en');
         }
 
         // Set locale in session
         Session::put('locale', $locale);
-        
+
         // Set application locale
         App::setLocale($locale);
 

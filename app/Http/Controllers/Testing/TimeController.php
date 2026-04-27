@@ -33,6 +33,7 @@ class TimeController extends Controller
     private function storedTime(): ?Carbon
     {
         $raw = Cache::get(ApplyMockedTime::CACHE_KEY);
+
         return $raw ? Carbon::parse($raw) : null;
     }
 
@@ -43,12 +44,12 @@ class TimeController extends Controller
         Carbon::setTestNow($time);
     }
 
-    private function timePayload(Carbon $mocked = null): array
+    private function timePayload(?Carbon $mocked = null): array
     {
         return [
-            'is_mocked'   => $mocked !== null,
+            'is_mocked' => $mocked !== null,
             'mocked_time' => $mocked?->toIso8601String(),
-            'real_time'   => Carbon::createFromTimestamp(time())->toIso8601String(),
+            'real_time' => Carbon::createFromTimestamp(time())->toIso8601String(),
         ];
     }
 
@@ -112,16 +113,16 @@ class TimeController extends Controller
         $request->validate([
             'seconds' => ['sometimes', 'integer', 'min:0'],
             'minutes' => ['sometimes', 'integer', 'min:0'],
-            'hours'   => ['sometimes', 'integer', 'min:0'],
-            'days'    => ['sometimes', 'integer', 'min:0'],
-            'weeks'   => ['sometimes', 'integer', 'min:0'],
-            'months'  => ['sometimes', 'integer', 'min:0'],
-            'years'   => ['sometimes', 'integer', 'min:0'],
+            'hours' => ['sometimes', 'integer', 'min:0'],
+            'days' => ['sometimes', 'integer', 'min:0'],
+            'weeks' => ['sometimes', 'integer', 'min:0'],
+            'months' => ['sometimes', 'integer', 'min:0'],
+            'years' => ['sometimes', 'integer', 'min:0'],
         ]);
 
         // At least one unit must be supplied.
         $units = ['seconds', 'minutes', 'hours', 'days', 'weeks', 'months', 'years'];
-        if (!collect($units)->contains(fn ($u) => $request->has($u))) {
+        if (! collect($units)->contains(fn ($u) => $request->has($u))) {
             return response()->json([
                 'message' => 'Provide at least one time unit to advance (seconds, minutes, hours, days, weeks, months, years).',
             ], 422);
@@ -132,11 +133,11 @@ class TimeController extends Controller
 
         $now->addSeconds($request->integer('seconds', 0));
         $now->addMinutes($request->integer('minutes', 0));
-        $now->addHours($request->integer('hours',   0));
-        $now->addDays($request->integer('days',     0));
-        $now->addWeeks($request->integer('weeks',   0));
+        $now->addHours($request->integer('hours', 0));
+        $now->addDays($request->integer('days', 0));
+        $now->addWeeks($request->integer('weeks', 0));
         $now->addMonths($request->integer('months', 0));
-        $now->addYears($request->integer('years',   0));
+        $now->addYears($request->integer('years', 0));
 
         $this->persist($now);
 
@@ -158,7 +159,7 @@ class TimeController extends Controller
         Carbon::setTestNow(null);
 
         return response()->json([
-            'message'   => 'Time mock cleared. Application is using the real clock.',
+            'message' => 'Time mock cleared. Application is using the real clock.',
             'real_time' => Carbon::now()->toIso8601String(),
         ]);
     }

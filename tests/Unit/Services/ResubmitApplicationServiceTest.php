@@ -50,7 +50,6 @@ class ResubmitApplicationServiceTest extends TestCase
             'household_size' => 2,
             'marital_status' => 'single',
             'is_student' => false,
-            'address_confirmation' => null,
         ]);
 
         $service = app(ResubmitApplicationService::class);
@@ -78,7 +77,6 @@ class ResubmitApplicationServiceTest extends TestCase
             'household_size' => 2,
             'marital_status' => 'single',
             'is_student' => false,
-            'address_confirmation' => null,
         ]);
 
         $service = app(ResubmitApplicationService::class);
@@ -92,16 +90,13 @@ class ResubmitApplicationServiceTest extends TestCase
         Storage::fake('local');
         Storage::disk('local')->put('provider_documents/lic.pdf', 'license');
         Storage::disk('local')->put('provider_documents/id.pdf', 'id');
-        Storage::disk('local')->put('recipient_address_photos/address.png', 'address');
 
         $provider = $this->createProviderApplicant();
-        $recipient = $this->createRecipientApplicant();
 
         $service = app(ResubmitApplicationService::class);
 
         $this->assertSame('provider_documents/lic.pdf', $service->resolveDocumentPath($provider->fresh(), 'business_license'));
         $this->assertSame('provider_documents/id.pdf', $service->resolveDocumentPath($provider->fresh(), 'id_or_iqama'));
-        $this->assertSame('recipient_address_photos/address.png', $service->resolveDocumentPath($recipient->fresh(), 'address_confirmation'));
     }
 
     #[Test]
@@ -127,7 +122,7 @@ class ResubmitApplicationServiceTest extends TestCase
             'household_size' => 2,
             'marital_status' => 'single',
             'is_student' => '0',
-        ], null, null));
+        ], null));
     }
 
     #[Test]
@@ -187,11 +182,10 @@ class ResubmitApplicationServiceTest extends TestCase
                 'household_size' => 2,
                 'marital_status' => 'single',
                 'is_student' => '0',
-            ], self::VALID_BASE64_IMAGE, self::VALID_BASE64_IMAGE);
+            ], self::VALID_BASE64_IMAGE);
             $this->fail('Expected resubmission to fail with an incomplete validated payload.');
         } catch (\Throwable) {
             $this->assertSame([], Storage::disk('local')->files('recipient_id_photos'));
-            $this->assertSame([], Storage::disk('local')->files('recipient_address_photos'));
         }
     }
 
@@ -239,7 +233,6 @@ class ResubmitApplicationServiceTest extends TestCase
             'household_size' => 2,
             'marital_status' => 'single',
             'is_student' => false,
-            'address_confirmation' => null,
         ]);
 
         $data = app(ResubmitApplicationService::class)->prepareRecipientEditData($user->fresh());
@@ -270,7 +263,6 @@ class ResubmitApplicationServiceTest extends TestCase
             'household_size' => 2,
             'marital_status' => 'single',
             'is_student' => false,
-            'address_confirmation' => 'recipient_address_photos/address.png',
         ]);
 
         return $user;

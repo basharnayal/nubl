@@ -65,13 +65,11 @@ class ResubmitApplicationController extends Controller
     private function updateRecipient(UpdateResubmitApplicationRequest $request, User $user): RedirectResponse
     {
         $idPhoto = $request->filled('id_photo_base64') ? $request->string('id_photo_base64')->toString() : null;
-        $addressPhoto = $request->filled('address_confirmation_base64') ? $request->string('address_confirmation_base64')->toString() : null;
 
         $ok = $this->resubmitApplicationService->resubmitRecipient(
             $user,
             $request->validated(),
             $idPhoto,
-            $addressPhoto,
         );
 
         return $this->redirectAfterResubmit($ok);

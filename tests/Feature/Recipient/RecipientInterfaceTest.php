@@ -16,7 +16,9 @@ class RecipientInterfaceTest extends TestCase
     use RefreshDatabase;
 
     protected $recipient;
+
     protected $provider;
+
     protected $request;
 
     protected function setUp(): void
@@ -34,7 +36,7 @@ class RecipientInterfaceTest extends TestCase
         $this->provider = User::factory()->create([
             'status' => User::STATUS_ACTIVE,
             'is_active' => true,
-            'membership_type' => 'provider'
+            'membership_type' => 'provider',
         ]);
         $this->provider->assignRole('provider');
 
@@ -53,7 +55,7 @@ class RecipientInterfaceTest extends TestCase
             'address_en' => 'Addr EN',
             'city' => 'Riyadh',
             'region' => 'Riyadh',
-            'location' => 'Downtown'
+            'location' => 'Downtown',
         ]);
 
         // Menu Item
@@ -90,8 +92,8 @@ class RecipientInterfaceTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('My Requests');
         $response->assertSee('Test Provider Business'); // business name on list (ProviderDisplay)
+        // Amounts use <x-sar-amount> (Saudi Riyal symbol), not a literal "SAR" label.
         $response->assertSee('50.00');
-        $response->assertSee('SAR');
     }
 
     #[Test]
@@ -104,7 +106,7 @@ class RecipientInterfaceTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Request Details');
         $response->assertSee('Burger'); // Item Name
-        $response->assertSee('50.00 SAR');
+        $response->assertSee('50.00');
     }
 
     #[Test]

@@ -1,6 +1,7 @@
 import './bootstrap';
 import { initFormSubmitGuard } from './form-submit-guard';
 import '../css/app.css';
+import 'choices.js/public/assets/styles/choices.min.css';
 
 initFormSubmitGuard();
 
@@ -62,6 +63,52 @@ window.loadApexCharts = async () => {
 window.loadTomSelect = async () => {
     const module = await import('tom-select/dist/js/tom-select.complete.min');
     return module.default;
+};
+
+/** Vanilla select enhancer (nationality, etc.) — no jQuery; works with Vite + RTL */
+window.loadChoices = async () => {
+    const module = await import('choices.js');
+    return module.default;
+};
+
+/** Shared config for long <select> lists (bilingual labels; value stays English) */
+window.nublNationalityChoicesConfig = (searchPlaceholder) => ({
+    silent: true,
+    searchEnabled: true,
+    searchChoices: true,
+    searchFields: ['label', 'value'],
+    searchResultLimit: -1,
+    searchFloor: 0,
+    shouldSort: false,
+    itemSelectText: '',
+    allowHTML: false,
+    searchPlaceholderValue: searchPlaceholder || null,
+    renderChoiceLimit: -1,
+});
+
+/**
+ * One-time mount for nationality <select> (Choices.js).
+ * @param {HTMLSelectElement} el
+ * @param {string|null|undefined} hintOverride optional search placeholder (e.g. from Blade @json)
+ */
+window.nublMountNationalityChoices = (el, hintOverride) => {
+    if (!el || !window.loadChoices || !window.nublNationalityChoicesConfig) {
+        return Promise.resolve(null);
+    }
+    if (el._nublChoicesInstance) {
+        return Promise.resolve(el._nublChoicesInstance);
+    }
+    const hint = hintOverride !== undefined && hintOverride !== null
+        ? hintOverride
+        : (el.dataset?.searchHint || null);
+    return window.loadChoices().then((Choices) => {
+        if (el._nublChoicesInstance) {
+            return el._nublChoicesInstance;
+        }
+        const instance = new Choices(el, window.nublNationalityChoicesConfig(hint));
+        el._nublChoicesInstance = instance;
+        return instance;
+    });
 };
 window.Alpine = Alpine;
 window.helpers = helpers;

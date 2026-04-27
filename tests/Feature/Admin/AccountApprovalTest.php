@@ -387,7 +387,6 @@ class AccountApprovalTest extends TestCase
     {
         Storage::fake('local');
         Storage::disk('local')->put('recipient_docs/id.png', 'id');
-        Storage::disk('local')->put('recipient_docs/address.png', 'address');
 
         $recipient = User::factory()->create([
             'status' => User::STATUS_PENDING_APPROVAL,
@@ -407,15 +406,10 @@ class AccountApprovalTest extends TestCase
             'household_size' => 2,
             'marital_status' => 'single',
             'is_student' => false,
-            'address_confirmation' => 'recipient_docs/address.png',
         ]);
 
         $this->actingAs($this->admin)
             ->get(route('admin.users.file', [$recipient, 'id_photo']))
-            ->assertOk();
-
-        $this->actingAs($this->admin)
-            ->get(route('admin.users.file', [$recipient, 'address_confirmation']))
             ->assertOk();
     }
 

@@ -129,8 +129,9 @@ class RecipientDashboardControllerTest extends TestCase
         $response->assertViewHas('remainingLimit', 300.0);
 
         $chart = $response->viewData('activityChartData');
-        $this->assertCount(8, $chart['categories']);
-        $this->assertCount(8, $chart['series']);
+        // Activity chart: one bucket per day for the last 7 days (today + 6 prior).
+        $this->assertCount(7, $chart['categories']);
+        $this->assertCount(7, $chart['series']);
     }
 
     #[Test]
@@ -235,4 +236,3 @@ class RecipientDashboardControllerTest extends TestCase
         return $provider;
     }
 }
-

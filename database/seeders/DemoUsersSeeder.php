@@ -214,7 +214,6 @@ class DemoUsersSeeder extends Seeder
                         'household_size'       => rand(1, 8),
                         'marital_status'       => $maritalStatuses[$i % count($maritalStatuses)],
                         'is_student'           => $i % 5 === 0,
-                        'address_confirmation' => null,
                     ]
                 );
             }

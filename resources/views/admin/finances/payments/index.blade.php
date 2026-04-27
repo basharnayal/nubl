@@ -70,12 +70,14 @@
                                 $failHint = $notes['callback_status'] ?? ($notes['error_url'] ?? null);
                                 $stKey = 'finance.payment_status.'.$payment->status;
                                 $stLabel = __($stKey);
+                                $donorName = $payment->sponsor?->name ?? ($payment->is_guest ? __('Guest Donor') : '—');
+                                $donorSubtitle = $payment->sponsor?->email ?? ($payment->is_guest ? __('Quick Donation') : null);
                             @endphp
                             <tr class="border-b border-slate-200 dark:border-navy-500">
                                 <td class="whitespace-nowrap px-4 py-3 sm:px-5 font-medium text-primary dark:text-accent-light">#{{ $payment->id }}</td>
                                 <td class="px-4 py-3 sm:px-5">
-                                    <div class="font-medium text-slate-700 dark:text-navy-100">{{ $payment->sponsor?->name ?? '—' }}</div>
-                                    <div class="text-xs text-slate-500 dark:text-navy-300">{{ $payment->sponsor?->email }}</div>
+                                    <div class="font-medium text-slate-700 dark:text-navy-100">{{ $donorName }}</div>
+                                    <div class="text-xs text-slate-500 dark:text-navy-300">{{ $donorSubtitle }}</div>
                                 </td>
                                 <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $payment->gateway }}</td>
                                 <td class="whitespace-nowrap px-4 py-3 sm:px-5 font-mono text-xs">{{ $payment->external_payment_id ?? '—' }}</td>

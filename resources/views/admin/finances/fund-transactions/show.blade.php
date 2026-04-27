@@ -70,7 +70,16 @@
                     </div>
                     <div class="flex justify-between gap-4">
                         <dt class="text-slate-500 dark:text-navy-300">{{ __('finance.ledger.donor_sponsor') }}</dt>
-                        <dd>{{ $fundTransaction->sponsor_id ? '#'.$fundTransaction->sponsor_id.' '.$fundTransaction->sponsor?->name : '—' }}</dd>
+                        <dd>
+                            @if ($fundTransaction->sponsor_id)
+                                #{{ $fundTransaction->sponsor_id }} {{ $fundTransaction->sponsor?->name }}
+                            @elseif ($fundTransaction->payment?->is_guest)
+                                {{ __('Guest Donor') }}
+                                <span class="text-xs text-slate-400 dark:text-navy-400">({{ __('Quick Donation') }})</span>
+                            @else
+                                —
+                            @endif
+                        </dd>
                     </div>
                     <div class="flex justify-between gap-4">
                         <dt class="text-slate-500 dark:text-navy-300">{{ __('finance.common.created') }}</dt>

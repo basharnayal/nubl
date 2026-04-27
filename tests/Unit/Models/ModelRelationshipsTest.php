@@ -148,7 +148,7 @@ class ModelRelationshipsTest extends TestCase
         ]);
 
         $this->assertSame($recipient->id, $profile->user->id);
-        $this->assertSame(['national_id', 'iqama'], RecipientProfile::ID_TYPES);
+        $this->assertSame(['national_id', 'iqama', 'hudood_number'], RecipientProfile::ID_TYPES);
     }
 
     #[Test]

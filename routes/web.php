@@ -8,7 +8,6 @@
  */
 
 use App\Http\Controllers\Admin\AccountApprovalController;
-use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFundTransactionController;
 use App\Http\Controllers\Admin\AdminPaymentController;
@@ -23,6 +22,8 @@ use App\Http\Controllers\Admin\SummaryReportController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\ProviderRegistrationController;
 use App\Http\Controllers\Auth\ResubmitApplicationController;
+use App\Http\Controllers\LandingPageController;
+use App\Http\Controllers\LandingPageFeedController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Provider\ProviderDashboardController;
 use App\Http\Controllers\Provider\ProviderWalletController;
@@ -35,6 +36,9 @@ $authMiddleware = config('app.phone_verification_enabled', true)
     : ['auth'];
 
 Route::get('/', LandingPageController::class)->name('home');
+Route::get('/landing/feed', LandingPageFeedController::class)
+    ->middleware('throttle:120,1')
+    ->name('landing.feed');
 
 // Locale switch (default: English, user can switch to Arabic)
 Route::get('/locale/{locale}', function (string $locale) {
@@ -256,6 +260,19 @@ Route::middleware(array_merge($authMiddleware, ['throttle:notifications']))->gro
     Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
 });
 
+// Guest Quick Donation (public, no auth required)
+Route::prefix('donate')->name('guest.donation.')->group(function () {
+    Route::post('/initiate', [\App\Http\Controllers\GuestDonationController::class, 'initiate'])
+        ->middleware('throttle:guest_donations')
+        ->name('initiate');
+    Route::get('/success', [\App\Http\Controllers\GuestDonationController::class, 'success'])
+        ->name('success');
+    Route::get('/{payment}/receipt', [\App\Http\Controllers\GuestDonationController::class, 'receipt'])
+        ->name('receipt');
+    Route::get('/failed', [\App\Http\Controllers\GuestDonationController::class, 'failed'])
+        ->name('failed');
+});
+
 // Payment callback (no auth — MyFatoorah redirects the user's browser here).
 // Rate-limited to prevent abuse (attackers flooding with random IDs to exhaust MyFatoorah API quota).
 Route::get('/payments/callback', [\App\Http\Controllers\PaymentCallbackController::class, 'callback'])
@@ -287,7 +304,7 @@ Route::middleware(array_merge($authMiddleware, ['account.approved:pending_only']
 
 // Test: debug roles (admin only - remove in production)
 Route::get('/test-roles', function () {
-    if (!auth()->user()->hasRole('admin')) {
+    if (! auth()->user()->hasRole('admin')) {
         abort(403);
     }
 
@@ -305,4 +322,4 @@ Route::get('/test-roles', function () {
 //     return 'تم تعيينك كـ admin بنجاح!';
 // });
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';

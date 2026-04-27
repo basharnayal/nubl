@@ -78,6 +78,32 @@ class AdminPaymentControllerTest extends TestCase
     }
 
     #[Test]
+    public function index_and_show_display_guest_donor_for_guest_payments(): void
+    {
+        $guestPayment = Payment::factory()->succeeded()->create([
+            'sponsor_id' => null,
+            'is_guest' => true,
+            'amount' => 33.00,
+            'external_payment_id' => 'GUEST-ADMIN-1',
+        ]);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.finances.payments.index', [
+                'search' => (string) $guestPayment->id,
+            ]))
+            ->assertOk()
+            ->assertSee('Guest Donor', false)
+            ->assertSee('Quick Donation', false)
+            ->assertSee('GUEST-ADMIN-1', false);
+
+        $this->actingAs($this->admin)
+            ->get(route('admin.finances.payments.show', $guestPayment))
+            ->assertOk()
+            ->assertSee('Guest Donor', false)
+            ->assertSee('Quick Donation', false);
+    }
+
+    #[Test]
     public function show_includes_related_records_and_payment_audit_entries_only(): void
     {
         $donor = $this->createDonor();
@@ -137,6 +163,12 @@ class AdminPaymentControllerTest extends TestCase
         $payment = Payment::factory()->for($donor, 'sponsor')->succeeded()->create([
             'amount' => 17.50,
         ]);
+        $guestPayment = Payment::factory()->succeeded()->create([
+            'sponsor_id' => null,
+            'is_guest' => true,
+            'amount' => 22.00,
+            'external_payment_id' => 'GUEST-CSV-1',
+        ]);
 
         $response = $this->actingAs($this->admin)
             ->get(route('admin.finances.payments.export', [
@@ -150,6 +182,9 @@ class AdminPaymentControllerTest extends TestCase
         $csv = $response->streamedContent();
         $this->assertStringContainsString('external_payment_id', $csv);
         $this->assertStringContainsString((string) $payment->id, $csv);
+        $this->assertStringContainsString((string) $guestPayment->id, $csv);
+        $this->assertStringContainsString('Guest Donor', $csv);
+        $this->assertStringContainsString('GUEST-CSV-1', $csv);
         $this->assertStringContainsString(Payment::STATUS_SUCCEEDED, $csv);
 
         $activity = Activity::query()
@@ -171,6 +206,12 @@ class AdminPaymentControllerTest extends TestCase
             'amount' => 70.00,
             'gateway' => Payment::GATEWAY_MYFATOORAH,
         ]);
+        $guestPayment = Payment::factory()->succeeded()->create([
+            'sponsor_id' => null,
+            'is_guest' => true,
+            'amount' => 44.00,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+        ]);
 
         $response = $this->actingAs($this->admin)
             ->get(route('admin.finances.payments.export-pdf', [
@@ -179,6 +220,12 @@ class AdminPaymentControllerTest extends TestCase
 
         $response->assertOk();
         $response->assertHeader('content-disposition');
+
+        $renderedPdfView = view('admin.finances.exports.payments-pdf', [
+            'payments' => collect([$guestPayment->load('sponsor')]),
+            'generated_at' => now(),
+        ])->render();
+        $this->assertStringContainsString('Guest Donor', $renderedPdfView);
 
         $activity = Activity::query()
             ->where('description', 'finance.payments_exported')
@@ -225,4 +272,3 @@ class AdminPaymentControllerTest extends TestCase
         ]);
     }
 }
-

@@ -10,29 +10,20 @@ class RecipientProfile extends Model
 {
     use HasFactory;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'user_id',
         'nationality',
         'short_address',
+        'location',
         'id_type',
+        'id_number',
         'id_photo_path',
     ];
 
-    /**
-     * Get the user that owns the profile.
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Valid ID types for recipient registration.
-     */
-    public const ID_TYPES = ['national_id', 'iqama'];
+    public const ID_TYPES = ['national_id', 'iqama', 'hudood_number'];
 }

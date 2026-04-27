@@ -110,7 +110,7 @@ class RecipientController extends Controller
         $startDate = Carbon::now()->subDays(6)->startOfDay();
         $dayExpression = DB::connection()->getDriverName() === 'sqlite'
             ? "strftime('%Y-%m-%d', created_at)"
-            : "DATE(created_at)";
+            : 'DATE(created_at)';
 
         $daily = RequestModel::forRecipient($recipientId)
             ->where('status', 'FULFILLED')
@@ -152,7 +152,7 @@ class RecipientController extends Controller
      */
     public function providerMenu(Request $request, User $provider): View
     {
-        if ($provider->membership_type !== User::MEMBERSHIP_PROVIDER || !$provider->providerProfile) {
+        if ($provider->membership_type !== User::MEMBERSHIP_PROVIDER || ! $provider->providerProfile) {
             abort(404);
         }
 

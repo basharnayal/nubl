@@ -15,8 +15,7 @@ class MenuItemController extends Controller
 {
     public function __construct(
         private AuditService $auditService
-    ) {
-    }
+    ) {}
 
     /**
      * Display a listing of the resource.
@@ -26,7 +25,7 @@ class MenuItemController extends Controller
         $query = ProviderMenuItem::ownedBy(Auth::id());
 
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%'.$request->search.'%');
         }
 
         $provider = Auth::user();

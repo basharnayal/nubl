@@ -52,7 +52,6 @@ class RecipientSeeder extends Seeder
                 'household_size' => 4,
                 'marital_status' => 'married',
                 'is_student' => false,
-                'address_confirmation' => null,
             ]
         );
     }

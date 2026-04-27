@@ -44,12 +44,16 @@
             <th>Payment ID</th>
             <th>Request ID</th>
             <th>Redemption ID</th>
-            <th>Sponsor ID</th>
+            <th>Donor ID</th>
+            <th>Donor</th>
             <th>Created At</th>
         </tr>
     </thead>
     <tbody>
         @forelse($transactions as $tx)
+            @php
+                $donorName = $tx->sponsor?->name ?? ($tx->payment?->is_guest ? __('Guest Donor') : null);
+            @endphp
             <tr>
                 <td>{{ $tx->id }}</td>
                 <td>{{ $tx->wallet_id }}</td>
@@ -65,11 +69,12 @@
                 <td>{{ $tx->request_id }}</td>
                 <td>{{ $tx->order_redemption_id }}</td>
                 <td>{{ $tx->sponsor_id }}</td>
+                <td>{{ $donorName }}</td>
                 <td>{{ $tx->created_at?->format('Y-m-d H:i') }}</td>
             </tr>
         @empty
             <tr>
-                <td colspan="11" style="text-align:center; padding: 12px; color: #94a3b8;">No records found.</td>
+                <td colspan="12" style="text-align:center; padding: 12px; color: #94a3b8;">No records found.</td>
             </tr>
         @endforelse
     </tbody>

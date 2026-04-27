@@ -14,7 +14,7 @@ class AdminMenuController extends Controller
         $query = User::role('provider')->with('providerProfile');
 
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%'.$request->search.'%');
         }
 
         if ($request->filled('status')) {
@@ -42,14 +42,14 @@ class AdminMenuController extends Controller
     public function show(User $provider, Request $request)
     {
         // Must be a provider
-        if (!$provider->hasRole('provider')) {
+        if (! $provider->hasRole('provider')) {
             abort(404);
         }
 
         $query = ProviderMenuItem::where('provider_id', $provider->id);
 
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $query->where('name', 'like', '%'.$request->search.'%');
         }
 
         if ($request->filled('status')) {
@@ -86,7 +86,7 @@ class AdminMenuController extends Controller
 
     public function toggleBlock(Request $request, ProviderMenuItem $item)
     {
-        $item->is_admin_blocked = !$item->is_admin_blocked;
+        $item->is_admin_blocked = ! $item->is_admin_blocked;
         $item->save();
 
         // Audit Logging

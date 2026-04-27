@@ -12,7 +12,7 @@ return [
         'how'          => 'How it works',
         'trust'        => 'Trust',
         'providers'    => 'Providers',
-        'give'         => 'Give support',
+        'give'         => 'Register',
         'dashboard'    => 'Dashboard',
         'login'        => 'Login',
         'open_menu'    => 'Open menu',
@@ -157,7 +157,7 @@ return [
         'eyebrow' => 'Chapter 07 · Your part',
         'h1'      => 'Three ways in.',
         'h2'      => 'One quiet circuit of care.',
-        'a_h'     => 'Give support',
+        'a_h'     => 'Register',
         'a_p'     => 'One-time, monthly, or directed. Every contribution is traceable to impact, invisible to the person you help.',
         'a_cta'   => 'Become a supporter',
         'b_h'     => 'Request support',
@@ -183,7 +183,7 @@ return [
         'press'        => 'Press',
         'contact'      => 'Contact',
         'copy'         => '© 2026 NUBL Platform · All rights reserved',
-        'legal'        => 'Privacy · Terms · Audited annually by Baker Tilly MENA',
+        'legal'        => 'Privacy · Terms · Audited annually by external auditors',
     ],
 
     'feed_live' => [

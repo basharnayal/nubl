@@ -1,0 +1,102 @@
+/* Nationality <select> + Choices.js — scoped; avoid styling .choices__list--single like dropdown rows */
+
+.nationality-choices-wrap {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    /* Override library defaults (defaults use #f9f9f9 inner + #f2f2f2 “highlight” that fights our theme) */
+    --choices-bg-color: #ffffff;
+    --choices-bg-color-dropdown: #ffffff;
+    /* Gold tint on hover/keyboard in list — keep text dark (never white on pale grey) */
+    --choices-highlighted-color: #fde68a;
+}
+
+.dark .nationality-choices-wrap {
+    --choices-bg-color: color-mix(in srgb, var(--color-navy-800) 85%, white 15%);
+    --choices-bg-color-dropdown: var(--color-navy-700);
+    --choices-highlighted-color: color-mix(in srgb, var(--color-nubl-gold-500) 28%, var(--color-navy-800));
+}
+
+.nationality-choices-wrap .choices {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 0;
+}
+
+/* Closed control: neutral white, no solid gold block */
+.nationality-choices-wrap .choices__inner {
+    @apply min-h-[42px] rounded-lg border border-slate-300 py-2 pl-3 pr-9
+        text-sm text-slate-800 transition duration-200
+        dark:border-navy-450 dark:text-navy-100;
+    background-color: #ffffff !important;
+}
+
+.nationality-choices-wrap .choices__inner:hover {
+    @apply border-slate-400 dark:border-navy-400;
+}
+
+.nationality-choices-wrap .is-focused .choices__inner,
+.nationality-choices-wrap .is-open .choices__inner {
+    @apply border-primary shadow-none dark:border-accent;
+    background-color: #ffffff !important;
+}
+
+/* Selected / placeholder text inside the closed field — not a full-width gold chip */
+.nationality-choices-wrap .choices__list--single .choices__item {
+    @apply text-slate-800 dark:text-navy-100;
+    background: transparent !important;
+}
+
+/* Search box at top of dropdown */
+.nationality-choices-wrap .choices__input {
+    @apply text-sm text-slate-800 dark:text-navy-100;
+    background-color: #ffffff !important;
+    margin-bottom: 0.25rem;
+}
+
+/* Dropdown panel */
+.nationality-choices-wrap .choices__list--dropdown,
+.nationality-choices-wrap .choices__list[aria-expanded] {
+    @apply z-50 rounded-lg border border-slate-200 bg-white shadow-md dark:border-navy-500 dark:bg-navy-700;
+    min-width: 100% !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+}
+
+.nationality-choices-wrap .choices__list--dropdown .choices__list {
+    @apply max-h-60;
+}
+
+.nationality-choices-wrap .choices__placeholder {
+    @apply text-slate-500 opacity-100 dark:text-navy-400;
+}
+
+/* List rows: default = dark text, pale row bg */
+.nationality-choices-wrap .choices__list--dropdown .choices__item--selectable,
+.nationality-choices-wrap .choices__list[aria-expanded] .choices__item--selectable {
+    @apply text-slate-800 dark:text-navy-100;
+    background-color: #ffffff !important;
+}
+
+/* Hover + keyboard highlight — brand gold tint, high-contrast text (never text-white on light grey) */
+.nationality-choices-wrap .choices__list--dropdown .choices__item--selectable.is-highlighted,
+.nationality-choices-wrap .choices__list[aria-expanded] .choices__item--selectable.is-highlighted,
+.nationality-choices-wrap .choices__list--dropdown .choices__item--selectable:hover,
+.nationality-choices-wrap .choices__list[aria-expanded] .choices__item--selectable:hover {
+    @apply text-nubl-navy-800 dark:text-navy-100;
+    background-color: #fde68a !important; /* nubl-gold-200: visible gold row */
+    color: #0f2a3d;
+}
+
+.dark .nationality-choices-wrap .choices__list--dropdown .choices__item--selectable.is-highlighted,
+.dark .nationality-choices-wrap .choices__list[aria-expanded] .choices__item--selectable.is-highlighted,
+.dark .nationality-choices-wrap .choices__list--dropdown .choices__item--selectable:hover,
+.dark .nationality-choices-wrap .choices__list[aria-expanded] .choices__item--selectable:hover {
+    color: #f1f5f9;
+    /* variable above already mixes gold into navy; fallback if needed: */
+    background-color: var(--choices-highlighted-color) !important;
+}

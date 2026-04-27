@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\Support\PhoneHelper;
+use App\Auth\PostAuthRedirector;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\AuditService;
 use App\Services\OtpService;
+use App\Support\PhoneHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -19,12 +20,10 @@ class OtpLoginController extends Controller
 {
     public function __construct(
         private OtpService $otpService,
-        private AuditService $auditService
+        private AuditService $auditService,
+        private PostAuthRedirector $postAuthRedirector,
     ) {}
 
-    /**
-     * Request OTP for login. User must exist by phone.
-     */
     public function requestOtp(Request $request): RedirectResponse
     {
         $request->validate([
@@ -58,9 +57,6 @@ class OtpLoginController extends Controller
         ]);
     }
 
-    /**
-     * Verify OTP and log in.
-     */
     public function verify(Request $request): RedirectResponse
     {
         $request->validate([
@@ -68,10 +64,10 @@ class OtpLoginController extends Controller
             'otp_code' => ['required', 'string', 'size:6'],
         ]);
 
-        $phone = $request->input('otp_phone');
-        $code = $request->input('otp_code');
-
-        $user = $this->otpService->verifyOtpForLogin($phone, $code);
+        $user = $this->otpService->verifyOtpForLogin(
+            $request->input('otp_phone'),
+            $request->input('otp_code'),
+        );
 
         if (! $user || ! $user->is_active) {
             throw ValidationException::withMessages([
@@ -91,14 +87,6 @@ class OtpLoginController extends Controller
             $user->update(['phone_verified_at' => now()]);
         }
 
-        if (config('app.email_verification_enabled', true) && ! $user->hasVerifiedEmail()) {
-            return redirect()->route('verification.notice');
-        }
-
-        if (in_array($user->status, [User::STATUS_PENDING_APPROVAL, User::STATUS_REJECTED])) {
-            return redirect()->route('approval.pending');
-        }
-
-        return redirect()->intended(route('dashboard', absolute: false));
+        return $this->postAuthRedirector->redirect($user);
     }
 }

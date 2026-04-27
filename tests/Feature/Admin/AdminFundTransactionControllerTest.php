@@ -268,6 +268,92 @@ class AdminFundTransactionControllerTest extends TestCase
     }
 
     #[Test]
+    public function show_displays_guest_donor_for_guest_payment_transaction(): void
+    {
+        $guestPayment = Payment::factory()->succeeded()->create([
+            'sponsor_id' => null,
+            'is_guest' => true,
+            'amount' => 25.00,
+        ]);
+
+        $transaction = FundTransaction::create([
+            'wallet_id' => $this->systemWallet->id,
+            'sponsor_id' => null,
+            'source' => FundTransaction::SOURCE_DONATION,
+            'amount' => 25.00,
+            'direction' => FundTransaction::DIRECTION_IN,
+            'payment_id' => $guestPayment->id,
+            'request_id' => null,
+            'order_redemption_id' => null,
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.finances.fund-transactions.show', $transaction));
+
+        $response->assertOk();
+        $response->assertSee('Guest Donor', false);
+        $response->assertSee('Quick Donation', false);
+    }
+
+    #[Test]
+    public function export_csv_includes_guest_donor_label_for_guest_payment_transactions(): void
+    {
+        $guestPayment = Payment::factory()->succeeded()->create([
+            'sponsor_id' => null,
+            'is_guest' => true,
+            'amount' => 31.00,
+        ]);
+        $transaction = FundTransaction::create([
+            'wallet_id' => $this->systemWallet->id,
+            'sponsor_id' => null,
+            'source' => FundTransaction::SOURCE_DONATION,
+            'amount' => 31.00,
+            'direction' => FundTransaction::DIRECTION_IN,
+            'payment_id' => $guestPayment->id,
+            'request_id' => null,
+            'order_redemption_id' => null,
+        ]);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.finances.fund-transactions.export'));
+
+        $response->assertOk();
+        $csv = $response->streamedContent();
+        $this->assertStringContainsString('donor_name', $csv);
+        $this->assertStringContainsString((string) $transaction->id, $csv);
+        $this->assertStringContainsString('Guest Donor', $csv);
+    }
+
+    #[Test]
+    public function export_pdf_includes_guest_donor_label_for_guest_payment_transactions(): void
+    {
+        $guestPayment = Payment::factory()->succeeded()->create([
+            'sponsor_id' => null,
+            'is_guest' => true,
+            'amount' => 47.00,
+        ]);
+        FundTransaction::create([
+            'wallet_id' => $this->systemWallet->id,
+            'sponsor_id' => null,
+            'source' => FundTransaction::SOURCE_DONATION,
+            'amount' => 47.00,
+            'direction' => FundTransaction::DIRECTION_IN,
+            'payment_id' => $guestPayment->id,
+            'request_id' => null,
+            'order_redemption_id' => null,
+        ]);
+
+        $rendered = view('admin.finances.exports.fund-transactions-pdf', [
+            'transactions' => FundTransaction::query()
+                ->with(['wallet', 'sponsor', 'payment'])
+                ->get(),
+            'generated_at' => now(),
+        ])->render();
+
+        $this->assertStringContainsString('Guest Donor', $rendered);
+    }
+
+    #[Test]
     public function export_pdf_downloads_and_writes_audit_entry(): void
     {
         $donor = $this->createDonor();

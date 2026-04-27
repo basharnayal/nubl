@@ -81,7 +81,6 @@ class ModelRelationsTest extends TestCase
             'household_size' => 3,
             'marital_status' => 'single',
             'is_student' => false,
-            'address_confirmation' => 'recipient_address_photos/address.png',
         ]);
 
         $payment = Payment::create([

@@ -91,7 +91,7 @@
                             {{ __('Create account') }}
                         </a>
                     </p>
-                    <p class="mt-3 text-xs leading-5 text-slate-500 dark:text-navy-300">
+                    <!-- <p class="mt-3 text-xs leading-5 text-slate-500 dark:text-navy-300">
                         {{ __('auth.legal.consent_login') }}
                         <a class="font-semibold text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent"
                             href="{{ route('legal.terms', ['return' => request()->getRequestUri()]) }}">
@@ -102,7 +102,7 @@
                             href="{{ route('legal.privacy', ['return' => request()->getRequestUri()]) }}">
                             {{ __('auth.legal.privacy') }}
                         </a>.
-                    </p>
+                    </p> -->
                 </div>
             @endif
         </div>

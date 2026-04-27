@@ -102,6 +102,15 @@ class RateLimiterServiceProvider extends ServiceProvider
                 ->by((string) $request->user()?->id);
         });
 
+        RateLimiter::for('guest_donations', function (Request $request) use ($off) {
+            if ($off()) {
+                return Limit::none();
+            }
+
+            return Limit::perMinute((int) config('rate_limiting.guest_donations.per_minute', 5))
+                ->by($request->ip());
+        });
+
         RateLimiter::for('notifications', function (Request $request) use ($off) {
             if ($off()) {
                 return Limit::none();
