@@ -18,20 +18,4 @@ abstract class Controller
     {
         return redirect()->route($route)->with('error', $message);
     }
-
-    //     // التحقق من دور
-    // if (auth()->user()->hasRole('admin')) {
-    //     // ...
-    // }
-
-    // // التحقق من عدة أدوار
-    // if (auth()->user()->hasAnyRole(['admin', 'donor'])) {
-    //     // ...
-    // }
-
-    // // التحقق من جميع الأدوار
-    // if (auth()->user()->hasAllRoles(['admin', 'donor'])) {
-    //     // ...
-    // }
-
 }
