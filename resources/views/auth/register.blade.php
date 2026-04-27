@@ -378,6 +378,8 @@
                     {{ __('auth.legal.privacy') }}
                 </a>.
             </p>
+            <button type="submit" x-show="membershipType && membershipType !== 'provider'"
+                class="btn w-full bg-primary px-5 py-2.5 font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90 sm:w-auto">
             <button type="submit" x-show="membershipType && membershipType !== 'provider'" x-cloak
                 class="btn w-full sm:w-auto bg-primary font-medium text-white hover:bg-primary-focus focus:bg-primary-focus active:bg-primary-focus/90 dark:bg-accent dark:hover:bg-accent-focus dark:focus:bg-accent-focus dark:active:bg-accent/90 px-5 py-2.5 rounded-lg">
                 {{ __('Register') }}
