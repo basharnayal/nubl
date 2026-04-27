@@ -51,7 +51,7 @@ class UpdateResubmitApplicationRequest extends FormRequest
                 'marital_status'             => ['required', 'string', 'in:' . implode(',', RecipientKycDetails::MARITAL_STATUSES)],
                 'is_student'                 => ['required', 'in:0,1'],
                 'employment_status'          => ['required', 'string', 'in:' . implode(',', RecipientKycDetails::EMPLOYMENT_STATUSES)],
-                'situation_description'      => ['nullable', 'string', 'min:10', 'max:1000'],
+                'situation_description'      => ['required', 'string', 'min:10', 'max:1000'],
                 'id_photo_base64'            => ['nullable', 'string'],
             ];
         }
