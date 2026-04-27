@@ -219,6 +219,7 @@ class AdminAccountNotificationsTest extends TestCase
             'id_photo_base64' => self::VALID_BASE64_IMAGE,
             'id_number' => '1234567890',
             'employment_status' => 'unemployed',
+            'situation_description' => 'Updated situation description.',
         ]);
 
         $response->assertRedirect(route('approval.pending'));
