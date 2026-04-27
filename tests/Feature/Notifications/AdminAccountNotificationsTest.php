@@ -54,7 +54,11 @@ class AdminAccountNotificationsTest extends TestCase
             'household_size' => 4,
             'marital_status' => 'married',
             'is_student' => false,
-            'address_confirmation_base64' => self::VALID_BASE64_IMAGE,
+            'id_number' => '1234567890',
+            'location_lat' => 24.7136,
+            'location_lng' => 46.6753,
+            'employment_status' => 'unemployed',
+            'situation_description' => 'Need assistance for food.',
         ]);
 
         $applicant = User::where('email', 'recipient@example.com')->first();
@@ -112,7 +116,6 @@ class AdminAccountNotificationsTest extends TestCase
             'household_size' => 2,
             'marital_status' => 'single',
             'is_student' => false,
-            'address_confirmation' => 'recipient_address_photos/old.png',
         ]);
 
         $recipient->update([
@@ -186,7 +189,6 @@ class AdminAccountNotificationsTest extends TestCase
         $recipient->assignRole('recipient');
 
         Storage::disk('local')->put('recipient_id_photos/old.png', 'x');
-        Storage::disk('local')->put('recipient_address_photos/old.png', 'y');
 
         RecipientProfile::create([
             'user_id' => $recipient->id,
@@ -201,7 +203,6 @@ class AdminAccountNotificationsTest extends TestCase
             'household_size' => 2,
             'marital_status' => 'single',
             'is_student' => false,
-            'address_confirmation' => 'recipient_address_photos/old.png',
         ]);
 
         $beforeCount = $admin->notifications()->count();
@@ -216,7 +217,8 @@ class AdminAccountNotificationsTest extends TestCase
             'marital_status' => 'single',
             'is_student' => '0',
             'id_photo_base64' => self::VALID_BASE64_IMAGE,
-            'address_confirmation_base64' => self::VALID_BASE64_IMAGE,
+            'id_number' => '1234567890',
+            'employment_status' => 'unemployed',
         ]);
 
         $response->assertRedirect(route('approval.pending'));

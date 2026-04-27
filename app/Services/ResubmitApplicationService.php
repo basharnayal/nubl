@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Auth\Support\Base64ImageStorage;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
@@ -15,6 +16,7 @@ class ResubmitApplicationService
 {
     public function __construct(
         private AuditService $auditService,
+        private Base64ImageStorage $base64Images,
     ) {}
 
     /**
@@ -66,11 +68,9 @@ class ResubmitApplicationService
                 default => null,
             };
         } elseif ($user->membership_type === User::MEMBERSHIP_RECIPIENT) {
-            $user->loadMissing(['recipientProfile', 'recipientKycDetails']);
+            $user->loadMissing(['recipientProfile']);
             if ($type === 'id_photo' && $user->recipientProfile) {
                 $path = $user->recipientProfile->id_photo_path;
-            } elseif ($type === 'address_confirmation' && $user->recipientKycDetails) {
-                $path = $user->recipientKycDetails->address_confirmation;
             }
         }
 
@@ -88,7 +88,6 @@ class ResubmitApplicationService
         User $user,
         array $validated,
         ?string $idPhotoBase64,
-        ?string $addressConfirmationBase64,
     ): bool {
         $user->load(['recipientProfile', 'recipientKycDetails']);
         $profile = $user->recipientProfile;
@@ -98,19 +97,14 @@ class ResubmitApplicationService
         }
 
         $idPath = null;
-        $addrPath = null;
         if ($idPhotoBase64 !== null && $idPhotoBase64 !== '') {
-            $idPath = $this->storeBase64Image($idPhotoBase64, 'recipient_id_photos');
-        }
-        if ($addressConfirmationBase64 !== null && $addressConfirmationBase64 !== '') {
-            $addrPath = $this->storeBase64Image($addressConfirmationBase64, 'recipient_address_photos');
+            $idPath = $this->base64Images->store($idPhotoBase64, 'recipient_id_photos', 'resubmit_');
         }
 
         $previousIdPath = $profile->id_photo_path;
-        $previousAddrPath = $kyc->address_confirmation;
 
         try {
-            DB::transaction(function () use ($user, $profile, $kyc, $validated, $idPath, $addrPath, $previousIdPath, $previousAddrPath): void {
+            DB::transaction(function () use ($user, $profile, $kyc, $validated, $idPath, $previousIdPath): void {
                 $user->update([
                     'name' => $validated['name'],
                     'status' => User::STATUS_PENDING_APPROVAL,
@@ -118,9 +112,10 @@ class ResubmitApplicationService
                 ]);
 
                 $profile->update([
-                    'nationality' => $validated['nationality'],
+                    'nationality'   => $validated['nationality'],
                     'short_address' => $validated['short_address'],
-                    'id_type' => $validated['id_type'],
+                    'id_type'       => $validated['id_type'],
+                    'id_number'     => $validated['id_number'],
                     'id_photo_path' => $idPath ?? $previousIdPath,
                 ]);
 
@@ -129,23 +124,17 @@ class ResubmitApplicationService
                 }
 
                 $kyc->update([
-                    'income_band' => $validated['income_band'],
-                    'household_size' => (int) $validated['household_size'],
-                    'marital_status' => $validated['marital_status'],
-                    'is_student' => (bool) (int) $validated['is_student'],
-                    'address_confirmation' => $addrPath ?? $previousAddrPath,
+                    'income_band'           => $validated['income_band'],
+                    'household_size'        => (int) $validated['household_size'],
+                    'marital_status'        => $validated['marital_status'],
+                    'is_student'            => (bool) (int) $validated['is_student'],
+                    'employment_status'     => $validated['employment_status'],
+                    'situation_description' => $validated['situation_description'] ?? null,
                 ]);
-
-                if ($addrPath && $previousAddrPath) {
-                    Storage::disk('local')->delete($previousAddrPath);
-                }
             });
         } catch (\Throwable $e) {
             if ($idPath) {
                 Storage::disk('local')->delete($idPath);
-            }
-            if ($addrPath) {
-                Storage::disk('local')->delete($addrPath);
             }
             throw $e;
         }
@@ -155,7 +144,6 @@ class ResubmitApplicationService
             'membership_type' => $user->membership_type,
             'recipient_profile_id' => $profile->id,
             'id_photo_updated' => (bool) $idPath,
-            'address_confirmation_updated' => (bool) $addrPath,
         ], $user->id);
 
         return true;
@@ -263,20 +251,4 @@ class ResubmitApplicationService
         return true;
     }
 
-    private function storeBase64Image(string $base64Data, string $directory): string
-    {
-        preg_match('/^data:image\/(jpeg|jpg|png|webp);base64,/i', $base64Data, $matches);
-        $extension = $matches[1] ?? 'jpg';
-        $extension = $extension === 'jpg' ? 'jpeg' : $extension;
-
-        $base64 = preg_replace('/^data:image\/(jpeg|jpg|png|webp);base64,/', '', $base64Data);
-        $decoded = base64_decode($base64, true);
-
-        $filename = uniqid('resubmit_', true).'.'.$extension;
-        $path = $directory.'/'.$filename;
-
-        Storage::disk('local')->put($path, $decoded);
-
-        return $path;
-    }
 }

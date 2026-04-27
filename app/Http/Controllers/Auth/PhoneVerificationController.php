@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Auth\PostAuthRedirector;
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Services\AuditService;
 use App\Services\OtpService;
 use Illuminate\Http\RedirectResponse;
@@ -18,12 +18,10 @@ class PhoneVerificationController extends Controller
 {
     public function __construct(
         private OtpService $otpService,
-        private AuditService $auditService
+        private AuditService $auditService,
+        private PostAuthRedirector $postAuthRedirector,
     ) {}
 
-    /**
-     * Show the phone verification form.
-     */
     public function show(Request $request): View|RedirectResponse
     {
         $user = $request->user();
@@ -31,15 +29,12 @@ class PhoneVerificationController extends Controller
             return redirect()->route('login');
         }
         if ($user->hasVerifiedPhone()) {
-            return $this->redirectAfterVerification($user);
+            return $this->postAuthRedirector->redirect($user);
         }
 
         return view('auth.verify-phone');
     }
 
-    /**
-     * Verify the OTP.
-     */
     public function verify(Request $request): RedirectResponse
     {
         $request->validate([
@@ -51,7 +46,7 @@ class PhoneVerificationController extends Controller
             return redirect()->route('login');
         }
         if ($user->hasVerifiedPhone()) {
-            return $this->redirectAfterVerification($user);
+            return $this->postAuthRedirector->redirect($user);
         }
 
         if (! $this->otpService->verifyOtp($user, $request->input('otp'))) {
@@ -66,12 +61,9 @@ class PhoneVerificationController extends Controller
             'user_id' => $user->id,
         ], $user->id);
 
-        return $this->redirectAfterVerification($user);
+        return $this->postAuthRedirector->redirect($user);
     }
 
-    /**
-     * Resend OTP.
-     */
     public function resend(Request $request): RedirectResponse
     {
         $user = $request->user();
@@ -79,7 +71,7 @@ class PhoneVerificationController extends Controller
             return redirect()->route('login');
         }
         if ($user->hasVerifiedPhone()) {
-            return $this->redirectAfterVerification($user);
+            return $this->postAuthRedirector->redirect($user);
         }
 
         $result = $this->otpService->sendOtp($user);
@@ -89,21 +81,5 @@ class PhoneVerificationController extends Controller
         }
 
         return back()->withErrors(['otp' => $result['message']]);
-    }
-
-    /**
-     * Redirect after successful verification based on membership type.
-     */
-    protected function redirectAfterVerification(User $user): RedirectResponse
-    {
-        if (in_array($user->status, [User::STATUS_PENDING_APPROVAL, User::STATUS_REJECTED])) {
-            return redirect()->route('approval.pending');
-        }
-
-        if (config('app.email_verification_enabled', true) && ! $user->hasVerifiedEmail()) {
-            return redirect()->route('verification.notice');
-        }
-
-        return redirect()->intended(route('dashboard', absolute: false));
     }
 }

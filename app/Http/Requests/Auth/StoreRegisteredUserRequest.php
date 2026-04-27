@@ -28,28 +28,32 @@ class StoreRegisteredUserRequest extends FormRequest
 
         if ($type === User::MEMBERSHIP_DONOR) {
             return array_merge($rules, [
-                'name' => ['required', 'string', 'max:255'],
+                'name'         => ['required', 'string', 'max:255'],
                 'phone_number' => ['required', 'string', new SaudiPhoneNumber, new SaudiPhoneUnique],
-                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-                'password' => ['required', Rules\Password::defaults()],
+                'email'        => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+                'password'     => ['required', Rules\Password::defaults()],
             ]);
         }
 
         if ($type === User::MEMBERSHIP_RECIPIENT) {
             return array_merge($rules, [
-                'name' => ['required', 'string', 'max:255'],
-                'phone_number' => ['required', 'string', new SaudiPhoneNumber, new SaudiPhoneUnique],
-                'nationality' => ['required', 'string', 'in:'.implode(',', config('nationalities', []))],
-                'short_address' => ['required', 'string', 'max:500'],
-                'id_type' => ['required', 'string', 'in:'.implode(',', RecipientProfile::ID_TYPES)],
-                'id_photo_base64' => ['required', 'string', new Base64Image],
-                'income_band' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::INCOME_BANDS)],
-                'household_size' => ['required', 'integer', 'min:1', 'max:50'],
-                'marital_status' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::MARITAL_STATUSES)],
-                'is_student' => ['required', 'boolean'],
-                'address_confirmation_base64' => ['required', 'string', new Base64Image],
-                'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-                'password' => ['required', Rules\Password::defaults()],
+                'name'                   => ['required', 'string', 'max:255'],
+                'phone_number'           => ['required', 'string', new SaudiPhoneNumber, new SaudiPhoneUnique],
+                'email'                  => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
+                'password'               => ['required', Rules\Password::defaults()],
+                'nationality'            => ['required', 'string', 'in:' . implode(',', config('nationalities', []))],
+                'short_address'          => ['required', 'string', 'max:500'],
+                'location_lat'           => ['required', 'numeric', 'between:-90,90'],
+                'location_lng'           => ['required', 'numeric', 'between:-180,180'],
+                'id_type'                => ['required', 'string', 'in:' . implode(',', RecipientProfile::ID_TYPES)],
+                'id_number'              => ['required', 'digits:10'],
+                'id_photo_base64'        => ['required', 'string', new Base64Image],
+                'income_band'            => ['required', 'string', 'in:' . implode(',', RecipientKycDetails::INCOME_BANDS)],
+                'household_size'         => ['required', 'integer', 'min:1', 'max:50'],
+                'marital_status'         => ['required', 'string', 'in:' . implode(',', RecipientKycDetails::MARITAL_STATUSES)],
+                'is_student'             => ['required', 'boolean'],
+                'employment_status'      => ['required', 'string', 'in:' . implode(',', RecipientKycDetails::EMPLOYMENT_STATUSES)],
+                'situation_description'  => ['nullable', 'string', 'min:10', 'max:1000'],
             ]);
         }
 
@@ -62,8 +66,8 @@ class StoreRegisteredUserRequest extends FormRequest
             if ($this->input('membership_type') !== User::MEMBERSHIP_RECIPIENT) {
                 return;
             }
-            if ($this->hasFile('id_photo') || $this->hasFile('address_confirmation')) {
-                abort(422, 'Use camera capture only. File upload is not allowed for identity or address proof.');
+            if ($this->hasFile('id_photo')) {
+                abort(422, 'Use camera capture only. File upload is not allowed for identity proof.');
             }
         });
     }

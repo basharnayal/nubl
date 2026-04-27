@@ -53,7 +53,6 @@ class AuthRegistrationRequestsTest extends TestCase
         $this->assertArrayHasKey('email', $rules);
         $this->assertArrayHasKey('phone_number', $rules);
         $this->assertArrayNotHasKey('id_photo_base64', $rules);
-        $this->assertArrayNotHasKey('address_confirmation_base64', $rules);
     }
 
     #[Test]
@@ -66,7 +65,7 @@ class AuthRegistrationRequestsTest extends TestCase
         $rules = $request->rules();
 
         $this->assertArrayHasKey('id_photo_base64', $rules);
-        $this->assertArrayHasKey('address_confirmation_base64', $rules);
+        $this->assertArrayNotHasKey('address_confirmation_base64', $rules);
         $this->assertArrayHasKey('income_band', $rules);
         $this->assertArrayHasKey('marital_status', $rules);
     }
@@ -192,10 +191,12 @@ class AuthRegistrationRequestsTest extends TestCase
             'nationality' => 'Saudi Arabia',
             'short_address' => 'Address',
             'id_type' => 'national_id',
+            'id_number' => '1234567890',
             'income_band' => '1000-1500',
             'household_size' => 3,
             'marital_status' => 'single',
             'is_student' => '1',
+            'employment_status' => 'unemployed',
             'id_photo_base64' => 'invalid-base64',
         ], $recipient);
 

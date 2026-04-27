@@ -46,12 +46,14 @@ class UpdateUserRequest extends FormRequest
                 'nationality' => ['required', 'string', 'in:'.implode(',', config('nationalities', []))],
                 'short_address' => ['required', 'string', 'max:500'],
                 'id_type' => ['required', 'string', 'in:'.implode(',', RecipientProfile::ID_TYPES)],
+                'id_number' => ['required', 'digits:10'],
                 'id_photo' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
                 'income_band' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::INCOME_BANDS)],
                 'household_size' => ['required', 'integer', 'min:1', 'max:50'],
                 'marital_status' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::MARITAL_STATUSES)],
                 'is_student' => ['required', 'boolean'],
-                'address_confirmation' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:5120'],
+                'employment_status' => ['nullable', 'string', 'in:'.implode(',', RecipientKycDetails::EMPLOYMENT_STATUSES)],
+                'situation_description' => ['nullable', 'string', 'min:10', 'max:1000'],
             ]);
         }
 

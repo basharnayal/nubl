@@ -150,8 +150,6 @@ class AccountApprovalController extends Controller
         } elseif ($user->membership_type === User::MEMBERSHIP_RECIPIENT) {
             if ($type === 'id_photo' && $user->recipientProfile) {
                 $path = $user->recipientProfile->id_photo_path;
-            } elseif ($type === 'address_confirmation' && $user->recipientKycDetails) {
-                $path = $user->recipientKycDetails->address_confirmation;
             }
         }
 

@@ -56,6 +56,7 @@ class ResubmitApplicationTest extends TestCase
             'nationality' => 'Saudi Arabia',
             'short_address' => 'Addr',
             'id_type' => 'national_id',
+            'id_number' => '1234567890',
             'id_photo_path' => 'recipient_id_photos/old.png',
         ]);
         RecipientKycDetails::create([
@@ -64,7 +65,8 @@ class ResubmitApplicationTest extends TestCase
             'household_size' => 2,
             'marital_status' => 'single',
             'is_student' => false,
-            'address_confirmation' => 'recipient_address_photos/old.png',
+            'employment_status' => 'unemployed',
+            'situation_description' => 'Original situation description for testing purposes.',
         ]);
 
         return $user;
@@ -223,19 +225,20 @@ class ResubmitApplicationTest extends TestCase
         Storage::fake('local');
         $user = $this->createRejectedRecipient();
         Storage::disk('local')->put('recipient_id_photos/old.png', 'x');
-        Storage::disk('local')->put('recipient_address_photos/old.png', 'y');
 
         $this->actingAs($user)->post(route('application.resubmit.update'), [
             'name' => $user->name,
             'nationality' => 'Saudi Arabia',
             'short_address' => 'Addr updated',
             'id_type' => 'national_id',
+            'id_number' => '1234567890',
             'income_band' => '1000-1500',
             'household_size' => 2,
             'marital_status' => 'single',
             'is_student' => '0',
+            'employment_status' => 'unemployed',
+            'situation_description' => 'Updated situation description for testing purposes.',
             'id_photo_base64' => self::VALID_BASE64_IMAGE,
-            'address_confirmation_base64' => self::VALID_BASE64_IMAGE,
         ]);
 
         $this->assertDatabaseHas('activity_log', [
@@ -265,10 +268,13 @@ class ResubmitApplicationTest extends TestCase
             'nationality' => 'Saudi Arabia',
             'short_address' => 'Addr',
             'id_type' => 'national_id',
+            'id_number' => '1234567890',
             'income_band' => '1000-1500',
             'household_size' => 2,
             'marital_status' => 'single',
             'is_student' => '0',
+            'employment_status' => 'unemployed',
+            'situation_description' => 'Situation description for testing purposes.',
         ]);
 
         $response->assertRedirect(route('approval.pending'));
@@ -325,17 +331,19 @@ class ResubmitApplicationTest extends TestCase
         Storage::fake('local');
         $user = $this->createRejectedRecipient();
         Storage::disk('local')->put('recipient_id_photos/old.png', 'x');
-        Storage::disk('local')->put('recipient_address_photos/old.png', 'y');
 
         $this->actingAs($user)->post(route('application.resubmit.update'), [
             'name' => $user->name,
             'nationality' => 'Saudi Arabia',
             'short_address' => 'New address',
             'id_type' => 'national_id',
+            'id_number' => '1234567890',
             'income_band' => '1000-1500',
             'household_size' => 2,
             'marital_status' => 'single',
             'is_student' => '0',
+            'employment_status' => 'unemployed',
+            'situation_description' => 'Updated situation after correction.',
         ]);
 
         $user->refresh();

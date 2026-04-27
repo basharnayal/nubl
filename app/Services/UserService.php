@@ -190,23 +190,24 @@ class UserService
     {
         if ($user->membership_type === User::MEMBERSHIP_RECIPIENT) {
             $idPath = $request->file('id_photo')->store('recipient_id_photos', 'local');
-            $addrPath = $request->file('address_confirmation')->store('recipient_address_photos', 'local');
 
             RecipientProfile::create([
-                'user_id' => $user->id,
-                'nationality' => $data['nationality'],
+                'user_id'       => $user->id,
+                'nationality'   => $data['nationality'],
                 'short_address' => $data['short_address'],
-                'id_type' => $data['id_type'],
+                'id_type'       => $data['id_type'],
+                'id_number'     => $data['id_number'] ?? null,
                 'id_photo_path' => $idPath,
             ]);
 
             RecipientKycDetails::create([
-                'user_id' => $user->id,
-                'income_band' => $data['income_band'],
-                'household_size' => (int) $data['household_size'],
-                'marital_status' => $data['marital_status'],
-                'is_student' => (bool) $data['is_student'],
-                'address_confirmation' => $addrPath,
+                'user_id'               => $user->id,
+                'income_band'           => $data['income_band'],
+                'household_size'        => (int) $data['household_size'],
+                'marital_status'        => $data['marital_status'],
+                'is_student'            => (bool) $data['is_student'],
+                'employment_status'     => $data['employment_status'] ?? null,
+                'situation_description' => $data['situation_description'] ?? null,
             ]);
         }
 
@@ -284,9 +285,10 @@ class UserService
             $kyc = $user->recipientKycDetails;
 
             $profileData = [
-                'nationality' => $data['nationality'],
+                'nationality'   => $data['nationality'],
                 'short_address' => $data['short_address'],
-                'id_type' => $data['id_type'],
+                'id_type'       => $data['id_type'],
+                'id_number'     => $data['id_number'] ?? null,
             ];
             if ($request->hasFile('id_photo')) {
                 Storage::disk('local')->delete($profile->id_photo_path ?? '');
@@ -295,15 +297,13 @@ class UserService
             $profile->update($profileData);
 
             $kycData = [
-                'income_band' => $data['income_band'],
-                'household_size' => (int) $data['household_size'],
-                'marital_status' => $data['marital_status'],
-                'is_student' => (bool) $data['is_student'],
+                'income_band'           => $data['income_band'],
+                'household_size'        => (int) $data['household_size'],
+                'marital_status'        => $data['marital_status'],
+                'is_student'            => (bool) $data['is_student'],
+                'employment_status'     => $data['employment_status'] ?? null,
+                'situation_description' => $data['situation_description'] ?? null,
             ];
-            if ($request->hasFile('address_confirmation')) {
-                Storage::disk('local')->delete($kyc->address_confirmation ?? '');
-                $kycData['address_confirmation'] = $request->file('address_confirmation')->store('recipient_address_photos', 'local');
-            }
             if ($kyc) {
                 $kyc->update($kycData);
             } else {

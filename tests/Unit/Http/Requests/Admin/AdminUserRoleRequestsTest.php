@@ -103,9 +103,9 @@ class AdminUserRoleRequestsTest extends TestCase
         $this->assertArrayHasKey('nationality', $rules);
         $this->assertArrayHasKey('id_photo', $rules);
         $this->assertContains('required', $rules['id_photo']);
-        $this->assertArrayHasKey('address_confirmation', $rules);
         $this->assertArrayHasKey('income_band', $rules);
         $this->assertArrayHasKey('household_size', $rules);
+        $this->assertArrayNotHasKey('address_confirmation', $rules);
     }
 
     #[Test]
@@ -179,8 +179,7 @@ class AdminUserRoleRequestsTest extends TestCase
         $this->assertArrayHasKey('nationality', $rules);
         $this->assertArrayHasKey('id_photo', $rules);
         $this->assertContains('nullable', $rules['id_photo']);
-        $this->assertArrayHasKey('address_confirmation', $rules);
-        $this->assertContains('nullable', $rules['address_confirmation']);
+        $this->assertArrayNotHasKey('address_confirmation', $rules);
     }
 
     /**

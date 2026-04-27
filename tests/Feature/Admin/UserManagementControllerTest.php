@@ -91,7 +91,8 @@ class UserManagementControllerTest extends TestCase
             'household_size' => 4,
             'marital_status' => RecipientKycDetails::MARITAL_STATUSES[0],
             'is_student' => true,
-            'address_confirmation' => UploadedFile::fake()->image('address.jpg'),
+            'id_number' => '1234567890',
+            'employment_status' => RecipientKycDetails::EMPLOYMENT_STATUSES[0],
         ]);
 
         $response->assertRedirect(route('admin.manage.users.index'));
@@ -104,11 +105,11 @@ class UserManagementControllerTest extends TestCase
         $kyc = RecipientKycDetails::query()->where('user_id', $recipient->id)->firstOrFail();
 
         $this->assertSame('Saudi Arabia', $profile->nationality);
+        $this->assertSame('1234567890', $profile->id_number);
         $this->assertNotNull($profile->id_photo_path);
-        $this->assertNotNull($kyc->address_confirmation);
+        $this->assertSame(RecipientKycDetails::EMPLOYMENT_STATUSES[0], $kyc->employment_status);
 
         Storage::disk('local')->assertExists($profile->id_photo_path);
-        Storage::disk('local')->assertExists($kyc->address_confirmation);
     }
 
     #[Test]
@@ -188,10 +189,8 @@ class UserManagementControllerTest extends TestCase
             'household_size' => 2,
             'marital_status' => RecipientKycDetails::MARITAL_STATUSES[0],
             'is_student' => false,
-            'address_confirmation' => 'recipient_address_photos/old-address.jpg',
         ]);
         Storage::disk('local')->put($profile->id_photo_path, 'old-id');
-        Storage::disk('local')->put($kyc->address_confirmation, 'old-address');
 
         $response = $this->actingAs($this->admin)->put(route('admin.manage.users.update', $recipient), [
             'name' => 'Recipient Updated',
@@ -206,8 +205,8 @@ class UserManagementControllerTest extends TestCase
             'household_size' => 5,
             'marital_status' => RecipientKycDetails::MARITAL_STATUSES[1],
             'is_student' => true,
+            'id_number' => '9876543210',
             'id_photo' => UploadedFile::fake()->image('new-id.jpg'),
-            'address_confirmation' => UploadedFile::fake()->image('new-address.jpg'),
         ]);
 
         $response->assertRedirect(route('admin.manage.users.show', $recipient));
@@ -218,14 +217,11 @@ class UserManagementControllerTest extends TestCase
         $this->assertSame('966503334444', $recipient->phone_number);
 
         $newProfile = $recipient->recipientProfile()->firstOrFail();
-        $newKyc = $recipient->recipientKycDetails()->firstOrFail();
 
         $this->assertNotSame('recipient_id_photos/old-id.jpg', $newProfile->id_photo_path);
-        $this->assertNotSame('recipient_address_photos/old-address.jpg', $newKyc->address_confirmation);
+        $this->assertSame('9876543210', $newProfile->id_number);
         Storage::disk('local')->assertMissing('recipient_id_photos/old-id.jpg');
-        Storage::disk('local')->assertMissing('recipient_address_photos/old-address.jpg');
         Storage::disk('local')->assertExists($newProfile->id_photo_path);
-        Storage::disk('local')->assertExists($newKyc->address_confirmation);
     }
 
     #[Test]
@@ -259,6 +255,7 @@ class UserManagementControllerTest extends TestCase
             'nationality' => 'Saudi Arabia',
             'short_address' => 'Address Updated',
             'id_type' => RecipientProfile::ID_TYPES[0],
+            'id_number' => '1111111111',
             'income_band' => RecipientKycDetails::INCOME_BANDS[2],
             'household_size' => 3,
             'marital_status' => RecipientKycDetails::MARITAL_STATUSES[2],

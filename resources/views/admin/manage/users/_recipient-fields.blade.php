@@ -19,7 +19,7 @@
         </div>
         <div>
             <x-input-label for="short_address" :value="__('Address')" required />
-            <input id="short_address" type="text" name="short_address" value="{{ $old['short_address'] ?? '' }}" class="form-input form-input-lineone mt-1.5 w-full" />
+            <input id="short_address" type="text" name="short_address" value="{{ $old['short_address'] ?? '' }}" placeholder="{{ __('City - District - Street - House Number') }}" class="form-input form-input-lineone mt-1.5 w-full" />
             <x-input-error :messages="$errors->get('short_address')" class="mt-2" />
         </div>
         <div>
@@ -27,7 +27,13 @@
             <select id="id_type" name="id_type" class="form-select form-select-lineone mt-1.5 w-full">
                 <option value="national_id" {{ ($old['id_type'] ?? '') === 'national_id' ? 'selected' : '' }}>{{ __('National ID') }}</option>
                 <option value="iqama" {{ ($old['id_type'] ?? '') === 'iqama' ? 'selected' : '' }}>{{ __('Iqama') }}</option>
+                <option value="hudood_number" {{ ($old['id_type'] ?? '') === 'hudood_number' ? 'selected' : '' }}>{{ __('Hudood Number (رقم الحدود)') }}</option>
             </select>
+        </div>
+        <div>
+            <x-input-label for="id_number" :value="__('ID Number (رقم الهوية / الإقامة)')" required />
+            <input id="id_number" type="text" name="id_number" value="{{ $old['id_number'] ?? '' }}" inputmode="numeric" maxlength="10" pattern="\d{10}" class="form-input form-input-lineone mt-1.5 w-full" />
+            <x-input-error :messages="$errors->get('id_number')" class="mt-2" />
         </div>
     </div>
 </div>
@@ -62,6 +68,21 @@
                 <option value="1" {{ ($old['is_student'] ?? '') === '1' ? 'selected' : '' }}>{{ __('Yes') }}</option>
             </select>
         </div>
+        <div>
+            <x-input-label for="employment_status" :value="__('Employment Status')" required />
+            <select id="employment_status" name="employment_status" class="form-select form-select-lineone mt-1.5 w-full">
+                <option value="">— {{ __('Select') }} —</option>
+                @foreach(\App\Models\RecipientKycDetails::EMPLOYMENT_STATUSES as $s)
+                    <option value="{{ $s }}" {{ ($old['employment_status'] ?? '') === $s ? 'selected' : '' }}>{{ __(ucwords(str_replace('_', ' ', $s))) }}</option>
+                @endforeach
+            </select>
+            <x-input-error :messages="$errors->get('employment_status')" class="mt-2" />
+        </div>
+        <div class="sm:col-span-2">
+            <x-input-label for="situation_description" :value="__('Situation Description (Optional)')" />
+            <textarea id="situation_description" name="situation_description" rows="4" maxlength="1000" placeholder="{{ __('Describe the situation (10–1000 characters)') }}" class="form-input form-input-lineone mt-1.5 w-full resize-none">{{ $old['situation_description'] ?? '' }}</textarea>
+            <x-input-error :messages="$errors->get('situation_description')" class="mt-2" />
+        </div>
     </div>
 </div>
 
@@ -78,17 +99,6 @@
             <input id="id_photo" type="file" name="id_photo" accept="image/*" class="form-input form-input-lineone mt-2 w-full file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-white file:hover:bg-primary-focus dark:file:bg-accent dark:file:hover:bg-accent-focus" {{ ($photosRequired ?? true) ? 'required' : '' }} />
             <p class="mt-1 text-xs text-slate-500 dark:text-navy-400">{{ __('Upload a new file to replace the current document.') }}</p>
             <x-input-error :messages="$errors->get('id_photo')" class="mt-2" />
-        </div>
-        <div>
-            <x-input-label for="address_confirmation" :value="__('Address Confirmation')" :required="$photosRequired ?? true" />
-            @if(isset($user) && $kyc?->address_confirmation)
-                <a href="{{ route('admin.users.file', [$user, 'address_confirmation']) }}" target="_blank" class="mt-2 block">
-                    <img src="{{ route('admin.users.file', [$user, 'address_confirmation']) }}" alt="{{ __('Address Confirmation') }}" class="max-h-64 max-w-full rounded-lg border object-contain" />
-                </a>
-            @endif
-            <input id="address_confirmation" type="file" name="address_confirmation" accept="image/*" class="form-input form-input-lineone mt-2 w-full file:mr-4 file:rounded-lg file:border-0 file:bg-primary file:px-4 file:py-2 file:text-white file:hover:bg-primary-focus dark:file:bg-accent dark:file:hover:bg-accent-focus" {{ ($photosRequired ?? true) ? 'required' : '' }} />
-            <p class="mt-1 text-xs text-slate-500 dark:text-navy-400">{{ __('Upload a new file to replace the current document.') }}</p>
-            <x-input-error :messages="$errors->get('address_confirmation')" class="mt-2" />
         </div>
     </div>
 </div>

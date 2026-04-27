@@ -41,16 +41,18 @@ class UpdateResubmitApplicationRequest extends FormRequest
         $user = $this->user();
         if ($user->membership_type === User::MEMBERSHIP_RECIPIENT) {
             return [
-                'name' => ['required', 'string', 'max:255'],
-                'nationality' => ['required', 'string', 'in:'.implode(',', config('nationalities', []))],
-                'short_address' => ['required', 'string', 'max:500'],
-                'id_type' => ['required', 'string', 'in:'.implode(',', RecipientProfile::ID_TYPES)],
-                'income_band' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::INCOME_BANDS)],
-                'household_size' => ['required', 'integer', 'min:1', 'max:50'],
-                'marital_status' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::MARITAL_STATUSES)],
-                'is_student' => ['required', 'in:0,1'],
-                'id_photo_base64' => ['nullable', 'string'],
-                'address_confirmation_base64' => ['nullable', 'string'],
+                'name'                       => ['required', 'string', 'max:255'],
+                'nationality'                => ['required', 'string', 'in:' . implode(',', config('nationalities', []))],
+                'short_address'              => ['required', 'string', 'max:500'],
+                'id_type'                    => ['required', 'string', 'in:' . implode(',', RecipientProfile::ID_TYPES)],
+                'id_number'                  => ['required', 'digits:10'],
+                'income_band'                => ['required', 'string', 'in:' . implode(',', RecipientKycDetails::INCOME_BANDS)],
+                'household_size'             => ['required', 'integer', 'min:1', 'max:50'],
+                'marital_status'             => ['required', 'string', 'in:' . implode(',', RecipientKycDetails::MARITAL_STATUSES)],
+                'is_student'                 => ['required', 'in:0,1'],
+                'employment_status'          => ['required', 'string', 'in:' . implode(',', RecipientKycDetails::EMPLOYMENT_STATUSES)],
+                'situation_description'      => ['nullable', 'string', 'min:10', 'max:1000'],
+                'id_photo_base64'            => ['nullable', 'string'],
             ];
         }
 
@@ -109,17 +111,6 @@ class UpdateResubmitApplicationRequest extends FormRequest
                     if ($v->fails()) {
                         foreach ($v->errors()->all() as $message) {
                             $validator->errors()->add('id_photo_base64', $message);
-                        }
-                    }
-                }
-                if ($this->filled('address_confirmation_base64')) {
-                    $v = Validator::make(
-                        ['address_confirmation_base64' => $this->input('address_confirmation_base64')],
-                        ['address_confirmation_base64' => [new Base64Image]]
-                    );
-                    if ($v->fails()) {
-                        foreach ($v->errors()->all() as $message) {
-                            $validator->errors()->add('address_confirmation_base64', $message);
                         }
                     }
                 }
