@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Auth\PostAuthRedirector;
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\AuditService;
 use App\Services\OtpService;
 use Illuminate\Http\RedirectResponse;
@@ -29,7 +30,7 @@ class PhoneVerificationController extends Controller
             return redirect()->route('login');
         }
         if ($user->hasVerifiedPhone()) {
-            return $this->postAuthRedirector->redirect($user);
+            return $this->redirectAfterPhoneVerification($user);
         }
 
         return view('auth.verify-phone');
@@ -46,7 +47,7 @@ class PhoneVerificationController extends Controller
             return redirect()->route('login');
         }
         if ($user->hasVerifiedPhone()) {
-            return $this->postAuthRedirector->redirect($user);
+            return $this->redirectAfterPhoneVerification($user);
         }
 
         if (! $this->otpService->verifyOtp($user, $request->input('otp'))) {
@@ -61,7 +62,7 @@ class PhoneVerificationController extends Controller
             'user_id' => $user->id,
         ], $user->id);
 
-        return $this->postAuthRedirector->redirect($user);
+        return $this->redirectAfterPhoneVerification($user);
     }
 
     public function resend(Request $request): RedirectResponse
@@ -71,7 +72,7 @@ class PhoneVerificationController extends Controller
             return redirect()->route('login');
         }
         if ($user->hasVerifiedPhone()) {
-            return $this->postAuthRedirector->redirect($user);
+            return $this->redirectAfterPhoneVerification($user);
         }
 
         $result = $this->otpService->sendOtp($user);
@@ -81,5 +82,14 @@ class PhoneVerificationController extends Controller
         }
 
         return back()->withErrors(['otp' => $result['message']]);
+    }
+
+    private function redirectAfterPhoneVerification(User $user): RedirectResponse
+    {
+        if (in_array($user->status, [User::STATUS_PENDING_APPROVAL, User::STATUS_REJECTED], true)) {
+            return redirect()->route('approval.pending');
+        }
+
+        return $this->postAuthRedirector->redirect($user);
     }
 }

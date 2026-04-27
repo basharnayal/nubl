@@ -275,8 +275,8 @@
                     <button type="button" x-on:click="clearLocation()" class="text-xs text-slate-500 underline hover:text-slate-700 ms-2">{{ __('Reset') }}</button>
                 </div>
 
-                <input type="hidden" name="location_lat" x-model="locationLat" />
-                <input type="hidden" name="location_lng" x-model="locationLng" />
+                <input type="hidden" name="location_lat" x-model="locationLat" x-bind:disabled="membershipType !== 'recipient'" />
+                <input type="hidden" name="location_lng" x-model="locationLng" x-bind:disabled="membershipType !== 'recipient'" />
                 <x-input-error :messages="$errors->get('location_lat')" class="mt-2" />
                 <x-input-error :messages="$errors->get('location_lng')" class="mt-2" />
             </div>
