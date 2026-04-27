@@ -190,14 +190,14 @@
                         <x-text-input id="unified_number" name="unified_number" value="{{ old('unified_number') }}" class="block mt-1 w-full" required />
                         <x-input-error :messages="$errors->get('unified_number')" class="mt-2" />
                     </div>
-                    <div>
-                        <x-input-label :value="__('Business Category')" required />
-                        <div class="mt-2 flex flex-wrap gap-2">
+                    <div class="space-y-2" role="radiogroup" aria-labelledby="business-category-label">
+                        <x-input-label id="business-category-label" :value="__('Business Category')" required />
+                        <div class="mt-2 flex flex-col sm:flex-row sm:flex-wrap gap-3">
                             @foreach($businessCategories as $cat)
-                            <label class="inline-flex items-center">
-                                <input type="checkbox" name="business_category[]" value="{{ $cat }}" {{ in_array($cat, old('business_category', [])) ? 'checked' : '' }}
-                                    class="rounded border-gray-300 text-primary focus:ring-primary dark:text-accent-light dark:focus:ring-accent">
-                                <span class="ms-2 text-sm text-gray-700">{{ ucfirst(str_replace('_', ' ', $cat)) }}</span>
+                            <label class="inline-flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="business_category[]" value="{{ $cat }}" {{ in_array($cat, (array) old('business_category', []), true) ? 'checked' : '' }}
+                                    class="border-gray-300 text-primary focus:ring-primary dark:text-accent-light dark:focus:ring-accent">
+                                <span class="text-sm text-gray-700">{{ ucfirst(str_replace('_', ' ', $cat)) }}</span>
                             </label>
                             @endforeach
                         </div>
@@ -387,7 +387,7 @@
     <script>
         window.__providerFormMessages = {
             fill_required: @json(__('Please fill all required fields in this step.')),
-            business_category: @json(__('Please select at least one business category.')),
+            business_category: @json(__('Please select a business category.')),
             service_type: @json(__('Please select at least one service type.')),
             phone_invalid: @json(__('Phone must be a valid Saudi number (9 digits, e.g. 512345678).')),
             region: @json(__('Please select region.')),

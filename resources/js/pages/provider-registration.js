@@ -5,6 +5,7 @@
 const STEP_CONFIG = {
   1: {
     requiredInputs: ['full_name_ar', 'full_name_en', 'phone_number', 'email', 'business_name_ar', 'business_name_en', 'unified_number', 'address_ar', 'address_en', 'city'],
+    // Radio group `business_category[]` — only one value; same validation as min:1 checked inputs
     checkboxGroups: [{ name: 'business_category[]', min: 1, msgKey: 'business_category' }],
     customValidators: ['phone', 'region'],
   },
@@ -136,7 +137,7 @@ function providerForm(initialStep, weekdays) {
     msg(key) {
       const messages = {
         fill_required: 'Please fill all required fields in this step.',
-        business_category: 'Please select at least one business category.',
+        business_category: 'Please select a business category.',
         service_type: 'Please select at least one service type.',
         phone_invalid: 'Phone must be a valid Saudi number (9 digits, e.g. 512345678).',
         region: 'Please select region.',

@@ -183,7 +183,7 @@ return [
         'press'        => 'Press',
         'contact'      => 'Contact',
         'copy'         => '© 2026 NUBL Platform · All rights reserved',
-        'legal'        => 'Privacy · Terms · Audited annually by Baker Tilly MENA',
+        'legal'        => 'Privacy · Terms · Audited annually by external auditors',
     ],
 
     'feed_live' => [

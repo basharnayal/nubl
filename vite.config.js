@@ -9,6 +9,7 @@ export default defineConfig({
                 'resources/css/app.css',
                 'resources/js/app.js',
                 'resources/css/fonts-landing.css',
+                'resources/css/welcome-landing.css',
             ],
             refresh: true,
         }),

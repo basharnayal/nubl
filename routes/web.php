@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\ProviderRegistrationController;
 use App\Http\Controllers\Auth\ResubmitApplicationController;
 use App\Http\Controllers\LandingPageController;
+use App\Http\Controllers\LandingPageFeedController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Provider\ProviderDashboardController;
 use App\Http\Controllers\Provider\ProviderWalletController;
@@ -35,6 +36,9 @@ $authMiddleware = config('app.phone_verification_enabled', true)
     : ['auth'];
 
 Route::get('/', LandingPageController::class)->name('home');
+Route::get('/landing/feed', LandingPageFeedController::class)
+    ->middleware('throttle:120,1')
+    ->name('landing.feed');
 
 // Locale switch (default: English, user can switch to Arabic)
 Route::get('/locale/{locale}', function (string $locale) {

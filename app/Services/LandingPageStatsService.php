@@ -33,18 +33,34 @@ class LandingPageStatsService
      *   trustBadges: array{delivered: float, held: float}|null,
      *   providerCounts: array{grocery: int, catering: int, bakery: int, restaurant: int},
      * }
+     *
+     * `feedItems` is merged after the cache: it is always computed fresh so the hero
+     * live ticker is not tied to the 5‑minute hero-stats cache. Use
+     * {@see getLiveFeedItems()} for the same payload from JSON polling.
      */
     public function getHeroStats(): array
     {
-        return Cache::remember('landing_hero_stats', 300, fn () => [
+        $cached = Cache::remember('landing_hero_stats', 300, fn () => [
             'totalDelivered' => $this->totalDelivered(),
             'familiesSupported' => $this->familiesSupported(),
             'localProviders' => $this->localProviders(),
-            'feedItems' => $this->liveFeedItems(),
             'trustLedger' => $this->trustLedgerEntries(),
             'trustBadges' => $this->trustBadges(),
             'providerCounts' => $this->providerCategoryCounts(),
         ]);
+        $cached['feedItems'] = $this->getLiveFeedItems();
+
+        return $cached;
+    }
+
+    /**
+     * Privacy-safe live feed rows (same as merged into getHeroStats); never cached.
+     *
+     * @return list<array{row1: string, row2: string}>
+     */
+    public function getLiveFeedItems(): array
+    {
+        return $this->liveFeedItems();
     }
 
     // ─────────────────────────────────────────────────────────────────────────

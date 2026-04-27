@@ -250,25 +250,36 @@
                 <x-input-error :messages="$errors->get('short_address')" class="mt-2" />
             </div>
 
-            {{-- GPS Location (mandatory) --}}
+            {{-- GPS Location: requested automatically when "Recipient" is selected (no primary button) --}}
             <div class="rounded-lg border border-primary/20 bg-primary/10 dark:border-accent/20 dark:bg-accent/10 p-4">
                 <x-input-label :value="__('Location Verification')" required />
-                <p class="text-sm text-slate-600 mt-1 mb-3">{{ __('We need to verify your location. Please allow location access when prompted by your browser.') }}</p>
+                <p class="text-sm text-slate-600 dark:text-navy-300 mt-1 mb-2">{{ __('Location is requested when you choose Recipient. Approve the browser prompt, or use Retry if it was blocked.') }}</p>
 
-                <div x-show="!locationCaptured" class="space-y-2">
-                    <button type="button" x-on:click="requestLocation()"
-                        :disabled="locationLoading"
-                        class="text-white bg-primary hover:bg-primary-focus focus:ring-4 focus:ring-primary/20 dark:bg-accent dark:hover:bg-accent-focus dark:focus:ring-accent/20 font-medium rounded-lg text-sm px-5 py-2.5 transition disabled:opacity-60 disabled:cursor-not-allowed">
-                        <span x-show="!locationLoading">{{ __('Allow Location Access') }}</span>
-                        <span x-show="locationLoading">{{ __('Retrieving location…') }}</span>
-                    </button>
-                    <p x-show="locationError" x-text="locationError" class="text-sm text-red-600 dark:text-red-400 mt-1"></p>
+                <div x-show="locationLoading" class="flex items-center gap-2.5 text-sm text-slate-700 dark:text-navy-200" x-cloak>
+                    <svg class="size-5 shrink-0 animate-spin text-primary dark:text-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>{{ __('Retrieving location…') }}</span>
                 </div>
 
-                <div x-show="locationCaptured" class="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    <span>{{ __('Location captured successfully.') }}</span>
-                    <button type="button" x-on:click="clearLocation()" class="text-xs text-slate-500 underline hover:text-slate-700 ms-2">{{ __('Reset') }}</button>
+                <div x-show="locationError" class="mt-1 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-3" x-cloak>
+                    <p x-text="locationError" class="text-sm text-red-600 dark:text-red-400"></p>
+                    <button type="button" x-on:click="requestLocation()"
+                        :disabled="locationLoading"
+                        class="shrink-0 self-start text-sm font-medium text-primary underline decoration-primary/30 hover:text-primary-focus hover:decoration-primary/50 disabled:opacity-50 dark:text-accent dark:decoration-accent/30">
+                        {{ __('Retry') }}
+                    </button>
+                </div>
+
+                <div x-show="locationCaptured && !locationLoading" class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-green-700 dark:text-green-400" x-cloak>
+                    <span class="inline-flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        <span>{{ __('Location captured successfully.') }}</span>
+                    </span>
+                    <button type="button" x-on:click="clearLocation()" class="text-xs text-slate-500 underline hover:text-slate-700 dark:text-navy-400 dark:hover:text-navy-200">
+                        {{ __('Reset') }}
+                    </button>
                 </div>
 
                 <input type="hidden" name="location_lat" x-model="locationLat" x-bind:disabled="membershipType !== 'recipient'" />
@@ -277,6 +288,26 @@
                 <x-input-error :messages="$errors->get('location_lng')" class="mt-2" />
             </div>
 
+
+            {{-- Employment Status --}}
+            <div>
+                <x-input-label for="employment_status" :value="__('Employment Status')" required />
+                <div class="relative flex mt-1">
+                    <select id="employment_status" name="employment_status"
+                        x-bind:required="membershipType === 'recipient'"
+                        x-bind:disabled="membershipType !== 'recipient'"
+                        class="form-input form-select peer w-full rounded-lg border border-slate-300 bg-transparent bg-none px-3 py-2.5 pr-9 pl-3 hover:z-10 hover:border-slate-400 focus:z-10 focus:border-primary dark:border-navy-450 dark:bg-navy-900/50 dark:hover:border-navy-400 dark:focus:border-accent">
+                        <option value="">— {{ __('Select') }} —</option>
+                        <option value="unemployed"                 {{ old('employment_status') === 'unemployed'                 ? 'selected' : '' }}>{{ __('Unemployed') }}</option>
+                        <option value="unable_to_work"             {{ old('employment_status') === 'unable_to_work'             ? 'selected' : '' }}>{{ __('Unable to work') }}</option>
+                        <option value="employed_insufficient_income" {{ old('employment_status') === 'employed_insufficient_income' ? 'selected' : '' }}>{{ __('Employed but income is insufficient') }}</option>
+                    </select>
+                    <span class="pointer-events-none absolute right-0 flex h-full w-10 items-center justify-center text-slate-400 peer-focus:text-primary dark:text-navy-300 dark:peer-focus:text-accent">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                    </span>
+                </div>
+                <x-input-error :messages="$errors->get('employment_status')" class="mt-2" />
+            </div>
             {{-- KYC: Income + Household --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -365,25 +396,7 @@
                 </div>
             </div>
 
-            {{-- Employment Status --}}
-            <div>
-                <x-input-label for="employment_status" :value="__('Employment Status')" required />
-                <div class="relative flex mt-1">
-                    <select id="employment_status" name="employment_status"
-                        x-bind:required="membershipType === 'recipient'"
-                        x-bind:disabled="membershipType !== 'recipient'"
-                        class="form-input form-select peer w-full rounded-lg border border-slate-300 bg-transparent bg-none px-3 py-2.5 pr-9 pl-3 hover:z-10 hover:border-slate-400 focus:z-10 focus:border-primary dark:border-navy-450 dark:bg-navy-900/50 dark:hover:border-navy-400 dark:focus:border-accent">
-                        <option value="">— {{ __('Select') }} —</option>
-                        <option value="unemployed"                 {{ old('employment_status') === 'unemployed'                 ? 'selected' : '' }}>{{ __('Unemployed') }}</option>
-                        <option value="unable_to_work"             {{ old('employment_status') === 'unable_to_work'             ? 'selected' : '' }}>{{ __('Unable to work') }}</option>
-                        <option value="employed_insufficient_income" {{ old('employment_status') === 'employed_insufficient_income' ? 'selected' : '' }}>{{ __('Employed but income is insufficient') }}</option>
-                    </select>
-                    <span class="pointer-events-none absolute right-0 flex h-full w-10 items-center justify-center text-slate-400 peer-focus:text-primary dark:text-navy-300 dark:peer-focus:text-accent">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                    </span>
-                </div>
-                <x-input-error :messages="$errors->get('employment_status')" class="mt-2" />
-            </div>
+       
 
             {{-- Situation Description --}}
             <div>
@@ -443,6 +456,7 @@
                 locationError: '',
                 nationalityChoices: null,
                 _nationalityChoicesTimer: null,
+                _locationRequestId: 0,
 
                 init() {
                     if (this.membershipType && document.querySelector('[name="membership_type"]').value) {
@@ -457,6 +471,8 @@
 
                 onMembershipChange() {
                     if (this.membershipType !== 'recipient') {
+                        this._locationRequestId++;
+                        this.locationLoading = false;
                         if (this._nationalityChoicesTimer) {
                             clearTimeout(this._nationalityChoicesTimer);
                             this._nationalityChoicesTimer = null;
@@ -471,10 +487,16 @@
                         this.locationLng = '';
                         this.locationCaptured = false;
                         this.locationError = '';
+                        this.locationLoading = true;
                     }
                     this.$nextTick(() => {
                         if (this.membershipType === 'recipient') {
                             this.scheduleNationalityChoices(320);
+                            this.$nextTick(() => {
+                                if (this.membershipType === 'recipient') {
+                                    this.requestLocation();
+                                }
+                            });
                         }
                     });
                 },
@@ -563,25 +585,44 @@
                 },
 
                 requestLocation() {
+                    const myId = ++this._locationRequestId;
+                    this.locationError = '';
+
                     if (!navigator.geolocation) {
+                        this.locationLoading = false;
                         this.locationError = '{{ __("Geolocation is not supported by your browser.") }}';
                         return;
                     }
+
                     this.locationLoading = true;
-                    this.locationError = '';
                     navigator.geolocation.getCurrentPosition(
                         (pos) => {
-                            this.locationLat = pos.coords.latitude;
-                            this.locationLng = pos.coords.longitude;
+                            if (myId !== this._locationRequestId) {
+                                return;
+                            }
+                            if (this.membershipType !== 'recipient') {
+                                this.locationLoading = false;
+                                return;
+                            }
+                            this.locationLat = String(pos.coords.latitude);
+                            this.locationLng = String(pos.coords.longitude);
                             this.locationCaptured = true;
                             this.locationLoading = false;
                         },
                         (err) => {
+                            if (myId !== this._locationRequestId) {
+                                return;
+                            }
                             this.locationLoading = false;
-                            this.locationError = '{{ __("Location access was denied. You must allow location access to complete registration.") }}';
+                            if (this.membershipType !== 'recipient') {
+                                return;
+                            }
+                            this.locationError = err && err.code === 1
+                                ? '{{ __("Location access was denied. You must allow location access to complete registration.") }}'
+                                : '{{ __("We could not read your position. Check that location is enabled and use Retry, or try again in a different browser.") }}';
                             console.error(err);
                         },
-                        { enableHighAccuracy: true, timeout: 10000 }
+                        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
                     );
                 },
 
@@ -590,6 +631,7 @@
                     this.locationLng = '';
                     this.locationCaptured = false;
                     this.locationError = '';
+                    this.requestLocation();
                 },
 
                 validateBeforeSubmit(event) {
