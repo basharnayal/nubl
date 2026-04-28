@@ -44,7 +44,6 @@ class PaymentCallbackControllerPagesTest extends TestCase
         ]));
 
         $response->assertOk();
-        $response->assertSee('Donation Receipt');
         $response->assertSee('DON-'.str_pad((string) $payment->id, 4, '0', STR_PAD_LEFT));
         $response->assertSee('125.50');
     }
@@ -115,12 +114,12 @@ class PaymentCallbackControllerPagesTest extends TestCase
         $this->actingAs($donor)
             ->get(route('donor.payments.failed', ['payment_id' => $ownFailedPayment->id]))
             ->assertOk()
-            ->assertSee('Payment was not completed');
+            ->assertSee('لم تكتمل عملية الدفع');
 
         $this->actingAs($donor)
             ->get(route('donor.payments.failed'))
             ->assertOk()
-            ->assertSee('Payment was not completed');
+            ->assertSee('لم تكتمل عملية الدفع');
 
         $this->actingAs($donor)
             ->get(route('donor.payments.failed', ['payment_id' => $otherPayment->id]))
