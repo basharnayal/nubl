@@ -267,7 +267,8 @@ Route::prefix('donate')->name('guest.donation.')->group(function () {
         ->name('initiate');
     Route::get('/success', [\App\Http\Controllers\GuestDonationController::class, 'success'])
         ->name('success');
-    Route::get('/{payment}/receipt', [\App\Http\Controllers\GuestDonationController::class, 'receipt'])
+    Route::get('/receipt/{token}', [\App\Http\Controllers\GuestDonationController::class, 'receipt'])
+        ->where('token', '[0-9a-f\-]{36}')
         ->name('receipt');
     Route::get('/failed', [\App\Http\Controllers\GuestDonationController::class, 'failed'])
         ->name('failed');
@@ -302,24 +303,6 @@ Route::middleware(array_merge($authMiddleware, ['account.approved:pending_only']
     Route::get('/application/my-file/{type}', [ResubmitApplicationController::class, 'serveFile'])->name('application.my-file');
 });
 
-// Test: debug roles (admin only - remove in production)
-Route::get('/test-roles', function () {
-    if (! auth()->user()->hasRole('admin')) {
-        abort(403);
-    }
 
-    return view('test-roles', ['roles' => auth()->user()->roles->pluck('name')->toArray()]);
-})->middleware(['auth', 'role:admin'])->name('test-roles');
-
-// // Dev helper: assign admin role (remove in production)
-// Route::get('/make-me-admin', function () {
-//     $user = auth()->user();
-//     if (! \Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
-//         \Spatie\Permission\Models\Role::create(['name' => 'admin']);
-//     }
-//     $user->assignRole('admin');
-
-//     return 'تم تعيينك كـ admin بنجاح!';
-// });
 
 require __DIR__.'/auth.php';
