@@ -99,24 +99,3 @@ Route::middleware('auth')->group(function () {
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
 });
-
-
-// Test: debug roles (admin only - remove in production)
-// Route::get('/test-roles', function () {
-//     if (! auth()->user()->hasRole('admin')) {
-//         abort(403);
-//     }
-
-//     return view('test-roles', ['roles' => auth()->user()->roles->pluck('name')->toArray()]);
-// })->middleware(['auth', 'role:admin'])->name('test-roles');
-
-// // Dev helper: assign admin role (remove in production)
-// Route::get('/make-me-admin', function () {
-//     $user = auth()->user();
-//     if (! \Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
-//         \Spatie\Permission\Models\Role::create(['name' => 'admin']);
-//     }
-//     $user->assignRole('admin');
-
-//     return 'تم تعيينك كـ admin بنجاح!';
-// });
