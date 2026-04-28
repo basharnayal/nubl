@@ -72,7 +72,7 @@ class AuditHashIntegrityTest extends TestCase
         $this->auditService->log('fund_transaction', 'created', [
             'wallet_id' => 1,
             'direction' => 'IN',
-            'amount'    => 100.00,
+            'amount' => 100.00,
         ]);
 
         $entry = Activity::latest()->first();
@@ -99,9 +99,9 @@ class AuditHashIntegrityTest extends TestCase
 
         // Keys intentionally NOT in alphabetical order
         $this->auditService->log('auth_test', 'login_test', [
-            'z_last'  => 'value',
+            'z_last' => 'value',
             'a_first' => 'value',
-            'nested'  => ['beta' => 2, 'alpha' => 1],
+            'nested' => ['beta' => 2, 'alpha' => 1],
         ]);
 
         $entry = Activity::latest()->first();
@@ -132,7 +132,7 @@ class AuditHashIntegrityTest extends TestCase
 
         $this->auditService->log('payment', 'succeeded', [
             'payment_id' => 42,
-            'amount'     => 500.00,
+            'amount' => 500.00,
         ]);
 
         $entry = Activity::latest()->first();

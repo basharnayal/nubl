@@ -39,14 +39,14 @@ class FundTransactionObserver
 
         // FR-13.1: audit every ledger movement with actor + timestamp
         $this->auditService->log('fund_transaction', 'created', [
-            'fund_transaction_id'  => $transaction->id,
-            'wallet_id'            => $transaction->wallet_id,
-            'direction'            => $transaction->direction,
-            'source'               => $transaction->source,
-            'amount'               => (float) $amount,
-            'payment_id'           => $transaction->payment_id,
-            'request_id'           => $transaction->request_id,
-            'order_redemption_id'  => $transaction->order_redemption_id,
+            'fund_transaction_id' => $transaction->id,
+            'wallet_id' => $transaction->wallet_id,
+            'direction' => $transaction->direction,
+            'source' => $transaction->source,
+            'amount' => (float) $amount,
+            'payment_id' => $transaction->payment_id,
+            'request_id' => $transaction->request_id,
+            'order_redemption_id' => $transaction->order_redemption_id,
         ], $transaction->sponsor_id ?? auth()->id());
     }
 }

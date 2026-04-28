@@ -3,6 +3,7 @@
 namespace Tests\Unit\Models;
 
 use App\Models\FundTransaction;
+use App\Models\Payment;
 use App\Models\PendingAllocation;
 use App\Models\ProviderMenuItem;
 use App\Models\ProviderPayout;
@@ -10,7 +11,6 @@ use App\Models\ProviderPayoutItem;
 use App\Models\Request as RequestModel;
 use App\Models\RequestItem;
 use App\Models\RequestPaymentLink;
-use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;

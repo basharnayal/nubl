@@ -21,7 +21,7 @@ class ProviderMenuItemSeeder extends Seeder
         // Copy seed images from public/images/seed/ (git-tracked) into storage/app/public/seed/
         // so every team member gets the images automatically when they run db:seed.
         $seedImagesSource = public_path('images/seed');
-        $seedImagesDest   = storage_path('app/public/seed');
+        $seedImagesDest = storage_path('app/public/seed');
 
         if (File::isDirectory($seedImagesSource)) {
             File::ensureDirectoryExists($seedImagesDest);
@@ -114,12 +114,12 @@ class ProviderMenuItemSeeder extends Seeder
                     ['name' => 'Vaseline Intensive Care Body Lotion for Dry to Very Dry Skin Cocoa Radiant Fast-Absorbing 72hr Moisturising 400ml', 'description' => 'Intensive care body lotion — Cocoa Radiant.', 'price' => 31.25, 'category_id' => 72, 'max_per_request' => 8, 'sku' => '6390', 'image_path' => 'seed/danube/Vaseline Intensive Care Body Lotion for Dry to Very Dry Skin Cocoa Radiant Fast-Absorbing 72hr Moisturising 400ml.jpg'],
                     ['name' => 'Fair & Lovely Multi-Vitamin Face Cream Pump 100g', 'description' => 'Multi-vitamin face cream.', 'price' => 34.50, 'category_id' => 72, 'max_per_request' => 8, 'sku' => '6445', 'image_path' => 'seed/danube/Fair & Lovely Multi-Vitamin Face Cream Pump 100g.jpg'],
                     ['name' => 'Vaseline Lip Therapy Mint Lip Balm With Pure Jelly & Mint Extracts 4.8g', 'description' => 'Lip therapy — mint.', 'price' => 12.95, 'category_id' => 72, 'max_per_request' => 8, 'sku' => '56938', 'image_path' => 'seed/danube/Vaseline Lip Therapy Mint Lip Balm With Pure Jelly & Mint Extracts 4.8g.jpg'],
-                    //Cleaning Supplies (71)
+                    // Cleaning Supplies (71)
                     ['name' => 'Lifebuoy Antibacterial Hand Wash 100% Stronger Germ Protection 450ml', 'description' => 'Antibacterial liquid hand wash.', 'price' => 28.50, 'category_id' => 71, 'max_per_request' => 8, 'sku' => '58318', 'image_path' => 'seed/danube/Lifebuoy Antibacterial Hand Wash 100% Stronger Germ Protection 450ml.jpg'],
                     ['name' => 'Lifebuoy Antibacterial Hand Wash Mild Care 450ml', 'description' => 'Antibacterial hand wash — mild care.', 'price' => 28.50, 'category_id' => 71, 'max_per_request' => 8, 'sku' => '53839', 'image_path' => 'seed/danube/Lifebuoy Antibacterial Hand Wash Mild Care 450ml.jpeg'],
                     ['name' => 'Lifebuoy Antibacterial Hand Wash Cool Fresh 450ml', 'description' => 'Antibacterial hand wash — cool fresh.', 'price' => 28.50, 'category_id' => 71, 'max_per_request' => 8, 'sku' => '53838', 'image_path' => 'seed/danube/Lifebuoy Antibacterial Hand Wash Cool Fresh 450ml.jpeg'],
                     ['name' => 'Lux Perfumed Liquid Hand Wash For All Skin Types Soft Rose Glycerin Enriched Liquid Soap 500ml', 'description' => 'Perfumed liquid hand wash — Soft Rose.', 'price' => 25.95, 'category_id' => 71, 'max_per_request' => 8, 'sku' => '6468', 'image_path' => 'seed/danube/Lux Perfumed Liquid Hand Wash For All Skin Types Soft Rose Glycerin Enriched Liquid Soap 500ml.jpg'],
-                    //Baby Products (70)
+                    // Baby Products (70)
                     ['name' => 'Vaseline Baby Jelly 450ml', 'description' => 'Baby jelly — gentle skin protection.', 'price' => 39.50, 'category_id' => 70, 'max_per_request' => 8, 'sku' => '14881', 'image_path' => 'seed/danube/Vaseline Baby Jelly 450ml.jpg'],
                 ],
             ],
@@ -220,7 +220,7 @@ class ProviderMenuItemSeeder extends Seeder
 
         foreach ($menuItems as $group) {
             $provider = User::where('email', $group['provider_email'])->first();
-            if (!$provider) {
+            if (! $provider) {
                 continue;
             }
 

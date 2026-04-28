@@ -34,6 +34,7 @@ class DemoUsersSeeder extends Seeder
     {
         if (User::where('email', 'admin2@nubl.com')->exists()) {
             $this->command->info('⏭ Demo admins already seeded.');
+
             return;
         }
 
@@ -45,23 +46,23 @@ class DemoUsersSeeder extends Seeder
 
         foreach ($admins as $a) {
             $user = User::create([
-                'name'              => $a['name'],
-                'email'             => $a['email'],
-                'password'          => self::$password,
+                'name' => $a['name'],
+                'email' => $a['email'],
+                'password' => self::$password,
                 'email_verified_at' => now(),
-                'membership_type'   => User::MEMBERSHIP_ADMIN,
-                'status'            => User::STATUS_ACTIVE,
-                'phone_number'      => $a['phone_number'],
+                'membership_type' => User::MEMBERSHIP_ADMIN,
+                'status' => User::STATUS_ACTIVE,
+                'phone_number' => $a['phone_number'],
                 'phone_verified_at' => now(),
-                'is_active'         => true,
-                'accepting_orders'  => true,
-                'created_at'        => now()->subWeeks($a['weeks_ago']),
-                'updated_at'        => now()->subWeeks($a['weeks_ago']),
+                'is_active' => true,
+                'accepting_orders' => true,
+                'created_at' => now()->subWeeks($a['weeks_ago']),
+                'updated_at' => now()->subWeeks($a['weeks_ago']),
             ]);
             $user->assignRole($adminRole);
         }
 
-        $this->command->info('✓ Seeded ' . count($admins) . ' additional admin(s)');
+        $this->command->info('✓ Seeded '.count($admins).' additional admin(s)');
     }
 
     // ─── Donors ──────────────────────────────────────────────────
@@ -70,6 +71,7 @@ class DemoUsersSeeder extends Seeder
     {
         if (User::where('email', 'demo-donor-01@nubl.com')->exists()) {
             $this->command->info('⏭ Demo donors already seeded.');
+
             return;
         }
 
@@ -94,25 +96,25 @@ class DemoUsersSeeder extends Seeder
         ];
 
         foreach ($donors as $i => $d) {
-            $idx  = str_pad($i + 1, 2, '0', STR_PAD_LEFT);
+            $idx = str_pad($i + 1, 2, '0', STR_PAD_LEFT);
             $user = User::create([
-                'name'              => $d['name'],
-                'email'             => "demo-donor-{$idx}@nubl.com",
-                'password'          => self::$password,
+                'name' => $d['name'],
+                'email' => "demo-donor-{$idx}@nubl.com",
+                'password' => self::$password,
                 'email_verified_at' => now()->subWeeks($d['weeks_ago']),
-                'membership_type'   => User::MEMBERSHIP_DONOR,
-                'status'            => User::STATUS_ACTIVE,
-                'phone_number'      => '96650500' . str_pad(1001 + $i, 4, '0', STR_PAD_LEFT),
+                'membership_type' => User::MEMBERSHIP_DONOR,
+                'status' => User::STATUS_ACTIVE,
+                'phone_number' => '96650500'.str_pad(1001 + $i, 4, '0', STR_PAD_LEFT),
                 'phone_verified_at' => now()->subWeeks($d['weeks_ago']),
-                'is_active'         => true,
-                'accepting_orders'  => true,
-                'created_at'        => now()->subWeeks($d['weeks_ago'])->subDays(rand(0, 3)),
-                'updated_at'        => now()->subWeeks($d['weeks_ago']),
+                'is_active' => true,
+                'accepting_orders' => true,
+                'created_at' => now()->subWeeks($d['weeks_ago'])->subDays(rand(0, 3)),
+                'updated_at' => now()->subWeeks($d['weeks_ago']),
             ]);
             $user->assignRole($donorRole);
         }
 
-        $this->command->info('✓ Seeded ' . count($donors) . ' demo donors');
+        $this->command->info('✓ Seeded '.count($donors).' demo donors');
     }
 
     // ─── Recipients ──────────────────────────────────────────────
@@ -121,6 +123,7 @@ class DemoUsersSeeder extends Seeder
     {
         if (User::where('email', 'demo-recipient-01@nubl.com')->exists()) {
             $this->command->info('⏭ Demo recipients already seeded.');
+
             return;
         }
 
@@ -165,7 +168,7 @@ class DemoUsersSeeder extends Seeder
         $maritalStatuses = ['single', 'married', 'divorced', 'widowed'];
 
         foreach ($recipients as $i => $r) {
-            $idx   = str_pad($i + 1, 2, '0', STR_PAD_LEFT);
+            $idx = str_pad($i + 1, 2, '0', STR_PAD_LEFT);
             $email = "demo-recipient-{$idx}@nubl.com";
 
             // Use named known accounts for pending/rejected
@@ -179,19 +182,19 @@ class DemoUsersSeeder extends Seeder
             $createdAt = now()->subWeeks($r['weeks_ago'])->subDays(rand(0, 4));
 
             $user = User::create([
-                'name'              => $r['name'],
-                'email'             => $email,
-                'password'          => self::$password,
+                'name' => $r['name'],
+                'email' => $email,
+                'password' => self::$password,
                 'email_verified_at' => $r['status'] === User::STATUS_ACTIVE ? $createdAt : null,
-                'membership_type'   => User::MEMBERSHIP_RECIPIENT,
-                'status'            => $r['status'],
-                'phone_number'      => '96650600' . str_pad(1001 + $i, 4, '0', STR_PAD_LEFT),
+                'membership_type' => User::MEMBERSHIP_RECIPIENT,
+                'status' => $r['status'],
+                'phone_number' => '96650600'.str_pad(1001 + $i, 4, '0', STR_PAD_LEFT),
                 'phone_verified_at' => $r['status'] === User::STATUS_ACTIVE ? $createdAt : null,
-                'is_active'         => $r['status'] === User::STATUS_ACTIVE,
-                'accepting_orders'  => true,
-                'rejection_reason'  => $r['status'] === User::STATUS_REJECTED ? 'Incomplete documentation' : null,
-                'created_at'        => $createdAt,
-                'updated_at'        => $createdAt,
+                'is_active' => $r['status'] === User::STATUS_ACTIVE,
+                'accepting_orders' => true,
+                'rejection_reason' => $r['status'] === User::STATUS_REJECTED ? 'Incomplete documentation' : null,
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt,
             ]);
             $user->assignRole($recipientRole);
 
@@ -200,26 +203,26 @@ class DemoUsersSeeder extends Seeder
                 RecipientProfile::firstOrCreate(
                     ['user_id' => $user->id],
                     [
-                        'nationality'    => $nationalities[$i % count($nationalities)],
-                        'short_address'  => $addresses[$i % count($addresses)],
-                        'id_type'        => $i % 3 === 0 ? 'iqama' : 'national_id',
-                        'id_photo_path'  => 'recipient_id_photos/seed-placeholder',
+                        'nationality' => $nationalities[$i % count($nationalities)],
+                        'short_address' => $addresses[$i % count($addresses)],
+                        'id_type' => $i % 3 === 0 ? 'iqama' : 'national_id',
+                        'id_photo_path' => 'recipient_id_photos/seed-placeholder',
                     ]
                 );
 
                 RecipientKycDetails::firstOrCreate(
                     ['user_id' => $user->id],
                     [
-                        'income_band'          => $incomeBands[$i % count($incomeBands)],
-                        'household_size'       => rand(1, 8),
-                        'marital_status'       => $maritalStatuses[$i % count($maritalStatuses)],
-                        'is_student'           => $i % 5 === 0,
+                        'income_band' => $incomeBands[$i % count($incomeBands)],
+                        'household_size' => rand(1, 8),
+                        'marital_status' => $maritalStatuses[$i % count($maritalStatuses)],
+                        'is_student' => $i % 5 === 0,
                     ]
                 );
             }
         }
 
-        $this->command->info('✓ Seeded ' . count($recipients) . ' demo recipients (15 active, 3 pending, 2 rejected)');
+        $this->command->info('✓ Seeded '.count($recipients).' demo recipients (15 active, 3 pending, 2 rejected)');
     }
 
     // ─── Providers (additional pending/rejected) ──────────────────
@@ -228,6 +231,7 @@ class DemoUsersSeeder extends Seeder
     {
         if (User::where('email', 'pending-provider@nubl.com')->exists()) {
             $this->command->info('⏭ Demo providers already seeded.');
+
             return;
         }
 
@@ -235,24 +239,24 @@ class DemoUsersSeeder extends Seeder
 
         $providers = [
             [
-                'name'            => 'Al-Salam Kitchen',
-                'email'           => 'pending-provider@nubl.com',
-                'phone_number'    => '966507999001',
-                'status'          => User::STATUS_PENDING_APPROVAL,
-                'business_name'   => 'Al-Salam Kitchen',
-                'business_name_ar'=> 'مطبخ السلام',
-                'business_category'=> 'Restaurant',
-                'city'            => 'Jeddah',
+                'name' => 'Al-Salam Kitchen',
+                'email' => 'pending-provider@nubl.com',
+                'phone_number' => '966507999001',
+                'status' => User::STATUS_PENDING_APPROVAL,
+                'business_name' => 'Al-Salam Kitchen',
+                'business_name_ar' => 'مطبخ السلام',
+                'business_category' => 'Restaurant',
+                'city' => 'Jeddah',
             ],
             [
-                'name'            => 'Fresh Bites',
-                'email'           => 'rejected-provider@nubl.com',
-                'phone_number'    => '966507999002',
-                'status'          => User::STATUS_REJECTED,
-                'business_name'   => 'Fresh Bites',
-                'business_name_ar'=> 'لقيمات طازجة',
-                'business_category'=> 'Bakery',
-                'city'            => 'Riyadh',
+                'name' => 'Fresh Bites',
+                'email' => 'rejected-provider@nubl.com',
+                'phone_number' => '966507999002',
+                'status' => User::STATUS_REJECTED,
+                'business_name' => 'Fresh Bites',
+                'business_name_ar' => 'لقيمات طازجة',
+                'business_category' => 'Bakery',
+                'city' => 'Riyadh',
             ],
         ];
 
@@ -260,37 +264,37 @@ class DemoUsersSeeder extends Seeder
             $createdAt = now()->subWeeks(rand(1, 3))->subDays(rand(0, 6));
 
             $user = User::create([
-                'name'              => $p['name'],
-                'email'             => $p['email'],
-                'password'          => self::$password,
+                'name' => $p['name'],
+                'email' => $p['email'],
+                'password' => self::$password,
                 'email_verified_at' => null,
-                'membership_type'   => User::MEMBERSHIP_PROVIDER,
-                'status'            => $p['status'],
-                'phone_number'      => $p['phone_number'],
+                'membership_type' => User::MEMBERSHIP_PROVIDER,
+                'status' => $p['status'],
+                'phone_number' => $p['phone_number'],
                 'phone_verified_at' => null,
-                'is_active'         => false,
-                'accepting_orders'  => false,
-                'rejection_reason'  => $p['status'] === User::STATUS_REJECTED ? 'Incomplete business license documentation' : null,
-                'created_at'        => $createdAt,
-                'updated_at'        => $createdAt,
+                'is_active' => false,
+                'accepting_orders' => false,
+                'rejection_reason' => $p['status'] === User::STATUS_REJECTED ? 'Incomplete business license documentation' : null,
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt,
             ]);
             $user->assignRole($providerRole);
 
             $profile = ProviderProfile::create([
-                'user_id'            => $user->id,
-                'full_name_ar'       => $p['name'],
-                'full_name_en'       => $p['name'],
-                'phone_number'       => $p['phone_number'],
-                'email'              => $p['email'],
-                'business_name_ar'   => $p['business_name_ar'],
-                'business_name_en'   => $p['business_name'],
-                'unified_number'     => '700' . rand(1000000, 9999999),
-                'business_category'  => [$p['business_category']],
-                'address_ar'         => "شارع الملك فهد، {$p['city']}",
-                'address_en'         => "King Fahd Road, {$p['city']}",
-                'city'               => $p['city'],
-                'region'             => $p['city'] === 'Riyadh' ? 'Riyadh Region' : 'Makkah Region',
-                'logo_path'          => null,
+                'user_id' => $user->id,
+                'full_name_ar' => $p['name'],
+                'full_name_en' => $p['name'],
+                'phone_number' => $p['phone_number'],
+                'email' => $p['email'],
+                'business_name_ar' => $p['business_name_ar'],
+                'business_name_en' => $p['business_name'],
+                'unified_number' => '700'.rand(1000000, 9999999),
+                'business_category' => [$p['business_category']],
+                'address_ar' => "شارع الملك فهد، {$p['city']}",
+                'address_en' => "King Fahd Road, {$p['city']}",
+                'city' => $p['city'],
+                'region' => $p['city'] === 'Riyadh' ? 'Riyadh Region' : 'Makkah Region',
+                'logo_path' => null,
             ]);
 
             // Manually create ewallet (WithoutModelEvents skips ProviderProfile::booted)
@@ -300,28 +304,28 @@ class DemoUsersSeeder extends Seeder
             );
 
             ProviderOperatingInfo::create([
-                'user_id'                           => $user->id,
-                'operating_hours'                   => ['sun' => '08:00-22:00', 'mon' => '08:00-22:00', 'tue' => '08:00-22:00', 'wed' => '08:00-22:00', 'thu' => '08:00-22:00'],
-                'service_type'                      => ['meal_preparation', 'pickup'],
-                'daily_capacity'                    => rand(30, 100),
-                'estimated_preparation_order_time'  => '30 minutes',
-                'adoption_support'                  => 'yes',
+                'user_id' => $user->id,
+                'operating_hours' => ['sun' => '08:00-22:00', 'mon' => '08:00-22:00', 'tue' => '08:00-22:00', 'wed' => '08:00-22:00', 'thu' => '08:00-22:00'],
+                'service_type' => ['meal_preparation', 'pickup'],
+                'daily_capacity' => rand(30, 100),
+                'estimated_preparation_order_time' => '30 minutes',
+                'adoption_support' => 'yes',
             ]);
 
             ProviderFinancialInfo::create([
-                'user_id'             => $user->id,
-                'bank_name'           => 'Al Rajhi Bank',
+                'user_id' => $user->id,
+                'bank_name' => 'Al Rajhi Bank',
                 'account_holder_name' => $p['business_name'],
-                'iban'                => 'SA' . rand(10, 99) . str_pad(rand(0, 9999999999), 22, '0', STR_PAD_LEFT),
+                'iban' => 'SA'.rand(10, 99).str_pad(rand(0, 9999999999), 22, '0', STR_PAD_LEFT),
             ]);
 
             ProviderDocuments::create([
-                'user_id'              => $user->id,
-                'business_license_path'=> 'provider_documents/demo_license.pdf',
-                'id_or_iqama_path'     => 'provider_documents/demo_id.pdf',
+                'user_id' => $user->id,
+                'business_license_path' => 'provider_documents/demo_license.pdf',
+                'id_or_iqama_path' => 'provider_documents/demo_id.pdf',
             ]);
         }
 
-        $this->command->info('✓ Seeded ' . count($providers) . ' additional providers (1 pending, 1 rejected)');
+        $this->command->info('✓ Seeded '.count($providers).' additional providers (1 pending, 1 rejected)');
     }
 }

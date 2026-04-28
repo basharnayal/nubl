@@ -36,7 +36,7 @@ class OtpLoginRoleFlowTest extends TestCase
 
     private function localPhoneFor(User $user): string
     {
-        return '0' . substr((string) $user->phone_number, 3);
+        return '0'.substr((string) $user->phone_number, 3);
     }
 
     private function requestAndVerifyOtp(User $user)
@@ -49,7 +49,7 @@ class OtpLoginRoleFlowTest extends TestCase
         $requestResponse->assertSessionHas('otp_phone', $user->phone_number);
         $requestResponse->assertSessionHas('otp_status');
 
-        $otpCode = Cache::get('otp:login:' . $user->phone_number);
+        $otpCode = Cache::get('otp:login:'.$user->phone_number);
         $this->assertNotNull($otpCode, 'Expected login OTP to be stored in cache.');
 
         return $this->post(route('login.otp.verify'), [

@@ -10,7 +10,7 @@ class WalletBalanceSyncSeeder extends Seeder
     public function run(): void
     {
         $wallets = Ewallet::all();
-        $count   = 0;
+        $count = 0;
 
         foreach ($wallets as $wallet) {
             $wallet->syncBalance();

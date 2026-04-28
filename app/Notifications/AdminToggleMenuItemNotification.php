@@ -15,13 +15,12 @@ class AdminToggleMenuItemNotification extends Notification implements ShouldQueu
     public function __construct(
         public ProviderMenuItem $menuItem,
         public bool $isBlocked
-    ) {
-    }
+    ) {}
 
     public function via(object $notifiable): array
     {
         $channels = ['database'];
-        if (!empty($notifiable->email)) {
+        if (! empty($notifiable->email)) {
             $channels[] = 'mail';
         }
 
@@ -38,7 +37,7 @@ class AdminToggleMenuItemNotification extends Notification implements ShouldQueu
             ->greeting(__('Hello!'))
             ->line(__('Your menu item ":name" has been :status by an administrator.', [
                 'name' => $this->menuItem->name,
-                'status' => $status
+                'status' => $status,
             ]));
 
         if ($this->isBlocked) {
@@ -60,7 +59,7 @@ class AdminToggleMenuItemNotification extends Notification implements ShouldQueu
             'is_blocked' => $this->isBlocked,
             'message' => __('Menu item ":name" was :status by admin.', [
                 'name' => $this->menuItem->name,
-                'status' => $status
+                'status' => $status,
             ]),
             'subtitle' => __('Inventory Update'),
             'url' => route('provider.menu-items.index'),

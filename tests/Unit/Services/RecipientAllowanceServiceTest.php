@@ -120,25 +120,25 @@ class RecipientAllowanceServiceTest extends TestCase
         Carbon::setTestNow(Carbon::parse('2026-01-07 12:00:00', 'UTC'));
 
         $recipient = User::factory()->create();
-        $provider  = User::factory()->create();
-        $menuItem  = ProviderMenuItem::create([
+        $provider = User::factory()->create();
+        $menuItem = ProviderMenuItem::create([
             'provider_id' => $provider->id,
-            'name'        => 'Meal',
-            'price'       => 200.00,
-            'category'    => 'Food',
-            'is_active'   => true,
+            'name' => 'Meal',
+            'price' => 200.00,
+            'category' => 'Food',
+            'is_active' => true,
         ]);
 
         // ADMIN_PENDING is escalated and not in the counted status list
         RequestModel::create([
-            'recipient_id'   => $recipient->id,
-            'provider_id'    => $provider->id,
+            'recipient_id' => $recipient->id,
+            'provider_id' => $provider->id,
             'reserved_amount' => 200.00,
-            'status'         => 'ADMIN_PENDING',
+            'status' => 'ADMIN_PENDING',
             'funding_source' => 'CITY_FUND',
         ])->items()->create([
-            'menu_item_id'   => $menuItem->id,
-            'quantity'       => 1,
+            'menu_item_id' => $menuItem->id,
+            'quantity' => 1,
             'price_snapshot' => 200.00,
         ]);
 

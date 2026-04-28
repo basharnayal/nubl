@@ -156,4 +156,3 @@ class BackfillMenuItemCategoriesCommandTest extends TestCase
         $this->assertSame($existingCategory->id, $item->fresh()->category_id);
     }
 }
-

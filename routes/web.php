@@ -76,12 +76,12 @@ $authMiddleware = config('app.phone_verification_enabled', true)
     ? ['auth', 'phone.verified']
     : ['auth'];
 
-$approvedMiddleware  = array_merge($authMiddleware, ['account.approved']);
-$adminMiddleware     = array_merge($approvedMiddleware, ['role:admin']);
-$providerMiddleware  = array_merge($approvedMiddleware, ['role:provider']);
+$approvedMiddleware = array_merge($authMiddleware, ['account.approved']);
+$adminMiddleware = array_merge($approvedMiddleware, ['role:admin']);
+$providerMiddleware = array_merge($approvedMiddleware, ['role:provider']);
 $recipientMiddleware = array_merge($approvedMiddleware, ['role:recipient']);
-$donorMiddleware     = array_merge($approvedMiddleware, ['role:donor']);
-$pendingMiddleware   = array_merge($authMiddleware, ['account.approved:pending_only']);
+$donorMiddleware = array_merge($approvedMiddleware, ['role:donor']);
+$pendingMiddleware = array_merge($authMiddleware, ['account.approved:pending_only']);
 
 /*
 |--------------------------------------------------------------------------

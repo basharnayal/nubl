@@ -118,7 +118,7 @@ class MyFatoorahServiceTest extends TestCase
             public function getPaymentStatus($keyId, $keyType = 'PaymentId', $arg3 = null, $arg4 = null, $arg5 = null)
             {
                 return (object) [
-                    'InvoiceStatus' => new stdClass(),
+                    'InvoiceStatus' => new stdClass,
                     'InvoiceId' => 9001,
                 ];
             }
@@ -158,7 +158,7 @@ class MyFatoorahServiceTest extends TestCase
             'services.myfatoorah.is_test' => true,
         ]);
 
-        $service = new MyFatoorahService();
+        $service = new MyFatoorahService;
 
         $reflection = new \ReflectionProperty(MyFatoorahService::class, 'client');
         $reflection->setAccessible(true);
@@ -167,4 +167,3 @@ class MyFatoorahServiceTest extends TestCase
         return $service;
     }
 }
-

@@ -55,7 +55,7 @@ class RecipientRequestStatusPresenter
      * Build the card configuration for the current request (used by the detail view).
      *
      * @param  bool  $justSubmitted  When status is `REQUESTED`, whether the user arrived
-     *                                immediately after submitting (affects hero copy and step hints).
+     *                               immediately after submitting (affects hero copy and step hints).
      * @return array{
      *   accent: string,
      *   heroIcon: 'check'|'clock'|'x'|'ban',

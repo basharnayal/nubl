@@ -64,14 +64,14 @@ abstract class AbstractAccountRegistrar implements AccountRegistrar
 
         try {
             $this->audit->log('registration', 'completed', [
-                'user_id'           => $user->id,
-                'membership_type'   => $user->membership_type,
+                'user_id' => $user->id,
+                'membership_type' => $user->membership_type,
                 'requires_approval' => $this->initialStatus() !== User::STATUS_ACTIVE,
             ], $user->id);
         } catch (\Throwable $e) {
             Log::error('Registration audit log failed', [
                 'user_id' => $user->id,
-                'error'   => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
         }
 
@@ -84,12 +84,12 @@ abstract class AbstractAccountRegistrar implements AccountRegistrar
     final protected function createBaseUser(RegistrationData $data): User
     {
         return User::create([
-            'name'            => $data->name,
-            'email'           => $data->email,
-            'password'        => Hash::make($data->password),
-            'phone_number'    => PhoneHelper::normalize($data->phoneNumber),
+            'name' => $data->name,
+            'email' => $data->email,
+            'password' => Hash::make($data->password),
+            'phone_number' => PhoneHelper::normalize($data->phoneNumber),
             'membership_type' => $this->membershipType(),
-            'status'          => $this->initialStatus(),
+            'status' => $this->initialStatus(),
         ]);
     }
 

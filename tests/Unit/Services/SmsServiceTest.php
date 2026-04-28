@@ -27,7 +27,8 @@ class SmsServiceTest extends TestCase
     {
         Log::spy();
 
-        $gateway = new class {
+        $gateway = new class
+        {
             public function sendMsg(string $body, array $recipients, string $sender, string $scheduled): string
             {
                 TestCase::assertSame('OTP 123456', $body);
@@ -56,7 +57,8 @@ class SmsServiceTest extends TestCase
     {
         Log::spy();
 
-        $gateway = new class {
+        $gateway = new class
+        {
             public function sendMsg(): never
             {
                 throw new \RuntimeException('gateway unavailable');

@@ -13,20 +13,29 @@ use Illuminate\Support\Facades\Storage;
 
 class ProviderRegistrar extends AbstractAccountRegistrar
 {
-    protected function membershipType(): string { return User::MEMBERSHIP_PROVIDER; }
+    protected function membershipType(): string
+    {
+        return User::MEMBERSHIP_PROVIDER;
+    }
 
-    protected function initialStatus(): string { return User::STATUS_PENDING_APPROVAL; }
+    protected function initialStatus(): string
+    {
+        return User::STATUS_PENDING_APPROVAL;
+    }
 
-    protected function roleName(): string { return 'provider'; }
+    protected function roleName(): string
+    {
+        return 'provider';
+    }
 
     protected function prepareArtifacts(RegistrationData $data): array
     {
         /** @var ProviderRegistrationData $data */
         $artifacts = [
             'license_path' => $data->businessLicense->store('provider_documents', 'local'),
-            'id_path'      => $data->idOrIqama->store('provider_documents', 'local'),
-            'logo_path'    => null,
-            'logo_disk'    => null,
+            'id_path' => $data->idOrIqama->store('provider_documents', 'local'),
+            'logo_path' => null,
+            'logo_disk' => null,
         ];
 
         if ($data->profileLogo !== null) {
@@ -41,43 +50,43 @@ class ProviderRegistrar extends AbstractAccountRegistrar
     {
         /** @var ProviderRegistrationData $data */
         ProviderProfile::create([
-            'user_id'           => $user->id,
-            'full_name_ar'      => $data->fullNameAr,
-            'full_name_en'      => $data->fullNameEn,
-            'phone_number'      => $user->phone_number,
-            'email'             => $data->email,
-            'business_name_ar'  => $data->businessNameAr,
-            'business_name_en'  => $data->businessNameEn,
-            'unified_number'    => $data->unifiedNumber,
+            'user_id' => $user->id,
+            'full_name_ar' => $data->fullNameAr,
+            'full_name_en' => $data->fullNameEn,
+            'phone_number' => $user->phone_number,
+            'email' => $data->email,
+            'business_name_ar' => $data->businessNameAr,
+            'business_name_en' => $data->businessNameEn,
+            'unified_number' => $data->unifiedNumber,
             'business_category' => $data->businessCategory,
-            'address_ar'        => $data->addressAr,
-            'address_en'        => $data->addressEn,
-            'city'              => $data->city,
-            'region'            => $data->region,
-            'location'          => $data->location,
-            'logo_path'         => $artifacts['logo_path'],
+            'address_ar' => $data->addressAr,
+            'address_en' => $data->addressEn,
+            'city' => $data->city,
+            'region' => $data->region,
+            'location' => $data->location,
+            'logo_path' => $artifacts['logo_path'],
         ]);
 
         ProviderOperatingInfo::create([
-            'user_id'                          => $user->id,
-            'operating_hours'                  => $data->operatingHours,
-            'daily_capacity'                   => $data->dailyCapacity,
-            'service_type'                     => $data->serviceType,
+            'user_id' => $user->id,
+            'operating_hours' => $data->operatingHours,
+            'daily_capacity' => $data->dailyCapacity,
+            'service_type' => $data->serviceType,
             'estimated_preparation_order_time' => $data->estimatedPreparationOrderTime,
-            'adoption_support'                 => $data->adoptionSupport,
+            'adoption_support' => $data->adoptionSupport,
         ]);
 
         ProviderFinancialInfo::create([
-            'user_id'             => $user->id,
-            'bank_name'           => $data->bankName,
-            'iban'                => $data->iban,
+            'user_id' => $user->id,
+            'bank_name' => $data->bankName,
+            'iban' => $data->iban,
             'account_holder_name' => $data->accountHolderName,
         ]);
 
         ProviderDocuments::create([
-            'user_id'              => $user->id,
+            'user_id' => $user->id,
             'business_license_path' => $artifacts['license_path'],
-            'id_or_iqama_path'     => $artifacts['id_path'],
+            'id_or_iqama_path' => $artifacts['id_path'],
         ]);
     }
 

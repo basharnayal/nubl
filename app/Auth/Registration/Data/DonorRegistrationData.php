@@ -11,9 +11,9 @@ class DonorRegistrationData extends RegistrationData
         $v = $request->validated();
 
         return new self(
-            name:        $v['name'],
-            email:       $v['email'],
-            password:    $v['password'],
+            name: $v['name'],
+            email: $v['email'],
+            password: $v['password'],
             phoneNumber: $v['phone_number'],
         );
     }

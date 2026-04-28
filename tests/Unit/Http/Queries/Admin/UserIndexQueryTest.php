@@ -88,4 +88,3 @@ class UserIndexQueryTest extends TestCase
         $this->assertSame($admin->id, $results->items()[0]->id);
     }
 }
-

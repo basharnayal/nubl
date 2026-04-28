@@ -17,8 +17,11 @@ class AdminMenuCrudTest extends TestCase
     use RefreshDatabase;
 
     protected $admin;
+
     protected $provider;
+
     protected $menuItem;
+
     protected $category;
 
     protected function setUp(): void

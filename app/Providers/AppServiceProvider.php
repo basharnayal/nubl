@@ -4,7 +4,6 @@ namespace App\Providers;
 
 use App\Contracts\AllocationEngineServiceInterface;
 use App\Contracts\NotificationServiceInterface;
-use App\View\Composers\SidebarComposer;
 use App\Models\FundTransaction;
 use App\Models\Request as RequestModel;
 use App\Models\User;
@@ -13,6 +12,7 @@ use App\Observers\RequestObserver;
 use App\Observers\UserObserver;
 use App\Services\AllocationEngineService;
 use App\Services\NotificationService;
+use App\View\Composers\SidebarComposer;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 

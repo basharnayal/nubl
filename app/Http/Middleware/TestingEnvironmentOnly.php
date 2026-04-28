@@ -37,10 +37,10 @@ class TestingEnvironmentOnly
         // X-Testing-Token header; otherwise the request is rejected.
         $configuredToken = config('app.testing_time_token');
 
-        if (!empty($configuredToken)) {
+        if (! empty($configuredToken)) {
             $providedToken = $request->header('X-Testing-Token');
 
-            if (!hash_equals($configuredToken, (string) $providedToken)) {
+            if (! hash_equals($configuredToken, (string) $providedToken)) {
                 abort(403, 'Invalid or missing X-Testing-Token header.');
             }
         }

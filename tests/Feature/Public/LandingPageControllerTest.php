@@ -43,4 +43,3 @@ class LandingPageControllerTest extends TestCase
         $response->assertViewHas('heroStats', $heroStats);
     }
 }
-

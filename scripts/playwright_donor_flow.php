@@ -15,14 +15,14 @@ use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
-$app = require __DIR__ . '/../bootstrap/app.php';
+$app = require __DIR__.'/../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 
 function uniquePhone(string $seed, string $pad): string
 {
-    return '05' . str_pad(substr($seed, -8), 8, $pad, STR_PAD_LEFT);
+    return '05'.str_pad(substr($seed, -8), 8, $pad, STR_PAD_LEFT);
 }
 
 function donorPayload(?User $user): ?array
@@ -57,7 +57,7 @@ if ($action === 'seed') {
         'membership_type' => User::MEMBERSHIP_DONOR,
         'status' => User::STATUS_ACTIVE,
         'is_active' => true,
-        'phone_number' => uniquePhone($suffix . '1', '6'),
+        'phone_number' => uniquePhone($suffix.'1', '6'),
         'phone_verified_at' => now(),
     ]);
     $primaryDonor->forceFill(['email_verified_at' => now()])->save();
@@ -70,7 +70,7 @@ if ($action === 'seed') {
         'membership_type' => User::MEMBERSHIP_DONOR,
         'status' => User::STATUS_ACTIVE,
         'is_active' => true,
-        'phone_number' => uniquePhone($suffix . '2', '5'),
+        'phone_number' => uniquePhone($suffix.'2', '5'),
         'phone_verified_at' => now(),
     ]);
     $emptyDonor->forceFill(['email_verified_at' => now()])->save();
@@ -83,7 +83,7 @@ if ($action === 'seed') {
         'membership_type' => User::MEMBERSHIP_DONOR,
         'status' => User::STATUS_ACTIVE,
         'is_active' => true,
-        'phone_number' => uniquePhone($suffix . '3', '4'),
+        'phone_number' => uniquePhone($suffix.'3', '4'),
         'phone_verified_at' => now(),
     ]);
     $otherDonor->forceFill(['email_verified_at' => now()])->save();
@@ -97,7 +97,7 @@ if ($action === 'seed') {
         'status' => User::STATUS_ACTIVE,
         'is_active' => true,
         'accepting_orders' => true,
-        'phone_number' => uniquePhone($suffix . '4', '3'),
+        'phone_number' => uniquePhone($suffix.'4', '3'),
         'phone_verified_at' => now(),
     ]);
     $provider->forceFill(['email_verified_at' => now()])->save();
@@ -110,7 +110,7 @@ if ($action === 'seed') {
         'membership_type' => User::MEMBERSHIP_RECIPIENT,
         'status' => User::STATUS_ACTIVE,
         'is_active' => true,
-        'phone_number' => uniquePhone($suffix . '5', '2'),
+        'phone_number' => uniquePhone($suffix.'5', '2'),
         'phone_verified_at' => now(),
     ]);
     $recipient->forceFill(['email_verified_at' => now()])->save();

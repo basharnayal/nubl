@@ -22,7 +22,7 @@ use Spatie\Activitylog\Models\Activity;
 class AdminDashboardService
 {
     public function __construct(
-        private readonly SystemStatusChecker   $statusChecker,
+        private readonly SystemStatusChecker $statusChecker,
         private readonly AttentionQueueBuilder $attentionQueue,
         private readonly AdminFinancialService $financialService,
     ) {}
@@ -33,11 +33,11 @@ class AdminDashboardService
         $financial = $this->financialService->getOverview();
 
         return [
-            'system_status'   => $this->statusChecker->all(),
+            'system_status' => $this->statusChecker->all(),
             'attention_items' => $this->attentionQueue->build(),
-            'kpis'            => $this->buildKpis($financial),
-            'financial'       => $financial,
-            'platform'        => $this->buildPlatformSnapshot(),
+            'kpis' => $this->buildKpis($financial),
+            'financial' => $financial,
+            'platform' => $this->buildPlatformSnapshot(),
             'recent_activity' => $this->buildRecentActivity(),
         ];
     }
@@ -75,57 +75,57 @@ class AdminDashboardService
 
         return [
             [
-                'key'          => 'pending_approvals',
-                'label_key'    => 'dashboard.kpi.pending_approvals.label',
-                'value'        => (int) ($userStats->pending_total ?? 0),
+                'key' => 'pending_approvals',
+                'label_key' => 'dashboard.kpi.pending_approvals.label',
+                'value' => (int) ($userStats->pending_total ?? 0),
                 'value_format' => 'integer',
-                'sub_key'      => 'dashboard.kpi.pending_approvals.sub',
-                'sub_params'   => [
+                'sub_key' => 'dashboard.kpi.pending_approvals.sub',
+                'sub_params' => [
                     'recipients' => (int) ($userStats->pending_recipients ?? 0),
-                    'providers'  => (int) ($userStats->pending_providers  ?? 0),
+                    'providers' => (int) ($userStats->pending_providers ?? 0),
                 ],
-                'icon'       => 'fa-solid fa-user-clock',
-                'color'      => 'amber',
-                'route'      => 'admin.users.pending',
+                'icon' => 'fa-solid fa-user-clock',
+                'color' => 'amber',
+                'route' => 'admin.users.pending',
                 'action_key' => 'dashboard.kpi.pending_approvals.action',
             ],
             [
-                'key'          => 'open_requests',
-                'label_key'    => 'dashboard.kpi.open_requests.label',
-                'value'        => (int) ($requestStats->open_requests ?? 0),
+                'key' => 'open_requests',
+                'label_key' => 'dashboard.kpi.open_requests.label',
+                'value' => (int) ($requestStats->open_requests ?? 0),
                 'value_format' => 'integer',
-                'sub_key'      => 'dashboard.kpi.open_requests.sub',
-                'sub_params'   => [
-                    'awaiting'    => (int) ($requestStats->awaiting_assignment ?? 0),
-                    'in_progress' => (int) ($requestStats->in_progress        ?? 0),
+                'sub_key' => 'dashboard.kpi.open_requests.sub',
+                'sub_params' => [
+                    'awaiting' => (int) ($requestStats->awaiting_assignment ?? 0),
+                    'in_progress' => (int) ($requestStats->in_progress ?? 0),
                 ],
-                'icon'       => 'fa-solid fa-inbox',
-                'color'      => 'blue',
-                'route'      => 'admin.requests.index',
+                'icon' => 'fa-solid fa-inbox',
+                'color' => 'blue',
+                'route' => 'admin.requests.index',
                 'action_key' => 'dashboard.kpi.open_requests.action',
             ],
             [
-                'key'          => 'wallet_balance',
-                'label_key'    => 'dashboard.kpi.wallet_balance.label',
-                'value'        => $financial['system_wallet_balance'],
+                'key' => 'wallet_balance',
+                'label_key' => 'dashboard.kpi.wallet_balance.label',
+                'value' => $financial['system_wallet_balance'],
                 'value_format' => 'currency',
-                'sub_key'      => 'dashboard.kpi.wallet_balance.sub',
-                'sub_params'   => [],
-                'icon'       => 'fa-solid fa-wallet',
-                'color'      => 'green',
-                'route'      => 'admin.finances.overview',
+                'sub_key' => 'dashboard.kpi.wallet_balance.sub',
+                'sub_params' => [],
+                'icon' => 'fa-solid fa-wallet',
+                'color' => 'green',
+                'route' => 'admin.finances.overview',
                 'action_key' => 'dashboard.kpi.wallet_balance.action',
             ],
             [
-                'key'          => 'approved_providers',
-                'label_key'    => 'dashboard.kpi.approved_providers.label',
-                'value'        => (int) ($userStats->approved_providers ?? 0),
+                'key' => 'approved_providers',
+                'label_key' => 'dashboard.kpi.approved_providers.label',
+                'value' => (int) ($userStats->approved_providers ?? 0),
                 'value_format' => 'integer',
-                'sub_key'      => 'dashboard.kpi.approved_providers.sub',
-                'sub_params'   => ['total' => (int) ($userStats->total_providers ?? 0)],
-                'icon'       => 'fa-solid fa-store',
-                'color'      => 'purple',
-                'route'      => 'admin.manage.users.index',
+                'sub_key' => 'dashboard.kpi.approved_providers.sub',
+                'sub_params' => ['total' => (int) ($userStats->total_providers ?? 0)],
+                'icon' => 'fa-solid fa-store',
+                'color' => 'purple',
+                'route' => 'admin.manage.users.index',
                 'action_key' => 'dashboard.kpi.approved_providers.action',
             ],
         ];
@@ -165,14 +165,14 @@ class AdminDashboardService
             ->first();
 
         return [
-            'total_users'        => (int) ($userCounts->total             ?? 0),
-            'donors'             => (int) ($userCounts->donors            ?? 0),
-            'recipients'         => (int) ($userCounts->recipients        ?? 0),
-            'providers'          => (int) ($userCounts->providers         ?? 0),
+            'total_users' => (int) ($userCounts->total ?? 0),
+            'donors' => (int) ($userCounts->donors ?? 0),
+            'recipients' => (int) ($userCounts->recipients ?? 0),
+            'providers' => (int) ($userCounts->providers ?? 0),
             'approved_providers' => (int) ($userCounts->approved_providers ?? 0),
-            'pending_users'      => (int) ($userCounts->pending_users     ?? 0),
-            'requests_30d'       => (int) ($requestCounts->requests_30d  ?? 0),
-            'fulfilled_30d'      => (int) ($requestCounts->fulfilled_30d ?? 0),
+            'pending_users' => (int) ($userCounts->pending_users ?? 0),
+            'requests_30d' => (int) ($requestCounts->requests_30d ?? 0),
+            'fulfilled_30d' => (int) ($requestCounts->fulfilled_30d ?? 0),
         ];
     }
 
@@ -185,11 +185,11 @@ class AdminDashboardService
             ->limit(8)
             ->get()
             ->map(fn (Activity $a) => [
-                'id'          => $a->id,
+                'id' => $a->id,
                 'description' => $a->description,
-                'log_name'    => $a->log_name,
+                'log_name' => $a->log_name,
                 'causer_name' => $a->causer?->name ?? 'System',
-                'created_at'  => $a->created_at,
+                'created_at' => $a->created_at,
             ])
             ->toArray();
     }

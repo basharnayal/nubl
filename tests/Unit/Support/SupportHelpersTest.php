@@ -162,4 +162,3 @@ class SupportHelpersTest extends TestCase
         $this->assertNull(SystemSetting::getValue(WeeklyAllowanceSettings::KEY_PENDING_EFFECTIVE_AT));
     }
 }
-

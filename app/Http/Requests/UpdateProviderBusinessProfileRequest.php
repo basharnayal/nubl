@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests;
 
-use App\Support\PhoneHelper;
 use App\Rules\SaudiPhoneNumber;
 use App\Rules\SaudiPhoneUnique;
+use App\Support\PhoneHelper;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateProviderBusinessProfileRequest extends FormRequest

@@ -16,6 +16,7 @@ class SaudiPhoneNumber implements ValidationRule
     {
         if (! is_string($value)) {
             $fail(__('The :attribute must be a valid Saudi phone number.'));
+
             return;
         }
 

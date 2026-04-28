@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Models;
 
+use App\Models\Ewallet;
 use App\Models\MenuItemCategory;
 use App\Models\OrderProof;
 use App\Models\OrderRedemption;
-use App\Models\Ewallet;
 use App\Models\ProviderDocuments;
 use App\Models\ProviderFinancialInfo;
 use App\Models\ProviderMenuItem;

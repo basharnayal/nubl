@@ -2,7 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Support\PhoneHelper;
 use App\Models\ProviderDocuments;
 use App\Models\ProviderFinancialInfo;
 use App\Models\ProviderOperatingInfo;
@@ -10,20 +9,21 @@ use App\Models\ProviderProfile;
 use App\Models\RecipientKycDetails;
 use App\Models\RecipientProfile;
 use App\Models\User;
+use App\Support\PhoneHelper;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
-$app = require __DIR__ . '/../bootstrap/app.php';
+$app = require __DIR__.'/../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 
 function uniquePhone(string $seed, string $pad): string
 {
-    return '05' . str_pad(substr($seed, -8), 8, $pad, STR_PAD_LEFT);
+    return '05'.str_pad(substr($seed, -8), 8, $pad, STR_PAD_LEFT);
 }
 
 function ensureRoles(): void
@@ -79,7 +79,7 @@ if ($action === 'seed-login-users') {
         'membership_type' => User::MEMBERSHIP_DONOR,
         'status' => User::STATUS_ACTIVE,
         'is_active' => true,
-        'phone_number' => PhoneHelper::normalize(uniquePhone($suffix . '1', '7')),
+        'phone_number' => PhoneHelper::normalize(uniquePhone($suffix.'1', '7')),
         'phone_verified_at' => now(),
     ]);
     $donor->forceFill(['email_verified_at' => now()])->save();
@@ -92,7 +92,7 @@ if ($action === 'seed-login-users') {
         'membership_type' => User::MEMBERSHIP_RECIPIENT,
         'status' => User::STATUS_PENDING_APPROVAL,
         'is_active' => true,
-        'phone_number' => PhoneHelper::normalize(uniquePhone($suffix . '2', '6')),
+        'phone_number' => PhoneHelper::normalize(uniquePhone($suffix.'2', '6')),
         'phone_verified_at' => now(),
     ]);
     $recipient->forceFill(['email_verified_at' => now()])->save();
@@ -123,7 +123,7 @@ if ($action === 'seed-login-users') {
         'status' => User::STATUS_PENDING_APPROVAL,
         'is_active' => true,
         'accepting_orders' => true,
-        'phone_number' => PhoneHelper::normalize(uniquePhone($suffix . '3', '5')),
+        'phone_number' => PhoneHelper::normalize(uniquePhone($suffix.'3', '5')),
         'phone_verified_at' => now(),
     ]);
     $provider->forceFill(['email_verified_at' => now()])->save();
@@ -202,7 +202,7 @@ if ($action === 'user-by-email') {
 if ($action === 'set-login-otp') {
     $phone = PhoneHelper::normalize($argv[2] ?? '');
     $code = preg_replace('/\D/', '', $argv[3] ?? '123456');
-    Cache::put('otp:login:' . $phone, $code, now()->addMinutes(5));
+    Cache::put('otp:login:'.$phone, $code, now()->addMinutes(5));
 
     echo json_encode([
         'phone' => $phone,
