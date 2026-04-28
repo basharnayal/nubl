@@ -854,10 +854,10 @@
 
       {{-- Payment icons --}}
       <div class="qd-payment-icons">
-        <img src="https://cdn.ehsan.sa/ehsan-ui/images/icons/visa-icon.svg" alt="Visa">
-        <img src="https://cdn.ehsan.sa/ehsan-ui/images/icons/apple-icon.svg" alt="Apple Pay">
-        <img src="https://cdn.ehsan.sa/ehsan-ui/images/icons/mastercard-icon.svg" alt="Mastercard">
-        <img src="https://cdn.ehsan.sa/ehsan-ui/images/icons/mada-icon.svg" alt="Mada">
+        <img src="{{ asset('images/icons/visa-icon.svg') }}" alt="Visa">
+        <img src="{{ asset('images/icons/apple-icon.svg') }}" alt="Apple Pay">
+        <img src="{{ asset('images/icons/mastercard-icon.svg') }}" alt="Mastercard">
+        <img src="{{ asset('images/icons/mada-icon.svg') }}" alt="Mada">
       </div>
 
       {{-- Submit --}}
