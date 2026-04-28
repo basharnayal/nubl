@@ -106,7 +106,7 @@ class GuestDonationFlowTest extends TestCase
         $this->assertNotNull($payment);
         $this->assertSame(Payment::STATUS_FAILED, $payment->status);
 
-        $response->assertRedirect(route('guest.donation.failed', ['payment_id' => $payment->id]));
+        $response->assertRedirect(route('guest.donation.failed', ['token' => $payment->idempotency_key]));
     }
 
     // ── Success callback ───────────────────────────────────────────────
@@ -133,7 +133,7 @@ class GuestDonationFlowTest extends TestCase
         $this->app->instance(MyFatoorahService::class, $mockMyFatoorah);
 
         $this->get(route('payments.callback', ['paymentId' => 'guest-pay-100']))
-            ->assertRedirect(route('guest.donation.success', ['payment_id' => $payment->id]));
+            ->assertRedirect(route('guest.donation.success', ['token' => $payment->fresh()->idempotency_key]));
 
         $payment->refresh();
         $this->assertSame(Payment::STATUS_SUCCEEDED, $payment->status);
@@ -181,7 +181,7 @@ class GuestDonationFlowTest extends TestCase
         $this->app->instance(NotificationServiceInterface::class, $mockNotifications);
 
         $this->get(route('payments.callback', ['paymentId' => 'guest-pay-nonotif']))
-            ->assertRedirect(route('guest.donation.success', ['payment_id' => $payment->id]));
+            ->assertRedirect(route('guest.donation.success', ['token' => $payment->fresh()->idempotency_key]));
 
         $this->assertSame(Payment::STATUS_SUCCEEDED, $payment->fresh()->status);
     }
@@ -210,7 +210,7 @@ class GuestDonationFlowTest extends TestCase
         $this->app->instance(MyFatoorahService::class, $mockMyFatoorah);
 
         $this->get(route('payments.callback', ['paymentId' => 'guest-fail-200']))
-            ->assertRedirect(route('guest.donation.failed', ['payment_id' => $payment->id]));
+            ->assertRedirect(route('guest.donation.failed', ['token' => $payment->fresh()->idempotency_key]));
 
         $payment->refresh();
         $this->assertSame(Payment::STATUS_FAILED, $payment->status);
@@ -263,9 +263,10 @@ class GuestDonationFlowTest extends TestCase
             'status' => Payment::STATUS_SUCCEEDED,
             'amount' => 100,
             'is_guest' => true,
+            'idempotency_key' => \Illuminate\Support\Str::uuid()->toString(),
         ]);
 
-        $response = $this->get(route('guest.donation.success', ['payment_id' => $payment->id]));
+        $response = $this->get(route('guest.donation.success', ['token' => $payment->idempotency_key]));
         $response->assertOk();
         $response->assertViewIs('guest-donation.success');
         $response->assertViewHas('payment');
@@ -287,9 +288,65 @@ class GuestDonationFlowTest extends TestCase
             'is_guest' => false,
         ]);
 
-        $response = $this->get(route('guest.donation.success', ['payment_id' => $payment->id]));
+        $response = $this->get(route('guest.donation.success', ['token' => $payment->idempotency_key ?? 'fake-token']));
         $response->assertOk();
         $response->assertViewHas('payment', null);
+    }
+
+    #[Test]
+    public function guest_receipt_loads_via_uuid_token(): void
+    {
+        $payment = Payment::create([
+            'sponsor_id' => null,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'external_payment_id' => 'guest-receipt-token',
+            'status' => Payment::STATUS_SUCCEEDED,
+            'amount' => 100,
+            'is_guest' => true,
+            'idempotency_key' => $key = \Illuminate\Support\Str::uuid()->toString(),
+        ]);
+
+        $response = $this->get(route('guest.donation.receipt', ['token' => $key]));
+        $response->assertOk();
+        $response->assertViewIs('guest-donation.receipt');
+        $response->assertViewHas('payment');
+    }
+
+    #[Test]
+    public function guest_receipt_rejects_numeric_id(): void
+    {
+        $payment = Payment::create([
+            'sponsor_id' => null,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'external_payment_id' => 'guest-receipt-numid',
+            'status' => Payment::STATUS_SUCCEEDED,
+            'amount' => 50,
+            'is_guest' => true,
+        ]);
+
+        $response = $this->get("/donate/receipt/{$payment->id}");
+        $response->assertNotFound();
+    }
+
+    #[Test]
+    public function guest_receipt_rejects_non_guest_payment_token(): void
+    {
+        Role::firstOrCreate(['name' => 'donor', 'guard_name' => 'web']);
+        $donor = User::factory()->create(['status' => User::STATUS_ACTIVE, 'is_active' => true]);
+        $donor->assignRole('donor');
+
+        $payment = Payment::create([
+            'sponsor_id' => $donor->id,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'external_payment_id' => 'donor-receipt-noaccess',
+            'status' => Payment::STATUS_SUCCEEDED,
+            'amount' => 200,
+            'is_guest' => false,
+            'idempotency_key' => $key = \Illuminate\Support\Str::uuid()->toString(),
+        ]);
+
+        $response = $this->get(route('guest.donation.receipt', ['token' => $key]));
+        $response->assertNotFound();
     }
 
     #[Test]
