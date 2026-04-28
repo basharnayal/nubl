@@ -59,4 +59,16 @@ return [
         'decay_minutes' => (int) env('RATE_LIMIT_APPLICATION_RESUBMIT_DECAY_MINUTES', 60),
         'max_attempts' => (int) env('RATE_LIMIT_APPLICATION_RESUBMIT_MAX', 10),
     ],
+
+    // Sensitive file downloads (admin docs, payout receipts, user's own application files).
+    // Generous limit — only catches brute-force enumeration of {user}/{type}/{payout}.
+    'file_downloads' => [
+        'per_minute' => (int) env('RATE_LIMIT_FILE_DOWNLOADS_PER_MINUTE', 120),
+    ],
+
+    // Public guest-donation receipt lookup by UUID token. Defense-in-depth against
+    // token enumeration (token is already a 36-char UUID, but cheap to add a cap).
+    'guest_receipt' => [
+        'per_minute' => (int) env('RATE_LIMIT_GUEST_RECEIPT_PER_MINUTE', 30),
+    ],
 ];

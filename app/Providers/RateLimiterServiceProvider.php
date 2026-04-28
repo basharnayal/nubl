@@ -139,5 +139,27 @@ class RateLimiterServiceProvider extends ServiceProvider
                 (int) config('rate_limiting.application_resubmit.max_attempts', 10),
             )->by((string) $request->user()?->id);
         });
+
+        RateLimiter::for('file_downloads', function (Request $request) use ($off) {
+            if ($off()) {
+                return Limit::none();
+            }
+
+            $key = $request->user()?->id
+                ? 'uid:'.$request->user()->id
+                : $request->ip();
+
+            return Limit::perMinute((int) config('rate_limiting.file_downloads.per_minute', 120))
+                ->by($key);
+        });
+
+        RateLimiter::for('guest_receipt', function (Request $request) use ($off) {
+            if ($off()) {
+                return Limit::none();
+            }
+
+            return Limit::perMinute((int) config('rate_limiting.guest_receipt.per_minute', 30))
+                ->by($request->ip());
+        });
     }
 }
