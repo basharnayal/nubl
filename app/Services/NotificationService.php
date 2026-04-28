@@ -53,19 +53,19 @@ class NotificationService implements NotificationServiceInterface
             $user->status === User::STATUS_PENDING_APPROVAL
             && in_array($user->membership_type, [User::MEMBERSHIP_RECIPIENT, User::MEMBERSHIP_PROVIDER], true)
         ) {
-            $admins->each(fn($admin) => $this->safeNotify($admin, new AccountApprovalPendingNotification($user)));
+            $admins->each(fn ($admin) => $this->safeNotify($admin, new AccountApprovalPendingNotification($user)));
 
             return;
         }
 
-        $admins->each(fn($admin) => $this->safeNotify($admin, new NewUserRegisteredNotification($user)));
+        $admins->each(fn ($admin) => $this->safeNotify($admin, new NewUserRegisteredNotification($user)));
     }
 
     /** Notify every admin when a rejected applicant resubmits (see {@see UserObserver}). */
     public function sendDocumentsResubmittedForReviewToAdmins(User $user): void
     {
         User::role('admin')->get()->each(
-            fn($admin) => $this->safeNotify($admin, new DocumentsResubmittedForReviewNotification($user))
+            fn ($admin) => $this->safeNotify($admin, new DocumentsResubmittedForReviewNotification($user))
         );
     }
 
@@ -77,7 +77,7 @@ class NotificationService implements NotificationServiceInterface
     public function sendRequestStatusChanged(RequestModel $request, string $status): void
     {
         $recipient = $request->recipient;
-        if (!$recipient) {
+        if (! $recipient) {
             return;
         }
 
@@ -87,7 +87,7 @@ class NotificationService implements NotificationServiceInterface
     public function sendNewRequestToProvider(RequestModel $request): void
     {
         $provider = $request->provider;
-        if (!$provider) {
+        if (! $provider) {
             return;
         }
 
@@ -96,12 +96,12 @@ class NotificationService implements NotificationServiceInterface
 
     public function sendRequestStatusChangedToProvider(RequestModel $request, string $status): void
     {
-        if (!in_array($status, ['CANCELLED', 'ADMIN_APPROVED', 'ADMIN_REJECTED'], true)) {
+        if (! in_array($status, ['CANCELLED', 'ADMIN_APPROVED', 'ADMIN_REJECTED'], true)) {
             return;
         }
 
         $provider = $request->provider;
-        if (!$provider) {
+        if (! $provider) {
             return;
         }
 
@@ -111,6 +111,6 @@ class NotificationService implements NotificationServiceInterface
     public function sendNewRequestToAdmins(RequestModel $request): void
     {
         $admins = User::role('admin')->get();
-        $admins->each(fn($admin) => $this->safeNotify($admin, new \App\Notifications\NewPendingAdminRequestNotification($request)));
+        $admins->each(fn ($admin) => $this->safeNotify($admin, new \App\Notifications\NewPendingAdminRequestNotification($request)));
     }
 }

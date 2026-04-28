@@ -16,7 +16,9 @@ class ProviderMenuV2Test extends TestCase
     use RefreshDatabase;
 
     protected $recipient;
+
     protected $provider;
+
     protected $menuItem;
 
     protected function setUp(): void
@@ -34,7 +36,7 @@ class ProviderMenuV2Test extends TestCase
         $this->provider = User::factory()->create([
             'status' => User::STATUS_ACTIVE,
             'is_active' => true,
-            'membership_type' => 'provider'
+            'membership_type' => 'provider',
         ]);
         $this->provider->assignRole('provider');
 
@@ -53,7 +55,7 @@ class ProviderMenuV2Test extends TestCase
             'address_en' => 'Address EN',
             'city' => 'Riyadh',
             'region' => 'Riyadh',
-            'location' => 'Downtown'
+            'location' => 'Downtown',
         ]);
 
         $this->menuItem = ProviderMenuItem::create([

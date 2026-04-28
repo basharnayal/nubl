@@ -19,10 +19,10 @@ class PhoneHelper
         $cleaned = self::nationalMobileDigits($phone);
 
         if (strlen($cleaned) === 9 && preg_match('/^[125][0-9]{8}$/', $cleaned)) {
-            return '966' . $cleaned;
+            return '966'.$cleaned;
         }
 
-        return '966' . $cleaned;
+        return '966'.$cleaned;
     }
 
     /**
@@ -61,8 +61,9 @@ class PhoneHelper
     {
         $normalized = self::normalize($phone);
         if (strlen($normalized) === 12 && str_starts_with($normalized, '966')) {
-            return '0' . substr($normalized, 3);
+            return '0'.substr($normalized, 3);
         }
+
         return $phone;
     }
 
@@ -101,8 +102,9 @@ class PhoneHelper
     {
         $normalized = self::normalize($phone);
         if (strlen($normalized) === 12) {
-            return '+' . substr($normalized, 0, 3) . ' ' . substr($normalized, 3, 2) . ' ' . substr($normalized, 5, 3) . ' ' . substr($normalized, 8);
+            return '+'.substr($normalized, 0, 3).' '.substr($normalized, 3, 2).' '.substr($normalized, 5, 3).' '.substr($normalized, 8);
         }
+
         return $phone;
     }
 }

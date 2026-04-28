@@ -41,18 +41,18 @@ class UpdateResubmitApplicationRequest extends FormRequest
         $user = $this->user();
         if ($user->membership_type === User::MEMBERSHIP_RECIPIENT) {
             return [
-                'name'                       => ['required', 'string', 'max:255'],
-                'nationality'                => ['required', 'string', 'in:' . implode(',', config('nationalities', []))],
-                'short_address'              => ['required', 'string', 'max:500'],
-                'id_type'                    => ['required', 'string', 'in:' . implode(',', RecipientProfile::ID_TYPES)],
-                'id_number'                  => ['required', 'digits:10'],
-                'income_band'                => ['required', 'string', 'in:' . implode(',', RecipientKycDetails::INCOME_BANDS)],
-                'household_size'             => ['required', 'integer', 'min:1', 'max:50'],
-                'marital_status'             => ['required', 'string', 'in:' . implode(',', RecipientKycDetails::MARITAL_STATUSES)],
-                'is_student'                 => ['required', 'in:0,1'],
-                'employment_status'          => ['required', 'string', 'in:' . implode(',', RecipientKycDetails::EMPLOYMENT_STATUSES)],
-                'situation_description'      => ['required', 'string', 'min:10', 'max:1000'],
-                'id_photo_base64'            => ['nullable', 'string'],
+                'name' => ['required', 'string', 'max:255'],
+                'nationality' => ['required', 'string', 'in:'.implode(',', config('nationalities', []))],
+                'short_address' => ['required', 'string', 'max:500'],
+                'id_type' => ['required', 'string', 'in:'.implode(',', RecipientProfile::ID_TYPES)],
+                'id_number' => ['required', 'digits:10'],
+                'income_band' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::INCOME_BANDS)],
+                'household_size' => ['required', 'integer', 'min:1', 'max:50'],
+                'marital_status' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::MARITAL_STATUSES)],
+                'is_student' => ['required', 'in:0,1'],
+                'employment_status' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::EMPLOYMENT_STATUSES)],
+                'situation_description' => ['required', 'string', 'min:10', 'max:1000'],
+                'id_photo_base64' => ['nullable', 'string'],
             ];
         }
 

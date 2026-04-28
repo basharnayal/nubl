@@ -31,11 +31,11 @@ return Application::configure(basePath: dirname(__DIR__))
             });
 
             Route::middleware('web')
-                 ->group(base_path('routes/web.php'));
+                ->group(base_path('routes/web.php'));
 
             if (! app()->environment('production')) {
                 Route::middleware('api')
-                     ->group(base_path('routes/testing.php'));
+                    ->group(base_path('routes/testing.php'));
             }
         },
     )

@@ -112,10 +112,10 @@ class ResubmitApplicationService
                 ]);
 
                 $profile->update([
-                    'nationality'   => $validated['nationality'],
+                    'nationality' => $validated['nationality'],
                     'short_address' => $validated['short_address'],
-                    'id_type'       => $validated['id_type'],
-                    'id_number'     => $validated['id_number'],
+                    'id_type' => $validated['id_type'],
+                    'id_number' => $validated['id_number'],
                     'id_photo_path' => $idPath ?? $previousIdPath,
                 ]);
 
@@ -124,11 +124,11 @@ class ResubmitApplicationService
                 }
 
                 $kyc->update([
-                    'income_band'           => $validated['income_band'],
-                    'household_size'        => (int) $validated['household_size'],
-                    'marital_status'        => $validated['marital_status'],
-                    'is_student'            => (bool) (int) $validated['is_student'],
-                    'employment_status'     => $validated['employment_status'],
+                    'income_band' => $validated['income_band'],
+                    'household_size' => (int) $validated['household_size'],
+                    'marital_status' => $validated['marital_status'],
+                    'is_student' => (bool) (int) $validated['is_student'],
+                    'employment_status' => $validated['employment_status'],
                     'situation_description' => $validated['situation_description'] ?? null,
                 ]);
             });
@@ -250,5 +250,4 @@ class ResubmitApplicationService
 
         return true;
     }
-
 }

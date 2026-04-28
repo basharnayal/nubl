@@ -3,6 +3,7 @@
 namespace App\Auth\Support;
 
 use Illuminate\Support\Facades\Storage;
+use InvalidArgumentException;
 
 class Base64ImageStorage
 {
@@ -18,8 +19,12 @@ class Base64ImageStorage
         $raw = preg_replace('/^data:image\/(jpeg|jpg|png|webp);base64,/i', '', $base64Data);
         $decoded = base64_decode($raw, true);
 
-        $filename = uniqid($prefix, true) . '.' . $extension;
-        $path = $directory . '/' . $filename;
+        if ($decoded === false) {
+            throw new InvalidArgumentException('Invalid base64 image data.');
+        }
+
+        $filename = uniqid($prefix, true).'.'.$extension;
+        $path = $directory.'/'.$filename;
 
         Storage::disk('local')->put($path, $decoded);
 

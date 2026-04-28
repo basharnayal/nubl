@@ -3,15 +3,37 @@
 /**
  * WEB ROUTES
  *
- * Middleware chain for protected routes:
- * auth → (email.verified if enabled) → account.approved → role-specific
+ * Sections:
+ *   1. Public                            (landing, locale, legal)
+ *   2. Authenticated (any approved)      (dashboard, profile)
+ *   3. Admin                             (role:admin)
+ *   4. Provider                          (role:provider)
+ *   5. Recipient                         (role:recipient)
+ *   6. Donor                             (role:donor)
+ *   7. Notifications                     (auth only — pending users included)
+ *   8. Guest Donations                   (public)
+ *   9. Payment Callbacks                 (public — gateway redirects)
+ *  10. Pending Approval flow             (account.approved:pending_only)
+ *
+ * Middleware reference:
+ *   auth -> phone.verified -> account.approved -> role:{role}
+ *   (phone.verified is conditional via config('app.phone_verification_enabled'))
+ *
+ * Rate limiters (named, see config/rate_limiting.php + RateLimiterServiceProvider):
+ *   registration, login, otp, password_reset, verification, sensitive_auth,
+ *   payments_gateway, donor_payments, guest_donations, notifications,
+ *   profile_photo, application_resubmit, file_downloads, guest_receipt
  */
 
 use App\Http\Controllers\Admin\AccountApprovalController;
+use App\Http\Controllers\Admin\AdminAllocationController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminFundTransactionController;
+use App\Http\Controllers\Admin\AdminMenuController;
 use App\Http\Controllers\Admin\AdminPaymentController;
+use App\Http\Controllers\Admin\AdminRequestController;
 use App\Http\Controllers\Admin\AllowanceSettingsController;
+use App\Http\Controllers\Admin\AuditLogController;
 use App\Http\Controllers\Admin\FinancialOverviewController;
 use App\Http\Controllers\Admin\FinancialReportController;
 use App\Http\Controllers\Admin\MaintenanceSettingsController;
@@ -22,304 +44,409 @@ use App\Http\Controllers\Admin\SummaryReportController;
 use App\Http\Controllers\Admin\UserManagementController;
 use App\Http\Controllers\Auth\ProviderRegistrationController;
 use App\Http\Controllers\Auth\ResubmitApplicationController;
+use App\Http\Controllers\Donor\DonationController;
+use App\Http\Controllers\Donor\DonorDashboardController;
+use App\Http\Controllers\GuestDonationController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\LandingPageFeedController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Provider\MenuItemController as ProviderMenuItemController;
 use App\Http\Controllers\Provider\ProviderDashboardController;
+use App\Http\Controllers\Provider\ProviderProfileController;
+use App\Http\Controllers\Provider\ProviderProofController;
+use App\Http\Controllers\Provider\ProviderQrController;
+use App\Http\Controllers\Provider\ProviderRequestController;
 use App\Http\Controllers\Provider\ProviderWalletController;
+use App\Http\Controllers\Recipient\ProviderMenuController as RecipientProviderMenuController;
 use App\Http\Controllers\Recipient\RecipientController;
+use App\Http\Controllers\Recipient\RecipientRequestController;
 use Illuminate\Support\Facades\Route;
 
-// Auth middleware: phone OTP is primary verification; email remains optional
+/*
+|--------------------------------------------------------------------------
+| Middleware stacks
+|--------------------------------------------------------------------------
+| Defined once and reused across role groups so the chain stays in sync
+| and is trivial to adjust in one place.
+*/
+
 $authMiddleware = config('app.phone_verification_enabled', true)
     ? ['auth', 'phone.verified']
     : ['auth'];
 
+$approvedMiddleware = array_merge($authMiddleware, ['account.approved']);
+$adminMiddleware = array_merge($approvedMiddleware, ['role:admin']);
+$providerMiddleware = array_merge($approvedMiddleware, ['role:provider']);
+$recipientMiddleware = array_merge($approvedMiddleware, ['role:recipient']);
+$donorMiddleware = array_merge($approvedMiddleware, ['role:donor']);
+$pendingMiddleware = array_merge($authMiddleware, ['account.approved:pending_only']);
+
+/*
+|--------------------------------------------------------------------------
+| 1. Public
+|--------------------------------------------------------------------------
+*/
+
 Route::get('/', LandingPageController::class)->name('home');
+
 Route::get('/landing/feed', LandingPageFeedController::class)
     ->middleware('throttle:120,1')
     ->name('landing.feed');
 
-// Locale switch (default: English, user can switch to Arabic)
+// Locale switch (default: English; user can switch to Arabic).
+// Constraint prevents arbitrary values from being persisted to session.
 Route::get('/locale/{locale}', function (string $locale) {
-    $allowed = ['en', 'ar'];
-    if (in_array($locale, $allowed)) {
+    if (in_array($locale, ['en', 'ar'], true)) {
         session(['locale' => $locale]);
     }
 
     return redirect()->back();
-})->name('locale.switch');
+})->where('locale', 'en|ar')->name('locale.switch');
 
-// Legal (public)
+// Legal
 Route::view('/terms', 'legal.terms')->name('legal.terms');
 Route::view('/privacy-policy', 'legal.privacy')->name('legal.privacy');
 
-// Redirect by role
+/*
+|--------------------------------------------------------------------------
+| 2. Authenticated (any approved role)
+|--------------------------------------------------------------------------
+*/
+
+// Role-aware redirect to the right dashboard
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(array_merge($authMiddleware, ['account.approved', 'redirect.by.role']))->name('dashboard');
+})->middleware(array_merge($approvedMiddleware, ['redirect.by.role']))->name('dashboard');
 
-Route::middleware(array_merge($authMiddleware, ['account.approved']))->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::post('/profile/photo', [ProfileController::class, 'uploadPhoto'])
-        ->middleware('throttle:profile_photo')
-        ->name('profile.photo.upload');
-    Route::patch('/profile/provider-business', [ProfileController::class, 'updateProviderBusiness'])
-        ->name('profile.provider-business.update');
-    Route::patch('/profile/provider-financial', [ProfileController::class, 'updateProviderFinancial'])
-        ->name('profile.provider-financial.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+Route::middleware($approvedMiddleware)->group(function () {
+    Route::controller(ProfileController::class)->prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', 'edit')->name('edit');
+        Route::patch('/', 'update')->name('update');
+        Route::post('/photo', 'uploadPhoto')
+            ->middleware('throttle:profile_photo')
+            ->name('photo.upload');
+        Route::patch('/provider-business', 'updateProviderBusiness')->name('provider-business.update');
+        Route::patch('/provider-financial', 'updateProviderFinancial')->name('provider-financial.update');
+        Route::delete('/', 'destroy')->name('destroy');
+    });
 });
 
-// $$ Role-specific dashboards $$
-// Admin routes
-Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:admin']))->prefix('admin')->name('admin.')
-    ->group(function () {
-        Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+/*
+|--------------------------------------------------------------------------
+| 3. Admin
+|--------------------------------------------------------------------------
+*/
 
-        Route::get('/users/pending', [AccountApprovalController::class, 'index'])->name('users.pending');
-        Route::post('/users/{user}/approve', [AccountApprovalController::class, 'approve'])->name('users.approve');
-        Route::get('/users/{user}/reject', [AccountApprovalController::class, 'showRejectForm'])->name('users.reject.form');
-        Route::post('/users/{user}/reject', [AccountApprovalController::class, 'reject'])->name('users.reject');
-        Route::get('/users/{user}/application', [AccountApprovalController::class, 'showApplication'])->name('users.application');
-        Route::get('/users/{user}/file/{type}', [AccountApprovalController::class, 'serveFile'])->name('users.file');
+Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(function () {
 
-        // User Management (CRUD + deactivate/reactivate) - separate from approval flow
-        Route::get('/manage/users', [UserManagementController::class, 'index'])->name('manage.users.index');
-        Route::get('/manage/users/create', [UserManagementController::class, 'create'])->name('manage.users.create');
-        Route::post('/manage/users', [UserManagementController::class, 'store'])->name('manage.users.store');
-        Route::get('/manage/users/{user}', [UserManagementController::class, 'show'])->name('manage.users.show');
-        Route::get('/manage/users/{user}/edit', [UserManagementController::class, 'edit'])->name('manage.users.edit');
-        Route::put('/manage/users/{user}', [UserManagementController::class, 'update'])->name('manage.users.update');
-        Route::delete('/manage/users/{user}', [UserManagementController::class, 'destroy'])->name('manage.users.destroy');
-        Route::post('/manage/users/{user}/deactivate', [UserManagementController::class, 'deactivate'])->name('manage.users.deactivate');
-        Route::post('/manage/users/{user}/reactivate', [UserManagementController::class, 'reactivate'])->name('manage.users.reactivate');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-        // Roles & permissions (Spatie)
-        Route::get('/roles', [RoleController::class, 'index'])->name('roles.index');
-        Route::get('/roles/create', [RoleController::class, 'create'])->name('roles.create');
-        Route::post('/roles', [RoleController::class, 'store'])->name('roles.store');
-        Route::get('/roles/{role}/edit', [RoleController::class, 'edit'])->name('roles.edit');
-        Route::put('/roles/{role}', [RoleController::class, 'update'])->name('roles.update');
-        Route::delete('/roles/{role}', [RoleController::class, 'destroy'])->name('roles.destroy');
+    // Account approval flow (pending users awaiting admin review)
+    Route::controller(AccountApprovalController::class)->group(function () {
+        Route::get('/users/pending', 'index')->name('users.pending');
+        Route::post('/users/{user}/approve', 'approve')->whereNumber('user')->name('users.approve');
+        Route::get('/users/{user}/reject', 'showRejectForm')->whereNumber('user')->name('users.reject.form');
+        Route::post('/users/{user}/reject', 'reject')->whereNumber('user')->name('users.reject');
+        Route::get('/users/{user}/application', 'showApplication')->whereNumber('user')->name('users.application');
+        Route::get('/users/{user}/file/{type}', 'serveFile')
+            ->whereNumber('user')
+            ->middleware('throttle:file_downloads')
+            ->name('users.file');
+    });
 
-        // Admin Request Management (ECS-63)
-        Route::get('/requests', [\App\Http\Controllers\Admin\AdminRequestController::class, 'index'])->name('requests.index');
-        Route::put('/requests/{request}', [\App\Http\Controllers\Admin\AdminRequestController::class, 'update'])->name('requests.update');
+    // User Management (CRUD + deactivate/reactivate) — separate from approval flow
+    Route::controller(UserManagementController::class)->prefix('manage/users')->name('manage.users.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{user}', 'show')->whereNumber('user')->name('show');
+        Route::get('/{user}/edit', 'edit')->whereNumber('user')->name('edit');
+        Route::put('/{user}', 'update')->whereNumber('user')->name('update');
+        Route::delete('/{user}', 'destroy')->whereNumber('user')->name('destroy');
+        Route::post('/{user}/deactivate', 'deactivate')->whereNumber('user')->name('deactivate');
+        Route::post('/{user}/reactivate', 'reactivate')->whereNumber('user')->name('reactivate');
+    });
 
-        // FR-8.3: QR token TTL (admin)
-        Route::get('/settings/qr', [QrSettingsController::class, 'edit'])->name('settings.qr.edit');
-        Route::put('/settings/qr', [QrSettingsController::class, 'update'])->name('settings.qr.update');
+    // Roles & permissions (Spatie)
+    Route::controller(RoleController::class)->prefix('roles')->name('roles.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/create', 'create')->name('create');
+        Route::post('/', 'store')->name('store');
+        Route::get('/{role}/edit', 'edit')->whereNumber('role')->name('edit');
+        Route::put('/{role}', 'update')->whereNumber('role')->name('update');
+        Route::delete('/{role}', 'destroy')->whereNumber('role')->name('destroy');
+    });
 
-        // FR-17.1: Weekly beneficiary allowance (scheduled next week)
-        Route::get('/settings/allowances', [AllowanceSettingsController::class, 'edit'])->name('settings.allowances.edit');
-        Route::put('/settings/allowances', [AllowanceSettingsController::class, 'update'])->name('settings.allowances.update');
+    // Admin Request Management (ECS-63)
+    Route::controller(AdminRequestController::class)->prefix('requests')->name('requests.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::put('/{request}', 'update')->whereNumber('request')->name('update');
+    });
 
-        // Laravel built-in maintenance (artisan down / up + secret bypass)
-        Route::get('/settings/maintenance', [MaintenanceSettingsController::class, 'edit'])->name('settings.maintenance.edit');
-        Route::post('/settings/maintenance/enable', [MaintenanceSettingsController::class, 'enable'])
-            ->middleware('throttle:6,1')
-            ->name('settings.maintenance.enable');
-        Route::post('/settings/maintenance/disable', [MaintenanceSettingsController::class, 'disable'])
-            ->middleware('throttle:6,1')
-            ->name('settings.maintenance.disable');
+    // FR-8.3: QR token TTL (admin)
+    Route::controller(QrSettingsController::class)->prefix('settings/qr')->name('settings.qr.')->group(function () {
+        Route::get('/', 'edit')->name('edit');
+        Route::put('/', 'update')->name('update');
+    });
 
-        // FR-24.1: Allocation engine pause/resume (global + per-provider)
-        Route::get('/allocation/status', [\App\Http\Controllers\Admin\AdminAllocationController::class, 'status'])->name('allocation.status');
-        Route::post('/allocation/pause', [\App\Http\Controllers\Admin\AdminAllocationController::class, 'pauseGlobal'])->name('allocation.pause');
-        Route::post('/allocation/resume', [\App\Http\Controllers\Admin\AdminAllocationController::class, 'resumeGlobal'])->name('allocation.resume');
-        Route::post('/allocation/providers/{provider}/pause', [\App\Http\Controllers\Admin\AdminAllocationController::class, 'pauseProvider'])->name('allocation.provider.pause');
-        Route::post('/allocation/providers/{provider}/resume', [\App\Http\Controllers\Admin\AdminAllocationController::class, 'resumeProvider'])->name('allocation.provider.resume');
+    // FR-17.1: Weekly beneficiary allowance (scheduled next week)
+    Route::controller(AllowanceSettingsController::class)->prefix('settings/allowances')->name('settings.allowances.')->group(function () {
+        Route::get('/', 'edit')->name('edit');
+        Route::put('/', 'update')->name('update');
+    });
 
-        // Fund management & payment monitoring (gateway vs internal ledger)
-        Route::prefix('finances')->name('finances.')->group(function () {
-            Route::get('/', [FinancialOverviewController::class, 'index'])->name('overview');
-            Route::get('/payments/export', [AdminPaymentController::class, 'export'])->name('payments.export');
-            Route::get('/payments/export-pdf', [AdminPaymentController::class, 'exportPdf'])->name('payments.export-pdf');
-            Route::get('/payments', [AdminPaymentController::class, 'index'])->name('payments.index');
-            Route::get('/payments/{payment}', [AdminPaymentController::class, 'show'])->name('payments.show');
-            Route::get('/fund-transactions/export', [AdminFundTransactionController::class, 'export'])->name('fund-transactions.export');
-            Route::get('/fund-transactions/export-pdf', [AdminFundTransactionController::class, 'exportPdf'])->name('fund-transactions.export-pdf');
-            Route::get('/fund-transactions', [AdminFundTransactionController::class, 'index'])->name('fund-transactions.index');
-            Route::get('/fund-transactions/{fund_transaction}', [AdminFundTransactionController::class, 'show'])->name('fund-transactions.show');
-            Route::get('/reports', [FinancialReportController::class, 'index'])->name('reports.index');
-            // FR-19.1: auto-generated weekly / monthly summary reports
-            Route::get('/summary-reports', [SummaryReportController::class, 'index'])->name('summary-reports.index');
-            Route::get('/summary-reports/{summaryReport}/download', [SummaryReportController::class, 'download'])->name('summary-reports.download');
+    // Laravel built-in maintenance (artisan down / up + secret bypass)
+    Route::controller(MaintenanceSettingsController::class)->prefix('settings/maintenance')->name('settings.maintenance.')->group(function () {
+        Route::get('/', 'edit')->name('edit');
+        Route::post('/enable', 'enable')->middleware('throttle:6,1')->name('enable');
+        Route::post('/disable', 'disable')->middleware('throttle:6,1')->name('disable');
+    });
 
-            Route::get('/provider-payouts', [ProviderPayoutController::class, 'index'])->name('provider-payouts.index');
-            Route::get('/provider-payouts/{provider_payout}', [ProviderPayoutController::class, 'show'])->name('provider-payouts.show');
-            Route::post('/provider-payouts/{provider_payout}/receipt', [ProviderPayoutController::class, 'storeReceipt'])->name('provider-payouts.receipt.store');
-            Route::get('/provider-payouts/{provider_payout}/receipt-file', [ProviderPayoutController::class, 'receiptFile'])->name('provider-payouts.receipt.file');
-            Route::post('/provider-payouts/{provider_payout}/confirm', [ProviderPayoutController::class, 'confirm'])->name('provider-payouts.confirm');
-            Route::post('/provider-payouts/{provider_payout}/reject', [ProviderPayoutController::class, 'reject'])->name('provider-payouts.reject');
-            Route::post('/provider-payouts/{provider_payout}/cancel', [ProviderPayoutController::class, 'cancel'])->name('provider-payouts.cancel');
+    // FR-24.1: Allocation engine pause/resume (global + per-provider)
+    Route::controller(AdminAllocationController::class)->prefix('allocation')->name('allocation.')->group(function () {
+        Route::get('/status', 'status')->name('status');
+        Route::post('/pause', 'pauseGlobal')->name('pause');
+        Route::post('/resume', 'resumeGlobal')->name('resume');
+        Route::post('/providers/{provider}/pause', 'pauseProvider')->whereNumber('provider')->name('provider.pause');
+        Route::post('/providers/{provider}/resume', 'resumeProvider')->whereNumber('provider')->name('provider.resume');
+    });
+
+    // Fund management & payment monitoring (gateway vs internal ledger)
+    Route::prefix('finances')->name('finances.')->group(function () {
+        Route::get('/', [FinancialOverviewController::class, 'index'])->name('overview');
+
+        Route::controller(AdminPaymentController::class)->prefix('payments')->name('payments.')->group(function () {
+            Route::get('/export', 'export')->name('export');
+            Route::get('/export-pdf', 'exportPdf')->name('export-pdf');
+            Route::get('/', 'index')->name('index');
+            Route::get('/{payment}', 'show')->whereNumber('payment')->name('show');
         });
 
-        // Audit Logs
-        Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+        Route::controller(AdminFundTransactionController::class)->prefix('fund-transactions')->name('fund-transactions.')->group(function () {
+            Route::get('/export', 'export')->name('export');
+            Route::get('/export-pdf', 'exportPdf')->name('export-pdf');
+            Route::get('/', 'index')->name('index');
+            Route::get('/{fund_transaction}', 'show')->whereNumber('fund_transaction')->name('show');
+        });
 
-        // Admin Menu Management
-        Route::prefix('menus')->name('menus.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\AdminMenuController::class, 'index'])->name('index');
-            Route::get('/{provider}', [\App\Http\Controllers\Admin\AdminMenuController::class, 'show'])->name('show');
-            Route::post('/{item}/toggle-block', [\App\Http\Controllers\Admin\AdminMenuController::class, 'toggleBlock'])->name('toggle-block');
+        Route::get('/reports', [FinancialReportController::class, 'index'])->name('reports.index');
+
+        // FR-19.1: auto-generated weekly / monthly summary reports
+        Route::controller(SummaryReportController::class)->prefix('summary-reports')->name('summary-reports.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/{summaryReport}/download', 'download')
+                ->whereNumber('summaryReport')
+                ->middleware('throttle:file_downloads')
+                ->name('download');
+        });
+
+        Route::controller(ProviderPayoutController::class)->prefix('provider-payouts')->name('provider-payouts.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/{provider_payout}', 'show')->whereNumber('provider_payout')->name('show');
+            Route::post('/{provider_payout}/receipt', 'storeReceipt')->whereNumber('provider_payout')->name('receipt.store');
+            Route::get('/{provider_payout}/receipt-file', 'receiptFile')
+                ->whereNumber('provider_payout')
+                ->middleware('throttle:file_downloads')
+                ->name('receipt.file');
+            Route::post('/{provider_payout}/confirm', 'confirm')->whereNumber('provider_payout')->name('confirm');
+            Route::post('/{provider_payout}/reject', 'reject')->whereNumber('provider_payout')->name('reject');
+            Route::post('/{provider_payout}/cancel', 'cancel')->whereNumber('provider_payout')->name('cancel');
         });
     });
 
-// Provider routes
-Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:provider']))
-    ->prefix('provider')
-    ->name('provider.')
-    ->group(function () {
+    // Audit Logs
+    Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
 
-        // Pending providers must still view their application
-        Route::get('/application', [\App\Http\Controllers\Auth\ProviderRegistrationController::class, 'showApplication'])
-            ->withoutMiddleware('account.approved')
-            ->name('application');
+    // Admin Menu Management
+    Route::controller(AdminMenuController::class)->prefix('menus')->name('menus.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/{provider}', 'show')->whereNumber('provider')->name('show');
+        Route::post('/{item}/toggle-block', 'toggleBlock')->whereNumber('item')->name('toggle-block');
+    });
+});
 
-        Route::get('/dashboard', ProviderDashboardController::class)->name('dashboard');
+/*
+|--------------------------------------------------------------------------
+| 4. Provider
+|--------------------------------------------------------------------------
+*/
 
-        Route::get('/wallet', [ProviderWalletController::class, 'index'])->name('wallet.index');
-        Route::get('/wallet/payouts/{provider_payout}/receipt', [ProviderWalletController::class, 'downloadReceipt'])
-            ->name('wallet.payout-receipt');
+Route::middleware($providerMiddleware)->prefix('provider')->name('provider.')->group(function () {
 
-        // Provider Menu Management (ECS-62)
-        Route::resource('menu-items', \App\Http\Controllers\Provider\MenuItemController::class);
+    // Pending providers must still view their application — opt out of the approval gate
+    Route::get('/application', [ProviderRegistrationController::class, 'showApplication'])
+        ->withoutMiddleware('account.approved')
+        ->name('application');
 
-        // Provider Requests (ECS-63)
-        Route::resource('requests', \App\Http\Controllers\Provider\ProviderRequestController::class)
-            ->only(['index', 'show', 'update']);
+    Route::get('/dashboard', ProviderDashboardController::class)->name('dashboard');
 
-        // Toggle Active
-        Route::post('/profile/toggle-active', [\App\Http\Controllers\Provider\ProviderProfileController::class, 'toggleActive'])
-            ->name('profile.toggle-active');
+    Route::get('/wallet', [ProviderWalletController::class, 'index'])->name('wallet.index');
+    Route::get('/wallet/payouts/{provider_payout}/receipt', [ProviderWalletController::class, 'downloadReceipt'])
+        ->whereNumber('provider_payout')
+        ->middleware('throttle:file_downloads')
+        ->name('wallet.payout-receipt');
 
-        Route::get('/profile/edit', [\App\Http\Controllers\Provider\ProviderProfileController::class, 'edit'])
-            ->name('profile.edit');
-        Route::put('/profile/edit', [\App\Http\Controllers\Provider\ProviderProfileController::class, 'update'])
-            ->name('profile.update');
+    // Provider Menu Management (ECS-62)
+    Route::resource('menu-items', ProviderMenuItemController::class);
 
-        // QR Redemption (ECS-111 & ECS-112)
-        Route::get('/qr/scan', [\App\Http\Controllers\Provider\ProviderQrController::class, 'scan'])->name('qr.scan');
-        Route::post('/qr/redeem', [\App\Http\Controllers\Provider\ProviderQrController::class, 'redeem'])->name('qr.redeem');
+    // Provider Requests (ECS-63)
+    Route::resource('requests', ProviderRequestController::class)->only(['index', 'show', 'update']);
 
-        Route::get('/redemptions/{redemption}/proof', [\App\Http\Controllers\Provider\ProviderProofController::class, 'index'])->name('proof.index');
-        Route::post('/redemptions/{redemption}/proof', [\App\Http\Controllers\Provider\ProviderProofController::class, 'store'])->name('proof.store');
+    // Profile
+    Route::controller(ProviderProfileController::class)->prefix('profile')->name('profile.')->group(function () {
+        Route::post('/toggle-active', 'toggleActive')->name('toggle-active');
+        Route::get('/edit', 'edit')->name('edit');
+        Route::put('/edit', 'update')->name('update');
     });
 
-// Recipient routes
-Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:recipient']))
-    ->prefix('recipient')
-    ->name('recipient.')
-    ->group(function () {
-
-        Route::get('/dashboard', [RecipientController::class, 'dashboard'])->name('dashboard');
-
-        // Recipient Browsing (ECS-62)
-        Route::get('/providers', [\App\Http\Controllers\Recipient\ProviderMenuController::class, 'index'])
-            ->name('providers.index');
-
-        Route::get('/providers/{provider}', [\App\Http\Controllers\Recipient\ProviderMenuController::class, 'show'])
-            ->name('providers.show');
-
-        Route::get('/providers/{provider}/menu', [RecipientController::class, 'providerMenu'])
-            ->name('providers.menu');
-
-        // Legacy URL: confirmation now lives on the request show page
-        Route::get('requests/{id}/submitted', function (int $id) {
-            return redirect()->route('recipient.requests.show', ['request' => $id], 301);
-        })->whereNumber('id')->name('requests.submitted');
-        Route::resource('requests', \App\Http\Controllers\Recipient\RecipientRequestController::class)
-            ->only(['index', 'show', 'store']);
-        Route::post('requests/cancel-throttle', [\App\Http\Controllers\Recipient\RecipientRequestController::class, 'cancelThrottle'])
-            ->name('requests.cancel-throttle');
-        Route::post('requests/{id}/cancel', [\App\Http\Controllers\Recipient\RecipientRequestController::class, 'cancel'])
-            ->name('requests.cancel');
+    // QR Redemption (ECS-111 & ECS-112)
+    Route::controller(ProviderQrController::class)->prefix('qr')->name('qr.')->group(function () {
+        Route::get('/scan', 'scan')->name('scan');
+        Route::post('/redeem', 'redeem')->name('redeem');
     });
 
-// Donor routes
-Route::middleware(array_merge($authMiddleware, ['account.approved', 'role:donor']))->prefix('donor')->name('donor.')
-    ->group(function () {
-        Route::get('/dashboard', [\App\Http\Controllers\Donor\DonorDashboardController::class, 'index'])->name('dashboard');
-        Route::get('/donations/new', [\App\Http\Controllers\Donor\DonationController::class, 'create'])->name('donations.new');
-        Route::get('/donations', [\App\Http\Controllers\Donor\DonationController::class, 'index'])->name('donations.index');
-        Route::get('/donations/{payment}/receipt', [\App\Http\Controllers\Donor\DonationController::class, 'receipt'])->name('donations.receipt');
-        Route::post('/payments/initiate', [\App\Http\Controllers\Donor\DonationController::class, 'initiate'])
+    Route::controller(ProviderProofController::class)->prefix('redemptions/{redemption}')->name('proof.')->group(function () {
+        Route::get('/proof', 'index')->whereNumber('redemption')->name('index');
+        Route::post('/proof', 'store')->whereNumber('redemption')->name('store');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| 5. Recipient
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware($recipientMiddleware)->prefix('recipient')->name('recipient.')->group(function () {
+
+    Route::get('/dashboard', [RecipientController::class, 'dashboard'])->name('dashboard');
+
+    // Recipient Browsing (ECS-62)
+    Route::controller(RecipientProviderMenuController::class)->prefix('providers')->name('providers.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::get('/{provider}', 'show')->whereNumber('provider')->name('show');
+    });
+
+    Route::get('/providers/{provider}/menu', [RecipientController::class, 'providerMenu'])
+        ->whereNumber('provider')
+        ->name('providers.menu');
+
+    // Legacy URL: confirmation now lives on the request show page
+    Route::get('requests/{id}/submitted', function (int $id) {
+        return redirect()->route('recipient.requests.show', ['request' => $id], 301);
+    })->whereNumber('id')->name('requests.submitted');
+
+    Route::resource('requests', RecipientRequestController::class)->only(['index', 'show', 'store']);
+    Route::post('requests/cancel-throttle', [RecipientRequestController::class, 'cancelThrottle'])
+        ->name('requests.cancel-throttle');
+    Route::post('requests/{id}/cancel', [RecipientRequestController::class, 'cancel'])
+        ->whereNumber('id')
+        ->name('requests.cancel');
+});
+
+/*
+|--------------------------------------------------------------------------
+| 6. Donor
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware($donorMiddleware)->prefix('donor')->name('donor.')->group(function () {
+    Route::get('/dashboard', [DonorDashboardController::class, 'index'])->name('dashboard');
+
+    Route::controller(DonationController::class)->group(function () {
+        Route::get('/donations/new', 'create')->name('donations.new');
+        Route::get('/donations', 'index')->name('donations.index');
+        Route::get('/donations/{payment}/receipt', 'receipt')
+            ->whereNumber('payment')
+            ->middleware('throttle:file_downloads')
+            ->name('donations.receipt');
+        Route::post('/payments/initiate', 'initiate')
             ->middleware('throttle:donor_payments')
             ->name('payments.initiate');
-        Route::get('/payments/success', [\App\Http\Controllers\PaymentCallbackController::class, 'success'])->name('payments.success');
-        Route::get('/payments/failed', [\App\Http\Controllers\PaymentCallbackController::class, 'failed'])->name('payments.failed');
     });
 
-// Notifications (auth required — for real-time polling)
-Route::middleware(array_merge($authMiddleware, ['throttle:notifications']))->group(function () {
-    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('/notifications/{notification}/read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::post('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+    Route::controller(PaymentCallbackController::class)->prefix('payments')->name('payments.')->group(function () {
+        Route::get('/success', 'success')->name('success');
+        Route::get('/failed', 'failed')->name('failed');
+    });
 });
 
-// Guest Quick Donation (public, no auth required)
-Route::prefix('donate')->name('guest.donation.')->group(function () {
-    Route::post('/initiate', [\App\Http\Controllers\GuestDonationController::class, 'initiate'])
+/*
+|--------------------------------------------------------------------------
+| 7. Notifications (auth required, real-time polling — pending users included)
+|--------------------------------------------------------------------------
+| NOTE: this group intentionally lacks `account.approved` so users awaiting
+| approval can still receive notifications about their application status.
+*/
+
+Route::middleware(array_merge($authMiddleware, ['throttle:notifications']))->group(function () {
+    Route::controller(NotificationController::class)->prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/{notification}/read', 'markAsRead')
+            ->where('notification', '[0-9a-fA-F\-]{36}')
+            ->name('read');
+        Route::post('/read-all', 'markAllAsRead')->name('read-all');
+    });
+});
+
+/*
+|--------------------------------------------------------------------------
+| 8. Guest Quick Donation (public, no auth required)
+|--------------------------------------------------------------------------
+*/
+
+Route::controller(GuestDonationController::class)->prefix('donate')->name('guest.donation.')->group(function () {
+    Route::post('/initiate', 'initiate')
         ->middleware('throttle:guest_donations')
         ->name('initiate');
-    Route::get('/success', [\App\Http\Controllers\GuestDonationController::class, 'success'])
-        ->name('success');
-    Route::get('/{payment}/receipt', [\App\Http\Controllers\GuestDonationController::class, 'receipt'])
+    Route::get('/success', 'success')->name('success');
+    Route::get('/receipt/{token}', 'receipt')
+        ->where('token', '[0-9a-f\-]{36}')
+        ->middleware('throttle:guest_receipt')
         ->name('receipt');
-    Route::get('/failed', [\App\Http\Controllers\GuestDonationController::class, 'failed'])
-        ->name('failed');
+    Route::get('/failed', 'failed')->name('failed');
 });
 
-// Payment callback (no auth — MyFatoorah redirects the user's browser here).
-// Rate-limited to prevent abuse (attackers flooding with random IDs to exhaust MyFatoorah API quota).
-Route::get('/payments/callback', [\App\Http\Controllers\PaymentCallbackController::class, 'callback'])
-    ->middleware('throttle:payments_gateway')
-    ->name('payments.callback');
-Route::get('/payments/error', [\App\Http\Controllers\PaymentCallbackController::class, 'error'])
-    ->middleware('throttle:payments_gateway')
-    ->name('payments.error');
+/*
+|--------------------------------------------------------------------------
+| 9. Payment Callbacks (public — MyFatoorah redirects browser here)
+|--------------------------------------------------------------------------
+| Rate-limited to prevent attackers flooding with random IDs to exhaust
+| the MyFatoorah API quota.
+*/
 
-// General routes //
-// Pending approval: recipient or provider (blocked from dashboard by EnsureAccountApproved).
-// Same middleware with pending_only: active users are redirected to dashboard from these URLs.
-// Provider registration: GET allows guest + auth (auth with profile sees read-only)
+Route::middleware('throttle:payments_gateway')->group(function () {
+    Route::get('/payments/callback', [PaymentCallbackController::class, 'callback'])->name('payments.callback');
+    Route::get('/payments/error', [PaymentCallbackController::class, 'error'])->name('payments.error');
+});
+
+/*
+|--------------------------------------------------------------------------
+| 10. Pending Approval flow + Provider Registration (guest GET)
+|--------------------------------------------------------------------------
+| Provider registration GET: allows guest + auth (auth users with profile see read-only).
+| Other routes here use `account.approved:pending_only` — active users are redirected
+| to their dashboard from these URLs.
+*/
+
 Route::get('/register/provider', [ProviderRegistrationController::class, 'create'])
     ->middleware('throttle:registration')
     ->name('register.provider');
 
-Route::middleware(array_merge($authMiddleware, ['account.approved:pending_only']))->group(function () {
-    Route::get('/approval-pending', function () {
-        return view('auth.approval-pending');
-    })->name('approval.pending');
+Route::middleware($pendingMiddleware)->group(function () {
+    Route::view('/approval-pending', 'auth.approval-pending')->name('approval.pending');
 
-    Route::get('/application/resubmit', [ResubmitApplicationController::class, 'edit'])->name('application.resubmit.edit');
-    Route::post('/application/resubmit', [ResubmitApplicationController::class, 'update'])
-        ->middleware('throttle:application_resubmit')
-        ->name('application.resubmit.update');
-    Route::get('/application/my-file/{type}', [ResubmitApplicationController::class, 'serveFile'])->name('application.my-file');
+    Route::controller(ResubmitApplicationController::class)->prefix('application')->name('application.')->group(function () {
+        Route::get('/resubmit', 'edit')->name('resubmit.edit');
+        Route::post('/resubmit', 'update')
+            ->middleware('throttle:application_resubmit')
+            ->name('resubmit.update');
+        Route::get('/my-file/{type}', 'serveFile')
+            ->middleware('throttle:file_downloads')
+            ->name('my-file');
+    });
 });
-
-// Test: debug roles (admin only - remove in production)
-Route::get('/test-roles', function () {
-    if (! auth()->user()->hasRole('admin')) {
-        abort(403);
-    }
-
-    return view('test-roles', ['roles' => auth()->user()->roles->pluck('name')->toArray()]);
-})->middleware(['auth', 'role:admin'])->name('test-roles');
-
-// // Dev helper: assign admin role (remove in production)
-// Route::get('/make-me-admin', function () {
-//     $user = auth()->user();
-//     if (! \Spatie\Permission\Models\Role::where('name', 'admin')->exists()) {
-//         \Spatie\Permission\Models\Role::create(['name' => 'admin']);
-//     }
-//     $user->assignRole('admin');
-
-//     return 'تم تعيينك كـ admin بنجاح!';
-// });
 
 require __DIR__.'/auth.php';

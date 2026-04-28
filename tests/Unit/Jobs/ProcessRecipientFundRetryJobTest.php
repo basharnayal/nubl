@@ -272,4 +272,3 @@ class ProcessRecipientFundRetryJobTest extends TestCase
         ];
     }
 }
-

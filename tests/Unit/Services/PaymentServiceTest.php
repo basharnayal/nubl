@@ -164,7 +164,7 @@ class PaymentServiceTest extends TestCase
 
         $response = $service->handleCallback(Request::create('/payments/callback', 'GET', ['paymentId' => 'unknown-invoice']));
 
-        $this->assertStringContainsString(route('donor.payments.failed'), $response->getTargetUrl());
+        $this->assertStringContainsString(route('guest.donation.failed'), $response->getTargetUrl());
     }
 
     #[Test]

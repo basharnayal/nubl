@@ -10,11 +10,12 @@ class SidebarComposer
     public function compose(View $view): void
     {
         $route = request()->route();
-        if (!$route) {
+        if (! $route) {
             $view->with('sidebarMenu', ['title' => '', 'items' => [[]]]);
             $view->with('pageName', '');
             $view->with('routePrefix', '');
             $view->with('dashboardUrl', route('dashboard'));
+
             return;
         }
 
@@ -40,7 +41,7 @@ class SidebarComposer
     private function resolveActor(): ?string
     {
         $user = auth()->user();
-        if (!$user) {
+        if (! $user) {
             return null;
         }
 

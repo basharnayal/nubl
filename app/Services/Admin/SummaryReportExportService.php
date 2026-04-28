@@ -19,27 +19,44 @@ class SummaryReportExportService
     private bool $isAr = false;
 
     // ── NUBL brand palette (from resources/css/app.css) ──────────────────────
-    private const CLR_TITLE_BG     = '1E293B'; // --color-nubl-dark
-    private const CLR_TITLE_FG     = 'FFFFFF';
-    private const CLR_SECTION_BG   = '2563EB'; // --color-nubl-blue-600
-    private const CLR_SECTION_FG   = 'FFFFFF';
-    private const CLR_HEADER_BG    = 'DBEAFE'; // --color-nubl-blue-100
-    private const CLR_HEADER_FG    = '1E293B'; // --color-nubl-dark
-    private const CLR_META_BG      = 'F8FAFC'; // --color-nubl-bg
-    private const CLR_ROW_WHITE    = 'FFFFFF';
-    private const CLR_ROW_ALT      = 'EFF6FF'; // --color-nubl-blue-50
+    private const CLR_TITLE_BG = '1E293B'; // --color-nubl-dark
+
+    private const CLR_TITLE_FG = 'FFFFFF';
+
+    private const CLR_SECTION_BG = '2563EB'; // --color-nubl-blue-600
+
+    private const CLR_SECTION_FG = 'FFFFFF';
+
+    private const CLR_HEADER_BG = 'DBEAFE'; // --color-nubl-blue-100
+
+    private const CLR_HEADER_FG = '1E293B'; // --color-nubl-dark
+
+    private const CLR_META_BG = 'F8FAFC'; // --color-nubl-bg
+
+    private const CLR_ROW_WHITE = 'FFFFFF';
+
+    private const CLR_ROW_ALT = 'EFF6FF'; // --color-nubl-blue-50
 
     // Semantic row accent colours
-    private const CLR_SUCCESS_BG   = 'D1FAE5'; // --color-success tint  (#10b981)
-    private const CLR_SUCCESS_FG   = '065F46';
-    private const CLR_WARNING_BG   = 'FEF3C7'; // --color-warning tint  (#ff9800)
-    private const CLR_WARNING_FG   = '92400E';
-    private const CLR_ERROR_BG     = 'FFE4E1'; // --color-error tint    (#ff5724)
-    private const CLR_ERROR_FG     = '9B1C1C';
-    private const CLR_INFO_BG      = 'E0F2FE'; // --color-info tint     (#0ea5e9)
-    private const CLR_INFO_FG      = '0C4A6E';
-    private const CLR_TEAL_BG      = 'CCFBF1'; // --color-nubl-teal-100 (#14b8a6)
-    private const CLR_TEAL_FG      = '134E4A';
+    private const CLR_SUCCESS_BG = 'D1FAE5'; // --color-success tint  (#10b981)
+
+    private const CLR_SUCCESS_FG = '065F46';
+
+    private const CLR_WARNING_BG = 'FEF3C7'; // --color-warning tint  (#ff9800)
+
+    private const CLR_WARNING_FG = '92400E';
+
+    private const CLR_ERROR_BG = 'FFE4E1'; // --color-error tint    (#ff5724)
+
+    private const CLR_ERROR_FG = '9B1C1C';
+
+    private const CLR_INFO_BG = 'E0F2FE'; // --color-info tint     (#0ea5e9)
+
+    private const CLR_INFO_FG = '0C4A6E';
+
+    private const CLR_TEAL_BG = 'CCFBF1'; // --color-nubl-teal-100 (#14b8a6)
+
+    private const CLR_TEAL_FG = '134E4A';
 
     // ── Public API ────────────────────────────────────────────────────────────
 
@@ -56,11 +73,11 @@ class SummaryReportExportService
     public function build(SummaryReport $report, bool $isAr): Spreadsheet
     {
         $this->isAr = $isAr;
-        $t    = fn (string $en, string $ar): string => $isAr ? $ar : $en;
-        $p    = $report->payload;
+        $t = fn (string $en, string $ar): string => $isAr ? $ar : $en;
+        $p = $report->payload;
 
-        $spreadsheet = new Spreadsheet();
-        $sheet       = $spreadsheet->getActiveSheet();
+        $spreadsheet = new Spreadsheet;
+        $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle($t('Summary Report', 'التقرير الملخص'));
 
         if ($isAr) {
@@ -90,8 +107,8 @@ class SummaryReportExportService
         $sheet->mergeCells("A{$row}:J{$row}");
         $sheet->setCellValue("A{$row}", $t('NUBL — Summary Report', 'نظام نبل — التقرير الملخص'));
         $sheet->getStyle("A{$row}:J{$row}")->applyFromArray([
-            'font'      => ['bold' => true, 'size' => 16, 'color' => ['rgb' => self::CLR_TITLE_FG]],
-            'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => self::CLR_TITLE_BG]],
+            'font' => ['bold' => true, 'size' => 16, 'color' => ['rgb' => self::CLR_TITLE_FG]],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => self::CLR_TITLE_BG]],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
         $sheet->getRowDimension($row)->setRowHeight(40);
@@ -145,12 +162,12 @@ class SummaryReportExportService
         ]);
 
         $data = [
-            $p['payments_total_count']      ?? 0,
-            $p['payments_succeeded_count']  ?? 0,
+            $p['payments_total_count'] ?? 0,
+            $p['payments_succeeded_count'] ?? 0,
             $p['payments_succeeded_amount'] ?? 0,
-            $p['payments_failed_count']     ?? 0,
-            $p['payments_failed_amount']    ?? 0,
-            $p['payments_pending_count']    ?? 0,
+            $p['payments_failed_count'] ?? 0,
+            $p['payments_failed_amount'] ?? 0,
+            $p['payments_pending_count'] ?? 0,
         ];
 
         $sheet->fromArray($data, null, "A{$row}");
@@ -191,11 +208,11 @@ class SummaryReportExportService
 
         // Status data rows with semantic colour coding
         $statusColours = [
-            'SUCCEEDED'  => [self::CLR_SUCCESS_BG, self::CLR_SUCCESS_FG],
-            'FAILED'     => [self::CLR_ERROR_BG,   self::CLR_ERROR_FG],
-            'PENDING'    => [self::CLR_WARNING_BG,  self::CLR_WARNING_FG],
+            'SUCCEEDED' => [self::CLR_SUCCESS_BG, self::CLR_SUCCESS_FG],
+            'FAILED' => [self::CLR_ERROR_BG,   self::CLR_ERROR_FG],
+            'PENDING' => [self::CLR_WARNING_BG,  self::CLR_WARNING_FG],
             'PROCESSING' => [self::CLR_INFO_BG,     self::CLR_INFO_FG],
-            'INITIATED'  => [self::CLR_INFO_BG,     self::CLR_INFO_FG],
+            'INITIATED' => [self::CLR_INFO_BG,     self::CLR_INFO_FG],
         ];
 
         foreach ($rows as $r) {
@@ -226,11 +243,11 @@ class SummaryReportExportService
             $t('Payouts to Providers (SAR)', 'المدفوعات للمزودين (ر.س)'),
         ]);
 
-        $net  = (float) ($p['ledger_net_amount'] ?? 0);
+        $net = (float) ($p['ledger_net_amount'] ?? 0);
         $data = [
             $p['ledger_entries_count'] ?? 0,
-            $p['ledger_in_amount']     ?? 0,
-            $p['ledger_out_amount']    ?? 0,
+            $p['ledger_in_amount'] ?? 0,
+            $p['ledger_out_amount'] ?? 0,
             $net,
             $p['payouts_to_providers'] ?? 0,
         ];
@@ -253,6 +270,7 @@ class SummaryReportExportService
         }
 
         $sheet->getRowDimension($row)->setRowHeight(20);
+
         return $row + 2; // +1 data row, +1 spacer
     }
 
@@ -273,28 +291,29 @@ class SummaryReportExportService
         ]);
 
         $data = [
-            $p['requests_total']            ?? 0,
-            $p['requests_fulfilled']        ?? 0,
+            $p['requests_total'] ?? 0,
+            $p['requests_fulfilled'] ?? 0,
             $p['requests_fulfilled_amount'] ?? 0,
-            $p['requests_approved']         ?? 0,
-            $p['requests_redeemable']       ?? 0,
-            $p['requests_pending']          ?? 0,
-            $p['requests_rejected']         ?? 0,
-            $p['requests_cancelled']        ?? 0,
-            $p['requests_city_fund']        ?? 0,
-            $p['requests_adopted']          ?? 0,
+            $p['requests_approved'] ?? 0,
+            $p['requests_redeemable'] ?? 0,
+            $p['requests_pending'] ?? 0,
+            $p['requests_rejected'] ?? 0,
+            $p['requests_cancelled'] ?? 0,
+            $p['requests_city_fund'] ?? 0,
+            $p['requests_adopted'] ?? 0,
         ];
 
         $sheet->fromArray($data, null, "A{$row}");
         $this->styleDataRow($sheet, $row, count($data), [3]);
 
         // Semantic highlights on individual cells
-        $this->accentCell($sheet, "B{$row}", self::CLR_TEAL_BG,   self::CLR_TEAL_FG);   // Fulfilled (teal)
-        $this->accentCell($sheet, "C{$row}", self::CLR_TEAL_BG,   self::CLR_TEAL_FG);   // Fulfilled amount
-        $this->accentCell($sheet, "G{$row}", self::CLR_ERROR_BG,  self::CLR_ERROR_FG);  // Rejected
+        $this->accentCell($sheet, "B{$row}", self::CLR_TEAL_BG, self::CLR_TEAL_FG);   // Fulfilled (teal)
+        $this->accentCell($sheet, "C{$row}", self::CLR_TEAL_BG, self::CLR_TEAL_FG);   // Fulfilled amount
+        $this->accentCell($sheet, "G{$row}", self::CLR_ERROR_BG, self::CLR_ERROR_FG);  // Rejected
         $this->accentCell($sheet, "H{$row}", self::CLR_WARNING_BG, self::CLR_WARNING_FG); // Cancelled
 
         $sheet->getRowDimension($row)->setRowHeight(20);
+
         return $row + 2;
     }
 
@@ -309,20 +328,21 @@ class SummaryReportExportService
         ]);
 
         $data = [
-            $p['redemptions_total']    ?? 0,
+            $p['redemptions_total'] ?? 0,
             $p['redemptions_redeemed'] ?? 0,
-            $p['redemptions_pending']  ?? 0,
-            $p['redemptions_expired']  ?? 0,
+            $p['redemptions_pending'] ?? 0,
+            $p['redemptions_expired'] ?? 0,
         ];
 
         $sheet->fromArray($data, null, "A{$row}");
         $this->styleDataRow($sheet, $row, count($data), []);
 
-        $this->accentCell($sheet, "B{$row}", self::CLR_TEAL_BG,   self::CLR_TEAL_FG);
+        $this->accentCell($sheet, "B{$row}", self::CLR_TEAL_BG, self::CLR_TEAL_FG);
         $this->accentCell($sheet, "C{$row}", self::CLR_WARNING_BG, self::CLR_WARNING_FG);
-        $this->accentCell($sheet, "D{$row}", self::CLR_ERROR_BG,  self::CLR_ERROR_FG);
+        $this->accentCell($sheet, "D{$row}", self::CLR_ERROR_BG, self::CLR_ERROR_FG);
 
         $sheet->getRowDimension($row)->setRowHeight(20);
+
         return $row + 2;
     }
 
@@ -336,8 +356,8 @@ class SummaryReportExportService
         ]);
 
         $data = [
-            $p['active_providers_total']          ?? 0,
-            $p['providers_with_requests']         ?? 0,
+            $p['active_providers_total'] ?? 0,
+            $p['providers_with_requests'] ?? 0,
             $p['active_recipients_with_requests'] ?? 0,
         ];
 
@@ -345,6 +365,7 @@ class SummaryReportExportService
         $this->styleDataRow($sheet, $row, count($data), []);
 
         $sheet->getRowDimension($row)->setRowHeight(20);
+
         return $row + 2;
     }
 
@@ -359,17 +380,18 @@ class SummaryReportExportService
         $sheet->mergeCells("A{$row}:{$lastCol}{$row}");
 
         // Indent on the reading-start side: trailing spaces in RTL, leading in LTR
-        $label = $this->isAr ? ($title . '  ') : ('  ' . $title);
+        $label = $this->isAr ? ($title.'  ') : ('  '.$title);
         $sheet->setCellValue("A{$row}", $label);
 
         $hAlign = $this->isAr ? Alignment::HORIZONTAL_RIGHT : Alignment::HORIZONTAL_LEFT;
 
         $sheet->getStyle("A{$row}:{$lastCol}{$row}")->applyFromArray([
-            'font'      => ['bold' => true, 'size' => 11, 'color' => ['rgb' => self::CLR_SECTION_FG]],
-            'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => self::CLR_SECTION_BG]],
+            'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => self::CLR_SECTION_FG]],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => self::CLR_SECTION_BG]],
             'alignment' => ['horizontal' => $hAlign, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
         $sheet->getRowDimension($row)->setRowHeight(26);
+
         return $row + 1;
     }
 
@@ -383,14 +405,15 @@ class SummaryReportExportService
         $lastCol = chr(64 + count($headers));
         $sheet->fromArray($headers, null, "A{$row}");
         $sheet->getStyle("A{$row}:{$lastCol}{$row}")->applyFromArray([
-            'font'      => ['bold' => true, 'color' => ['rgb' => self::CLR_HEADER_FG]],
-            'fill'      => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => self::CLR_HEADER_BG]],
+            'font' => ['bold' => true, 'color' => ['rgb' => self::CLR_HEADER_FG]],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => self::CLR_HEADER_BG]],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'wrapText' => true],
-            'borders'   => [
+            'borders' => [
                 'bottom' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => self::CLR_SECTION_BG]],
             ],
         ]);
         $sheet->getRowDimension($row)->setRowHeight(30);
+
         return $row + 1;
     }
 
@@ -407,8 +430,8 @@ class SummaryReportExportService
         ]);
 
         for ($c = 1; $c <= $colCount; $c++) {
-            $cellRef = chr(64 + $c) . $row;
-            $val     = $sheet->getCell($cellRef)->getValue();
+            $cellRef = chr(64 + $c).$row;
+            $val = $sheet->getCell($cellRef)->getValue();
             if (is_numeric($val)) {
                 $sheet->getStyle($cellRef)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_RIGHT);
             }

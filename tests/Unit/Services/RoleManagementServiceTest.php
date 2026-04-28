@@ -89,4 +89,3 @@ class RoleManagementServiceTest extends TestCase
         $this->assertDatabaseMissing('roles', ['name' => 'qa_role']);
     }
 }
-

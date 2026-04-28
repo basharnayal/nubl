@@ -12,7 +12,6 @@ use Illuminate\Notifications\Notification;
  */
 class DonationReceiptNotification extends Notification
 {
-
     public function __construct(
         public Payment $payment
     ) {}
@@ -44,9 +43,9 @@ class DonationReceiptNotification extends Notification
             ->subject(__('Donation Receipt - :amount SAR', ['amount' => $amount]))
             ->greeting(__('Thank you for your donation!'))
             ->line(__('Your donation was successful. Here is your receipt:'))
-            ->line(__('Amount') . ': ' . $amount . ' ' . __('SAR'))
-            ->line(__('Date') . ': ' . $date)
-            ->line(__('Payment ID') . ': #' . $this->payment->id)
+            ->line(__('Amount').': '.$amount.' '.__('SAR'))
+            ->line(__('Date').': '.$date)
+            ->line(__('Payment ID').': #'.$this->payment->id)
             ->line(__('Your contribution has been added to the city fund and will help those in need.'))
             ->action(__('View My Donations'), route('donor.donations.index'))
             ->line(__('Thank you for supporting those in need.'));

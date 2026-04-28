@@ -100,4 +100,3 @@ class RoleControllerTest extends TestCase
         $this->assertDatabaseHas('roles', ['name' => 'ops_role']);
     }
 }
-

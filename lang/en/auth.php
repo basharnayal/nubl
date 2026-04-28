@@ -11,4 +11,3 @@ return [
         'last_updated' => 'Last updated',
     ],
 ];
-

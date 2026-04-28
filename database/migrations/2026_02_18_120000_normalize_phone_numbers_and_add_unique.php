@@ -1,8 +1,8 @@
 <?php
 
-use App\Support\PhoneHelper;
 use App\Models\ProviderProfile;
 use App\Models\User;
+use App\Support\PhoneHelper;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

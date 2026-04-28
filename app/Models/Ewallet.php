@@ -51,4 +51,3 @@ class Ewallet extends Model
         return $this->hasMany(FundTransaction::class, 'wallet_id');
     }
 }
-

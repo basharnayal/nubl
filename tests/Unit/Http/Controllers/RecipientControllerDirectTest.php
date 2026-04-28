@@ -59,4 +59,3 @@ class RecipientControllerDirectTest extends TestCase
         $this->assertSame($activeProvider->id, $providers->first()->id);
     }
 }
-

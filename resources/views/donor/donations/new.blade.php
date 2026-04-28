@@ -74,16 +74,16 @@
 
                             <div class="flex items-center justify-center gap-3" role="region" aria-label="خيارات الدفع المتاحة">
                                 <div class="flex h-8 items-center justify-center rounded-md border-2 border-slate-200 bg-white p-1 dark:border-navy-600 dark:bg-navy-700">
-                                    <img class="h-6 w-6" src="https://cdn.ehsan.sa/ehsan-ui/images/icons/visa-icon.svg" alt="Visa">
+                                    <img class="h-6 w-6" src="{{ asset('images/icons/visa-icon.svg') }}" alt="Visa">
                                 </div>
                                 <div class="flex h-8 items-center justify-center rounded-md border-2 border-slate-200 bg-white p-1 dark:border-navy-600 dark:bg-navy-700">
-                                    <img class="h-6 w-6" src="https://cdn.ehsan.sa/ehsan-ui/images/icons/apple-icon.svg" alt="Apple Pay">
+                                    <img class="h-6 w-6" src="{{ asset('images/icons/apple-icon.svg') }}" alt="Apple Pay">
                                 </div>
                                 <div class="flex h-8 items-center justify-center rounded-md border-2 border-slate-200 bg-white p-1 dark:border-navy-600 dark:bg-navy-700">
-                                    <img class="h-6 w-6" src="https://cdn.ehsan.sa/ehsan-ui/images/icons/mastercard-icon.svg" alt="Master Card">
+                                    <img class="h-6 w-6" src="{{ asset('images/icons/mastercard-icon.svg') }}" alt="Master Card">
                                 </div>
                                 <div class="flex h-8 items-center justify-center rounded-md border-2 border-slate-200 bg-white p-1 dark:border-navy-600 dark:bg-navy-700">
-                                    <img class="h-6 w-6" src="https://cdn.ehsan.sa/ehsan-ui/images/icons/mada-icon.svg" alt="بطاقة مدى">
+                                    <img class="h-6 w-6" src="{{ asset('images/icons/mada-icon.svg') }}" alt="بطاقة مدى">
                                 </div>
                             </div>
                         </div>

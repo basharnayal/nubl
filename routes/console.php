@@ -46,8 +46,6 @@ Schedule::call(fn () => Http::get(config('services.forge.heartbeat_url')))
     ->name('forge-scheduler-heartbeat')
     ->withoutOverlapping();
 
-
-
 // For Testing run every hour
 Schedule::command('provider-payouts:generate-weekly')
     ->hourly()
@@ -63,4 +61,3 @@ Schedule::command(GenerateSummaryReportCommand::class, ['--type=daily'])
     ->dailyAt('06:00')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/report-monthly.log'));
-

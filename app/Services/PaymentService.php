@@ -218,7 +218,7 @@ class PaymentService
                 'invoice_id' => $invoiceId,
             ]);
 
-            return $this->redirectDonorFailed(null, 'payment_not_found');
+            return $this->redirectDonorFailed(null, 'payment_not_found', true);
         }
 
         // ── 2. Quick idempotency check (no lock needed — read-only fast path) ─
@@ -443,19 +443,25 @@ class PaymentService
 
     private function redirectPaymentSuccess(Payment $payment): RedirectResponse
     {
-        $route = $payment->is_guest ? 'guest.donation.success' : 'donor.payments.success';
+        if ($payment->is_guest) {
+            return redirect()->route('guest.donation.success', ['token' => $payment->idempotency_key]);
+        }
 
-        return redirect()->route($route, ['payment_id' => $payment->id]);
+        return redirect()->route('donor.payments.success', ['payment_id' => $payment->id]);
     }
 
-    private function redirectDonorFailed(?Payment $payment, string $reason): RedirectResponse
+    private function redirectDonorFailed(?Payment $payment, string $reason, bool $guestFallback = false): RedirectResponse
     {
         $params = [];
         if ($payment !== null) {
-            $params['payment_id'] = $payment->id;
+            $params[$payment->is_guest ? 'token' : 'payment_id'] = $payment->is_guest
+                ? $payment->idempotency_key
+                : $payment->id;
         }
 
-        $route = ($payment?->is_guest) ? 'guest.donation.failed' : 'donor.payments.failed';
+        $route = ($payment?->is_guest || ($payment === null && $guestFallback))
+            ? 'guest.donation.failed'
+            : 'donor.payments.failed';
 
         return redirect()->route($route, $params)
             ->with('payment_reason', $reason);

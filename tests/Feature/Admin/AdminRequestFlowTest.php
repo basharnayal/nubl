@@ -18,8 +18,11 @@ class AdminRequestFlowTest extends TestCase
     use RefreshDatabase;
 
     protected $admin;
+
     protected $provider;
+
     protected $recipient;
+
     protected $request;
 
     protected function setUp(): void

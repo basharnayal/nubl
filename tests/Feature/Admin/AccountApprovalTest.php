@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Admin;
 
+use App\Http\Controllers\Admin\AccountApprovalController;
 use App\Models\ProviderDocuments;
 use App\Models\ProviderFinancialInfo;
 use App\Models\ProviderOperatingInfo;
@@ -9,7 +10,6 @@ use App\Models\ProviderProfile;
 use App\Models\RecipientKycDetails;
 use App\Models\RecipientProfile;
 use App\Models\User;
-use App\Http\Controllers\Admin\AccountApprovalController;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;

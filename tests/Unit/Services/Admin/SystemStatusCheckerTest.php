@@ -94,4 +94,3 @@ class SystemStatusCheckerTest extends TestCase
         $this->assertSame('ok', $items['gateway']['severity']);
     }
 }
-

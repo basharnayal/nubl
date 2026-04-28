@@ -21,7 +21,7 @@ class SaudiPhoneRulesTest extends TestCase
     {
         $validator = Validator::make(
             ['phone_number' => $input],
-            ['phone_number' => [new SaudiPhoneNumber()]]
+            ['phone_number' => [new SaudiPhoneNumber]]
         );
 
         $this->assertFalse($validator->fails(), implode(', ', $validator->errors()->all()));
@@ -47,7 +47,7 @@ class SaudiPhoneRulesTest extends TestCase
     {
         $validator = Validator::make(
             ['phone_number' => $input],
-            ['phone_number' => [new SaudiPhoneNumber()]]
+            ['phone_number' => [new SaudiPhoneNumber]]
         );
 
         $this->assertTrue($validator->fails());
@@ -73,7 +73,7 @@ class SaudiPhoneRulesTest extends TestCase
 
         $validator = Validator::make(
             ['phone_number' => '0501234567'],
-            ['phone_number' => [new SaudiPhoneUnique()]]
+            ['phone_number' => [new SaudiPhoneUnique]]
         );
 
         $this->assertTrue($validator->fails());
@@ -98,7 +98,7 @@ class SaudiPhoneRulesTest extends TestCase
     {
         $validator = Validator::make(
             ['phone_number' => 501234567],
-            ['phone_number' => [new SaudiPhoneUnique()]]
+            ['phone_number' => [new SaudiPhoneUnique]]
         );
 
         $this->assertTrue($validator->fails());

@@ -88,4 +88,3 @@ class SummaryReportExportServiceTest extends TestCase
         $this->assertTrue($spreadsheet->getActiveSheet()->getRightToLeft());
     }
 }
-

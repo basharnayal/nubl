@@ -47,7 +47,7 @@ class ProcessPendingAllocationsJobTest extends TestCase
                     && ($data['provider_id'] ?? null) === null)
             );
 
-        (new ProcessPendingAllocationsJob())->handle($allocationService, $auditService);
+        (new ProcessPendingAllocationsJob)->handle($allocationService, $auditService);
 
         $this->assertDatabaseCount('pending_allocations', 0);
     }
@@ -111,7 +111,7 @@ class ProcessPendingAllocationsJobTest extends TestCase
                     && ($data['failed'] ?? null) === 1)
             );
 
-        (new ProcessPendingAllocationsJob())->handle($allocationService, $auditService);
+        (new ProcessPendingAllocationsJob)->handle($allocationService, $auditService);
 
         $this->assertDatabaseHas('pending_allocations', ['id' => $pending->id]);
     }

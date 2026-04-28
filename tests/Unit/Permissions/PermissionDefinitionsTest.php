@@ -40,4 +40,3 @@ class PermissionDefinitionsTest extends TestCase
         $this->assertSame(PermissionDefinitions::provider(), $groups->get('provider')['names']);
     }
 }
-

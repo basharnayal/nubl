@@ -29,11 +29,11 @@ class GuestDonationController extends Controller
 
     public function success(Request $request)
     {
-        $paymentId = $request->query('payment_id');
+        $token = $request->query('token');
         $payment = null;
 
-        if ($paymentId) {
-            $payment = Payment::where('id', $paymentId)
+        if ($token) {
+            $payment = Payment::where('idempotency_key', $token)
                 ->where('is_guest', true)
                 ->where('status', Payment::STATUS_SUCCEEDED)
                 ->first();
@@ -42,22 +42,23 @@ class GuestDonationController extends Controller
         return view('guest-donation.success', compact('payment'));
     }
 
-    public function receipt(Payment $payment)
+    public function receipt(string $token)
     {
-        if (! $payment->is_guest || $payment->status !== Payment::STATUS_SUCCEEDED) {
-            abort(404);
-        }
+        $payment = Payment::where('idempotency_key', $token)
+            ->where('is_guest', true)
+            ->where('status', Payment::STATUS_SUCCEEDED)
+            ->firstOrFail();
 
         return view('guest-donation.receipt', compact('payment'));
     }
 
     public function failed(Request $request)
     {
-        $paymentId = $request->query('payment_id');
+        $token = $request->query('token');
         $payment = null;
 
-        if ($paymentId) {
-            $payment = Payment::where('id', $paymentId)
+        if ($token) {
+            $payment = Payment::where('idempotency_key', $token)
                 ->where('is_guest', true)
                 ->first();
         }

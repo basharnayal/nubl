@@ -17,6 +17,7 @@ class DemoRequestSeeder extends Seeder
     {
         if (Request::where('invoice_id', 'like', 'DEMO-%')->exists()) {
             $this->command->info('⏭ Demo requests already seeded.');
+
             return;
         }
 
@@ -33,6 +34,7 @@ class DemoRequestSeeder extends Seeder
 
         if (empty($recipients) || empty($providers)) {
             $this->command->warn('⚠ No active recipients or providers found. Skipping DemoRequestSeeder.');
+
             return;
         }
 
@@ -51,6 +53,7 @@ class DemoRequestSeeder extends Seeder
         $providers = array_keys($menuItemsByProvider);
         if (empty($providers)) {
             $this->command->warn('⚠ No providers with active menu items. Skipping.');
+
             return;
         }
 
@@ -65,14 +68,14 @@ class DemoRequestSeeder extends Seeder
         $paymentCursor = 0;
 
         $requestCount = 0;
-        $itemCount    = 0;
-        $linkCount    = 0;
+        $itemCount = 0;
+        $linkCount = 0;
 
         foreach ($distribution as $spec) {
             $recipientId = $recipients[array_rand($recipients)];
-            $providerId  = $providers[array_rand($providers)];
-            $items       = $menuItemsByProvider[$providerId];
-            $weeksAgo    = $spec['weeks_ago'];
+            $providerId = $providers[array_rand($providers)];
+            $items = $menuItemsByProvider[$providerId];
+            $weeksAgo = $spec['weeks_ago'];
 
             $createdAt = now()->subWeeks($weeksAgo)->subDays(rand(0, 6))->subHours(rand(6, 22));
 
@@ -82,20 +85,20 @@ class DemoRequestSeeder extends Seeder
             $requestItemsData = [];
 
             foreach ($pickedItems as $menuItem) {
-                $qty   = rand(1, (int) ($menuItem->max_per_request ?? 3));
+                $qty = rand(1, (int) ($menuItem->max_per_request ?? 3));
                 $price = $menuItem->price;
-                $line  = bcmul((string) $price, (string) $qty, 2);
+                $line = bcmul((string) $price, (string) $qty, 2);
                 $reservedAmount = bcadd($reservedAmount, $line, 2);
 
                 $requestItemsData[] = [
-                    'menu_item_id'   => $menuItem->id,
-                    'quantity'       => $qty,
+                    'menu_item_id' => $menuItem->id,
+                    'quantity' => $qty,
                     'price_snapshot' => $price,
                 ];
             }
 
             // Determine funding_source and rejection fields
-            $fundingSource       = null;
+            $fundingSource = null;
             $rejectionReasonCode = null;
             $rejectionReasonNote = null;
 
@@ -110,39 +113,39 @@ class DemoRequestSeeder extends Seeder
                 case 'REJECTED':
                     $rejectionReasonCode = ['out_of_stock', 'outside_service_area', 'duplicate', 'policy_violation'][array_rand(['out_of_stock', 'outside_service_area', 'duplicate', 'policy_violation'])];
                     $rejectionReasonNote = [
-                        'out_of_stock'        => 'المنتجات المطلوبة غير متوفرة حالياً',
+                        'out_of_stock' => 'المنتجات المطلوبة غير متوفرة حالياً',
                         'outside_service_area' => 'العنوان خارج نطاق التوصيل',
-                        'duplicate'           => 'طلب مكرر',
-                        'policy_violation'    => 'مخالفة سياسة الاستخدام',
+                        'duplicate' => 'طلب مكرر',
+                        'policy_violation' => 'مخالفة سياسة الاستخدام',
                     ][$rejectionReasonCode];
                     break;
             }
 
             // Create the request
             $request = Request::create([
-                'recipient_id'          => $recipientId,
-                'provider_id'           => $providerId,
-                'reserved_amount'       => $reservedAmount,
-                'funding_source'        => $fundingSource,
-                'status'                => $spec['status'],
+                'recipient_id' => $recipientId,
+                'provider_id' => $providerId,
+                'reserved_amount' => $reservedAmount,
+                'funding_source' => $fundingSource,
+                'status' => $spec['status'],
                 'rejection_reason_code' => $rejectionReasonCode,
                 'rejection_reason_note' => $rejectionReasonNote,
-                'is_flagged'            => rand(1, 20) === 1, // 5% flagged
-                'invoice_id'            => 'DEMO-' . strtoupper(substr(md5(uniqid()), 0, 8)),
-                'created_at'            => $createdAt,
-                'updated_at'            => $createdAt,
+                'is_flagged' => rand(1, 20) === 1, // 5% flagged
+                'invoice_id' => 'DEMO-'.strtoupper(substr(md5(uniqid()), 0, 8)),
+                'created_at' => $createdAt,
+                'updated_at' => $createdAt,
             ]);
             $requestCount++;
 
             // Create request items
             foreach ($requestItemsData as $ri) {
                 RequestItem::create([
-                    'request_id'     => $request->id,
-                    'menu_item_id'   => $ri['menu_item_id'],
-                    'quantity'       => $ri['quantity'],
+                    'request_id' => $request->id,
+                    'menu_item_id' => $ri['menu_item_id'],
+                    'quantity' => $ri['quantity'],
                     'price_snapshot' => $ri['price_snapshot'],
-                    'created_at'     => $createdAt,
-                    'updated_at'     => $createdAt,
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
                 ]);
                 $itemCount++;
             }
@@ -155,7 +158,7 @@ class DemoRequestSeeder extends Seeder
                 RequestPaymentLink::create([
                     'payment_id' => $paymentId,
                     'request_id' => $request->id,
-                    'amount'     => $reservedAmount,
+                    'amount' => $reservedAmount,
                     'created_at' => $createdAt,
                     'updated_at' => $createdAt,
                 ]);
@@ -212,36 +215,36 @@ class DemoRequestSeeder extends Seeder
     {
         // Create 3 "paused" allocation records
         for ($i = 0; $i < 3; $i++) {
-            $providerId  = $providers[array_rand($providers)];
+            $providerId = $providers[array_rand($providers)];
             $recipientId = $recipients[array_rand($recipients)];
-            $items       = $menuItemsByProvider[$providerId];
-            $menuItem    = $items->random();
+            $items = $menuItemsByProvider[$providerId];
+            $menuItem = $items->random();
 
             $amount = bcmul((string) $menuItem->price, (string) rand(1, 2), 2);
 
             // Create a REQUESTED request for this pending allocation
             $request = Request::create([
-                'recipient_id'    => $recipientId,
-                'provider_id'     => $providerId,
+                'recipient_id' => $recipientId,
+                'provider_id' => $providerId,
                 'reserved_amount' => $amount,
-                'status'          => 'REQUESTED',
-                'invoice_id'      => 'DEMO-PA-' . strtoupper(substr(md5(uniqid()), 0, 6)),
-                'created_at'      => now()->subHours(rand(1, 12)),
-                'updated_at'      => now()->subHours(rand(1, 12)),
+                'status' => 'REQUESTED',
+                'invoice_id' => 'DEMO-PA-'.strtoupper(substr(md5(uniqid()), 0, 6)),
+                'created_at' => now()->subHours(rand(1, 12)),
+                'updated_at' => now()->subHours(rand(1, 12)),
             ]);
 
             RequestItem::create([
-                'request_id'     => $request->id,
-                'menu_item_id'   => $menuItem->id,
-                'quantity'        => rand(1, 2),
+                'request_id' => $request->id,
+                'menu_item_id' => $menuItem->id,
+                'quantity' => rand(1, 2),
                 'price_snapshot' => $menuItem->price,
             ]);
 
             PendingAllocation::create([
-                'request_id'  => $request->id,
+                'request_id' => $request->id,
                 'provider_id' => $providerId,
-                'amount'      => $amount,
-                'paused_by'   => $i < 2 ? 'global' : 'provider',
+                'amount' => $amount,
+                'paused_by' => $i < 2 ? 'global' : 'provider',
             ]);
         }
 

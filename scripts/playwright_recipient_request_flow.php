@@ -12,9 +12,9 @@ use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
-$app = require __DIR__ . '/../bootstrap/app.php';
+$app = require __DIR__.'/../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 
 $action = $argv[1] ?? null;
@@ -26,8 +26,8 @@ if ($action === 'seed') {
     $password = 'password123';
     $businessName = "PW Provider {$uniqueSuffix}";
     $itemName = "PW Kabsa {$uniqueSuffix}";
-    $recipientPhone = '05' . str_pad(substr(strrev($uniqueSuffix), 0, 8), 8, '1', STR_PAD_RIGHT);
-    $providerPhone = '05' . str_pad(substr($uniqueSuffix, -8), 8, '0', STR_PAD_LEFT);
+    $recipientPhone = '05'.str_pad(substr(strrev($uniqueSuffix), 0, 8), 8, '1', STR_PAD_RIGHT);
+    $providerPhone = '05'.str_pad(substr($uniqueSuffix, -8), 8, '0', STR_PAD_LEFT);
 
     app(PermissionRegistrar::class)->forgetCachedPermissions();
 

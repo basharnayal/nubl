@@ -26,11 +26,11 @@ class RegistrationManager
     public function register(RegistrationData $data): User
     {
         return match (true) {
-            $data instanceof DonorRegistrationData     => $this->donor->register($data),
+            $data instanceof DonorRegistrationData => $this->donor->register($data),
             $data instanceof RecipientRegistrationData => $this->recipient->register($data),
-            $data instanceof ProviderRegistrationData  => $this->provider->register($data),
+            $data instanceof ProviderRegistrationData => $this->provider->register($data),
             default => throw new \InvalidArgumentException(
-                'Unsupported registration data type: ' . $data::class
+                'Unsupported registration data type: '.$data::class
             ),
         };
     }
