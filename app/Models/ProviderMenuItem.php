@@ -40,10 +40,10 @@ class ProviderMenuItem extends Model
         }
 
         $normalized = str_replace('\\', '/', $path);
-        $segments = array_values(array_filter(explode('/', $normalized), static fn($s) => $s !== ''));
-        $encoded = array_map(static fn(string $segment): string => rawurlencode($segment), $segments);
+        $segments = array_values(array_filter(explode('/', $normalized), static fn ($s) => $s !== ''));
+        $encoded = array_map(static fn (string $segment): string => rawurlencode($segment), $segments);
 
-        return asset('storage/' . implode('/', $encoded));
+        return asset('storage/'.implode('/', $encoded));
     }
 
     public function provider(): BelongsTo

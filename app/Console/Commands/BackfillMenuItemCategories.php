@@ -24,20 +24,21 @@ class BackfillMenuItemCategories extends Command
 
         foreach ($items as $item) {
             $provider = $item->provider;
-            if (!$provider)
+            if (! $provider) {
                 continue;
+            }
 
             $profile = $provider->providerProfile;
             $businessCategories = $profile?->business_category ?? ['Other'];
             $businessCategory = 'Other';
             if (is_array($businessCategories) && count($businessCategories) > 0) {
                 $businessCategory = $businessCategories[0];
-            } else if (is_string($businessCategories)) {
+            } elseif (is_string($businessCategories)) {
                 $businessCategory = $businessCategories;
             }
 
             $validMainCategories = ['Restaurant', 'Catering', 'Bakery', 'Grocery', 'Food truck', 'Other'];
-            if (!in_array($businessCategory, $validMainCategories)) {
+            if (! in_array($businessCategory, $validMainCategories)) {
                 $businessCategory = 'Other';
             }
 
@@ -49,7 +50,7 @@ class BackfillMenuItemCategories extends Command
                 ->first();
 
             // Fallback to "other" (case insensitive slug)
-            if (!$category) {
+            if (! $category) {
                 $category = \App\Models\MenuItemCategory::firstOrCreate([
                     'business_category' => $businessCategory,
                     'slug' => 'other',

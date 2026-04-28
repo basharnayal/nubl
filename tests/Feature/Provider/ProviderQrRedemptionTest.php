@@ -12,8 +12,8 @@ use App\Models\Request as RequestModel;
 use App\Models\RequestPaymentLink;
 use App\Models\SystemSetting;
 use App\Models\User;
-use App\Services\RedemptionService;
 use App\Services\AuditService;
+use App\Services\RedemptionService;
 use App\Services\SystemWalletService;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
@@ -64,18 +64,18 @@ class ProviderQrRedemptionTest extends TestCase
         ProviderProfile::firstOrCreate(
             ['user_id' => $this->provider->id],
             [
-                'full_name_ar'      => 'مزود',
-                'full_name_en'      => 'Provider',
-                'phone_number'      => '966501234567',
-                'email'             => $this->provider->email,
-                'business_name_ar'  => 'متجر',
-                'business_name_en'  => 'Shop',
-                'unified_number'    => '7000123456',
+                'full_name_ar' => 'مزود',
+                'full_name_en' => 'Provider',
+                'phone_number' => '966501234567',
+                'email' => $this->provider->email,
+                'business_name_ar' => 'متجر',
+                'business_name_en' => 'Shop',
+                'unified_number' => '7000123456',
                 'business_category' => ['restaurant'],
-                'address_ar'        => 'عنوان',
-                'address_en'        => 'Address',
-                'city'              => 'Riyadh',
-                'region'            => 'central',
+                'address_ar' => 'عنوان',
+                'address_en' => 'Address',
+                'city' => 'Riyadh',
+                'region' => 'central',
             ]
         );
 
@@ -84,49 +84,49 @@ class ProviderQrRedemptionTest extends TestCase
 
         $menuItem = ProviderMenuItem::create([
             'provider_id' => $this->provider->id,
-            'name'        => 'Meal',
-            'price'       => 30.00,
-            'category'    => 'food',
-            'is_active'   => true,
+            'name' => 'Meal',
+            'price' => 30.00,
+            'category' => 'food',
+            'is_active' => true,
         ]);
 
         // System wallet + donor payment so transfer at redemption can succeed
         $systemWallet = Ewallet::create([
             'owner_type' => 'SYSTEM',
-            'owner_id'   => null,
-            'balance'    => 0,
-            'status'     => true,
+            'owner_id' => null,
+            'balance' => 0,
+            'status' => true,
         ]);
 
-        $donor   = User::factory()->create();
+        $donor = User::factory()->create();
         $payment = Payment::create([
-            'sponsor_id'         => $donor->id,
-            'gateway'            => Payment::GATEWAY_MYFATOORAH,
-            'status'             => Payment::STATUS_SUCCEEDED,
-            'amount'             => 100,
+            'sponsor_id' => $donor->id,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'status' => Payment::STATUS_SUCCEEDED,
+            'amount' => 100,
         ]);
         FundTransaction::create([
-            'wallet_id'          => $systemWallet->id,
-            'sponsor_id'         => $donor->id,
-            'source'             => FundTransaction::SOURCE_DONATION,
-            'amount'             => 100,
-            'direction'          => FundTransaction::DIRECTION_IN,
-            'payment_id'         => $payment->id,
-            'request_id'         => null,
+            'wallet_id' => $systemWallet->id,
+            'sponsor_id' => $donor->id,
+            'source' => FundTransaction::SOURCE_DONATION,
+            'amount' => 100,
+            'direction' => FundTransaction::DIRECTION_IN,
+            'payment_id' => $payment->id,
+            'request_id' => null,
             'order_redemption_id' => null,
         ]);
         $systemWallet->syncBalance();
 
         $request = RequestModel::create([
-            'recipient_id'    => $recipient->id,
-            'provider_id'     => $this->provider->id,
+            'recipient_id' => $recipient->id,
+            'provider_id' => $this->provider->id,
             'reserved_amount' => 30.00,
-            'status'          => 'REDEEMABLE',
-            'funding_source'  => 'CITY_FUND',
+            'status' => 'REDEEMABLE',
+            'funding_source' => 'CITY_FUND',
         ]);
         $request->items()->create([
-            'menu_item_id'   => $menuItem->id,
-            'quantity'       => 1,
+            'menu_item_id' => $menuItem->id,
+            'quantity' => 1,
             'price_snapshot' => 30.00,
         ]);
 
@@ -218,7 +218,7 @@ class ProviderQrRedemptionTest extends TestCase
     #[Test]
     public function valid_token_is_redeemed_and_returns_200_fr_9_1(): void
     {
-        $request    = $this->createRedeemableRequest();
+        $request = $this->createRedeemableRequest();
         $redemption = RedemptionService::generateForRequest($request);
         $this->assertNotNull($redemption, 'Redemption token must be generated for REDEEMABLE request.');
 
@@ -234,7 +234,7 @@ class ProviderQrRedemptionTest extends TestCase
 
         // DB: redemption is now REDEEMED
         $this->assertDatabaseHas('order_redemptions', [
-            'id'     => $redemption->id,
+            'id' => $redemption->id,
             'status' => 'REDEEMED',
         ]);
 
@@ -434,7 +434,7 @@ class ProviderQrRedemptionTest extends TestCase
     #[Test]
     public function already_redeemed_token_returns_409_fr_9_1(): void
     {
-        $request    = $this->createRedeemableRequest();
+        $request = $this->createRedeemableRequest();
         $redemption = RedemptionService::generateForRequest($request);
         $this->assertNotNull($redemption);
 

@@ -23,7 +23,7 @@ class AdminFinancialService
      */
     public function getOverview(): array
     {
-        $systemWallet   = Ewallet::where('owner_type', 'SYSTEM')->first();
+        $systemWallet = Ewallet::where('owner_type', 'SYSTEM')->first();
         $systemWalletId = $systemWallet?->id;
 
         // 6 individual Payment queries → 1 aggregate query
@@ -66,16 +66,16 @@ class AdminFinancialService
             : null;
 
         return [
-            'system_wallet_balance'      => $systemWallet ? (float) $systemWallet->balance : 0.0,
-            'successful_payments_count'  => (int)   ($paymentStats->succeeded_count  ?? 0),
+            'system_wallet_balance' => $systemWallet ? (float) $systemWallet->balance : 0.0,
+            'successful_payments_count' => (int) ($paymentStats->succeeded_count ?? 0),
             'successful_payments_amount' => (float) ($paymentStats->succeeded_amount ?? 0),
-            'pending_count'              => (int)   ($paymentStats->pending_count    ?? 0),
-            'pending_amount'             => (float) ($paymentStats->pending_amount   ?? 0),
-            'failed_count'               => (int)   ($paymentStats->failed_count     ?? 0),
-            'failed_amount'              => (float) ($paymentStats->failed_amount    ?? 0),
-            'fund_inbound_system'        => (float) ($ledgerStats->fund_in           ?? 0),
-            'fund_outbound_system'       => (float) ($ledgerStats->fund_out          ?? 0),
-            'transfers_to_providers'     => (float) ($ledgerStats->provider_payouts  ?? 0),
+            'pending_count' => (int) ($paymentStats->pending_count ?? 0),
+            'pending_amount' => (float) ($paymentStats->pending_amount ?? 0),
+            'failed_count' => (int) ($paymentStats->failed_count ?? 0),
+            'failed_amount' => (float) ($paymentStats->failed_amount ?? 0),
+            'fund_inbound_system' => (float) ($ledgerStats->fund_in ?? 0),
+            'fund_outbound_system' => (float) ($ledgerStats->fund_out ?? 0),
+            'transfers_to_providers' => (float) ($ledgerStats->provider_payouts ?? 0),
         ];
     }
 
@@ -88,7 +88,7 @@ class AdminFinancialService
     public function getRangeSummary(Carbon $from, Carbon $to): array
     {
         $from = $from->copy()->startOfDay();
-        $to   = $to->copy()->endOfDay();
+        $to = $to->copy()->endOfDay();
 
         // ── Payments (gateway) — 7 queries → 1 ────────────────────────────
         $paymentRows = Payment::query()
@@ -98,19 +98,19 @@ class AdminFinancialService
             ->get()
             ->keyBy('status');
 
-        $paymentsTotal   = (int)   $paymentRows->sum('cnt');
-        $paymentsSuccCnt = (int)   ($paymentRows->get(Payment::STATUS_SUCCEEDED)?->cnt   ?? 0);
+        $paymentsTotal = (int) $paymentRows->sum('cnt');
+        $paymentsSuccCnt = (int) ($paymentRows->get(Payment::STATUS_SUCCEEDED)?->cnt ?? 0);
         $paymentsSuccAmt = (float) ($paymentRows->get(Payment::STATUS_SUCCEEDED)?->total ?? 0);
-        $paymentsFailCnt = (int)   ($paymentRows->get(Payment::STATUS_FAILED)?->cnt      ?? 0);
-        $paymentsFailAmt = (float) ($paymentRows->get(Payment::STATUS_FAILED)?->total    ?? 0);
+        $paymentsFailCnt = (int) ($paymentRows->get(Payment::STATUS_FAILED)?->cnt ?? 0);
+        $paymentsFailAmt = (float) ($paymentRows->get(Payment::STATUS_FAILED)?->total ?? 0);
         $paymentsPendCnt = (int) (
-            ($paymentRows->get(Payment::STATUS_INITIATED)?->cnt  ?? 0)
-            + ($paymentRows->get(Payment::STATUS_PENDING)?->cnt  ?? 0)
+            ($paymentRows->get(Payment::STATUS_INITIATED)?->cnt ?? 0)
+            + ($paymentRows->get(Payment::STATUS_PENDING)?->cnt ?? 0)
             + ($paymentRows->get(Payment::STATUS_PROCESSING)?->cnt ?? 0)
         );
 
         // ── Fund ledger — 4 queries → 1 ────────────────────────────────────
-        $systemWallet   = Ewallet::where('owner_type', 'SYSTEM')->first();
+        $systemWallet = Ewallet::where('owner_type', 'SYSTEM')->first();
         $systemWalletId = $systemWallet?->id;
 
         $ledgerStats = FundTransaction::query()
@@ -128,10 +128,10 @@ class AdminFinancialService
             )
             ->first();
 
-        $ledgerIn           = (float) ($ledgerStats->total_in          ?? 0);
-        $ledgerOut          = (float) ($ledgerStats->total_out         ?? 0);
-        $ledgerCnt          = (int)   ($ledgerStats->entries_count     ?? 0);
-        $payoutsToProviders = (float) ($ledgerStats->provider_payouts  ?? 0);
+        $ledgerIn = (float) ($ledgerStats->total_in ?? 0);
+        $ledgerOut = (float) ($ledgerStats->total_out ?? 0);
+        $ledgerCnt = (int) ($ledgerStats->entries_count ?? 0);
+        $payoutsToProviders = (float) ($ledgerStats->provider_payouts ?? 0);
 
         // ── Requests — 7 queries → 1 ───────────────────────────────────────
         $requestStats = RequestModel::query()
@@ -173,49 +173,49 @@ class AdminFinancialService
         return [
             // meta
             'from' => $from,
-            'to'   => $to,
+            'to' => $to,
 
             // payments
-            'payments_by_status'       => $paymentRows,
-            'payments_total_count'     => $paymentsTotal,
+            'payments_by_status' => $paymentRows,
+            'payments_total_count' => $paymentsTotal,
             'payments_succeeded_count' => $paymentsSuccCnt,
-            'payments_succeeded_amount'=> $paymentsSuccAmt,
-            'payments_failed_count'    => $paymentsFailCnt,
-            'payments_failed_amount'   => $paymentsFailAmt,
-            'payments_pending_count'   => $paymentsPendCnt,
+            'payments_succeeded_amount' => $paymentsSuccAmt,
+            'payments_failed_count' => $paymentsFailCnt,
+            'payments_failed_amount' => $paymentsFailAmt,
+            'payments_pending_count' => $paymentsPendCnt,
 
             // ledger
-            'ledger_entries_count'  => $ledgerCnt,
-            'ledger_in_amount'      => $ledgerIn,
-            'ledger_out_amount'     => $ledgerOut,
-            'ledger_net_amount'     => (float) FinancialMath::sub(
+            'ledger_entries_count' => $ledgerCnt,
+            'ledger_in_amount' => $ledgerIn,
+            'ledger_out_amount' => $ledgerOut,
+            'ledger_net_amount' => (float) FinancialMath::sub(
                 FinancialMath::normalize((string) $ledgerIn),
                 FinancialMath::normalize((string) $ledgerOut)
             ),
-            'payouts_to_providers'  => $payoutsToProviders,
+            'payouts_to_providers' => $payoutsToProviders,
 
             // requests
-            'requests_total'           => (int)   ($requestStats->total                  ?? 0),
-            'requests_fulfilled'       => (int)   ($requestStats->fulfilled              ?? 0),
-            'requests_approved'        => (int)   ($requestStats->approved               ?? 0),
-            'requests_redeemable'      => (int)   ($requestStats->redeemable             ?? 0),
-            'requests_pending'         => (int)   ($requestStats->pending                ?? 0),
-            'requests_rejected'        => (int)   ($requestStats->rejected               ?? 0),
-            'requests_cancelled'       => (int)   ($requestStats->cancelled              ?? 0),
-            'requests_city_fund'       => (int)   ($requestStats->city_fund              ?? 0),
-            'requests_adopted'         => (int)   ($requestStats->adopted                ?? 0),
-            'requests_fulfilled_amount'=> (float) ($requestStats->fulfilled_amount       ?? 0),
+            'requests_total' => (int) ($requestStats->total ?? 0),
+            'requests_fulfilled' => (int) ($requestStats->fulfilled ?? 0),
+            'requests_approved' => (int) ($requestStats->approved ?? 0),
+            'requests_redeemable' => (int) ($requestStats->redeemable ?? 0),
+            'requests_pending' => (int) ($requestStats->pending ?? 0),
+            'requests_rejected' => (int) ($requestStats->rejected ?? 0),
+            'requests_cancelled' => (int) ($requestStats->cancelled ?? 0),
+            'requests_city_fund' => (int) ($requestStats->city_fund ?? 0),
+            'requests_adopted' => (int) ($requestStats->adopted ?? 0),
+            'requests_fulfilled_amount' => (float) ($requestStats->fulfilled_amount ?? 0),
 
             // redemptions
-            'redemptions_total'    => (int) ($redemptionStats->total    ?? 0),
+            'redemptions_total' => (int) ($redemptionStats->total ?? 0),
             'redemptions_redeemed' => (int) ($redemptionStats->redeemed ?? 0),
-            'redemptions_expired'  => (int) ($redemptionStats->expired  ?? 0),
-            'redemptions_pending'  => (int) ($redemptionStats->pending  ?? 0),
+            'redemptions_expired' => (int) ($redemptionStats->expired ?? 0),
+            'redemptions_pending' => (int) ($redemptionStats->pending ?? 0),
 
             // participation
-            'active_providers_total'          => $activeProviders,
-            'providers_with_requests'         => (int) ($requestStats->providers_with_requests  ?? 0),
-            'active_recipients_with_requests' => (int) ($requestStats->active_recipients       ?? 0),
+            'active_providers_total' => $activeProviders,
+            'providers_with_requests' => (int) ($requestStats->providers_with_requests ?? 0),
+            'active_recipients_with_requests' => (int) ($requestStats->active_recipients ?? 0),
         ];
     }
 }

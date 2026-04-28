@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests\Auth;
 
-use App\Support\PhoneHelper;
 use App\Models\User;
 use App\Rules\SaudiPhoneNumber;
 use App\Rules\SaudiPhoneUnique;
 use App\Support\OperatingHoursNormalizer;
+use App\Support\PhoneHelper;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;

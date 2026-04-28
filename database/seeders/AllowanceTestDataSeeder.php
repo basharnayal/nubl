@@ -22,14 +22,16 @@ class AllowanceTestDataSeeder extends Seeder
         $recipient = User::where('email', 'recipient@nubl.com')->first();
         $provider = User::where('email', 'provider@nubl.com')->first();
 
-        if (!$recipient || !$provider) {
+        if (! $recipient || ! $provider) {
             $this->command->warn('Recipient or provider not found. Run RecipientSeeder and ProviderSeeder first.');
+
             return;
         }
 
         $menuItems = ProviderMenuItem::where('provider_id', $provider->id)->get();
         if ($menuItems->isEmpty()) {
             $this->command->warn('No menu items found. Run ProviderMenuItemSeeder first.');
+
             return;
         }
 

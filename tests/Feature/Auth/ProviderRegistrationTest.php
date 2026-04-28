@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\User;
 use App\Models\ProviderDocuments;
 use App\Models\ProviderFinancialInfo;
 use App\Models\ProviderOperatingInfo;
 use App\Models\ProviderProfile;
+use App\Models\User;
 use Database\Seeders\PermissionSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;

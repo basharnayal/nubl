@@ -22,7 +22,7 @@ class ProviderSeeder extends Seeder
         // Copy provider logos from public/images/seed/provider-logos/ (git-tracked)
         // into storage/app/public/provider-logos/ so teammates get them automatically on db:seed.
         $logosSource = public_path('images/seed/provider-logos');
-        $logosDest   = storage_path('app/public/provider-logos');
+        $logosDest = storage_path('app/public/provider-logos');
 
         if (File::isDirectory($logosSource)) {
             File::ensureDirectoryExists($logosDest);
@@ -310,7 +310,7 @@ class ProviderSeeder extends Seeder
                 ]);
             }
 
-            if (!$user->providerOperatingInfo) {
+            if (! $user->providerOperatingInfo) {
                 $operatingHours = [];
                 foreach (array_keys(config('provider.weekdays')) as $day) {
                     $operatingHours[$day] = $day === 'friday' ? ['closed' => true] : [
@@ -329,11 +329,11 @@ class ProviderSeeder extends Seeder
                 ]);
             }
 
-            if (!$user->providerFinancialInfo) {
+            if (! $user->providerFinancialInfo) {
                 ProviderFinancialInfo::create(array_merge($data['financial'], ['user_id' => $user->id]));
             }
 
-            if (!$user->providerDocuments) {
+            if (! $user->providerDocuments) {
                 ProviderDocuments::create([
                     'user_id' => $user->id,
                     'business_license_path' => 'provider_documents/seed-license-placeholder',

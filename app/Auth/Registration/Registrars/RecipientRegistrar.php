@@ -24,11 +24,20 @@ class RecipientRegistrar extends AbstractAccountRegistrar
         parent::__construct($notifications, $audit, $otp);
     }
 
-    protected function membershipType(): string { return User::MEMBERSHIP_RECIPIENT; }
+    protected function membershipType(): string
+    {
+        return User::MEMBERSHIP_RECIPIENT;
+    }
 
-    protected function initialStatus(): string { return User::STATUS_PENDING_APPROVAL; }
+    protected function initialStatus(): string
+    {
+        return User::STATUS_PENDING_APPROVAL;
+    }
 
-    protected function roleName(): string { return 'recipient'; }
+    protected function roleName(): string
+    {
+        return 'recipient';
+    }
 
     protected function prepareArtifacts(RegistrationData $data): array
     {
@@ -42,22 +51,22 @@ class RecipientRegistrar extends AbstractAccountRegistrar
     {
         /** @var RecipientRegistrationData $data */
         RecipientProfile::create([
-            'user_id'       => $user->id,
-            'nationality'   => $data->nationality,
+            'user_id' => $user->id,
+            'nationality' => $data->nationality,
             'short_address' => $data->shortAddress,
-            'location'      => json_encode(['lat' => $data->locationLat, 'lng' => $data->locationLng]),
-            'id_type'       => $data->idType,
-            'id_number'     => $data->idNumber,
+            'location' => json_encode(['lat' => $data->locationLat, 'lng' => $data->locationLng]),
+            'id_type' => $data->idType,
+            'id_number' => $data->idNumber,
             'id_photo_path' => $artifacts['id_photo'],
         ]);
 
         RecipientKycDetails::create([
-            'user_id'              => $user->id,
-            'income_band'          => $data->incomeBand,
-            'household_size'       => $data->householdSize,
-            'marital_status'       => $data->maritalStatus,
-            'is_student'           => $data->isStudent,
-            'employment_status'    => $data->employmentStatus,
+            'user_id' => $user->id,
+            'income_band' => $data->incomeBand,
+            'household_size' => $data->householdSize,
+            'marital_status' => $data->maritalStatus,
+            'is_student' => $data->isStudent,
+            'employment_status' => $data->employmentStatus,
             'situation_description' => $data->situationDescription,
         ]);
     }

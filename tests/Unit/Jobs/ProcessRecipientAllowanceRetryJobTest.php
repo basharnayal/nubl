@@ -334,4 +334,3 @@ class ProcessRecipientAllowanceRetryJobTest extends TestCase
         ];
     }
 }
-

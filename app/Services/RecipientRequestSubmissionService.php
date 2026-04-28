@@ -13,8 +13,7 @@ class RecipientRequestSubmissionService
     public function __construct(
         private AuditService $auditService,
         private NotificationServiceInterface $notificationService
-    ) {
-    }
+    ) {}
 
     /**
      * @param  array<int, array{id: int, quantity: int}>  $itemsData
@@ -29,7 +28,7 @@ class RecipientRequestSubmissionService
         $dbItems = ProviderMenuItem::whereIn('id', $itemIds)->get()->keyBy('id');
 
         foreach ($itemsData as $item) {
-            if (!isset($dbItems[$item['id']])) {
+            if (! isset($dbItems[$item['id']])) {
                 throw new RuntimeException('Menu item no longer available.');
             }
 

@@ -113,7 +113,7 @@ class PhoneVerificationTest extends TestCase
         $user->assignRole('donor');
 
         $otp = '123456';
-        Cache::put('otp:user:' . $user->id, $otp, now()->addMinutes(5));
+        Cache::put('otp:user:'.$user->id, $otp, now()->addMinutes(5));
 
         $response = $this->actingAs($user)->post(route('verification.phone.verify'), [
             'otp' => $otp,
@@ -135,7 +135,7 @@ class PhoneVerificationTest extends TestCase
         $user->assignRole('recipient');
 
         $otp = '123456';
-        Cache::put('otp:user:' . $user->id, $otp, now()->addMinutes(5));
+        Cache::put('otp:user:'.$user->id, $otp, now()->addMinutes(5));
 
         $response = $this->actingAs($user)->post(route('verification.phone.verify'), [
             'otp' => $otp,
@@ -153,7 +153,7 @@ class PhoneVerificationTest extends TestCase
         ]);
         $user->assignRole('donor');
 
-        Cache::put('otp:user:' . $user->id, '123456', now()->addMinutes(5));
+        Cache::put('otp:user:'.$user->id, '123456', now()->addMinutes(5));
 
         $response = $this->actingAs($user)->post(route('verification.phone.verify'), [
             'otp' => '999999',
@@ -212,14 +212,14 @@ class PhoneVerificationTest extends TestCase
         $user->assignRole('donor');
 
         $otp1 = '111111';
-        Cache::put('otp:user:' . $user->id, $otp1, now()->addMinutes(5));
+        Cache::put('otp:user:'.$user->id, $otp1, now()->addMinutes(5));
 
         $response = $this->actingAs($user)->post(route('verification.phone.resend'));
 
         $response->assertRedirect();
         $response->assertSessionHas('status');
 
-        $newOtp = Cache::get('otp:user:' . $user->id);
+        $newOtp = Cache::get('otp:user:'.$user->id);
         $this->assertNotNull($newOtp);
         $this->assertNotSame($otp1, $newOtp);
     }
@@ -236,7 +236,7 @@ class PhoneVerificationTest extends TestCase
         ]);
         $user->assignRole('donor');
 
-        Cache::put('otp:resend:' . $user->id, 6, now()->addMinutes(60));
+        Cache::put('otp:resend:'.$user->id, 6, now()->addMinutes(60));
 
         $response = $this->actingAs($user)->post(route('verification.phone.resend'));
 

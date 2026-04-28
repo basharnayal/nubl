@@ -102,4 +102,3 @@ class DonationControllerTest extends TestCase
             ->assertNotFound();
     }
 }
-

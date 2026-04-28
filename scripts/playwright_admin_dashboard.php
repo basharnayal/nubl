@@ -15,19 +15,19 @@ use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 
-require __DIR__ . '/../vendor/autoload.php';
+require __DIR__.'/../vendor/autoload.php';
 
-$app = require __DIR__ . '/../bootstrap/app.php';
+$app = require __DIR__.'/../bootstrap/app.php';
 $app->make(Kernel::class)->bootstrap();
 
 function uniquePhone(string $seed, string $pad): string
 {
-    return '05' . str_pad(substr($seed, -8), 8, $pad, STR_PAD_LEFT);
+    return '05'.str_pad(substr($seed, -8), 8, $pad, STR_PAD_LEFT);
 }
 
 function userPayload(?User $user): ?array
 {
-    if (!$user) {
+    if (! $user) {
         return null;
     }
 
@@ -54,7 +54,7 @@ if ($action === 'seed') {
     Role::firstOrCreate(['name' => 'donor', 'guard_name' => 'web']);
 
     $qrPermission = Permission::firstOrCreate(['name' => 'qr.configure_ttl', 'guard_name' => 'web']);
-    if (!$adminRole->hasPermissionTo($qrPermission)) {
+    if (! $adminRole->hasPermissionTo($qrPermission)) {
         $adminRole->givePermissionTo($qrPermission);
     }
 
@@ -79,14 +79,14 @@ if ($action === 'seed') {
         'status' => User::STATUS_PENDING_APPROVAL,
         'is_active' => true,
         'accepting_orders' => true,
-        'phone_number' => uniquePhone($suffix . '1', '6'),
+        'phone_number' => uniquePhone($suffix.'1', '6'),
     ]);
     $pendingProvider->assignRole('provider');
     ProviderProfile::create([
         'user_id' => $pendingProvider->id,
         'full_name_ar' => 'Pending Provider',
         'full_name_en' => 'Pending Provider',
-        'phone_number' => uniquePhone($suffix . '1', '6'),
+        'phone_number' => uniquePhone($suffix.'1', '6'),
         'email' => $pendingProvider->email,
         'business_name_ar' => "Pending Provider {$suffix}",
         'business_name_en' => "Pending Provider {$suffix}",
@@ -106,7 +106,7 @@ if ($action === 'seed') {
         'membership_type' => User::MEMBERSHIP_RECIPIENT,
         'status' => User::STATUS_PENDING_APPROVAL,
         'is_active' => true,
-        'phone_number' => uniquePhone($suffix . '2', '5'),
+        'phone_number' => uniquePhone($suffix.'2', '5'),
     ]);
     $pendingRecipient->assignRole('recipient');
 
@@ -117,7 +117,7 @@ if ($action === 'seed') {
         'membership_type' => User::MEMBERSHIP_DONOR,
         'status' => User::STATUS_ACTIVE,
         'is_active' => true,
-        'phone_number' => uniquePhone($suffix . '3', '4'),
+        'phone_number' => uniquePhone($suffix.'3', '4'),
         'phone_verified_at' => now(),
     ]);
     $managedDonor->forceFill(['email_verified_at' => now()])->save();
@@ -131,7 +131,7 @@ if ($action === 'seed') {
         'status' => User::STATUS_ACTIVE,
         'is_active' => true,
         'accepting_orders' => true,
-        'phone_number' => uniquePhone($suffix . '4', '3'),
+        'phone_number' => uniquePhone($suffix.'4', '3'),
     ]);
     $provider->assignRole('provider');
 
@@ -142,7 +142,7 @@ if ($action === 'seed') {
         'membership_type' => User::MEMBERSHIP_RECIPIENT,
         'status' => User::STATUS_ACTIVE,
         'is_active' => true,
-        'phone_number' => uniquePhone($suffix . '5', '2'),
+        'phone_number' => uniquePhone($suffix.'5', '2'),
     ]);
     $recipient->assignRole('recipient');
 

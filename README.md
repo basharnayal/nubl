@@ -76,6 +76,7 @@ php artisan serve
 # Terminal 2: Vite Dev Server (for development only)
 npm run dev
 ```
+./vendor/bin/pint --test
 
 ### Assign Role to User
 

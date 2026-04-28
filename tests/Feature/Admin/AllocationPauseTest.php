@@ -19,8 +19,11 @@ class AllocationPauseTest extends TestCase
     use RefreshDatabase;
 
     protected User $admin;
+
     protected User $provider;
+
     protected User $recipient;
+
     protected User $donor;
 
     protected function setUp(): void

@@ -16,17 +16,17 @@ class EnsureEmailVerified
     public function handle(Request $request, Closure $next): Response
     {
         // If email verification is disabled, skip verification check
-        if (!config('app.email_verification_enabled', true)) {
+        if (! config('app.email_verification_enabled', true)) {
             return $next($request);
         }
 
         // If user is not authenticated, redirect to login
-        if (!$request->user()) {
+        if (! $request->user()) {
             return redirect()->route('login');
         }
 
         // If email verification is enabled and user hasn't verified email, redirect to verification notice
-        if (!$request->user()->hasVerifiedEmail()) {
+        if (! $request->user()->hasVerifiedEmail()) {
             return redirect()->route('verification.notice');
         }
 

@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
-use App\Support\PhoneHelper;
 use App\Models\User;
+use App\Support\PhoneHelper;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -41,7 +41,7 @@ class OtpService
      */
     protected function otpKey(int $userId): string
     {
-        return 'otp:user:' . $userId;
+        return 'otp:user:'.$userId;
     }
 
     /**
@@ -49,7 +49,7 @@ class OtpService
      */
     protected function resendKey(int $userId): string
     {
-        return 'otp:resend:' . $userId;
+        return 'otp:resend:'.$userId;
     }
 
     /**
@@ -61,6 +61,7 @@ class OtpService
             return $user->phone_number;
         }
         $profile = $user->providerProfile;
+
         return $profile?->phone_number;
     }
 
@@ -74,6 +75,7 @@ class OtpService
         $phone = $this->getPhoneForUser($user);
         if (empty($phone)) {
             Log::warning('OtpService: No phone number for user', ['user_id' => $user->id]);
+
             return ['success' => false, 'message' => __('No phone number associated with this account.')];
         }
 
@@ -118,7 +120,7 @@ class OtpService
      */
     protected function loginOtpKey(string $phone): string
     {
-        return 'otp:login:' . $phone;
+        return 'otp:login:'.$phone;
     }
 
     /**
@@ -126,7 +128,7 @@ class OtpService
      */
     protected function loginResendKey(string $phone): string
     {
-        return 'otp:login:resend:' . $phone;
+        return 'otp:login:resend:'.$phone;
     }
 
     /**
@@ -221,6 +223,7 @@ class OtpService
         }
 
         Cache::forget($cacheKey);
+
         return true;
     }
 }

@@ -5,7 +5,6 @@ namespace App\Notifications;
 use App\Models\Request as RequestModel;
 use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\Notification;
-use App\Channels\DatabaseChannel;
 
 class NewPendingAdminRequestNotification extends Notification
 {
@@ -30,7 +29,7 @@ class NewPendingAdminRequestNotification extends Notification
             'title' => __('New Pending Request Needs Approval'),
             'body' => __('Request #:id from :name exceeds their limit and requires admin approval.', [
                 'id' => $this->requestModel->id,
-                'name' => $this->requestModel->recipient->name
+                'name' => $this->requestModel->recipient->name,
             ]),
             'action_url' => route('admin.requests.index'),
             'icon' => 'warning',

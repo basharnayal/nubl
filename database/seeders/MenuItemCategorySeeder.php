@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class MenuItemCategorySeeder extends Seeder
@@ -32,7 +31,7 @@ class MenuItemCategorySeeder extends Seeder
                 'Desserts',
                 'Hot Drinks',
                 'Cold Drinks',
-                'Fresh Juices'
+                'Fresh Juices',
             ],
 
             'Catering' => [
@@ -48,7 +47,7 @@ class MenuItemCategorySeeder extends Seeder
                 'Dessert Trays',
                 'Beverage Service',
                 'Breakfast Catering',
-                'Lunch Boxes'
+                'Lunch Boxes',
             ],
             'Bakery' => [
                 'Bread',
@@ -65,7 +64,7 @@ class MenuItemCategorySeeder extends Seeder
                 'Cheesecakes',
                 'Arabic Sweets',
                 'Savory Pastries',
-                'Baking Ingredients'
+                'Baking Ingredients',
             ],
             'Grocery' => [
                 'Fruits',
@@ -91,7 +90,7 @@ class MenuItemCategorySeeder extends Seeder
                 'Breakfast Items',
                 'Baby Products',
                 'Cleaning Supplies',
-                'Personal Care'
+                'Personal Care',
             ],
             'Food truck' => [
                 'Street Snacks',
@@ -106,13 +105,13 @@ class MenuItemCategorySeeder extends Seeder
                 'Coffee',
                 'Cold Drinks',
                 'Smoothies',
-                'Specialty Items'
+                'Specialty Items',
             ],
             'Other' => [
                 'Other',
                 'Seasonal',
                 'Bundles',
-                'Promotions' // Changed 'Other (generic)' to 'Other'
+                'Promotions', // Changed 'Other (generic)' to 'Other'
             ],
         ];
 

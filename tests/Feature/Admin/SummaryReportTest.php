@@ -31,7 +31,7 @@ class SummaryReportTest extends TestCase
         $this->seed(RoleSeeder::class);
 
         $this->admin = User::factory()->create([
-            'status'    => User::STATUS_ACTIVE,
+            'status' => User::STATUS_ACTIVE,
             'is_active' => true,
         ]);
         $this->admin->assignRole('admin');
@@ -99,10 +99,10 @@ class SummaryReportTest extends TestCase
     public function admin_can_view_summary_reports_list_fr_19_1(): void
     {
         SummaryReport::create([
-            'type'         => 'weekly',
-            'period_from'  => '2026-03-30',
-            'period_to'    => '2026-04-05',
-            'payload'      => ['payments_total_count' => 5, 'payments_succeeded_amount' => 200.0, 'payments_failed_amount' => 0, 'ledger_entries_count' => 3, 'ledger_in_amount' => 200.0, 'ledger_out_amount' => 150.0],
+            'type' => 'weekly',
+            'period_from' => '2026-03-30',
+            'period_to' => '2026-04-05',
+            'payload' => ['payments_total_count' => 5, 'payments_succeeded_amount' => 200.0, 'payments_failed_amount' => 0, 'ledger_entries_count' => 3, 'ledger_in_amount' => 200.0, 'ledger_out_amount' => 150.0],
             'generated_at' => now(),
         ]);
 
@@ -143,17 +143,17 @@ class SummaryReportTest extends TestCase
         }
 
         $report = SummaryReport::create([
-            'type'         => 'monthly',
-            'period_from'  => '2026-03-01',
-            'period_to'    => '2026-03-31',
-            'payload'      => [
-                'payments_total_count'       => 10,
-                'payments_succeeded_amount'  => 500.0,
-                'payments_failed_amount'     => 50.0,
-                'ledger_entries_count'       => 8,
-                'ledger_in_amount'           => 500.0,
-                'ledger_out_amount'          => 300.0,
-                'payments_by_status'         => [
+            'type' => 'monthly',
+            'period_from' => '2026-03-01',
+            'period_to' => '2026-03-31',
+            'payload' => [
+                'payments_total_count' => 10,
+                'payments_succeeded_amount' => 500.0,
+                'payments_failed_amount' => 50.0,
+                'ledger_entries_count' => 8,
+                'ledger_in_amount' => 500.0,
+                'ledger_out_amount' => 300.0,
+                'payments_by_status' => [
                     ['status' => 'SUCCEEDED', 'cnt' => 10, 'total' => 500.0],
                 ],
             ],

@@ -47,4 +47,3 @@ class EwalletSeeder extends Seeder
         }
     }
 }
-

@@ -6,11 +6,7 @@ use App\Models\MenuItemCategory;
 use App\Models\ProviderMenuItem;
 use App\Models\ProviderProfile;
 use App\Models\User;
-use Database\Seeders\PermissionSeeder;
-use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class ProviderMenuManagementTest extends TestCase
@@ -74,7 +70,7 @@ class ProviderMenuManagementTest extends TestCase
         $this->assertDatabaseHas('provider_menu_items', [
             'name' => 'Cheeseburger',
             'provider_id' => $provider->id,
-            'price' => 25.50
+            'price' => 25.50,
         ]);
     }
 
@@ -104,7 +100,7 @@ class ProviderMenuManagementTest extends TestCase
         $this->assertDatabaseHas('provider_menu_items', [
             'id' => $item->id,
             'name' => 'New Name',
-            'price' => 15.00
+            'price' => 15.00,
         ]);
     }
 

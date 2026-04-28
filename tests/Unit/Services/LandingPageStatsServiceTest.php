@@ -195,4 +195,3 @@ class LandingPageStatsServiceTest extends TestCase
         ]);
     }
 }
-

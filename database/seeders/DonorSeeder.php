@@ -48,4 +48,3 @@ class DonorSeeder extends Seeder
         }
     }
 }
-

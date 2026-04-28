@@ -4,8 +4,8 @@ namespace Tests\Unit\Http\Controllers;
 
 use App\Http\Controllers\Controller as BaseController;
 use App\Http\Controllers\LanguageController;
-use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;

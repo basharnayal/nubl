@@ -17,7 +17,7 @@ class Base64ImageRuleTest extends TestCase
     {
         $validator = Validator::make(
             ['photo' => self::VALID_BASE64_IMAGE],
-            ['photo' => [new Base64Image()]]
+            ['photo' => [new Base64Image]]
         );
 
         $this->assertFalse($validator->fails(), implode(', ', $validator->errors()->all()));
@@ -28,7 +28,7 @@ class Base64ImageRuleTest extends TestCase
     {
         $validator = Validator::make(
             ['photo' => UploadedFile::fake()->image('photo.jpg')],
-            ['photo' => [new Base64Image()]]
+            ['photo' => [new Base64Image]]
         );
 
         $this->assertTrue($validator->fails());
@@ -40,7 +40,7 @@ class Base64ImageRuleTest extends TestCase
     {
         $validator = Validator::make(
             ['photo' => 'data:text/plain;base64,SGVsbG8='],
-            ['photo' => [new Base64Image()]]
+            ['photo' => [new Base64Image]]
         );
 
         $this->assertTrue($validator->fails());
@@ -51,7 +51,7 @@ class Base64ImageRuleTest extends TestCase
     {
         $validator = Validator::make(
             ['photo' => 'data:image/png;base64,'],
-            ['photo' => [new Base64Image()]]
+            ['photo' => [new Base64Image]]
         );
 
         $this->assertTrue($validator->fails());
@@ -62,7 +62,7 @@ class Base64ImageRuleTest extends TestCase
     {
         $validator = Validator::make(
             ['photo' => 'data:image/png;base64,%%%not_base64%%%'],
-            ['photo' => [new Base64Image()]]
+            ['photo' => [new Base64Image]]
         );
 
         $this->assertTrue($validator->fails());
@@ -76,7 +76,7 @@ class Base64ImageRuleTest extends TestCase
 
         $validator = Validator::make(
             ['photo' => $oversized],
-            ['photo' => [new Base64Image()]]
+            ['photo' => [new Base64Image]]
         );
 
         $this->assertTrue($validator->fails());

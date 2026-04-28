@@ -397,4 +397,3 @@ class UserManagementControllerTest extends TestCase
         return $hours;
     }
 }
-

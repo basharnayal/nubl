@@ -17,6 +17,7 @@ class DemoRedemptionSeeder extends Seeder
     {
         if (OrderRedemption::whereHas('request', fn ($q) => $q->where('invoice_id', 'like', 'DEMO-%'))->exists()) {
             $this->command->info('⏭ Demo redemptions already seeded.');
+
             return;
         }
 
@@ -28,22 +29,22 @@ class DemoRedemptionSeeder extends Seeder
             ->get();
 
         $redemptionCount = 0;
-        $proofCount      = 0;
-        $txnCount        = 0;
+        $proofCount = 0;
+        $txnCount = 0;
 
         foreach ($redeemableRequests as $req) {
-            $tokenRaw   = strtoupper(Str::random(9));
-            $tokenHash  = hash('sha256', $tokenRaw);
-            $shortCode  = substr($tokenRaw, 0, 6);
-            $shortHash  = hash('sha256', $shortCode);
-            $ttl        = 180;
-            $expiresAt  = $req->created_at->copy()->addMinutes($ttl);
+            $tokenRaw = strtoupper(Str::random(9));
+            $tokenHash = hash('sha256', $tokenRaw);
+            $shortCode = substr($tokenRaw, 0, 6);
+            $shortHash = hash('sha256', $shortCode);
+            $ttl = 180;
+            $expiresAt = $req->created_at->copy()->addMinutes($ttl);
 
             // Determine redemption status based on request status
             $redemptionStatus = match ($req->status) {
-                'FULFILLED'  => 'REDEEMED',
+                'FULFILLED' => 'REDEEMED',
                 'APPROVED', 'REDEEMABLE' => (rand(1, 10) <= 2) ? 'EXPIRED' : 'PENDING',
-                default      => 'PENDING',
+                default => 'PENDING',
             };
 
             // If EXPIRED, set expiry in the past
@@ -52,18 +53,18 @@ class DemoRedemptionSeeder extends Seeder
             }
 
             $redemption = OrderRedemption::create([
-                'request_id'           => $req->id,
-                'provider_id'          => $req->provider_id,
-                'token_code'           => $tokenHash,
-                'short_code_hash'      => $shortHash,
-                'token_ciphertext'     => $tokenRaw, // Will be encrypted by cast
-                'short_code_ciphertext'=> $shortCode,
-                'token_qr_url'         => null,
-                'ttl_minutes'          => $ttl,
-                'redeem_expires_at'    => $expiresAt,
-                'status'               => $redemptionStatus,
-                'created_at'           => $req->created_at,
-                'updated_at'           => $redemptionStatus === 'REDEEMED'
+                'request_id' => $req->id,
+                'provider_id' => $req->provider_id,
+                'token_code' => $tokenHash,
+                'short_code_hash' => $shortHash,
+                'token_ciphertext' => $tokenRaw, // Will be encrypted by cast
+                'short_code_ciphertext' => $shortCode,
+                'token_qr_url' => null,
+                'ttl_minutes' => $ttl,
+                'redeem_expires_at' => $expiresAt,
+                'status' => $redemptionStatus,
+                'created_at' => $req->created_at,
+                'updated_at' => $redemptionStatus === 'REDEEMED'
                     ? $req->created_at->copy()->addHours(rand(1, 48))
                     : $req->created_at,
             ]);
@@ -75,18 +76,18 @@ class DemoRedemptionSeeder extends Seeder
 
                 OrderProof::create([
                     'order_redemption_id' => $redemption->id,
-                    'proof_url'           => 'private/proofs/' . $redemption->id . '/demo_proof.jpg',
-                    'is_provider_donation'=> $req->funding_source === 'PROVIDER_ADOPTION',
-                    'fulfilled_at'        => $fulfilledAt,
-                    'created_at'          => $fulfilledAt,
-                    'updated_at'          => $fulfilledAt,
+                    'proof_url' => 'private/proofs/'.$redemption->id.'/demo_proof.jpg',
+                    'is_provider_donation' => $req->funding_source === 'PROVIDER_ADOPTION',
+                    'fulfilled_at' => $fulfilledAt,
+                    'created_at' => $fulfilledAt,
+                    'updated_at' => $fulfilledAt,
                 ]);
                 $proofCount++;
 
                 // For CITY_FUND fulfilled requests: system wallet → provider wallet transfer
                 if ($req->funding_source === 'CITY_FUND' && $systemWallet) {
                     $providerProfile = ProviderProfile::where('user_id', $req->provider_id)->first();
-                    $providerWallet  = $providerProfile
+                    $providerWallet = $providerProfile
                         ? Ewallet::where('owner_type', 'PROVIDER')->where('owner_id', $providerProfile->id)->first()
                         : null;
 
@@ -95,26 +96,26 @@ class DemoRedemptionSeeder extends Seeder
 
                         // OUT from system wallet
                         FundTransaction::create([
-                            'wallet_id'          => $systemWallet->id,
-                            'source'             => FundTransaction::SOURCE_REDEMPTION,
-                            'amount'             => $req->reserved_amount,
-                            'direction'          => FundTransaction::DIRECTION_OUT,
-                            'request_id'         => $req->id,
-                            'order_redemption_id'=> $redemption->id,
-                            'created_at'         => $txnTime,
-                            'updated_at'         => $txnTime,
+                            'wallet_id' => $systemWallet->id,
+                            'source' => FundTransaction::SOURCE_REDEMPTION,
+                            'amount' => $req->reserved_amount,
+                            'direction' => FundTransaction::DIRECTION_OUT,
+                            'request_id' => $req->id,
+                            'order_redemption_id' => $redemption->id,
+                            'created_at' => $txnTime,
+                            'updated_at' => $txnTime,
                         ]);
 
                         // IN to provider wallet
                         FundTransaction::create([
-                            'wallet_id'          => $providerWallet->id,
-                            'source'             => FundTransaction::SOURCE_REDEMPTION,
-                            'amount'             => $req->reserved_amount,
-                            'direction'          => FundTransaction::DIRECTION_IN,
-                            'request_id'         => $req->id,
-                            'order_redemption_id'=> $redemption->id,
-                            'created_at'         => $txnTime,
-                            'updated_at'         => $txnTime,
+                            'wallet_id' => $providerWallet->id,
+                            'source' => FundTransaction::SOURCE_REDEMPTION,
+                            'amount' => $req->reserved_amount,
+                            'direction' => FundTransaction::DIRECTION_IN,
+                            'request_id' => $req->id,
+                            'order_redemption_id' => $redemption->id,
+                            'created_at' => $txnTime,
+                            'updated_at' => $txnTime,
                         ]);
 
                         $txnCount += 2;

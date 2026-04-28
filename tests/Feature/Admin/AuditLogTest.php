@@ -4,7 +4,6 @@ namespace Tests\Feature\Admin;
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Spatie\Activitylog\Models\Activity;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -109,7 +108,7 @@ class AuditLogTest extends TestCase
 
         $response = $this->actingAs($admin)->get(route('admin.audit-logs.index', [
             'date_from' => today()->toDateString(),
-            'date_to'   => today()->toDateString(),
+            'date_to' => today()->toDateString(),
         ]));
 
         $response->assertOk();

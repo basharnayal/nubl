@@ -105,4 +105,3 @@ class NotificationChannelsTest extends TestCase
         $this->assertSame(route('admin.users.pending'), $payload['url']);
     }
 }
-

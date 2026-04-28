@@ -40,7 +40,7 @@ class GenerateSummaryReportCommand extends Command
 
         // Carbon instances are not JSON-serialisable directly; convert to strings
         $payload['from'] = $from->toDateString();
-        $payload['to']   = $to->toDateString();
+        $payload['to'] = $to->toDateString();
 
         // Serialise payment Eloquent collection to plain array
         if (isset($payload['payments_by_status'])) {
@@ -51,10 +51,10 @@ class GenerateSummaryReportCommand extends Command
         }
 
         SummaryReport::create([
-            'type'         => $type,
-            'period_from'  => $from->toDateString(),
-            'period_to'    => $to->toDateString(),
-            'payload'      => $payload,
+            'type' => $type,
+            'period_from' => $from->toDateString(),
+            'period_to' => $to->toDateString(),
+            'payload' => $payload,
             'generated_at' => now(),
         ]);
 
@@ -70,11 +70,11 @@ class GenerateSummaryReportCommand extends Command
     {
         if ($type === SummaryReport::TYPE_MONTHLY) {
             $from = Carbon::now()->startOfMonth();
-            $to   = Carbon::now()->endOfMonth();
+            $to = Carbon::now()->endOfMonth();
         } else {
             // Weekly: previous full week (Mon–Sun)
             $from = Carbon::now()->subWeek()->startOfWeek();
-            $to   = Carbon::now()->subWeek()->endOfWeek();
+            $to = Carbon::now()->subWeek()->endOfWeek();
         }
 
         return [$from, $to];
