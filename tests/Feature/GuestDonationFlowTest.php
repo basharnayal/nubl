@@ -121,6 +121,7 @@ class GuestDonationFlowTest extends TestCase
             'status' => Payment::STATUS_PENDING,
             'amount' => 100,
             'is_guest' => true,
+            'idempotency_key' => \Illuminate\Support\Str::uuid()->toString(),
         ]);
 
         $mockMyFatoorah = $this->createMock(MyFatoorahService::class);
@@ -164,6 +165,7 @@ class GuestDonationFlowTest extends TestCase
             'status' => Payment::STATUS_PENDING,
             'amount' => 25,
             'is_guest' => true,
+            'idempotency_key' => \Illuminate\Support\Str::uuid()->toString(),
         ]);
 
         $mockMyFatoorah = $this->createMock(MyFatoorahService::class);
@@ -198,6 +200,7 @@ class GuestDonationFlowTest extends TestCase
             'status' => Payment::STATUS_PENDING,
             'amount' => 50,
             'is_guest' => true,
+            'idempotency_key' => \Illuminate\Support\Str::uuid()->toString(),
         ]);
 
         $mockMyFatoorah = $this->createMock(MyFatoorahService::class);
