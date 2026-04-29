@@ -19,9 +19,9 @@
                         <li class="py-3 first:pt-0">
                             <div class="flex justify-between gap-4">
                                 <div class="min-w-0 flex-1">
-                                    <p class="font-medium text-gray-900">{{ $item->name }}</p>
-                                    @if($item->description)
-                                        <p class="text-sm text-gray-500 mt-0.5">{{ $item->description }}</p>
+                                    <p class="font-medium text-gray-900">{{ $item->localized_name }}</p>
+                                    @if($item->localized_description)
+                                        <p class="text-sm text-gray-500 mt-0.5">{{ $item->localized_description }}</p>
                                     @endif
                                     @if($item->max_per_request)
                                         <p class="text-xs text-gray-400 mt-1">{{ __('Max per request') }}: {{ $item->max_per_request }}</p>

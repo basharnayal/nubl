@@ -87,6 +87,9 @@
                                                     @endif
                                                     <div>
                                                         <span class="font-medium text-slate-700 dark:text-navy-100">{{ $item->name }}</span>
+                                                        @if(filled($item->name_ar))
+                                                            <span class="block text-xs text-slate-500 dark:text-navy-300" dir="rtl">{{ $item->name_ar }}</span>
+                                                        @endif
                                                         @if($item->sku)
                                                             <span class="block text-xs text-slate-500 dark:text-navy-300">SKU: {{ $item->sku }}</span>
                                                         @endif

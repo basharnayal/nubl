@@ -35,7 +35,7 @@
                                 @foreach($request->items as $item)
                                     <tr class="border-y border-transparent border-b-slate-200 dark:border-b-navy-500">
                                         <td class="px-4 py-3 font-medium text-slate-700 dark:text-navy-100 sm:px-5">
-                                            {{ $item->menuItem->name ?? __('Unknown') }}</td>
+                                            {{ $item->menuItem->localized_name ?? __('Unknown') }}</td>
                                         <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $item->quantity }}</td>
                                         <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $item->price_snapshot }}</td>
                                         <td

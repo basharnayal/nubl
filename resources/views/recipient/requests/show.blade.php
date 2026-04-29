@@ -122,7 +122,7 @@
                                                     class="size-12 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-100 dark:border-navy-600 dark:bg-navy-700">
                                                     @if($imgUrl)
                                                         <img src="{{ $imgUrl }}"
-                                                            alt="{{ $menu?->name ?? __('Menu item') }}"
+                                                            alt="{{ $menu?->localized_name ?? __('Menu item') }}"
                                                             class="size-full object-cover">
                                                     @else
                                                         <div class="flex size-full items-center justify-center text-slate-400 dark:text-navy-500"
@@ -137,7 +137,7 @@
                                                         </div>
                                                     @endif
                                                 </div>
-                                                <span class="min-w-0">{{ $menu?->name ?? __('Unknown Item') }}</span>
+                                                <span class="min-w-0">{{ $menu?->localized_name ?? __('Unknown Item') }}</span>
                                             </div>
                                         </td>
                                         <td class="whitespace-nowrap px-4 py-3 sm:px-5">{{ $item->quantity }}</td>

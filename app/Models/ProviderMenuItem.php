@@ -12,7 +12,9 @@ class ProviderMenuItem extends Model
     protected $fillable = [
         'provider_id',
         'name',
+        'name_ar',
         'description',
+        'description_ar',
         'price',
         'category',
         'sku',
@@ -30,6 +32,30 @@ class ProviderMenuItem extends Model
             'is_active' => 'boolean',
             'is_admin_blocked' => 'boolean',
         ];
+    }
+
+    /**
+     * Display name for the current app locale (Arabic when set and locale is ar).
+     */
+    public function getLocalizedNameAttribute(): string
+    {
+        if (app()->getLocale() === 'ar' && filled($this->name_ar)) {
+            return (string) $this->name_ar;
+        }
+
+        return (string) ($this->name ?? '');
+    }
+
+    /**
+     * Display description for the current app locale (Arabic when set and locale is ar).
+     */
+    public function getLocalizedDescriptionAttribute(): ?string
+    {
+        if (app()->getLocale() === 'ar' && filled($this->description_ar)) {
+            return (string) $this->description_ar;
+        }
+
+        return $this->description !== null ? (string) $this->description : null;
     }
 
     public function getImageUrlAttribute(): ?string

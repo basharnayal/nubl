@@ -25,7 +25,11 @@ class MenuItemController extends Controller
         $query = ProviderMenuItem::ownedBy(Auth::id());
 
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%'.$request->search.'%');
+            $term = '%'.$request->search.'%';
+            $query->where(function ($q) use ($term) {
+                $q->where('name', 'like', $term)
+                    ->orWhere('name_ar', 'like', $term);
+            });
         }
 
         $provider = Auth::user();

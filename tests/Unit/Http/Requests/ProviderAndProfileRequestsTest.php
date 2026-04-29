@@ -222,6 +222,7 @@ class ProviderAndProfileRequestsTest extends TestCase
 
         $request = $this->makeRequest(UpdateMenuItemRequest::class, [
             'name' => 'Item',
+            'name_ar' => 'عنصر',
             'category_id' => $category->id,
             'price' => 10,
         ], $provider);

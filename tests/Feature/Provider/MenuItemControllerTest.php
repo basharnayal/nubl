@@ -201,6 +201,7 @@ class MenuItemControllerTest extends TestCase
         $this->actingAs($this->provider)
             ->put(route('provider.menu-items.update', $blocked->id), [
                 'name' => 'Attempt Update',
+                'name_ar' => 'محاولة تحديث',
                 'category_id' => $this->restaurantCategory->id,
                 'price' => 99.99,
                 'description' => 'desc',
@@ -239,6 +240,7 @@ class MenuItemControllerTest extends TestCase
         $response = $this->actingAs($this->provider)
             ->put(route('provider.menu-items.update', $item->id), [
                 'name' => 'Image Item Updated',
+                'name_ar' => 'عنصر صورة محدث',
                 'category_id' => $this->restaurantCategory->id,
                 'price' => 23.00,
                 'description' => 'new',

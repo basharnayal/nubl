@@ -96,17 +96,17 @@ class StoreRecipientRequest extends FormRequest
 
                 // Check Ownership
                 if ($menuItem->provider_id != $providerId) {
-                    $validator->errors()->add("items.{$index}.id", "Item '{$menuItem->name}' does not belong to the selected provider.");
+                    $validator->errors()->add("items.{$index}.id", "Item '{$menuItem->localized_name}' does not belong to the selected provider.");
                 }
 
                 // Check Active
                 if (! $menuItem->is_active) {
-                    $validator->errors()->add("items.{$index}.id", "Item '{$menuItem->name}' is currently unavailable.");
+                    $validator->errors()->add("items.{$index}.id", "Item '{$menuItem->localized_name}' is currently unavailable.");
                 }
 
                 // Check Max Quantity
                 if ($menuItem->max_per_request && $quantity > $menuItem->max_per_request) {
-                    $validator->errors()->add("items.{$index}.quantity", "You can only order up to {$menuItem->max_per_request} of '{$menuItem->name}' per request.");
+                    $validator->errors()->add("items.{$index}.quantity", "You can only order up to {$menuItem->max_per_request} of '{$menuItem->localized_name}' per request.");
                 }
             }
         });

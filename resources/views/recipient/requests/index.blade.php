@@ -106,7 +106,7 @@
                                 @php
                                     $itemQty = $request->items->sum('quantity');
                                     $itemsForPreview = $request->items->take(3)->map(function ($it) {
-                                        $name = $it->menuItem?->name ?? $it->menuItem?->name_en ?? $it->menuItem?->name_ar ?? null;
+                                        $name = $it->menuItem?->localized_name ?: null;
                                         if (!$name) {
                                             return null;
                                         }

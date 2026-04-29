@@ -227,6 +227,8 @@ class ProviderMenuItemSeeder extends Seeder
             foreach ($group['items'] as $item) {
                 $categoryId = $item['category_id'];
                 $categoryName = MenuItemCategory::query()->whereKey($categoryId)->value('name') ?? '';
+                $nameAr = $item['name_ar'] ?? $this->translateToArabic($item['name'] ?? null);
+                $descriptionAr = $item['description_ar'] ?? $this->translateToArabic($item['description'] ?? null);
 
                 ProviderMenuItem::updateOrCreate(
                     [
@@ -234,7 +236,9 @@ class ProviderMenuItemSeeder extends Seeder
                         'name' => $item['name'],
                     ],
                     [
+                        'name_ar' => $nameAr,
                         'description' => $item['description'],
+                        'description_ar' => $descriptionAr,
                         'price' => $item['price'],
                         'category' => $categoryName,
                         'category_id' => $categoryId,
@@ -246,5 +250,221 @@ class ProviderMenuItemSeeder extends Seeder
                 );
             }
         }
+    }
+
+    private function translateToArabic(?string $text): ?string
+    {
+        if ($text === null || trim($text) === '') {
+            return null;
+        }
+
+        $normalized = trim($text);
+        $lower = mb_strtolower($normalized);
+
+        $exact = [
+            'family meal package' => 'باقة وجبة عائلية',
+            'complete meal for 4-6 people' => 'وجبة كاملة تكفي 4-6 أشخاص',
+            'daily support order' => 'طلب دعم يومي',
+            'single daily meal support' => 'دعم وجبة يومية واحدة',
+            'rice & chicken combo' => 'وجبة أرز ودجاج',
+            'traditional rice with grilled chicken' => 'أرز تقليدي مع دجاج مشوي',
+            'vegetable soup' => 'شوربة خضار',
+            'fresh vegetable soup' => 'شوربة خضار طازجة',
+            'fresh bread basket' => 'سلة خبز طازج',
+            'assorted fresh bread' => 'تشكيلة خبز طازج',
+            'weekly assistance' => 'مساعدة أسبوعية',
+            'weekly meal package' => 'باقة وجبات أسبوعية',
+            'lunch box' => 'وجبة غداء',
+            'single lunch box' => 'وجبة غداء فردية',
+            'breakfast pack' => 'باقة إفطار',
+            'morning breakfast essentials' => 'أساسيات إفطار الصباح',
+            'pastry set' => 'تشكيلة معجنات',
+            'assorted pastries' => 'معجنات متنوعة',
+        ];
+
+        if (isset($exact[$lower])) {
+            return $exact[$lower];
+        }
+
+        $translated = $normalized;
+        $brandMap = [
+            'Abukass' => 'أبو كاس',
+            'Al Walimah' => 'الوليمة',
+            'Sunwhite' => 'صن وايت',
+            'Panda' => 'بنده',
+            'Al Osra' => 'الأسرة',
+            'SIS' => 'إس آي إس',
+            'Steviana' => 'ستيفيانا',
+            'Afia' => 'عافية',
+            'Miza' => 'ميزة',
+            'Culina' => 'كولينا',
+            'Baya' => 'بايا',
+            'Gold Branch' => 'جولد برانش',
+            'Danube' => 'الدانوب',
+            'Carrefour' => 'كارفور',
+            'McChicken' => 'ماك تشيكن',
+            'McNuggets' => 'ماك ناجتس',
+            'Big Mac' => 'بيج ماك',
+            'McRoyale' => 'ماك رويال',
+            'McArabia' => 'ماك عربية',
+            'Shawarma' => 'شاورما',
+        ];
+        uksort($brandMap, static fn ($a, $b) => strlen($b) <=> strlen($a));
+        foreach ($brandMap as $en => $ar) {
+            $translated = preg_replace('/\b'.preg_quote($en, '/').'\b/ui', $ar, $translated) ?? $translated;
+        }
+
+        $dictionary = [
+            'Premium' => 'فاخر',
+            'Traditional' => 'تقليدي',
+            'Fresh' => 'طازج',
+            'Classic' => 'كلاسيكي',
+            'Organic' => 'عضوي',
+            'Low Calorie' => 'قليل السعرات',
+            'Family' => 'عائلي',
+            'Daily' => 'يومي',
+            'Weekly' => 'أسبوعي',
+            'Large' => 'كبير',
+            'Medium' => 'وسط',
+            'Mini' => 'صغير',
+            'Meal' => 'وجبة',
+            'Meals' => 'وجبات',
+            'Package' => 'باقة',
+            'Pack' => 'عبوة',
+            'Bag' => 'كيس',
+            'Set' => 'تشكيلة',
+            'Box' => 'صندوق',
+            'Combo' => 'كومبو',
+            'Deluxe' => 'ديلوكس',
+            'Rice' => 'أرز',
+            'Basmati' => 'بسمتي',
+            'Calrose' => 'كالروز',
+            'Chicken' => 'دجاج',
+            'Beef' => 'لحم بقري',
+            'Soup' => 'شوربة',
+            'Bread' => 'خبز',
+            'Pastry' => 'معجنات',
+            'Pasta' => 'باستا',
+            'Sugar' => 'سكر',
+            'Sweetener' => 'مُحلّي',
+            'Oil' => 'زيت',
+            'Olive Oil' => 'زيت زيتون',
+            'Corn Oil' => 'زيت ذرة',
+            'Sunflower Oil' => 'زيت دوار الشمس',
+            'Vegetable Ghee' => 'سمن نباتي',
+            'Shampoo' => 'شامبو',
+            'Conditioner' => 'بلسم',
+            'Deodorant' => 'مزيل عرق',
+            'Toothpaste' => 'معجون أسنان',
+            'Body Wash' => 'غسول جسم',
+            'Soap' => 'صابون',
+            'Lotion' => 'لوشن',
+            'Face Cream' => 'كريم للوجه',
+            'Lip Balm' => 'مرطب شفاه',
+            'Hand Wash' => 'غسول يدين',
+            'Baby' => 'أطفال',
+            'Jelly' => 'جيلي',
+            'Milk' => 'حليب',
+            'Laban' => 'لبن',
+            'Labneh' => 'لبنة',
+            'Yoghurt' => 'زبادي',
+            'Yogurt' => 'زبادي',
+            'Cheese' => 'جبن',
+            'Eggs' => 'بيض',
+            'Egg' => 'بيضة',
+            'Hummus' => 'حمص',
+            'Salad' => 'سلطة',
+            'Fries' => 'بطاطس مقلية',
+            'Nuggets' => 'ناجتس',
+            'Wings' => 'أجنحة',
+            'Croissant' => 'كرواسون',
+            'Cake' => 'كيك',
+            'Juice' => 'عصير',
+            'Tea' => 'شاي',
+            'Orange' => 'برتقال',
+            'Black' => 'أسود',
+            'White' => 'أبيض',
+            'Lite' => 'خفيف',
+            'Full Fat' => 'كامل الدسم',
+            'Plain' => 'سادة',
+            'Shredded' => 'مبشور',
+            'Breakfast' => 'إفطار',
+            'Grilled' => 'مشوي',
+            'Charcoal' => 'فحم',
+            'Shawarma' => 'شاورما',
+            'French' => 'فرنسي',
+            'Spicy' => 'حار',
+            'Chocolate' => 'شوكولاتة',
+            'Cheddar' => 'شيدر',
+            'Anti Dandruff' => 'مضاد للقشرة',
+            'Intensive Repair' => 'عناية مكثفة',
+            'Cavity Fighter' => 'مكافح للتسوس',
+            'Antibacterial' => 'مضاد للبكتيريا',
+            'Moisturising' => 'مرطب',
+            'Protection' => 'حماية',
+            'pieces' => 'حبة',
+            'Pieces' => 'حبة',
+            'pcs' => 'قطع',
+            'Pcs' => 'قطع',
+            'for' => 'لـ',
+            'with' => 'مع',
+            'and' => 'و',
+        ];
+
+        uksort($dictionary, static fn ($a, $b) => strlen($b) <=> strlen($a));
+        foreach ($dictionary as $en => $ar) {
+            $translated = preg_replace('/\b'.preg_quote($en, '/').'\b/ui', $ar, $translated) ?? $translated;
+        }
+
+        $translated = str_replace(['&times;', '&', ' x '], ['×', ' و ', ' × '], $translated);
+        $translated = preg_replace('/(?<=\d)\s*[xX]\s*(?=\d)/u', '×', $translated) ?? $translated;
+        $translated = preg_replace('/(\d+(?:\.\d+)?)\s*kg\b/ui', '$1 كجم', $translated) ?? $translated;
+        $translated = preg_replace('/(\d+(?:\.\d+)?)\s*g\b/ui', '$1 جم', $translated) ?? $translated;
+        $translated = preg_replace('/(\d+(?:\.\d+)?)\s*ml\b/ui', '$1 مل', $translated) ?? $translated;
+        $translated = preg_replace('/(\d+(?:\.\d+)?)\s*l\b/ui', '$1 لتر', $translated) ?? $translated;
+        $translated = preg_replace('/\b(\d+)\s*x\s*(\d+(?:\.\d+)?)\s*(ml|l)\b/ui', '$1×$2 $3', $translated) ?? $translated;
+        // Product-name reordering for better Arabic flow.
+        $translated = preg_replace('/^(.+?)\s+(بسمتي|كالروز)\s+أرز\s+(\d+(?:\.\d+)?\s*كجم)$/u', 'أرز $2 $1 $3', $translated) ?? $translated;
+        $translated = preg_replace('/^(.+?)\s+أرز\s+(\d+(?:\.\d+)?\s*كجم)$/u', 'أرز $1 $2', $translated) ?? $translated;
+        $translated = preg_replace('/^(.+?)\s+(زيت)\s+(.+)$/u', '$2 $1 $3', $translated) ?? $translated;
+        $translated = preg_replace('/^كبير\s+(.+?)\s+وجبة$/u', 'وجبة $1 كبيرة', $translated) ?? $translated;
+        $translated = preg_replace('/^وسط\s+(.+?)\s+وجبة$/u', 'وجبة $1 متوسطة', $translated) ?? $translated;
+        $translated = preg_replace('/^صغير\s+(.+?)\s+وجبة$/u', 'وجبة $1 صغيرة', $translated) ?? $translated;
+        $translated = preg_replace('/\s+/', ' ', $translated) ?? $translated;
+        $translated = preg_replace('/\bأرز\s+أرز\b/u', 'أرز', $translated) ?? $translated;
+        $translated = preg_replace('/\b(كجم|جم|مل|لتر)\s+(كجم|جم|مل|لتر)\b/u', '$1', $translated) ?? $translated;
+
+        // Hard guarantee: no English words remain in Arabic fields.
+        $translated = preg_replace_callback('/[A-Za-z][A-Za-z0-9\.\-\+\'"]*/u', function (array $match): string {
+            return $this->transliterateLatinTokenToArabic($match[0]);
+        }, $translated) ?? $translated;
+
+        $translated = preg_replace('/\s+/', ' ', $translated) ?? $translated;
+
+        return trim($translated);
+    }
+
+    private function transliterateLatinTokenToArabic(string $token): string
+    {
+        $map = [
+            'a' => 'ا', 'b' => 'ب', 'c' => 'ك', 'd' => 'د', 'e' => 'ي', 'f' => 'ف', 'g' => 'ج', 'h' => 'ه',
+            'i' => 'ي', 'j' => 'ج', 'k' => 'ك', 'l' => 'ل', 'm' => 'م', 'n' => 'ن', 'o' => 'و', 'p' => 'ب',
+            'q' => 'ق', 'r' => 'ر', 's' => 'س', 't' => 'ت', 'u' => 'و', 'v' => 'ف', 'w' => 'و', 'x' => 'كس',
+            'y' => 'ي', 'z' => 'ز',
+        ];
+
+        $lower = mb_strtolower($token);
+        $result = '';
+
+        $chars = preg_split('//u', $lower, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        foreach ($chars as $ch) {
+            if (isset($map[$ch])) {
+                $result .= $map[$ch];
+            } elseif (preg_match('/[0-9]/', $ch) === 1) {
+                $result .= $ch;
+            }
+        }
+
+        return $result !== '' ? $result : $token;
     }
 }
