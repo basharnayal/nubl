@@ -19,17 +19,31 @@
 <label class="nav-drawer-overlay" for="nav-drawer-toggle" aria-hidden="true"></label>
 <nav class="nav-drawer" aria-label="{{ __('welcome.nav.aria') }}">
   <label class="nav-drawer-close" for="nav-drawer-toggle" aria-label="{{ __('welcome.nav.close_drawer') }}">✕</label>
-  <a href="#idea">{{ __('welcome.nav.idea') }}</a>
-  <a href="#how">{{ __('welcome.nav.how') }}</a>
-  <a href="#trust">{{ __('welcome.nav.trust') }}</a>
-  <a href="#providers">{{ __('welcome.nav.providers') }}</a>
-  <a href="{{ route('top-donors.index') }}">{{ __('welcome.nav.top_donors') }}</a>
-  @if (auth()->check())
-  <a href="{{ url('/dashboard') }}" class="cta danger nav-drawer-cta">{{ __('welcome.nav.dashboard') }}</a>
-  @else
-  <a href="{{ route('register') }}" class="cta accent nav-drawer-cta">{{ __('welcome.nav.give') }}</a>
-  <a href="{{ route('login') }}" class="cta nav-drawer-cta--sm">{{ __('welcome.nav.login') }}</a>
-  @endif
+
+  <div class="nav-drawer-links">
+    <a href="#idea">{{ __('welcome.nav.idea') }}</a>
+    <a href="#how">{{ __('welcome.nav.how') }}</a>
+    <a href="#trust">{{ __('welcome.nav.trust') }}</a>
+    <a href="#providers">{{ __('welcome.nav.providers') }}</a>
+    <a href="{{ route('top-donors.index') }}">{{ __('welcome.nav.top_donors') }}</a>
+  </div>
+
+  <div class="nav-drawer-actions">
+    @if (auth()->check())
+    <a href="{{ url('/dashboard') }}" class="cta accent nav-drawer-cta">{{ __('welcome.nav.dashboard') }}</a>
+    <form method="POST" action="{{ route('logout') }}">
+      @csrf
+      <button type="submit" class="cta ghost nav-drawer-cta">{{ __('Logout') }}</button>
+    </form>
+    @else
+    <a href="{{ route('register') }}" class="cta accent nav-drawer-cta">{{ __('welcome.nav.give') }}</a>
+    <a href="{{ route('login') }}" class="cta nav-drawer-cta">{{ __('welcome.nav.login') }}</a>
+    @endif
+  </div>
+
+  <div class="nav-drawer-footer">
+    <button class="nav-drawer-lang" type="button" onclick="window.location.href='{{ app()->getLocale() === 'ar' ? route('locale.switch', 'en') : route('locale.switch', 'ar') }}'">{{ __('welcome.nav.lang_label') }}</button>
+  </div>
 </nav>
 
 <!-- ========== NAV ========== -->
@@ -65,10 +79,13 @@
       @endif
     </div>
 
-    <!-- Hamburger: visible ≤760 px, opens CSS drawer -->
-    <label class="nav-hamburger" for="nav-drawer-toggle" aria-label="{{ __('welcome.nav.open_menu') }}" role="button" tabindex="0">
-      <span></span><span></span><span></span>
-    </label>
+    <!-- Mobile-only: lang + hamburger -->
+    <div class="nav-mobile-end">
+      <button class="lang-mobile" type="button" aria-label="{{ __('welcome.nav.lang_aria') }}" onclick="window.location.href='{{ app()->getLocale() === 'ar' ? route('locale.switch', 'en') : route('locale.switch', 'ar') }}'">{{ __('welcome.nav.lang_label') }}</button>
+      <label class="nav-hamburger" for="nav-drawer-toggle" aria-label="{{ __('welcome.nav.open_menu') }}" role="button" tabindex="0">
+        <span></span><span></span><span></span>
+      </label>
+    </div>
   </div>
 </nav>
 
@@ -249,7 +266,6 @@
       <div class="privacy-pills">
         <span class="pill">{{ __('welcome.privacy.pill1') }}</span>
         <span class="pill">{{ __('welcome.privacy.pill2') }}</span>
-        <span class="pill">{{ __('welcome.privacy.pill3') }}</span>
         <span class="pill">{{ __('welcome.privacy.pill4') }}</span>
       </div>
     </div>
@@ -575,6 +591,14 @@
 </div>
 
 <script>
+  // -------- Close mobile drawer on link click --------
+  (function() {
+    const toggle = document.getElementById('nav-drawer-toggle');
+    document.querySelectorAll('.nav-drawer-links a').forEach(function(link) {
+      link.addEventListener('click', function() { toggle.checked = false; });
+    });
+  })();
+
   // -------- Locale (server-side) --------
   const CURRENT_LOCALE = "{{ app()->getLocale() }}";
   const FEED_POLL_URL = @json(route('landing.feed'));
