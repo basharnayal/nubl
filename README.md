@@ -76,19 +76,6 @@ php artisan serve
 # Terminal 2: Vite Dev Server (for development only)
 npm run dev
 ```
-./vendor/bin/pint --test
-
-### Assign Role to User
-
-```bash
-php artisan tinker
-```
-
-In Tinker:
-```php
-$user = User::where('email', 'your-email@example.com')->first();
-$user->assignRole('admin');
-```
 
 ---
 
@@ -128,46 +115,69 @@ $user->assignRole('admin');
 ```
 nubl/
 ├── app/
+│   ├── Auth/
+│   │   ├── Registration/
+│   │   └── PostAuthRedirector.php
+│   ├── Console/Commands/
+│   ├── Contracts/
 │   ├── Http/
-│   │   ├── Controllers/          # Controllers (organized by role)
+│   │   ├── Controllers/
 │   │   │   ├── Admin/
+│   │   │   ├── Auth/
 │   │   │   ├── Donor/
-│   │   │   ├── recipient/
-│   │   │   └── Provider/
-│   │   ├── Middleware/           # Custom Middleware
-│   │   ├── Requests/             # Form Requests (Validation)
-│   └── Services/                 # Business Logic Layer
-│   ├── Models/                   # Eloquent Models
-│   ├── Providers/                # Service Providers
-│   └── View/Components/          # Blade Component Classes
+│   │   │   ├── Provider/
+│   │   │   ├── Recipient/
+│   │   │   └── Testing/
+│   │   ├── Middleware/
+│   │   ├── Queries/
+│   │   └── Requests/
+│   ├── Jobs/
+│   ├── Models/
+│   ├── Notifications/
+│   ├── Observers/
+│   ├── Providers/
+│   ├── Rules/
+│   ├── Services/
+│   │   └── Admin/
+│   ├── Support/
+│   └── View/
+│       ├── Components/
+│       └── Composers/
 │
 ├── database/
+│   ├── factories/
 │   ├── migrations/
 │   └── seeders/
 │
 ├── resources/
 │   ├── css/
-│   │   └── app.css               # Tailwind CSS
 │   ├── js/
-│   │   ├── app.js                # Main JS file
-│   │   └── bootstrap.js          # Bootstrap JS
 │   └── views/
-│       ├── layouts/              # Layout Templates
-│       ├── components/           # Blade Components
-│       ├── admin/                # Admin Views
-│       ├── donor/                # Donor Views
-│       ├── recipient/            # Recipient Views
-│       └── provider/             # Provider Views
+│       ├── admin/
+│       ├── auth/
+│       ├── components/
+│       ├── donor/
+│       ├── provider/
+│       ├── recipient/
+│       ├── guest-donation/
+│       └── legal/
 │
 ├── routes/
-│   ├── web.php                   # Main web routes (role groups;        includes auth)
-│   ├── auth.php                  # Auth routes (required from web.php)
-│   └── console.php
+│   ├── web.php
+│   ├── auth.php
+│   ├── console.php
+│   └── testing.php
 │
-└── tests/
-    ├── e2e/                      # Playwright specs (*.spec.js)
-    ├── Feature/                  # PHPUnit
-    └── Unit/
+├── tests/
+│   ├── e2e/
+│   ├── Feature/
+│   └── Unit/
+│
+├── config/
+├── docker/
+├── lang/
+├── scripts/
+└── storage/
 ```
 
 ### Architecture Pattern
@@ -175,33 +185,9 @@ nubl/
 - **MVC Pattern**: Model-View-Controller
 - **Service Layer**: Business logic in `app/Services/` 
 - **Form Requests**: Validation in `app/Http/Requests/`
-- **Blade Templates**: Server-side rendering (no SPA)
+- **Blade Templates**: Server-side rendering 
 
 ---
-
-## 🎨 Frontend Configuration
-
-### Vite Configuration
-
-**`vite.config.js`**
-```javascript
-import { defineConfig } from 'vite';
-import laravel from 'laravel-vite-plugin';
-import tailwindcss from '@tailwindcss/vite';
-
-export default defineConfig({
-    plugins: [
-        laravel({
-            input: [
-                'resources/css/app.css',
-                'resources/js/app.js',
-            ],
-            refresh: true,
-        }),
-        tailwindcss(),
-    ],
-});
-```
 
 ### CSS & JavaScript
 
@@ -219,75 +205,10 @@ export default defineConfig({
 
 ---
 
-## 📖 Spatie Permission Usage
-
-### In Routes
-
-Protect routes with specific roles:
-```php
-// Single role
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin/dashboard', ...);
-});
-
-// Multiple roles (OR)
-Route::middleware(['auth', 'role:donor|admin'])->group(function () {
-    Route::get('/donations', ...);
-});
-```
-
-### In Controllers
-
-Check user roles:
-```php
-// Check single role
-if (auth()->user()->hasRole('admin')) {
-    // Admin code
-}
-
-// Check multiple roles (OR)
-if (auth()->user()->hasAnyRole(['admin', 'donor'])) {
-    // Admin or Donor code
-}
-
-// Check all roles (AND)
-if (auth()->user()->hasAllRoles(['admin', 'donor'])) {
-    // Must have both roles
-}
-```
-
-### In Blade Views
-
-```blade
-{{-- Check single role --}}
-@if(auth()->user()->hasRole('admin'))
-    <a href="{{ route('admin.dashboard') }}">Admin Panel</a>
-@endif
-
-{{-- Use @role directive --}}
-@role('admin')
-    <p>You are an admin</p>
-@endrole
-
-{{-- Check multiple roles --}}
-@if(auth()->user()->hasAnyRole(['donor', 'admin']))
-    <a href="{{ route('donations.create') }}">Make Donation</a>
-@endif
-
-{{-- Always wrap with @auth --}}
-@auth
-    @role('admin')
-        <a href="/admin">Admin Dashboard</a>
-    @endrole
-@endauth
-```
 
 ### Common Commands
 
-```php
-// Assign Role
-$user->assignRole('admin');
-$user->assignRole(['admin', 'donor']); // Multiple roles
+```
 
 // Remove Role
 $user->removeRole('admin');
@@ -520,7 +441,6 @@ npm run test:e2e:php-only          # PHP server only
 npm run test:e2e:ui                # Playwright UI mode
 ```
 
-Extended notes (ports, troubleshooting): see `docs/playwright.md` when that file is available in your doc set.
 
 ---
 
@@ -615,7 +535,6 @@ php artisan migrate:fresh --seed
 
 - [Laravel Documentation](https://laravel.com/docs)
 - [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [Lineone Template](https://lineone.pixelcave.com) - UI reference
 - [Spatie Laravel Permission](https://spatie.be/docs/laravel-permission)
 - [Spatie Laravel Activity Log](https://spatie.be/docs/laravel-activitylog)
 - [Alpine.js Documentation](https://alpinejs.dev)

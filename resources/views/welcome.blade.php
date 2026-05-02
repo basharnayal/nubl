@@ -23,6 +23,7 @@
   <a href="#how">{{ __('welcome.nav.how') }}</a>
   <a href="#trust">{{ __('welcome.nav.trust') }}</a>
   <a href="#providers">{{ __('welcome.nav.providers') }}</a>
+  <a href="{{ route('top-donors.index') }}">{{ __('welcome.nav.top_donors') }}</a>
   @if (auth()->check())
   <a href="{{ url('/dashboard') }}" class="cta danger nav-drawer-cta">{{ __('welcome.nav.dashboard') }}</a>
   @else
@@ -43,6 +44,7 @@
       <a href="#how">{{ __('welcome.nav.how') }}</a>
       <a href="#trust">{{ __('welcome.nav.trust') }}</a>
       <a href="#providers">{{ __('welcome.nav.providers') }}</a>
+      <a href="{{ route('top-donors.index') }}">{{ __('welcome.nav.top_donors') }}</a>
       <button class="lang" id="langToggle" type="button" aria-label="{{ __('welcome.nav.lang_aria') }}" data-en-url="{{ route('locale.switch', 'en') }}" data-ar-url="{{ route('locale.switch', 'ar') }}">
         <span id="langLabel">{{ __('welcome.nav.lang_label') }}</span>
       </button>

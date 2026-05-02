@@ -20,6 +20,8 @@ class PaymentFactory extends Factory
             'amount' => fake()->randomFloat(2, 10, 500),
             'notes' => null,
             'idempotency_key' => fake()->uuid(),
+            'is_guest' => false,
+            'is_anonymous' => false,
         ];
     }
 
@@ -41,6 +43,22 @@ class PaymentFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => Payment::STATUS_PENDING,
+        ]);
+    }
+
+    public function anonymous(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_anonymous' => true,
+        ]);
+    }
+
+    public function guest(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'sponsor_id' => null,
+            'is_guest' => true,
+            'is_anonymous' => true,
         ]);
     }
 }
