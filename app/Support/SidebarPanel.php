@@ -144,11 +144,11 @@ class SidebarPanel
                         'route_name' => 'provider.profile.edit',
                         'icon' => 'user-clock',
                     ],
-                    'provider_analytics' => [
-                        'title' => __('Analytics'),
-                        'route_name' => '',
-                        'icon' => 'analytics',
-                    ],
+                    // 'provider_analytics' => [
+                    //     'title' => __('Analytics'),
+                    //     'route_name' => '',
+                    //     'icon' => 'analytics',
+                    // ],
                 ],
             ],
         ];

@@ -47,8 +47,7 @@
                                 <div>
                                     <label for="category_id" class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Category') }} *</label>
                                     <select id="category_id" name="category_id" required
-                                        class="form-select form-select-lineone w-full ltr:pl-3 ltr:pr-9 rtl:pr-3 rtl:pl-10 rtl:bg-[position:left_0.5rem_center]"
-                                        onfocus="if (!this.tomselect) { var el = this; window.loadTomSelect().then(function(TS) { if (!el.tomselect) new TS(el, {create: false}); }); }">
+                                        class="form-select form-select-lineone w-full ltr:pl-3 ltr:pr-9 rtl:pr-3 rtl:pl-10 rtl:bg-[position:left_0.5rem_center]">
                                         <option value="">{{ __('Select Category') }}</option>
                                         @foreach($categories as $cat)
                                             <option value="{{ $cat->id }}" {{ old('category_id') == $cat->id ? 'selected' : '' }}>
