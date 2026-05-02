@@ -7,6 +7,7 @@ use App\Models\FundTransaction;
 use App\Models\Payment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -20,7 +21,7 @@ class PaymentService
         private NotificationServiceInterface $notificationService
     ) {}
 
-    public function initiateSponsorPayment(int $sponsorId, float $amount, ?string $idempotencyKey = null): Payment
+    public function initiateSponsorPayment(int $sponsorId, float $amount, bool $isAnonymous = false, ?string $idempotencyKey = null): Payment
     {
         if ($idempotencyKey !== null) {
             $existing = Payment::where('idempotency_key', $idempotencyKey)->first();
@@ -36,12 +37,14 @@ class PaymentService
             'status' => Payment::STATUS_INITIATED,
             'amount' => $amount,
             'idempotency_key' => $idempotencyKey ?? Str::uuid()->toString(),
+            'is_anonymous' => $isAnonymous,
         ]);
 
         $this->auditService->log('payment', 'initiated', [
             'payment_id' => $payment->id,
             'amount' => $amount,
             'sponsor_id' => $sponsorId,
+            'is_anonymous' => $isAnonymous,
         ], $sponsorId);
 
         return $payment;
@@ -56,6 +59,7 @@ class PaymentService
             'amount' => $amount,
             'idempotency_key' => Str::uuid()->toString(),
             'is_guest' => true,
+            'is_anonymous' => true,
             'notes' => ['source' => 'quick_donation'],
         ]);
 
@@ -63,6 +67,7 @@ class PaymentService
             'payment_id' => $payment->id,
             'amount' => $amount,
             'is_guest' => true,
+            'is_anonymous' => true,
             'source' => 'quick_donation',
         ], null);
 
@@ -256,6 +261,8 @@ class PaymentService
                     $locked->sponsor_id,
                     $locked->id
                 );
+
+                Cache::forget('top_donors_list');
 
                 if (! $locked->is_guest) {
                     $this->notificationService->sendDonationReceipt($locked);

@@ -12,6 +12,7 @@ return [
         'how' => 'How it works',
         'trust' => 'Trust',
         'providers' => 'Providers',
+        'top_donors' => 'NUBL Hands',
         'give' => 'Register',
         'dashboard' => 'Dashboard',
         'login' => 'Login',

@@ -49,6 +49,7 @@ use App\Http\Controllers\Donor\DonorDashboardController;
 use App\Http\Controllers\GuestDonationController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\LandingPageFeedController;
+use App\Http\Controllers\TopDonorsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\ProfileController;
@@ -108,6 +109,9 @@ Route::get('/locale/{locale}', function (string $locale) {
 // Legal
 Route::view('/terms', 'legal.terms')->name('legal.terms');
 Route::view('/privacy-policy', 'legal.privacy')->name('legal.privacy');
+
+// Top Donors (سواعد نُبل)
+Route::get('/top-donors', TopDonorsController::class)->name('top-donors.index');
 
 /*
 |--------------------------------------------------------------------------

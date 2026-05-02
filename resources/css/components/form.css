@@ -52,6 +52,10 @@
   background-position: left 0.5rem center;
 }
 
+[dir='rtl'] input[dir='ltr']::placeholder {
+  text-align: right;
+}
+
 .form-multiselect {
   background-image: initial;
   background-position: initial;

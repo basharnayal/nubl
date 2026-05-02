@@ -31,7 +31,7 @@
                         <div class="w-full sm:w-48">
                             <select name="category_id"
                                 class="form-select form-select-lineone ltr:pl-3 ltr:pr-9 rtl:pr-3 rtl:pl-10 rtl:bg-[position:left_0.5rem_center]"
-                                onfocus="if (!this.tomselect) { var el = this; window.loadTomSelect().then(function(TS) { if (!el.tomselect) new TS(el, {create: false}); }); }">
+>
                                 <option value="">{{ __('All Categories') }}</option>
                                 @foreach($categories as $category)
                                     <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
