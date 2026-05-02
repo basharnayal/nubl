@@ -67,7 +67,9 @@ class NotificationController extends Controller
             'type' => $type,
             'read_at' => $notification->read_at?->toIso8601String(),
             'created_at' => $notification->created_at->toIso8601String(),
-            'title' => $data['message'] ?? $data['title'] ?? __('Notification'),
+            'title' => isset($data['message_key'])
+                ? __($data['message_key'], $data['message_params'] ?? [])
+                : ($data['message'] ?? $data['title'] ?? __('Notification')),
             'subtitle' => $subtitle ? __($subtitle) : '',
             'url' => $data['url'] ?? '#',
             'icon' => $typeConfig['icon'] ?? 'info',

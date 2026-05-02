@@ -60,6 +60,10 @@ class DonationReceiptNotification extends Notification
             'type' => 'donation_receipt',
             'payment_id' => $this->payment->id,
             'amount' => (float) $this->payment->amount,
+            'message_key' => 'Thank you! Your donation of :amount SAR was successful.',
+            'message_params' => [
+                'amount' => number_format((float) $this->payment->amount, 2),
+            ],
             'message' => __('Thank you! Your donation of :amount SAR was successful.', [
                 'amount' => number_format((float) $this->payment->amount, 2),
             ]),
