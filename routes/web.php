@@ -47,6 +47,7 @@ use App\Http\Controllers\Auth\ResubmitApplicationController;
 use App\Http\Controllers\Donor\DonationController;
 use App\Http\Controllers\Donor\DonorDashboardController;
 use App\Http\Controllers\GuestDonationController;
+use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\LandingPageFeedController;
 use App\Http\Controllers\TopDonorsController;
@@ -98,13 +99,9 @@ Route::get('/landing/feed', LandingPageFeedController::class)
 
 // Locale switch (default: English; user can switch to Arabic).
 // Constraint prevents arbitrary values from being persisted to session.
-Route::get('/locale/{locale}', function (string $locale) {
-    if (in_array($locale, ['en', 'ar'], true)) {
-        session(['locale' => $locale]);
-    }
-
-    return redirect()->back();
-})->where('locale', 'en|ar')->name('locale.switch');
+Route::get('/locale/{locale}', [LanguageController::class, 'switch'])
+    ->where('locale', 'en|ar')
+    ->name('locale.switch');
 
 // Legal
 Route::view('/terms', 'legal.terms')->name('legal.terms');
@@ -120,9 +117,9 @@ Route::get('/top-donors', TopDonorsController::class)->name('top-donors.index');
 */
 
 // Role-aware redirect to the right dashboard
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(array_merge($approvedMiddleware, ['redirect.by.role']))->name('dashboard');
+Route::view('/dashboard', 'dashboard')
+    ->middleware(array_merge($approvedMiddleware, ['redirect.by.role']))
+    ->name('dashboard');
 
 Route::middleware($approvedMiddleware)->group(function () {
     Route::controller(ProfileController::class)->prefix('profile')->name('profile.')->group(function () {
