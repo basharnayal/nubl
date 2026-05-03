@@ -46,9 +46,10 @@ Schedule::call(fn () => Http::get(config('services.forge.heartbeat_url')))
     ->name('forge-scheduler-heartbeat')
     ->withoutOverlapping();
 
-// For Testing run every hour
+// For Testing 
+// Every 2 minutes for local testing
 Schedule::command('provider-payouts:generate-weekly')
-    ->hourly()
+    ->everyTwoMinutes()
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/provider-payout-weekly.log'));
 
