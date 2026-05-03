@@ -55,6 +55,7 @@ class PaymentServiceTest extends TestCase
         $resolved = $service->initiateSponsorPayment(
             $this->donor->id,
             99.99,
+            false,
             '77777777-7777-7777-7777-777777777777'
         );
 
@@ -78,6 +79,7 @@ class PaymentServiceTest extends TestCase
         $payment = $service->initiateSponsorPayment(
             $this->donor->id,
             55.25,
+            false,
             '88888888-8888-8888-8888-888888888888'
         );
 
