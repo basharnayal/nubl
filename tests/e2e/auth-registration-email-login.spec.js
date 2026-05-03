@@ -103,17 +103,23 @@ test.describe('auth registration and email login coverage', () => {
     await page.locator('#recipient_phone_number').fill(phone);
     await page.locator('#nationality').selectOption('Saudi Arabia');
     await page.locator('#id_type').selectOption('national_id');
-    await page.locator('#short_address').fill('Playwright short address');
+    await page.locator('#id_number').fill('1234567890');
     await page.locator('input[name="id_photo_base64"]').evaluate((input, value) => {
       input.value = value;
     }, VALID_BASE64_IMAGE);
+    await page.locator('#short_address').fill('Playwright short address');
+    await page.evaluate(() => {
+      const lat = document.querySelector('input[name="location_lat"]');
+      const lng = document.querySelector('input[name="location_lng"]');
+      if (lat) { lat.disabled = false; lat.value = '24.6877'; }
+      if (lng) { lng.disabled = false; lng.value = '46.7219'; }
+    });
+    await page.locator('#employment_status').selectOption('unemployed');
     await page.locator('#income_band').selectOption('1000-1500');
     await page.locator('#household_size').fill('4');
     await page.locator('#marital_status').selectOption('married');
     await page.locator('input[name="is_student"][value="0"]').check({ force: true });
-    await page.locator('input[name="address_confirmation_base64"]').evaluate((input, value) => {
-      input.value = value;
-    }, VALID_BASE64_IMAGE);
+    await page.locator('#situation_description').fill('Playwright test situation description for e2e purposes.');
 
     await Promise.all([
       page.waitForURL(/\/approval-pending$/),

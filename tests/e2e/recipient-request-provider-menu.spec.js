@@ -38,7 +38,7 @@ test.describe('recipient request flow', () => {
     await expect(page.getByText(seeded.itemName)).toBeVisible();
 
     const itemControls = page.locator(`#menu-controls-${seeded.itemId}`);
-    await itemControls.getByRole('button', { name: 'Add to Cart' }).click();
+    await itemControls.getByRole('button', { name: 'Increase quantity' }).click();
 
     await expect(page.locator('#submit-btn')).toBeEnabled();
 
