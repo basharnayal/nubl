@@ -48,8 +48,15 @@ Schedule::call(fn () => Http::get(config('services.forge.heartbeat_url')))
 
 // For Testing 
 // Every 2 minutes for local testing
+// Schedule::command('provider-payouts:generate-weekly')
+//     ->everyTwoMinutes()
+//     ->withoutOverlapping()
+//     ->appendOutputTo(storage_path('logs/provider-payout-weekly.log'));
+
+// Weekly provider bank payout requests (Sun 00:00, app timezone — set APP_TIMEZONE=Asia/Riyadh for KSA).
 Schedule::command('provider-payouts:generate-weekly')
-    ->everyTwoMinutes()
+    ->weeklyOn(Carbon::SUNDAY, '00:00')
+    ->timezone(config('app.timezone'))
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/provider-payout-weekly.log'));
 
