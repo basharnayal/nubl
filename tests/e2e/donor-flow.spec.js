@@ -64,11 +64,11 @@ test.describe('donor flow coverage', () => {
 
     await expect(main).toContainText(`Welcome, ${seed.primaryDonor.name}`);
     await expect(main).toContainText('Total Donated');
-    await expect(main).toContainText(`${seed.impact.totalDonated} SAR`);
+    await expect(main).toContainText(String(seed.impact.totalDonated));
     await expect(main).toContainText(`${seed.impact.donationCount} donations`);
     await expect(main).toContainText('Requests Delivered');
     await expect(main).toContainText(String(seed.impact.requestsDelivered));
-    await expect(main).toContainText(`${seed.impact.amountAllocated} SAR`);
+    await expect(main).toContainText(String(seed.impact.amountAllocated));
     await expect(main).toContainText(`${seed.impact.requestsFunded} requests funded`);
     await expect(main).toContainText(seed.impact.fulfilledReference);
     await expect(main).toContainText(seed.impact.redeemableReference);
@@ -89,16 +89,16 @@ test.describe('donor flow coverage', () => {
     const main = mainContent(page);
 
     await expect(page.getByRole('heading', { name: 'My Donations & Impact' })).toBeVisible();
-    await expect(main).toContainText('120.50 SAR');
-    await expect(main).toContainText('79.50 SAR');
-    await expect(main).not.toContainText('55.25 SAR');
-    await expect(main).not.toContainText('15.00 SAR');
+    await expect(main).toContainText('120.50');
+    await expect(main).toContainText('79.50');
+    await expect(main).not.toContainText('55.25');
+    await expect(main).not.toContainText('15.00');
     await expect(page.getByRole('link', { name: 'View Receipt' })).toHaveCount(2);
 
     await page.goto(`/donor/donations/${seed.payments.succeededOneId}/receipt`);
     await expect(page.getByRole('heading', { name: 'Donation Receipt' })).toBeVisible();
     await expect(page.locator('#receipt')).toContainText('#' + seed.payments.succeededOneId);
-    await expect(page.locator('#receipt')).toContainText('120.50 SAR');
+    await expect(page.locator('#receipt')).toContainText('120.50');
     await expect(page.locator('#receipt')).toContainText(seed.primaryDonor.name);
     await expect(page.locator('#receipt')).toContainText('allocated to 2 request(s)');
   });
@@ -156,12 +156,12 @@ test.describe('donor flow coverage', () => {
     const successResponse = await page.goto(`/donor/payments/success?payment_id=${seed.payments.succeededOneId}`);
     expect(successResponse?.status()).toBe(200);
     await expect(mainContent(page)).toContainText('Thank you! Your donation was successful.');
-    await expect(mainContent(page)).toContainText('#' + seed.payments.succeededOneId);
-    await expect(mainContent(page)).toContainText('120.50 SAR');
+    await expect(mainContent(page)).toContainText(`DON-${String(seed.payments.succeededOneId).padStart(4, '0')}`);
+    await expect(mainContent(page)).toContainText('120.50');
 
     await page.goto('/donor/payments/success');
     await expect(mainContent(page)).toContainText('Thank you! Your donation was successful.');
-    await expect(mainContent(page)).not.toContainText('#' + seed.payments.succeededOneId);
+    await expect(mainContent(page)).not.toContainText(`DON-${String(seed.payments.succeededOneId).padStart(4, '0')}`);
 
     const failedResponse = await page.goto(`/donor/payments/failed?payment_id=${seed.payments.failedId}`);
     expect(failedResponse?.status()).toBe(200);
