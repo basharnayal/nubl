@@ -130,7 +130,7 @@
                         <select id="income_band" name="income_band" required class="{{ $sel }}">
                             <option value="">— {{ __('Select') }} —</option>
                             @foreach(\App\Models\RecipientKycDetails::INCOME_BANDS as $band)
-                                <option value="{{ $band }}" @selected(old('income_band', $k->income_band) === $band)>{{ $band }} <x-sar-symbol />/{{ __('month') }}</option>
+                                <option value="{{ $band }}" @selected(old('income_band', $k->income_band) === $band)>{{ $band }} {{ __('SAR') }}/{{ __('month') }}</option>
                             @endforeach
                         </select>
                         <span class="pointer-events-none absolute right-0 flex h-full w-10 items-center justify-center text-slate-400 peer-focus:text-primary dark:text-navy-300 dark:peer-focus:text-accent">
@@ -215,21 +215,56 @@
             </div>
         </section>
 
-        {{-- Documents: current + optional new --}}
+        {{-- Documents: current + camera capture for replacement --}}
         <section class="rounded-lg border border-slate-200 p-6 bg-white dark:bg-navy-800 dark:border-navy-600">
             <h2 class="text-lg font-semibold text-slate-900 dark:text-navy-100 mb-2">{{ __('Documents') }}</h2>
-            <p class="text-sm text-slate-600 dark:text-navy-300 mb-4">{{ __('Current uploads are shown below. Choose a new file only if you want to replace it.') }}</p>
-            <div>
-                <x-input-label :value="__('Identity Photo (current)')" />
+
+            <div class="rounded-lg border border-primary/20 bg-primary/10 dark:border-accent/20 dark:bg-accent/10 p-4">
+                <x-input-label :value="__('Identity Photo')" />
                 @if($p->id_photo_path)
-                    <a href="{{ route('application.my-file', 'id_photo') }}" target="_blank" class="block mt-2">
-                        <img src="{{ route('application.my-file', 'id_photo') }}" alt="" class="max-h-48 rounded-lg border border-slate-200 object-contain" />
+                    <p class="text-xs text-slate-500 dark:text-navy-400 mt-1 mb-2">{{ __('Current photo on file:') }}</p>
+                    <a href="{{ route('application.my-file', 'id_photo') }}" target="_blank" class="block mb-3" id="current-id-photo-link">
+                        <img src="{{ route('application.my-file', 'id_photo') }}" alt="" class="max-h-40 rounded-lg border border-slate-200 dark:border-navy-500 object-contain" />
                     </a>
                 @endif
-                <p class="text-xs text-slate-500 mt-2">{{ __('Replace identity photo') }}</p>
-                <input type="file" id="id_file" accept="image/jpeg,image/png,image/webp" class="mt-1 block w-full text-sm" />
+                <p class="text-sm text-slate-600 dark:text-navy-300 mb-3">{{ __('To replace your identity photo, capture a new one using your device camera.') }}</p>
+
+                {{-- Camera not started --}}
+                <div id="camera-idle">
+                    <button type="button" id="btn-start-camera"
+                        class="text-white bg-primary hover:bg-primary-focus focus:ring-4 focus:ring-primary/20 dark:bg-accent dark:hover:bg-accent-focus dark:focus:ring-accent/20 font-medium rounded-lg text-sm px-5 py-2.5 transition">
+                        {{ __('Start Camera') }}
+                    </button>
+                </div>
+
+                {{-- Camera active --}}
+                <div id="camera-active" class="space-y-3" style="display:none;">
+                    <video id="camera-preview" autoplay playsinline class="w-full rounded-lg border border-slate-300 dark:border-navy-500"></video>
+                    <div class="flex gap-2">
+                        <button type="button" id="btn-capture"
+                            class="text-white bg-primary hover:bg-primary-focus focus:ring-4 focus:ring-primary/20 dark:bg-accent dark:hover:bg-accent-focus dark:focus:ring-accent/20 font-medium rounded-lg text-sm px-5 py-2.5 transition">
+                            {{ __('Capture Photo') }}
+                        </button>
+                        <button type="button" id="btn-cancel-camera"
+                            class="text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 dark:text-navy-100 dark:bg-navy-700 dark:border-navy-500 dark:hover:bg-navy-600 font-medium rounded-lg text-sm px-5 py-2.5 transition">
+                            {{ __('Cancel') }}
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Photo captured --}}
+                <div id="camera-captured" class="space-y-2" style="display:none;">
+                    <img id="captured-preview" src="" alt="{{ __('Captured') }}" class="max-h-40 rounded-lg border border-slate-300 dark:border-navy-500" />
+                    <button type="button" id="btn-retake"
+                        class="text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent font-medium text-sm">
+                        {{ __('Retake photo') }}
+                    </button>
+                </div>
+
                 <input type="hidden" name="id_photo_base64" id="id_photo_base64" value="" />
+                <x-input-error :messages="$errors->get('id_photo_base64')" class="mt-2" />
             </div>
+
             <div class="mt-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800 dark:border-blue-800 dark:bg-blue-900/20 dark:text-blue-200">
                 {{ __('Your GPS location was captured when you first registered and does not need to be re-submitted.') }}
             </div>
@@ -249,23 +284,62 @@
                     window.nublMountNationalityChoices(el, @json(__('Search')));
                 }
             }, 150);
-            const form = document.getElementById('resubmit-recipient-form');
-            if (!form) return;
-            function readAsDataUrl(file) {
-                return new Promise(function (resolve, reject) {
-                    const r = new FileReader();
-                    r.onload = function () { resolve(r.result); };
-                    r.onerror = reject;
-                    r.readAsDataURL(file);
-                });
+
+            var stream = null;
+
+            var elIdle     = document.getElementById('camera-idle');
+            var elActive   = document.getElementById('camera-active');
+            var elCaptured = document.getElementById('camera-captured');
+            var video      = document.getElementById('camera-preview');
+            var preview    = document.getElementById('captured-preview');
+            var hidden     = document.getElementById('id_photo_base64');
+
+            function showState(state) {
+                elIdle.style.display     = state === 'idle'     ? '' : 'none';
+                elActive.style.display   = state === 'active'   ? '' : 'none';
+                elCaptured.style.display = state === 'captured' ? '' : 'none';
             }
-            form.addEventListener('submit', function (e) {
-                e.preventDefault();
-                const idFile = document.getElementById('id_file').files[0];
-                document.getElementById('id_photo_base64').value = '';
-                const tasks = [];
-                if (idFile) tasks.push(readAsDataUrl(idFile).then(function (u) { document.getElementById('id_photo_base64').value = u; }));
-                Promise.all(tasks).then(function () { form.submit(); });
+
+            function stopStream() {
+                if (stream) {
+                    stream.getTracks().forEach(function (t) { t.stop(); });
+                    stream = null;
+                }
+            }
+
+            document.getElementById('btn-start-camera').addEventListener('click', function () {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                    .then(function (s) {
+                        stream = s;
+                        video.srcObject = s;
+                        showState('active');
+                    })
+                    .catch(function () {
+                        alert(@json(__('Camera access is required to capture your identity photo. Please allow camera permission.')));
+                    });
+            });
+
+            document.getElementById('btn-capture').addEventListener('click', function () {
+                var canvas = document.createElement('canvas');
+                canvas.width  = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                var dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                hidden.value = dataUrl;
+                preview.src  = dataUrl;
+                stopStream();
+                showState('captured');
+            });
+
+            document.getElementById('btn-cancel-camera').addEventListener('click', function () {
+                stopStream();
+                showState('idle');
+            });
+
+            document.getElementById('btn-retake').addEventListener('click', function () {
+                hidden.value = '';
+                preview.src  = '';
+                document.getElementById('btn-start-camera').click();
             });
         })();
     </script>
