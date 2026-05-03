@@ -30,26 +30,30 @@ class TimeController extends Controller
 {
     // ── Helpers ───────────────────────────────────────────────────────────
 
-    private function storedTime(): ?Carbon
+    private function storedOffsetSeconds(): ?int
     {
         $raw = Cache::get(ApplyMockedTime::CACHE_KEY);
 
-        return $raw ? Carbon::parse($raw) : null;
+        return $raw !== null ? (int) $raw : null;
     }
 
-    private function persist(Carbon $time): void
+    private function persistOffset(int $offsetSeconds): void
     {
-        Cache::forever(ApplyMockedTime::CACHE_KEY, $time->toIso8601String());
+        Cache::forever(ApplyMockedTime::CACHE_KEY, $offsetSeconds);
         // Also apply immediately to this request's Carbon instance.
-        Carbon::setTestNow($time);
+        Carbon::setTestNow(Carbon::now()->addSeconds($offsetSeconds));
     }
 
-    private function timePayload(?Carbon $mocked = null): array
+    private function timePayload(?int $offsetSeconds = null): array
     {
+        $realNow = Carbon::createFromTimestamp(time());
+        $mockedNow = $offsetSeconds !== null ? $realNow->copy()->addSeconds($offsetSeconds) : null;
+
         return [
-            'is_mocked' => $mocked !== null,
-            'mocked_time' => $mocked?->toIso8601String(),
-            'real_time' => Carbon::createFromTimestamp(time())->toIso8601String(),
+            'is_mocked'      => $offsetSeconds !== null,
+            'offset_seconds' => $offsetSeconds,
+            'mocked_time'    => $mockedNow?->toIso8601String(),
+            'real_time'      => $realNow->toIso8601String(),
         ];
     }
 
@@ -62,13 +66,13 @@ class TimeController extends Controller
      */
     public function show(): JsonResponse
     {
-        $mocked = $this->storedTime();
+        $offset = $this->storedOffsetSeconds();
 
         return response()->json([
-            'message' => $mocked
-                ? 'Time is currently mocked.'
+            'message' => $offset !== null
+                ? "Time is offset by {$offset} seconds (clock is running)."
                 : 'Time is running normally (no mock active).',
-            ...$this->timePayload($mocked),
+            ...$this->timePayload($offset),
         ]);
     }
 
@@ -78,7 +82,8 @@ class TimeController extends Controller
      * Body (JSON):
      *   { "datetime": "2025-12-31 23:59:00" }
      *
-     * Sets the application clock to an absolute datetime.
+     * Sets the application clock offset so that "now" appears to be the
+     * given datetime. The clock continues ticking from that point.
      */
     public function set(Request $request): JsonResponse
     {
@@ -86,12 +91,13 @@ class TimeController extends Controller
             'datetime' => ['required', 'date'],
         ]);
 
-        $time = Carbon::parse($request->input('datetime'));
-        $this->persist($time);
+        $target = Carbon::parse($request->input('datetime'));
+        $offsetSeconds = (int) $target->diffInSeconds(Carbon::now(), false) * -1;
+        $this->persistOffset($offsetSeconds);
 
         return response()->json([
             'message' => 'Application time set successfully.',
-            ...$this->timePayload($time),
+            ...$this->timePayload($offsetSeconds),
         ]);
     }
 
@@ -128,29 +134,38 @@ class TimeController extends Controller
             ], 422);
         }
 
-        // Start from the current mock, falling back to real wall-clock time.
-        $now = ($this->storedTime() ?? Carbon::now())->copy();
+        // Calculate additional offset from the requested duration.
+        $additionalSeconds = 0;
+        $additionalSeconds += $request->integer('seconds', 0);
+        $additionalSeconds += $request->integer('minutes', 0) * 60;
+        $additionalSeconds += $request->integer('hours', 0) * 3600;
+        $additionalSeconds += $request->integer('days', 0) * 86400;
+        $additionalSeconds += $request->integer('weeks', 0) * 604800;
+        // For months/years, compute from a reference point to handle variable lengths.
+        if ($request->has('months') || $request->has('years')) {
+            $ref = Carbon::now();
+            $shifted = $ref->copy()
+                ->addMonths($request->integer('months', 0))
+                ->addYears($request->integer('years', 0));
+            $additionalSeconds += (int) $shifted->diffInSeconds($ref, false) * -1;
+        }
 
-        $now->addSeconds($request->integer('seconds', 0));
-        $now->addMinutes($request->integer('minutes', 0));
-        $now->addHours($request->integer('hours', 0));
-        $now->addDays($request->integer('days', 0));
-        $now->addWeeks($request->integer('weeks', 0));
-        $now->addMonths($request->integer('months', 0));
-        $now->addYears($request->integer('years', 0));
+        // Accumulate on top of any existing offset.
+        $currentOffset = $this->storedOffsetSeconds() ?? 0;
+        $newOffset = $currentOffset + $additionalSeconds;
 
-        $this->persist($now);
+        $this->persistOffset($newOffset);
 
         return response()->json([
             'message' => 'Application time advanced successfully.',
-            ...$this->timePayload($now),
+            ...$this->timePayload($newOffset),
         ]);
     }
 
     /**
      * POST /_testing/time/reset
      *
-     * Clears the time mock.  Subsequent requests will use the real system clock.
+     * Clears the time offset.  Subsequent requests will use the real system clock.
      * Call this in your test teardown / after-all hook.
      */
     public function reset(): JsonResponse
@@ -159,8 +174,8 @@ class TimeController extends Controller
         Carbon::setTestNow(null);
 
         return response()->json([
-            'message' => 'Time mock cleared. Application is using the real clock.',
-            'real_time' => Carbon::now()->toIso8601String(),
+            'message' => 'Time offset cleared. Application is using the real clock.',
+            'real_time' => Carbon::createFromTimestamp(time())->toIso8601String(),
         ]);
     }
 }

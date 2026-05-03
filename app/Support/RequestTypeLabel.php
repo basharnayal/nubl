@@ -23,7 +23,7 @@ final class RequestTypeLabel
             return $categoryName;
         }
 
-        $itemName = $menuItem->name;
+        $itemName = $menuItem->localized_name;
         if ($itemName && ! preg_match('/^\d+$/', (string) $itemName)) {
             return $itemName;
         }

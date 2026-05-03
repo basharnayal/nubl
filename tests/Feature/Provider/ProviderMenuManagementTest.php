@@ -60,6 +60,7 @@ class ProviderMenuManagementTest extends TestCase
 
         $response = $this->actingAs($provider)->post(route('provider.menu-items.store'), [
             'name' => 'Cheeseburger',
+            'name_ar' => 'تشيز برغر',
             'description' => 'Delicious cheese burger',
             'price' => 25.50,
             'category_id' => $this->menuItemCategory->id,
@@ -90,6 +91,7 @@ class ProviderMenuManagementTest extends TestCase
 
         $response = $this->actingAs($provider)->put(route('provider.menu-items.update', $item->id), [
             'name' => 'New Name',
+            'name_ar' => 'اسم جديد',
             'price' => 15.00,
             'category_id' => $this->menuItemCategory->id,
             'description' => 'Updated desc',
@@ -123,6 +125,7 @@ class ProviderMenuManagementTest extends TestCase
 
         $response = $this->actingAs($providerA)->put(route('provider.menu-items.update', $itemB->id), [
             'name' => 'Hacked Name',
+            'name_ar' => 'اسم مخترق',
             'price' => 0.00,
             'category_id' => $this->menuItemCategory->id,
             'is_active' => true,
@@ -257,6 +260,7 @@ class ProviderMenuManagementTest extends TestCase
 
         $response = $this->actingAs($provider)->post(route('provider.menu-items.store'), [
             'name' => 'Burger with Image',
+            'name_ar' => 'برغر مع صورة',
             'price' => 50.00,
             'category_id' => $this->menuItemCategory->id,
             'is_active' => true,

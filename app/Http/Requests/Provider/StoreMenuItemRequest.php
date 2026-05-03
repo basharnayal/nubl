@@ -6,6 +6,16 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreMenuItemRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('name_ar') && trim((string) $this->input('name_ar')) === '') {
+            $this->merge(['name_ar' => null]);
+        }
+        if ($this->has('description_ar') && trim((string) $this->input('description_ar')) === '') {
+            $this->merge(['description_ar' => null]);
+        }
+    }
+
     public function authorize(): bool
     {
         return $this->user()->hasRole('provider');
@@ -15,6 +25,7 @@ class StoreMenuItemRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:255',
+            'name_ar' => 'required|string|max:255',
             'category_id' => [
                 'required',
                 'exists:menu_item_categories,id',
@@ -37,6 +48,7 @@ class StoreMenuItemRequest extends FormRequest
             'category' => 'nullable|string|max:50', // to be overwritten in controller
             'price' => 'required|numeric|min:0',
             'description' => 'nullable|string|max:2000',
+            'description_ar' => 'nullable|string|max:2000',
             'sku' => 'nullable|string|max:100',
             'max_per_request' => 'nullable|integer|min:1|max:999',
             'is_active' => 'boolean',

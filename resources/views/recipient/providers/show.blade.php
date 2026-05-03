@@ -223,7 +223,7 @@
                                     class="relative h-28 w-28 shrink-0 overflow-hidden bg-slate-100 sm:h-32 sm:w-32 dark:bg-navy-700">
                                     @if($item->image_url)
                                         <img class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                            src="{{ $item->image_url }}" alt="{{ $item->name }}">
+                                            src="{{ $item->image_url }}" alt="{{ $item->localized_name }}">
                                     @else
                                         <div class="flex size-full items-center justify-center text-slate-400 dark:text-navy-400">
                                             <svg class="size-10 sm:size-12" fill="none" stroke="currentColor"
@@ -241,10 +241,10 @@
                                         <div class="min-w-0 flex-1">
                                             <h5
                                                 class="line-clamp-2 text-base font-bold tracking-tight text-slate-800 dark:text-navy-100 sm:text-lg">
-                                                {{ $item->name }}
+                                                {{ $item->localized_name }}
                                             </h5>
                                             <p class="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-navy-300">
-                                                {{ $item->description }}
+                                                {{ $item->localized_description }}
                                             </p>
                                         </div>
                                         <div class="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
@@ -264,11 +264,11 @@
                                             data-item-id="{{ $item->id }}"
                                             data-price="{{ $item->price }}"
                                             data-max="{{ $itemMax }}"
-                                            data-item-name="{{ e($item->name) }}"
+                                            data-item-name="{{ e($item->localized_name) }}"
                                             data-capacity-on="{{ $capacityOn ? '1' : '0' }}"
                                             data-item-active="{{ $item->is_active ? '1' : '0' }}"
                                             role="group"
-                                            aria-label="{{ __('Quantity') }} — {{ $item->name }}">
+                                            aria-label="{{ __('Quantity') }} — {{ $item->localized_name }}">
                                             <div class="flex shrink-0 justify-center">
                                                 <button type="button"
                                                     class="menu-trash flex size-8 items-center justify-center rounded-full text-slate-300 disabled:pointer-events-none disabled:cursor-not-allowed dark:text-navy-500"

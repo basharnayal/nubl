@@ -37,11 +37,13 @@ class ApplyMockedTime
             return $next($request);
         }
 
-        // ── Rehydrate mocked time from cache ──────────────────────────────
-        $stored = Cache::get(self::CACHE_KEY);
+        // ── Rehydrate mocked time offset from cache ───────────────────────
+        // We store an offset in seconds rather than a frozen timestamp, so
+        // the clock ticks normally but is always shifted by that amount.
+        $offsetSeconds = Cache::get(self::CACHE_KEY);
 
-        if ($stored !== null) {
-            Carbon::setTestNow(Carbon::parse($stored));
+        if ($offsetSeconds !== null) {
+            Carbon::setTestNow(Carbon::now()->addSeconds((int) $offsetSeconds));
         } else {
             // Ensure any previously set test-now is cleared when no mock is active.
             Carbon::setTestNow(null);

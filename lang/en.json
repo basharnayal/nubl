@@ -998,5 +998,11 @@
     "dashboard.audit.action.provider_allocation_paused": "Provider allocation paused",
     "dashboard.audit.action.provider_allocation_resumed": "Provider allocation resumed",
     "dashboard.audit.action.menu_item_updated": "Menu item updated",
-    "Your donation will automatically go to the most needy cases": "Your donation will automatically go to the most needy cases"
+    "Your donation will automatically go to the most needy cases": "Your donation will automatically go to the most needy cases",
+    "Item name (Arabic)": "Item name (Arabic)",
+    "Optional — shown when the site is in Arabic": "Optional — shown when the site is in Arabic",
+    "Item Name (Arabic)": "Item Name (Arabic)",
+    "Item Name (English)": "Item Name (English)",
+    "Description (Arabic)": "Description (Arabic)",
+    "Description (English)": "Description (English)"
 }
