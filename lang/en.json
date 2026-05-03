@@ -55,6 +55,7 @@
     "Your request could not be placed now due to your weekly allowance. It has been queued and will be retried automatically within :seconds seconds.": "Your request could not be placed now due to your weekly allowance. It has been queued and will be retried automatically within :seconds seconds.",
     "Your request could not be placed now because the city fund is temporarily insufficient. It has been queued and will be retried automatically within :seconds seconds.": "Your request could not be placed now because the city fund is temporarily insufficient. It has been queued and will be retried automatically within :seconds seconds.",
     "You must wait :seconds seconds before submitting another request while a previous attempt is being retried.": "You must wait :seconds seconds before submitting another request while a previous attempt is being retried.",
+    "Your session has expired. Please try again.": "Your session has expired. Please try again.",
     "Request submitted successfully!": "Request submitted successfully!",
     "QR code validity": "QR code validity",
     "Back to admin dashboard": "Back to admin dashboard",

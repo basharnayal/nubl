@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Foundation\Events\DiagnosingHealth;
+use Illuminate\Session\TokenMismatchException;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 
@@ -63,5 +64,19 @@ return Application::configure(basePath: dirname(__DIR__))
 
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (TokenMismatchException $e, $request) {
+            $message = __('Your session has expired. Please try again.');
+
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => $message,
+                    'code' => 'session_expired',
+                ], 419);
+            }
+
+            return redirect()
+                ->back()
+                ->withInput($request->except(['password', 'password_confirmation', '_token']))
+                ->with('error', $message);
+        });
     })->create();

@@ -1202,6 +1202,7 @@
     "Your request could not be placed now because the city fund is temporarily insufficient. It has been queued and will be retried automatically within :seconds seconds.": "لا يمكن تنفيذ طلبك الآن لعدم كفاية صندوق المدينة مؤقتاً. تم وضعه في قائمة الانتظار وسُيعاد المحاولة تلقائياً خلال :seconds ثانية.",
     "Your request could not be placed now due to your weekly allowance. It has been queued and will be retried automatically within :seconds seconds.": "لا يمكن تنفيذ طلبك الآن بسبب البدل الأسبوعي. تم وضعه في قائمة الانتظار وسُيعاد المحاولة تلقائياً خلال :seconds ثانية.",
     "Your request exceeds your available allowance for this period.": "طلبك يتجاوز البدل المتاح لك في هذه الفترة.",
+    "Your session has expired. Please try again.": "انتهت صلاحية الجلسة. يرجى المحاولة مرة أخرى.",
     "Your store is now open. Recipients can see your menu.": "متجرك مفتوح الآن. يمكن للمستفيدين رؤية قائمتك.",
     "Your store is paused. Recipients cannot see your menu until you reopen.": "متجرك متوقف. لا يمكن للمستفيدين رؤية قائمتك حتى تعيد الفتح.",
     "Your weekly allowance settings were updated.": "تم تحديث إعدادات الحد الأسبوعي للبدل.",
