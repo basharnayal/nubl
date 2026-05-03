@@ -52,12 +52,13 @@ Schedule::command('provider-payouts:generate-weekly')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/provider-payout-weekly.log'));
 
-Schedule::command(GenerateSummaryReportCommand::class, ['--type=weekly'])
-    ->dailyAt('06:00')
+
+ Schedule::command(GenerateSummaryReportCommand::class, ['--type=weekly'])
+    ->weeklyOn(1, '06:00')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/report-weekly.log'));
 
 Schedule::command(GenerateSummaryReportCommand::class, ['--type=monthly'])
-    ->dailyAt('06:00')
+    ->monthlyOn(1, '06:00')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/report-monthly.log'));
