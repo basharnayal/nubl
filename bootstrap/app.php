@@ -54,7 +54,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'role' => \App\Http\Middleware\EnsureRole::class,
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \App\Http\Middleware\EnsurePermission::class,
             'redirect.by.role' => \App\Http\Middleware\RedirectByRole::class,
             'email.verified' => \App\Http\Middleware\EnsureEmailVerified::class,
