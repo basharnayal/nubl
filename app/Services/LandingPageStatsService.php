@@ -40,7 +40,7 @@ class LandingPageStatsService
      */
     public function getHeroStats(): array
     {
-        $cached = Cache::remember('landing_hero_stats', 300, fn () => [
+        $cached = Cache::remember('landing_hero_stats_' . app()->getLocale(), 300, fn () => [
             'totalDelivered' => $this->totalDelivered(),
             'familiesSupported' => $this->familiesSupported(),
             'localProviders' => $this->localProviders(),
