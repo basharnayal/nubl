@@ -259,6 +259,7 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
 
     // Audit Logs
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
+    Route::get('/audit-logs/{log}/verify', [AuditLogController::class, 'verify'])->name('audit-logs.verify');
 
     // Admin Menu Management
     Route::controller(AdminMenuController::class)->prefix('menus')->name('menus.')->group(function () {
