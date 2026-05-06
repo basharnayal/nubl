@@ -111,10 +111,18 @@ class FundTransactionController extends Controller
             'filters' => $request->query(),
         ]);
 
-        return Pdf::loadView('admin.finances.exports.fund-transactions-pdf', [
+        $pdf = Pdf::loadView('admin.finances.exports.fund-transactions-pdf', [
             'transactions' => $transactions,
             'generated_at' => now(),
-        ])->setPaper('a4', 'landscape')->download($filename);
+        ])->setPaper('a4', 'landscape');
+
+        $content = $pdf->output();
+
+        return new Response($content, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'X-Content-SHA256' => hash('sha256', $content),
+        ]);
     }
 
     private function buildIndexQuery(Request $request): Builder

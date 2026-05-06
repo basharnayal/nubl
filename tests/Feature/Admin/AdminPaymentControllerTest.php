@@ -238,6 +238,31 @@ class AdminPaymentControllerTest extends TestCase
         $this->assertSame(Payment::GATEWAY_MYFATOORAH, $activity->properties->get('filters')['gateway'] ?? null);
     }
 
+    #[Test]
+    public function pdf_export_includes_sha256_checksum_header_within_5_seconds_fr_15_2(): void
+    {
+        $donor = $this->createDonor();
+        Payment::factory()->for($donor, 'sponsor')->succeeded()->create(['amount' => 30]);
+
+        $start = microtime(true);
+
+        $response = $this->actingAs($this->admin)
+            ->get(route('admin.finances.payments.export-pdf'));
+
+        $elapsed = microtime(true) - $start;
+
+        $response->assertOk();
+        $response->assertHeader('X-Content-SHA256');
+
+        $hash = $response->headers->get('X-Content-SHA256');
+        $this->assertMatchesRegularExpression('/^[0-9a-f]{64}$/', $hash);
+
+        $computedHash = hash('sha256', $response->getContent());
+        $this->assertSame($hash, $computedHash, 'X-Content-SHA256 header must match SHA-256 of response body.');
+
+        $this->assertLessThan(5.0, $elapsed, 'PDF export with checksum must complete within 5 seconds (FR-15.2).');
+    }
+
     private function createDonor(): User
     {
         $donor = User::factory()->create([
