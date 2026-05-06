@@ -26,19 +26,19 @@
  */
 
 use App\Http\Controllers\Admin\AccountApprovalController;
-use App\Http\Controllers\Admin\AdminAllocationController;
-use App\Http\Controllers\Admin\AdminDashboardController;
-use App\Http\Controllers\Admin\AdminFundTransactionController;
-use App\Http\Controllers\Admin\AdminMenuController;
-use App\Http\Controllers\Admin\AdminPaymentController;
-use App\Http\Controllers\Admin\AdminRequestController;
+use App\Http\Controllers\Admin\AllocationController;
 use App\Http\Controllers\Admin\AllowanceSettingsController;
 use App\Http\Controllers\Admin\AuditLogController;
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\FinancialOverviewController;
 use App\Http\Controllers\Admin\FinancialReportController;
+use App\Http\Controllers\Admin\FundTransactionController;
 use App\Http\Controllers\Admin\MaintenanceSettingsController;
+use App\Http\Controllers\Admin\MenuController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ProviderPayoutController;
 use App\Http\Controllers\Admin\QrSettingsController;
+use App\Http\Controllers\Admin\RequestController;
 use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SummaryReportController;
 use App\Http\Controllers\Admin\UserManagementController;
@@ -47,10 +47,9 @@ use App\Http\Controllers\Auth\ResubmitApplicationController;
 use App\Http\Controllers\Donor\DonationController;
 use App\Http\Controllers\Donor\DonorDashboardController;
 use App\Http\Controllers\GuestDonationController;
-use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\LandingPageFeedController;
-use App\Http\Controllers\TopDonorsController;
+use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PaymentCallbackController;
 use App\Http\Controllers\ProfileController;
@@ -64,6 +63,7 @@ use App\Http\Controllers\Provider\ProviderWalletController;
 use App\Http\Controllers\Recipient\ProviderMenuController as RecipientProviderMenuController;
 use App\Http\Controllers\Recipient\RecipientController;
 use App\Http\Controllers\Recipient\RecipientRequestController;
+use App\Http\Controllers\TopDonorsController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -142,7 +142,7 @@ Route::middleware($approvedMiddleware)->group(function () {
 
 Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(function () {
 
-    Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Account approval flow (pending users awaiting admin review)
     Route::controller(AccountApprovalController::class)->group(function () {
@@ -181,7 +181,7 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
     });
 
     // Admin Request Management (ECS-63)
-    Route::controller(AdminRequestController::class)->prefix('requests')->name('requests.')->group(function () {
+    Route::controller(RequestController::class)->prefix('requests')->name('requests.')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::put('/{request}', 'update')->whereNumber('request')->name('update');
     });
@@ -206,7 +206,7 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
     });
 
     // FR-24.1: Allocation engine pause/resume (global + per-provider)
-    Route::controller(AdminAllocationController::class)->prefix('allocation')->name('allocation.')->group(function () {
+    Route::controller(AllocationController::class)->prefix('allocation')->name('allocation.')->group(function () {
         Route::get('/status', 'status')->name('status');
         Route::post('/pause', 'pauseGlobal')->name('pause');
         Route::post('/resume', 'resumeGlobal')->name('resume');
@@ -218,14 +218,14 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
     Route::prefix('finances')->name('finances.')->group(function () {
         Route::get('/', [FinancialOverviewController::class, 'index'])->name('overview');
 
-        Route::controller(AdminPaymentController::class)->prefix('payments')->name('payments.')->group(function () {
+        Route::controller(PaymentController::class)->prefix('payments')->name('payments.')->group(function () {
             Route::get('/export', 'export')->name('export');
             Route::get('/export-pdf', 'exportPdf')->name('export-pdf');
             Route::get('/', 'index')->name('index');
             Route::get('/{payment}', 'show')->whereNumber('payment')->name('show');
         });
 
-        Route::controller(AdminFundTransactionController::class)->prefix('fund-transactions')->name('fund-transactions.')->group(function () {
+        Route::controller(FundTransactionController::class)->prefix('fund-transactions')->name('fund-transactions.')->group(function () {
             Route::get('/export', 'export')->name('export');
             Route::get('/export-pdf', 'exportPdf')->name('export-pdf');
             Route::get('/', 'index')->name('index');
@@ -262,7 +262,7 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
     Route::get('/audit-logs/{log}/verify', [AuditLogController::class, 'verify'])->name('audit-logs.verify');
 
     // Admin Menu Management
-    Route::controller(AdminMenuController::class)->prefix('menus')->name('menus.')->group(function () {
+    Route::controller(MenuController::class)->prefix('menus')->name('menus.')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/{provider}', 'show')->whereNumber('provider')->name('show');
         Route::post('/{item}/toggle-block', 'toggleBlock')->whereNumber('item')->name('toggle-block');

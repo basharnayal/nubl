@@ -1,6 +1,6 @@
 {{--
     FINANCIAL SNAPSHOT — Compact horizontal strip of key financial indicators.
-    Reuses AdminFinancialService::getOverview() — no duplicate queries.
+    Reuses FinancialService::getOverview() — no duplicate queries.
 --}}
 @php
     $walletBalance = (float) ($financial['system_wallet_balance']      ?? 0);

@@ -3,7 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\User;
-use App\Services\Admin\AdminFinancialService;
+use App\Services\Admin\FinancialService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
@@ -26,14 +26,14 @@ class FinancialReportControllerTest extends TestCase
     {
         Carbon::setTestNow('2026-04-21 10:30:00');
 
-        $service = Mockery::mock(AdminFinancialService::class);
+        $service = Mockery::mock(FinancialService::class);
         $service->shouldReceive('getRangeSummary')
             ->once()
             ->andReturn($this->fakeSummary(
                 Carbon::parse('2026-04-21 00:00:00'),
                 Carbon::parse('2026-04-21 23:59:59')
             ));
-        $this->app->instance(AdminFinancialService::class, $service);
+        $this->app->instance(FinancialService::class, $service);
 
         $response = $this->actingAs($this->makeAdmin())->get(route('admin.finances.reports.index', [
             'period' => 'daily',
@@ -54,14 +54,14 @@ class FinancialReportControllerTest extends TestCase
     {
         Carbon::setTestNow('2026-04-21 10:30:00');
 
-        $service = Mockery::mock(AdminFinancialService::class);
+        $service = Mockery::mock(FinancialService::class);
         $service->shouldReceive('getRangeSummary')
             ->once()
             ->andReturn($this->fakeSummary(
                 Carbon::parse('2026-04-01 00:00:00'),
                 Carbon::parse('2026-04-30 23:59:59')
             ));
-        $this->app->instance(AdminFinancialService::class, $service);
+        $this->app->instance(FinancialService::class, $service);
 
         $response = $this->actingAs($this->makeAdmin())->get(route('admin.finances.reports.index', [
             'period' => 'monthly',
@@ -81,14 +81,14 @@ class FinancialReportControllerTest extends TestCase
     {
         Carbon::setTestNow('2026-04-21 10:30:00');
 
-        $service = Mockery::mock(AdminFinancialService::class);
+        $service = Mockery::mock(FinancialService::class);
         $service->shouldReceive('getRangeSummary')
             ->once()
             ->andReturn($this->fakeSummary(
                 Carbon::parse('2026-03-22 00:00:00'),
                 Carbon::parse('2026-04-21 23:59:59')
             ));
-        $this->app->instance(AdminFinancialService::class, $service);
+        $this->app->instance(FinancialService::class, $service);
 
         $response = $this->actingAs($this->makeAdmin())->get(route('admin.finances.reports.index'));
 
