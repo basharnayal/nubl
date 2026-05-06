@@ -137,6 +137,26 @@ class LandingPageStatsServiceTest extends TestCase
             'payment_id' => $paymentTwo->id,
         ]);
 
+        // PAYOUT IN transactions represent money physically delivered at QR scan
+        $requestOne = RequestModel::where('recipient_id', $recipientOne->id)->first();
+        $requestTwo = RequestModel::where('recipient_id', $recipientTwo->id)->where('status', 'FULFILLED')->first();
+        FundTransaction::create([
+            'wallet_id' => $systemWallet->id,
+            'sponsor_id' => null,
+            'source' => FundTransaction::SOURCE_PAYOUT,
+            'amount' => 120,
+            'direction' => FundTransaction::DIRECTION_IN,
+            'request_id' => $requestOne->id,
+        ]);
+        FundTransaction::create([
+            'wallet_id' => $systemWallet->id,
+            'sponsor_id' => null,
+            'source' => FundTransaction::SOURCE_PAYOUT,
+            'amount' => 80,
+            'direction' => FundTransaction::DIRECTION_IN,
+            'request_id' => $requestTwo->id,
+        ]);
+
         $stats = app(LandingPageStatsService::class)->getHeroStats();
 
         $this->assertSame(200, $stats['totalDelivered']);
