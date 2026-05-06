@@ -181,6 +181,40 @@ class RecipientRequestSubmissionTest extends TestCase
     }
 
     #[Test]
+    public function exceeds_allowance_displays_user_friendly_message_fr_6_3(): void
+    {
+        Queue::fake();
+        Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00'));
+
+        RequestModel::create([
+            'recipient_id' => $this->recipient->id,
+            'provider_id' => $this->provider->id,
+            'reserved_amount' => 300.00,
+            'status' => 'REDEEMABLE',
+            'funding_source' => 'CITY_FUND',
+        ])->items()->create([
+            'menu_item_id' => $this->menuItem1->id,
+            'quantity' => 6,
+            'price_snapshot' => 50.00,
+        ]);
+
+        $response = $this->actingAs($this->recipient)
+            ->from(route('recipient.providers.show', $this->provider))
+            ->followingRedirects()
+            ->post(route('recipient.requests.store'), [
+                'provider_id' => $this->provider->id,
+                'items' => [
+                    ['id' => $this->menuItem1->id, 'quantity' => 2],
+                    ['id' => $this->menuItem2->id, 'quantity' => 1],
+                ],
+            ]);
+
+        $response->assertSee(__('Your request exceeds your available allowance for this period.'));
+
+        Carbon::setTestNow();
+    }
+
+    #[Test]
     public function allowance_prompt_does_not_start_submit_cooldown(): void
     {
         config(['recipient.allowance_retry_delay_seconds' => 2]);

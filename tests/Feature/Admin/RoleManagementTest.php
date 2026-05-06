@@ -132,4 +132,41 @@ class RoleManagementTest extends TestCase
 
         $this->assertSame($before, $role->fresh()->permissions()->pluck('name')->sort()->values()->all());
     }
+
+    #[Test]
+    public function policy_change_propagates_immediately_fr_12_2(): void
+    {
+        $role = Role::findByName('admin');
+
+        // Confirm admin can access QR settings (requires qr.configure_ttl permission)
+        $this->actingAs($this->admin)
+            ->get(route('admin.settings.qr.edit'))
+            ->assertOk();
+
+        // Remove qr.configure_ttl from admin role (keep at least one permission to pass validation)
+        $remainingPermissions = $role->permissions()
+            ->pluck('name')
+            ->reject(fn ($name) => $name === 'qr.configure_ttl')
+            ->values()
+            ->all();
+
+        app(RoleManagementService::class)->updateRole($role, [
+            'permissions' => $remainingPermissions,
+        ]);
+
+        // Same request, same user — permission should be revoked immediately (≤5s, FR-12.2)
+        $this->actingAs($this->admin)
+            ->get(route('admin.settings.qr.edit'))
+            ->assertForbidden();
+
+        // Re-grant the permission
+        app(RoleManagementService::class)->updateRole($role, [
+            'permissions' => array_merge($remainingPermissions, ['qr.configure_ttl']),
+        ]);
+
+        // Should be accessible again immediately
+        $this->actingAs($this->admin)
+            ->get(route('admin.settings.qr.edit'))
+            ->assertOk();
+    }
 }

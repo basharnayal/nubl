@@ -179,6 +179,42 @@ class ProviderProofUploadTest extends TestCase
     }
 
     #[Test]
+    public function proof_upload_rejects_file_over_5mb_fr_10_2(): void
+    {
+        [, $redemption] = $this->createRedeemedRequest('CITY_FUND');
+
+        $this->actingAs($this->provider)
+            ->from(route('provider.proof.index', $redemption))
+            ->post(route('provider.proof.store', $redemption), [
+                'proof_file' => UploadedFile::fake()->create('big.jpg', 5121, 'image/jpeg'),
+            ])
+            ->assertRedirect(route('provider.proof.index', $redemption))
+            ->assertSessionHasErrors('proof_file');
+
+        $this->assertDatabaseMissing('order_proofs', [
+            'order_redemption_id' => $redemption->id,
+        ]);
+    }
+
+    #[Test]
+    public function proof_upload_accepts_file_at_5mb_boundary(): void
+    {
+        Notification::fake();
+
+        [, $redemption] = $this->createRedeemedRequest('CITY_FUND');
+
+        $this->actingAs($this->provider)
+            ->post(route('provider.proof.store', $redemption), [
+                'proof_file' => UploadedFile::fake()->create('exact.jpg', 5120, 'image/jpeg'),
+            ])
+            ->assertRedirect(route('provider.requests.index'));
+
+        $this->assertDatabaseHas('order_proofs', [
+            'order_redemption_id' => $redemption->id,
+        ]);
+    }
+
+    #[Test]
     public function proof_upload_returns_error_for_missing_or_invalid_base64_payloads(): void
     {
         [, $redemption] = $this->createRedeemedRequest('CITY_FUND');
