@@ -147,6 +147,8 @@
                             <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('audit_logs.table.description') }}</th>
                             <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('audit_logs.table.entity') }}</th>
                             <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('audit_logs.table.causer') }}</th>
+                            <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('audit_logs.table.ip') }}</th>
+                            <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('audit_logs.table.device') }}</th>
                             <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('audit_logs.table.properties') }}</th>
                             <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('audit_logs.table.entry_hash') }}</th>
                             <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('audit_logs.table.created_at') }}</th>
@@ -171,11 +173,26 @@
                                     default            => 'bg-slate-100 text-slate-600 dark:bg-navy-500 dark:text-navy-200',
                                 };
 
-                                // Extract meaningful properties (skip entity/action which have dedicated columns)
+                                // Extract meaningful properties (skip entity/action/ip/user_agent which have dedicated columns)
                                 $displayProps = collect($log->properties ?? [])
-                                    ->except(['entity', 'action'])
+                                    ->except(['entity', 'action', 'ip', 'user_agent'])
                                     ->filter(fn($v) => $v !== null && $v !== '' && $v !== [])
                                     ->take(4);
+
+                                // Client info
+                                $logIp        = $log->properties['ip'] ?? null;
+                                $logUserAgent = $log->properties['user_agent'] ?? null;
+                                $logDevice    = null;
+                                if ($logUserAgent) {
+                                    $ua = strtolower($logUserAgent);
+                                    if (str_contains($ua, 'mobile') || str_contains($ua, 'android') || str_contains($ua, 'iphone')) {
+                                        $logDevice = __('Mobile');
+                                    } elseif (str_contains($ua, 'tablet') || str_contains($ua, 'ipad')) {
+                                        $logDevice = __('Tablet');
+                                    } else {
+                                        $logDevice = __('Desktop');
+                                    }
+                                }
 
                                 // Causer resolution
                                 $isUserCauser = $log->causer_type === 'App\\Models\\User' && $log->causer_id;
@@ -201,6 +218,9 @@
                                                         ? $log->properties->toArray()
                                                         : (array) $log->properties,
                                     'entry_hash'   => $hashFull,
+                                    'ip'           => $logIp,
+                                    'user_agent'   => $logUserAgent,
+                                    'device'       => $logDevice,
                                     'batch_uuid'   => $log->batch_uuid,
                                     'created_at'   => $log->created_at?->toDateTimeString(),
                                     'updated_at'   => $log->updated_at?->toDateTimeString(),
@@ -252,6 +272,26 @@
                                         @else
                                             <span class="text-sm text-slate-600 dark:text-navy-200">#{{ $log->causer_id }}</span>
                                         @endif
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                {{-- IP Address --}}
+                                <td class="whitespace-nowrap px-4 py-3 sm:px-5">
+                                    @if($logIp)
+                                        <span class="font-mono text-xs text-slate-700 dark:text-navy-100">{{ $logIp }}</span>
+                                    @else
+                                        <span class="text-slate-400">—</span>
+                                    @endif
+                                </td>
+
+                                {{-- Device --}}
+                                <td class="whitespace-nowrap px-4 py-3 sm:px-5">
+                                    @if($logDevice)
+                                        <span class="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium {{ $logDevice === __('Mobile') ? 'bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300' : ($logDevice === __('Tablet') ? 'bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300' : 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300') }}">
+                                            {{ $logDevice }}
+                                        </span>
                                     @else
                                         <span class="text-slate-400">—</span>
                                     @endif
@@ -327,7 +367,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="px-4 py-14 text-center">
+                                <td colspan="11" class="px-4 py-14 text-center">
                                     <div class="flex flex-col items-center gap-3 text-slate-400 dark:text-navy-400">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="size-12 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A2.251 2.251 0 0 1 13.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
@@ -465,6 +505,22 @@
                             <div
                                 class="break-all rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 font-mono text-xs text-slate-500 dark:border-navy-500 dark:bg-navy-800 dark:text-navy-300"
                                 x-text="selected?.entry_hash ?? '—'"></div>
+                        </div>
+
+                        {{-- IP / Device / User-Agent --}}
+                        <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            <div class="rounded-xl bg-slate-50 p-3 dark:bg-navy-800">
+                                <p class="text-xs font-medium text-slate-400 dark:text-navy-400">{{ __('audit_logs.modal.ip') }}</p>
+                                <p class="mt-1 font-mono text-sm font-semibold text-slate-700 dark:text-navy-100" x-text="selected?.ip ?? '—'"></p>
+                            </div>
+                            <div class="rounded-xl bg-slate-50 p-3 dark:bg-navy-800">
+                                <p class="text-xs font-medium text-slate-400 dark:text-navy-400">{{ __('audit_logs.modal.device') }}</p>
+                                <p class="mt-1 text-sm font-semibold text-slate-700 dark:text-navy-100" x-text="selected?.device ?? '—'"></p>
+                            </div>
+                            <div class="rounded-xl bg-slate-50 p-3 dark:bg-navy-800">
+                                <p class="text-xs font-medium text-slate-400 dark:text-navy-400">{{ __('audit_logs.modal.user_agent') }}</p>
+                                <p class="mt-1 break-all text-xs text-slate-600 dark:text-navy-200" x-text="selected?.user_agent ?? '—'"></p>
+                            </div>
                         </div>
 
                         {{-- Batch UUID --}}

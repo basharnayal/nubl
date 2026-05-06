@@ -26,6 +26,7 @@ class AuditService
             ->causedBy($causer)
             ->withProperties(array_merge(
                 ['entity' => $entity, 'action' => $action],
+                ['ip' => request()->ip(), 'user_agent' => request()->userAgent()],
                 $data
             ))
             ->log("{$entity}.{$action}");

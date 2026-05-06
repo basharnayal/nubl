@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Activity;
 use App\Models\User;
 use App\Services\Admin\AccountApprovalService;
 use Illuminate\Http\RedirectResponse;
@@ -94,8 +95,13 @@ class AccountApprovalController extends Controller
             return redirect()->route('admin.users.pending')->with('error', __('No recipient application found.'));
         }
 
+        $registrationLog = Activity::where('causer_id', $user->id)
+            ->where('description', 'registration.completed')
+            ->first();
+
         return view('admin.users.recipient-application', [
             'user' => $user,
+            'registrationLog' => $registrationLog,
         ]);
     }
 

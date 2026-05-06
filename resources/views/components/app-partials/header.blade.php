@@ -13,8 +13,13 @@
                 </button>
             </div>
 
-            <!-- Right: Language, Page Title, Dark Mode -->
+            <!-- Right: Page Title, Language, Dark Mode -->
             <div class="-me-1.5 flex items-center space-x-2">
+                @if(!empty($header))
+                    <div class="text-sm font-medium text-slate-700 dark:text-navy-100">
+                        {!! $header !!}
+                    </div>
+                @endif
                 {{-- Language switcher --}}
                 <div x-data="usePopper({ placement: '{{ app()->getLocale() === 'ar' ? 'bottom-start' : 'bottom-end' }}', offset: 8 })" @click.outside="isShowPopper && (isShowPopper = false)" class="flex">
                     <button @click="isShowPopper = !isShowPopper" x-ref="popperRef"
@@ -35,11 +40,6 @@
                         </div>
                     </div>
                 </div>
-                @if(!empty($header))
-                    <div class="text-sm font-medium text-slate-700 dark:text-navy-100">
-                        {!! $header !!}
-                    </div>
-                @endif
                 <button @click="$store.global.isDarkModeEnabled = !$store.global.isDarkModeEnabled"
                     class="btn size-8 rounded-full p-0 hover:bg-slate-300/20 focus:bg-slate-300/20 active:bg-slate-300/25 dark:hover:bg-navy-300/20 dark:focus:bg-navy-300/20 dark:active:bg-navy-300/25">
                     <svg x-show="$store.global.isDarkModeEnabled"

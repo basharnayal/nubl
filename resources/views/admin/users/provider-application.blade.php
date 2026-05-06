@@ -2,10 +2,15 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
+            <a href="{{ route('admin.users.pending') }}" class="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-navy-300 dark:hover:bg-navy-600 dark:hover:text-navy-100" title="{{ __('Back to pending') }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                </svg>
+            </a>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Provider Application') }} — {{ $user->name }}
             </h2>
-            <a href="{{ route('admin.users.pending') }}" class="text-sm text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent font-medium">{{ __('Back to pending') }}</a>
+            <div class="size-9 shrink-0"></div>
         </div>
     </x-slot>
 
