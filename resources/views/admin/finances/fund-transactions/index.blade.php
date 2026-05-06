@@ -10,9 +10,18 @@
                 <h2 class="text-base font-medium tracking-wide text-slate-700 dark:text-navy-100">{{ __('finance.ledger.title') }}</h2>
                 <p class="mt-1 text-sm leading-relaxed text-slate-500 dark:text-navy-300">{{ __('finance.ledger.subtitle') }}</p>
             </div>
-            <x-lineone-button :href="route('admin.finances.fund-transactions.export', request()->query())" variant="slate" size="sm">
-                {{ __('finance.ledger.export_csv') }}
-            </x-lineone-button>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('admin.finances.fund-transactions.export', request()->query()) }}"
+                   class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-navy-600 dark:bg-navy-800 dark:text-navy-100 dark:hover:border-navy-500 dark:hover:bg-navy-700">
+                    <i class="fa-solid fa-file-csv text-emerald-600 dark:text-emerald-400" aria-hidden="true"></i>
+                    CSV
+                </a>
+                <a href="{{ route('admin.finances.fund-transactions.export-pdf', request()->query()) }}"
+                   class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-navy-600 dark:bg-navy-800 dark:text-navy-100 dark:hover:border-navy-500 dark:hover:bg-navy-700">
+                    <i class="fa-solid fa-file-pdf text-rose-600 dark:text-rose-400" aria-hidden="true"></i>
+                    PDF
+                </a>
+            </div>
         </div>
 
         <form method="GET" action="{{ route('admin.finances.fund-transactions.index') }}" class="card mt-4 space-y-3 p-4">

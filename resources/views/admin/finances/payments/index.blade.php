@@ -8,9 +8,16 @@
         <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <h2 class="text-base font-medium tracking-wide text-slate-700 dark:text-navy-100">{{ __('finance.payments.title') }}</h2>
             <div class="flex flex-wrap gap-2">
-                <x-lineone-button :href="route('admin.finances.payments.export', request()->query())" variant="slate" size="sm">
-                    {{ __('finance.payments.export_csv') }}
-                </x-lineone-button>
+                <a href="{{ route('admin.finances.payments.export', request()->query()) }}"
+                   class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-navy-600 dark:bg-navy-800 dark:text-navy-100 dark:hover:border-navy-500 dark:hover:bg-navy-700">
+                    <i class="fa-solid fa-file-csv text-emerald-600 dark:text-emerald-400" aria-hidden="true"></i>
+                    CSV
+                </a>
+                <a href="{{ route('admin.finances.payments.export-pdf', request()->query()) }}"
+                   class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-navy-600 dark:bg-navy-800 dark:text-navy-100 dark:hover:border-navy-500 dark:hover:bg-navy-700">
+                    <i class="fa-solid fa-file-pdf text-rose-600 dark:text-rose-400" aria-hidden="true"></i>
+                    PDF
+                </a>
             </div>
         </div>
 
