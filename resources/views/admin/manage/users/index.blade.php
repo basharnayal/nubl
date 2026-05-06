@@ -44,6 +44,16 @@
                     </div>
                 </div>
 
+            @php
+                $activeSort = request('sort');
+                $activeDir  = request('direction', 'asc');
+                $sortHref   = fn(string $col) => request()->fullUrlWithQuery([
+                    'sort'      => $col,
+                    'direction' => ($activeSort === $col && $activeDir === 'asc') ? 'desc' : 'asc',
+                    'page'      => 1,
+                ]);
+            @endphp
+
             <div class="card mt-3">
                 <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
                     <table class="is-hoverable w-full text-left">
@@ -51,10 +61,37 @@
                             <tr>
                                 <th class="whitespace-nowrap rounded-tl-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">#</th>
                                 <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Avatar') }}</th>
-                                <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Name') }}</th>
-                                <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Email') }}</th>
+                                <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
+                                    <a href="{{ $sortHref('name') }}" class="inline-flex items-center gap-1 hover:text-primary dark:hover:text-accent-light transition-colors">
+                                        {{ __('Name') }}
+                                        @if($activeSort === 'name')
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-primary dark:text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $activeDir === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/></svg>
+                                        @else
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 opacity-35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>
+                                        @endif
+                                    </a>
+                                </th>
+                                <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
+                                    <a href="{{ $sortHref('email') }}" class="inline-flex items-center gap-1 hover:text-primary dark:hover:text-accent-light transition-colors">
+                                        {{ __('Email') }}
+                                        @if($activeSort === 'email')
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-primary dark:text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $activeDir === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/></svg>
+                                        @else
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 opacity-35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>
+                                        @endif
+                                    </a>
+                                </th>
                                 <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Role') }}</th>
-                                <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Status') }}</th>
+                                <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
+                                    <a href="{{ $sortHref('status') }}" class="inline-flex items-center gap-1 hover:text-primary dark:hover:text-accent-light transition-colors">
+                                        {{ __('Status') }}
+                                        @if($activeSort === 'status')
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-primary dark:text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $activeDir === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/></svg>
+                                        @else
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 opacity-35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>
+                                        @endif
+                                    </a>
+                                </th>
                                 <th class="whitespace-nowrap rounded-tr-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Actions') }}</th>
                             </tr>
                         </thead>
