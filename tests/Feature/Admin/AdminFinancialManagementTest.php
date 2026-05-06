@@ -220,4 +220,42 @@ class AdminFinancialManagementTest extends TestCase
         $this->assertSame('export', $activity->properties->get('decision'));
         $this->assertNotNull($activity->created_at);
     }
+
+    #[Test]
+    public function payments_list_page_shows_pdf_export_link(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.finances.payments.index'));
+
+        $response->assertOk();
+        $response->assertSee(route('admin.finances.payments.export-pdf'), false);
+        $response->assertSee('fa-file-pdf', false);
+    }
+
+    #[Test]
+    public function fund_transactions_list_page_shows_pdf_export_link(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('admin.finances.fund-transactions.index'));
+
+        $response->assertOk();
+        $response->assertSee(route('admin.finances.fund-transactions.export-pdf'), false);
+        $response->assertSee('fa-file-pdf', false);
+    }
+
+    #[Test]
+    public function payments_pdf_export_preserves_filter_params(): void
+    {
+        Payment::factory()->for($this->donor, 'sponsor')->succeeded()->create(['amount' => 10]);
+
+        $response = $this->actingAs($this->admin)->get(route('admin.finances.payments.index', [
+            'status' => Payment::STATUS_SUCCEEDED,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+        ]));
+
+        $response->assertOk();
+        $exportUrl = route('admin.finances.payments.export-pdf', [
+            'status' => Payment::STATUS_SUCCEEDED,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+        ]);
+        $response->assertSee(e($exportUrl), false);
+    }
 }

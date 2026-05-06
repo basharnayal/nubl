@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\DB;
  * Read-only aggregates for admin financial monitoring.
  * Source of truth: payments.status and ewallets.balance (via FundTransaction ledger).
  */
-class AdminFinancialService
+class FinancialService
 {
     /**
      * @return array<string, float|int>

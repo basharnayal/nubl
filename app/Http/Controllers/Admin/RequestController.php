@@ -8,7 +8,7 @@ use App\Models\Request as RequestModel;
 use App\Services\AuditService;
 use Illuminate\Http\Request;
 
-class AdminRequestController extends Controller
+class RequestController extends Controller
 {
     public function __construct(
         private AuditService $auditService,

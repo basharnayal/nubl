@@ -4,17 +4,17 @@ namespace Tests\Unit\Services\Admin;
 
 use App\Models\Request as RequestModel;
 use App\Models\User;
-use App\Services\Admin\AdminDashboardService;
-use App\Services\Admin\AdminFinancialService;
 use App\Services\Admin\Dashboard\AttentionQueueBuilder;
 use App\Services\Admin\Dashboard\SystemStatusChecker;
+use App\Services\Admin\DashboardService;
+use App\Services\Admin\FinancialService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\Activitylog\Models\Activity;
 use Tests\TestCase;
 
-class AdminDashboardServiceTest extends TestCase
+class DashboardServiceTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -113,7 +113,7 @@ class AdminDashboardServiceTest extends TestCase
             ->once()
             ->andReturn([['severity' => 'medium', 'labelKey' => 'dashboard.attention.pending_approvals.label']]);
 
-        $financialService = Mockery::mock(AdminFinancialService::class);
+        $financialService = Mockery::mock(FinancialService::class);
         $financialService->shouldReceive('getOverview')
             ->once()
             ->andReturn([
@@ -129,7 +129,7 @@ class AdminDashboardServiceTest extends TestCase
                 'transfers_to_providers' => 0.0,
             ]);
 
-        $service = new AdminDashboardService($statusChecker, $attentionQueue, $financialService);
+        $service = new DashboardService($statusChecker, $attentionQueue, $financialService);
         $overview = $service->getOverview();
 
         $this->assertArrayHasKey('system_status', $overview);

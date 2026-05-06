@@ -111,6 +111,7 @@ class AdminMenuCrudTest extends TestCase
         // Attempt to update
         $response = $this->actingAs($this->provider)->put(route('provider.menu-items.update', $this->menuItem), [
             'name' => 'Updated Name',
+            'name_ar' => 'اسم محدث',
             'price' => 20.00,
             'category_id' => $this->category->id,
         ]);

@@ -1,6 +1,6 @@
 {{--
     KPI GRID — Four compact metric cards (2 × 2).
-    Uses translation keys from AdminDashboardService::buildKpis().
+    Uses translation keys from DashboardService::buildKpis().
 --}}
 @php
     $colorMap = [

@@ -12,19 +12,19 @@ use Spatie\Activitylog\Models\Activity;
  * Orchestrates all data required by the Admin Command Center dashboard.
  *
  * Delegates to:
- *  - SystemStatusChecker       → status strip pills
- *  - AttentionQueueBuilder     → action queue (sorted by severity)
- *  - AdminFinancialService     → financial snapshot (reused — no duplication)
+ *  - SystemStatusChecker   → status strip pills
+ *  - AttentionQueueBuilder → action queue (sorted by severity)
+ *  - FinancialService      → financial snapshot (reused — no duplication)
  *
  * Privacy rule: this service MUST NOT return individual recipient names,
  * identity numbers, documents, or any PII. Aggregate counts only.
  */
-class AdminDashboardService
+class DashboardService
 {
     public function __construct(
         private readonly SystemStatusChecker $statusChecker,
         private readonly AttentionQueueBuilder $attentionQueue,
-        private readonly AdminFinancialService $financialService,
+        private readonly FinancialService $financialService,
     ) {}
 
     public function getOverview(): array

@@ -280,7 +280,7 @@ class DemoMiscSeeder extends Seeder
     // ─── Helpers ───────────────────────────────────────────────────
 
     /**
-     * Build a payload array matching AdminFinancialService::getRangeSummary() keys.
+     * Build a payload array matching FinancialService::getRangeSummary() keys.
      */
     private function buildPayload($from, $to, float $succAmt, float $failAmt, float $ledgerIn, float $ledgerOut): array
     {

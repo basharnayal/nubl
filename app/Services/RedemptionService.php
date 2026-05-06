@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\FundTransaction;
 use App\Models\OrderRedemption;
 use App\Models\Request as RequestModel;
+use App\Models\User;
+use App\Notifications\RedemptionCompletedAdminNotification;
 use App\Support\QrTtl;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\DB;
@@ -83,6 +85,11 @@ class RedemptionService
             ]);
 
             DB::commit();
+
+            // FR-11.2: Notify admins within 60s of transaction outcome
+            User::role('admin')->get()->each(
+                fn (User $admin) => $admin->notify(new RedemptionCompletedAdminNotification($redemption, $providerId))
+            );
 
             return [
                 'status' => 200,

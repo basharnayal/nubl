@@ -15,7 +15,7 @@ use Illuminate\View\View;
  * FR-24.1: Admin pause/resume for the allocation engine (global + per-provider).
  * Thin controller — all logic lives in AllocationEngineService.
  */
-class AdminAllocationController extends Controller
+class AllocationController extends Controller
 {
     public function __construct(
         private readonly AllocationEngineServiceInterface $engineService

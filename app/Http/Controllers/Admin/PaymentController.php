@@ -3,26 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Queries\Admin\AdminPaymentIndexQuery;
 use App\Models\Payment;
 use App\Services\AuditService;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
 use Spatie\Activitylog\Models\Activity;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
-class AdminPaymentController extends Controller
+class PaymentController extends Controller
 {
     public function __construct(
-        private AdminPaymentIndexQuery $paymentIndexQuery,
         private AuditService $auditService
     ) {}
 
     public function index(Request $request): View
     {
-        $payments = ($this->paymentIndexQuery)($request, 15);
+        $payments = $this->buildIndexQuery($request)->paginate(15)->withQueryString();
 
         return view('admin.finances.payments.index', compact('payments'));
     }
@@ -46,7 +45,7 @@ class AdminPaymentController extends Controller
 
     public function export(Request $request): StreamedResponse
     {
-        $query = $this->paymentIndexQuery->buildQuery($request);
+        $query = $this->buildIndexQuery($request);
         $query->with('sponsor')->reorder()->orderBy('id');
 
         $filename = 'payments-'.now()->format('Y-m-d-His').'.csv';
@@ -97,7 +96,7 @@ class AdminPaymentController extends Controller
 
     public function exportPdf(Request $request): Response
     {
-        $query = $this->paymentIndexQuery->buildQuery($request);
+        $query = $this->buildIndexQuery($request);
         $query->with('sponsor')->reorder()->orderBy('id');
 
         $payments = $query->get();
@@ -109,9 +108,76 @@ class AdminPaymentController extends Controller
             'filters' => $request->query(),
         ]);
 
-        return Pdf::loadView('admin.finances.exports.payments-pdf', [
+        $pdf = Pdf::loadView('admin.finances.exports.payments-pdf', [
             'payments' => $payments,
             'generated_at' => now(),
-        ])->setPaper('a4', 'landscape')->download($filename);
+        ])->setPaper('a4', 'landscape');
+
+        $content = $pdf->output();
+
+        return new Response($content, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'X-Content-SHA256' => hash('sha256', $content),
+        ]);
+    }
+
+    private function buildIndexQuery(Request $request): Builder
+    {
+        $query = Payment::query()->with(['sponsor']);
+
+        if ($request->filled('search')) {
+            $search = trim((string) $request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('external_payment_id', 'like', "%{$search}%")
+                    ->orWhereHas('sponsor', function ($sq) use ($search) {
+                        $sq->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%")
+                            ->orWhere('phone_number', 'like', "%{$search}%");
+                    });
+                if (ctype_digit($search)) {
+                    $q->orWhere('id', (int) $search);
+                }
+            });
+        }
+
+        if ($request->filled('status')) {
+            $status = (string) $request->status;
+            if ($status === 'PROBLEM_GROUP') {
+                $query->whereIn('status', [
+                    Payment::STATUS_FAILED,
+                    Payment::STATUS_PENDING,
+                    Payment::STATUS_PROCESSING,
+                ]);
+            } else {
+                $query->where('status', $status);
+            }
+        }
+
+        if ($request->filled('gateway')) {
+            $query->where('gateway', $request->gateway);
+        }
+
+        if ($request->filled('donor_id')) {
+            $query->where('sponsor_id', (int) $request->donor_id);
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        if ($request->filled('min_amount')) {
+            $query->where('amount', '>=', $request->min_amount);
+        }
+
+        if ($request->filled('max_amount')) {
+            $query->where('amount', '<=', $request->max_amount);
+        }
+
+        return $query->orderByDesc('id');
     }
 }

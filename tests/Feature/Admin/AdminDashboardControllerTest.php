@@ -3,7 +3,7 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\User;
-use App\Services\Admin\AdminDashboardService;
+use App\Services\Admin\DashboardService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
@@ -97,9 +97,9 @@ class AdminDashboardControllerTest extends TestCase
             ]],
         ];
 
-        $mock = Mockery::mock(AdminDashboardService::class);
+        $mock = Mockery::mock(DashboardService::class);
         $mock->shouldReceive('getOverview')->once()->andReturn($overview);
-        $this->app->instance(AdminDashboardService::class, $mock);
+        $this->app->instance(DashboardService::class, $mock);
 
         $response = $this->actingAs($admin)->get(route('admin.dashboard'));
 
