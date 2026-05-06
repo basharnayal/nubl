@@ -10,6 +10,7 @@ use App\Support\OperatingHoursNormalizer;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 
@@ -45,7 +46,7 @@ class UpdateResubmitApplicationRequest extends FormRequest
                 'nationality' => ['required', 'string', 'in:'.implode(',', config('nationalities', []))],
                 'short_address' => ['required', 'string', 'max:500'],
                 'id_type' => ['required', 'string', 'in:'.implode(',', RecipientProfile::ID_TYPES)],
-                'id_number' => ['required', 'digits:10'],
+                'id_number' => ['required', 'digits:10', Rule::unique('recipient_profiles', 'id_number')->ignore($this->user()->recipientProfile?->id)],
                 'income_band' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::INCOME_BANDS)],
                 'household_size' => ['required', 'integer', 'min:1', 'max:50'],
                 'marital_status' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::MARITAL_STATUSES)],
