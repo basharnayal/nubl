@@ -650,7 +650,47 @@
       if (!data.items || !Array.isArray(data.items)) return;
       FEED_ITEMS = data.items;
       renderFeed();
+      updateHeroCounters(data);
     } catch (_) { /* keep previous items */ }
+  }
+
+  function updateHeroCounters(data) {
+    const splitCounters = document.querySelectorAll('.agg-split .num[data-counter]');
+    const map = {
+      totalDelivered: document.querySelector('.agg-big[data-counter]'),
+      familiesSupported: splitCounters[0] || null,
+      localProviders: splitCounters[1] || null,
+    };
+    Object.entries(map).forEach(([key, el]) => {
+      if (!el || data[key] == null) return;
+      const newVal = parseInt(data[key], 10);
+      const oldVal = parseInt(el.dataset.counter, 10);
+      if (newVal === oldVal) return;
+      el.dataset.counter = newVal;
+      animateCounterFrom(el, oldVal, newVal);
+    });
+  }
+
+  function animateCounterFrom(el, from, to) {
+    const duration = 900;
+    const start = performance.now();
+    const locale = CURRENT_LOCALE === 'ar' ? 'ar-EG' : 'en-US';
+    const valueEl = el.querySelector(':scope > .agg-value');
+    const textNode = valueEl ? null : el.childNodes[el.childNodes.length - 1];
+    function setFormatted(n) {
+      const s = Math.floor(n).toLocaleString(locale);
+      if (valueEl) valueEl.textContent = s;
+      else textNode.nodeValue = s;
+    }
+    if (reduceMotion) { setFormatted(to); return; }
+    function tick(now) {
+      const t = Math.min(1, (now - start) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      setFormatted(from + (to - from) * eased);
+      if (t < 1) requestAnimationFrame(tick);
+      else setFormatted(to);
+    }
+    requestAnimationFrame(tick);
   }
 
   function renderFeed() {

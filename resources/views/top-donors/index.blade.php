@@ -63,10 +63,6 @@
   font-size: .95rem;
   background: #fff;
 }
-@media (prefers-color-scheme: dark) {
-  .td-table { background: #1e2532; }
-  .td-table-wrap { border-color: rgba(255,255,255,.08); }
-}
 .td-table thead tr {
   background: var(--color-base, #F5F4F1);
   border-bottom: 2px solid rgba(0,0,0,.08);
@@ -190,6 +186,30 @@
   color: var(--color-ink-muted, #999);
   margin-top: 1.25rem;
   line-height: 1.6;
+}
+
+@media (prefers-color-scheme: dark) {
+  body { background: #111621; color: #e8e8ec; }
+  .td-hero { background: #161b26; border-bottom-color: rgba(255,255,255,.06); }
+  .td-hero h1 { color: #f0f0f0; }
+  .td-hero p  { color: #9a9fac; }
+  .td-table { background: #1e2532; }
+  .td-table-wrap { border-color: rgba(255,255,255,.08); box-shadow: 0 2px 16px rgba(0,0,0,.3); }
+  .td-table thead tr { background: #1a1f2c; border-bottom-color: rgba(255,255,255,.08); }
+  .td-table th { color: #9a9fac; }
+  .td-table tbody tr { border-bottom-color: rgba(255,255,255,.05); }
+  .td-table tbody tr:nth-child(even) { background: rgba(255,255,255,.03); }
+  .td-table tbody tr:hover { background: rgba(240,170,31,.1); }
+  .td-name { color: #e8e8ec; }
+  .td-name .td-anon-badge { background: rgba(255,255,255,.1); color: #9a9fac; }
+  .td-amount { color: #e8e8ec; }
+  .td-rank-badge.plain { background: rgba(255,255,255,.08); color: #9a9fac; }
+  .td-empty h3 { color: #e8e8ec; }
+  .td-empty p, .td-note { color: #9a9fac; }
+  footer { background: #111621; }
+  .site.scrolled { background: #161b26; border-bottom-color: rgba(255,255,255,.06); }
+  .site .links a { color: #c0c4ce; }
+  .site .links a:hover { color: #f0f0f0; }
 }
 </style>
 </head>

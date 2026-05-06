@@ -16,7 +16,15 @@ class LandingPageFeedTest extends TestCase
         $response = $this->getJson(route('landing.feed'));
 
         $response->assertOk();
-        $response->assertJsonStructure(['items']);
+        $response->assertJsonStructure([
+            'items',
+            'totalDelivered',
+            'familiesSupported',
+            'localProviders',
+        ]);
         $this->assertIsArray($response->json('items'));
+        $this->assertIsInt($response->json('totalDelivered'));
+        $this->assertIsInt($response->json('familiesSupported'));
+        $this->assertIsInt($response->json('localProviders'));
     }
 }

@@ -1210,7 +1210,7 @@
     align-items: center;
     gap: 10px;
     padding: 14px 22px;
-    background: var(--navy-dk);
+    background: #e0305e;
     color: var(--off-white);
     border-radius: var(--r-full);
     font-family: var(--sans);
