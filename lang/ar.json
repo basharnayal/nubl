@@ -72,6 +72,7 @@
     "Admin Pending": "معلق لدى المدير",
     "Admin Request Queue": "قائمة طلبات المدير",
     "Adopt Request (My Fund)": "تبني الطلب (من أموالي)",
+    "Adopt Request": "تبني الطلب",
     "Adopt orders as community support": "تبنّي الطلبات كدعم مجتمعي",
     "Adopted": "متبنى",
     "Adoption Support": "دعم التبني",
@@ -1167,6 +1168,10 @@
     "You must wait :seconds seconds before submitting another request while a previous attempt is being retried.": "يجب الانتظار :seconds ثانية قبل إرسال طلب جديد أثناء إعادة محاولة المحاولة السابقة.",
     "You see when and how your donation was used — date, amount, and delivery status. We protect the dignity of beneficiaries by never sharing personal data.": "ترى متى وكيف تم استخدام تبرعك — التاريخ، المبلغ، وحالة التسليم. نحمي كرامة المستفيدين بعدم مشاركة البيانات الشخصية.",
     "You will cover the cost of this request.": "ستتحمل تكلفة هذا الطلب.",
+    "You will personally cover this request.": "سيتم تنفيذ هذا الطلب على حسابك.",
+    "Open the QR scanner to verify and complete this request.": "افتح الماسح للتحقق من الطلب وإكماله.",
+    "Item image not available": "صورة العنصر غير متوفرة",
+    "Approve this request under City Fund. Redemption completes it.": "اعتماد هذا الطلب ضمن صندوق المدينة. يكتمل عند مسح رمز QR.",
     "You're logged in!": "لقد قمت بتسجيل الدخول!",
     "Your Impact Over Time": "أثرك عبر الوقت",
     "Your NUBL verification code is: :code. Valid for :minutes minutes.": "رمز التحقق NUBL الخاص بك: :code. صالح لمدة :minutes دقيقة.",
@@ -1993,5 +1998,11 @@
     "dashboard.audit.action.engine_resumed": "استئناف محرك التوزيع",
     "dashboard.audit.action.provider_allocation_paused": "إيقاف توزيع المزوّد",
     "dashboard.audit.action.provider_allocation_resumed": "استئناف توزيع المزوّد",
-    "dashboard.audit.action.menu_item_updated": "تحديث عنصر القائمة"
+    "dashboard.audit.action.menu_item_updated": "تحديث عنصر القائمة",
+    "Requested Items": "العناصر المطلوبة",
+    "Request Details": "تفاصيل الطلب",
+    "Anonymous requester": "مقدم طلب مجهول",
+    "No personal data is shown.": "لا يتم عرض أي بيانات شخصية.",
+    "Request Date": "تاريخ الطلب",
+    "Category": "التصنيف"
 }

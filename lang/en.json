@@ -30,6 +30,11 @@
     "Rejected by admin": "Rejected by admin",
     "Scan QR Code": "Scan QR Code",
     "Provider QR scan page subtitle": "Scan the customer's QR code to redeem their order, or enter the token manually if needed.",
+  "Open the QR scanner to verify and complete this request.": "Open the QR scanner to verify and complete this request.",
+  "Adopt Request": "Adopt Request",
+  "You will personally cover this request.": "You will personally cover this request.",
+  "Item image not available": "Item image not available",
+  "Approve this request under City Fund. Redemption completes it.": "Approve this request under City Fund. Redemption completes it.",
     "Point camera at the customer QR code": "Point your camera at the customer's QR code.",
     "Camera Scanner": "Camera Scanner",
     "Manual Entry": "Manual Entry",
@@ -1037,5 +1042,11 @@
     "Item Name (Arabic)": "Item Name (Arabic)",
     "Item Name (English)": "Item Name (English)",
     "Description (Arabic)": "Description (Arabic)",
-    "Description (English)": "Description (English)"
+    "Description (English)": "Description (English)",
+    "Requested Items": "Requested Items",
+    "Request Details": "Request Details",
+    "Anonymous requester": "Anonymous requester",
+    "No personal data is shown.": "No personal data is shown.",
+    "Request Date": "Request Date",
+    "Category": "Category"
 }
