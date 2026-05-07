@@ -10,7 +10,7 @@ use Illuminate\View\View;
 class FinancialReportController extends Controller
 {
     public function __construct(
-        private \App\Services\Admin\AdminFinancialService $financialService
+        private \App\Services\Admin\FinancialService $financialService
     ) {}
 
     public function index(Request $request): View

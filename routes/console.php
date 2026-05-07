@@ -46,18 +46,27 @@ Schedule::call(fn () => Http::get(config('services.forge.heartbeat_url')))
     ->name('forge-scheduler-heartbeat')
     ->withoutOverlapping();
 
-// For Testing run every hour
+// For Testing 
+// Every 2 minutes for local testing
+// Schedule::command('provider-payouts:generate-weekly')
+//     ->everyTwoMinutes()
+//     ->withoutOverlapping()
+//     ->appendOutputTo(storage_path('logs/provider-payout-weekly.log'));
+
+// Weekly provider bank payout requests (Sun 00:00, app timezone — set APP_TIMEZONE=Asia/Riyadh for KSA).
 Schedule::command('provider-payouts:generate-weekly')
-    ->hourly()
+    ->weeklyOn(Carbon::SUNDAY, '00:00')
+    ->timezone(config('app.timezone'))
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/provider-payout-weekly.log'));
 
-Schedule::command(GenerateSummaryReportCommand::class, ['--type=daily'])
-    ->dailyAt('06:00')
+
+ Schedule::command(GenerateSummaryReportCommand::class, ['--type=weekly'])
+    ->weeklyOn(1, '06:00')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/report-weekly.log'));
 
-Schedule::command(GenerateSummaryReportCommand::class, ['--type=daily'])
-    ->dailyAt('06:00')
+Schedule::command(GenerateSummaryReportCommand::class, ['--type=monthly'])
+    ->monthlyOn(1, '06:00')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/report-monthly.log'));

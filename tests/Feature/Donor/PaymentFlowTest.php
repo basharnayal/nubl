@@ -80,6 +80,11 @@ class PaymentFlowTest extends TestCase
                 ->exists(),
             'Donation receipt notification should be created for donor'
         );
+
+        // FR-3.3: Audit trail must record successful payment
+        $this->assertDatabaseHas('activity_log', [
+            'description' => 'payment.succeeded',
+        ]);
     }
 
     #[Test]
@@ -113,6 +118,11 @@ class PaymentFlowTest extends TestCase
             FundTransaction::where('payment_id', $payment->id)->exists(),
             'No FundTransaction should exist for failed payment'
         );
+
+        // FR-3.3: Audit trail must record failed payment
+        $this->assertDatabaseHas('activity_log', [
+            'description' => 'payment.failed',
+        ]);
     }
 
     #[Test]
@@ -306,6 +316,11 @@ class PaymentFlowTest extends TestCase
         $response->assertSessionHas('payment_reason', 'api_unavailable');
         $payment = Payment::where('sponsor_id', $this->donor->id)->latest()->first();
         $this->assertSame(Payment::STATUS_FAILED, $payment->status);
+
+        // FR-3.3: Audit trail must record gateway API error
+        $this->assertDatabaseHas('activity_log', [
+            'description' => 'payment.gateway_api_error',
+        ]);
     }
 
     #[Test]

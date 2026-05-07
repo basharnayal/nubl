@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Services\Admin\AdminFinancialService;
+use App\Services\Admin\FinancialService;
 use App\Support\FinancialMath;
 use Illuminate\View\View;
 
 class FinancialOverviewController extends Controller
 {
     public function __construct(
-        private AdminFinancialService $financialService
+        private FinancialService $financialService
     ) {}
 
     public function index(): View

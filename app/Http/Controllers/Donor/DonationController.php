@@ -44,14 +44,16 @@ class DonationController extends Controller
     public function initiate(Request $request)
     {
         $validated = $request->validate([
-            'amount' => ['required', 'numeric', 'min:1', 'max:999999.99'],
+            'amount'       => ['required', 'numeric', 'min:1', 'max:999999.99'],
+            'is_anonymous' => ['sometimes', 'boolean'],
         ], [
             'amount.min' => __('The minimum donation amount is 1 SAR.'),
         ]);
 
         $payment = $this->paymentService->initiateSponsorPayment(
             auth()->id(),
-            (float) $validated['amount']
+            (float) $validated['amount'],
+            $request->boolean('is_anonymous')
         );
 
         return $this->paymentService->redirectToGateway($payment);

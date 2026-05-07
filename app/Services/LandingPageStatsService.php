@@ -40,7 +40,7 @@ class LandingPageStatsService
      */
     public function getHeroStats(): array
     {
-        $cached = Cache::remember('landing_hero_stats', 300, fn () => [
+        $cached = Cache::remember('landing_hero_stats_' . app()->getLocale(), 300, fn () => [
             'totalDelivered' => $this->totalDelivered(),
             'familiesSupported' => $this->familiesSupported(),
             'localProviders' => $this->localProviders(),
@@ -63,33 +63,51 @@ class LandingPageStatsService
         return $this->liveFeedItems();
     }
 
+    /**
+     * Returns hero numbers + feed items in a single uncached call for live polling.
+     *
+     * @return array{totalDelivered: int, familiesSupported: int, localProviders: int, feedItems: list<array{row1: string, row2: string}>}
+     */
+    public function getLiveSnapshot(): array
+    {
+        return [
+            'totalDelivered' => $this->totalDelivered(),
+            'familiesSupported' => $this->familiesSupported(),
+            'localProviders' => $this->localProviders(),
+            'feedItems' => $this->liveFeedItems(),
+        ];
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Hero stats
     // ─────────────────────────────────────────────────────────────────────────
 
     /**
-     * Total SAR delivered: sum of `reserved_amount` across all REDEEMABLE and
-     * FULFILLED requests.  REDEEMABLE means the funds have been committed and the
-     * recipient can redeem them; FULFILLED means physical delivery is confirmed.
-     * Both represent delivered impact for the landing-page counter.
-     *
-     * Returned as an integer (floor) so the JS counter animation receives a
-     * clean whole-number value.
+     * Total SAR delivered: sum of PAYOUT IN fund transactions.
+     * Only counts money that physically changed hands at the provider (QR scanned),
+     * not funds merely reserved/approved.
      */
     private function totalDelivered(): int
     {
-        return (int) Request::whereIn('status', ['REDEEMABLE', 'FULFILLED'])->sum('reserved_amount');
+        return (int) FundTransaction::where('source', FundTransaction::SOURCE_PAYOUT)
+            ->where('direction', FundTransaction::DIRECTION_IN)
+            ->sum('amount');
     }
 
     /**
-     * Unique recipient families who have received support: count of distinct
-     * recipient_id values among REDEEMABLE and FULFILLED requests.
+     * Unique recipient families who have had a QR physically scanned at the provider:
+     * count of distinct recipient_id values on requests linked to a PAYOUT IN
+     * fund transaction (created at QR scan time, before proof upload).
      */
     private function familiesSupported(): int
     {
-        return Request::whereIn('status', ['REDEEMABLE', 'FULFILLED'])
-            ->distinct('recipient_id')
-            ->count('recipient_id');
+        return Request::whereIn('id', function ($q) {
+            $q->select('request_id')
+                ->from('fund_transactions')
+                ->where('source', FundTransaction::SOURCE_PAYOUT)
+                ->where('direction', FundTransaction::DIRECTION_IN)
+                ->whereNotNull('request_id');
+        })->distinct('recipient_id')->count('recipient_id');
     }
 
     /**
@@ -160,7 +178,13 @@ class LandingPageStatsService
     private function liveFeedItems(int $limit = 5): array
     {
         $fulfilled = Request::with(['provider.providerProfile'])
-            ->whereIn('status', ['REDEEMABLE', 'FULFILLED'])
+            ->whereIn('id', function ($q) {
+                $q->select('request_id')
+                    ->from('fund_transactions')
+                    ->where('source', FundTransaction::SOURCE_PAYOUT)
+                    ->where('direction', FundTransaction::DIRECTION_IN)
+                    ->whereNotNull('request_id');
+            })
             ->latest('updated_at')
             ->limit($limit)
             ->get();
@@ -206,8 +230,8 @@ class LandingPageStatsService
 
     /**
      * Returns up to 5 privacy-safe trust-ledger rows from the last 24 hours.
-     * Falls back to `staticLedgerPreview()` when no REDEEMABLE or FULFILLED
-     * requests exist in that window; the `is_live` flag tells the view which
+     * Falls back to `staticLedgerPreview()` when no QR-redeemed requests exist
+     * in that window; the `is_live` flag tells the view which
      * heading/footer to use.
      *
      * @return array{is_live: bool, rows: list<array{desc: string, meta: string, amount: int}>, shown: int, total: int}
@@ -216,16 +240,19 @@ class LandingPageStatsService
     {
         $cutoff = now()->subHours(24);
 
+        $redeemedIds = FundTransaction::where('source', FundTransaction::SOURCE_PAYOUT)
+            ->where('direction', FundTransaction::DIRECTION_IN)
+            ->whereNotNull('request_id')
+            ->where('created_at', '>=', $cutoff)
+            ->pluck('request_id');
+
         $recent = Request::with(['provider.providerProfile'])
-            ->whereIn('status', ['REDEEMABLE', 'FULFILLED'])
-            ->where('updated_at', '>=', $cutoff)
+            ->whereIn('id', $redeemedIds)
             ->latest('updated_at')
             ->limit(5)
             ->get();
 
-        $total = Request::whereIn('status', ['REDEEMABLE', 'FULFILLED'])
-            ->where('updated_at', '>=', $cutoff)
-            ->count();
+        $total = $redeemedIds->count();
 
         if ($recent->isEmpty()) {
             return $this->staticLedgerPreview();
@@ -279,7 +306,9 @@ class LandingPageStatsService
             return null;
         }
 
-        $totalFulfilled = (float) Request::whereIn('status', ['REDEEMABLE', 'FULFILLED'])->sum('reserved_amount');
+        $totalFulfilled = (float) FundTransaction::where('source', FundTransaction::SOURCE_PAYOUT)
+            ->where('direction', FundTransaction::DIRECTION_IN)
+            ->sum('amount');
         $deliveredPct = round(min($totalFulfilled / $totalDonated * 100, 100), 1);
         $heldPct = round(100 - $deliveredPct, 1);
 

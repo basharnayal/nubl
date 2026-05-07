@@ -44,6 +44,7 @@ class Payment extends Model
         'notes',
         'idempotency_key',
         'is_guest',
+        'is_anonymous',
     ];
 
     protected $casts = [
@@ -51,6 +52,7 @@ class Payment extends Model
         'notes' => 'array',
         'created_at' => 'datetime',
         'is_guest' => 'boolean',
+        'is_anonymous' => 'boolean',
     ];
 
     public function sponsor(): BelongsTo

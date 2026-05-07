@@ -9,6 +9,7 @@ use App\Rules\Base64Image;
 use App\Rules\SaudiPhoneNumber;
 use App\Rules\SaudiPhoneUnique;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules;
 
 class StoreRegisteredUserRequest extends FormRequest
@@ -46,7 +47,7 @@ class StoreRegisteredUserRequest extends FormRequest
                 'location_lat' => ['required', 'numeric', 'between:-90,90'],
                 'location_lng' => ['required', 'numeric', 'between:-180,180'],
                 'id_type' => ['required', 'string', 'in:'.implode(',', RecipientProfile::ID_TYPES)],
-                'id_number' => ['required', 'digits:10'],
+                'id_number' => ['required', 'digits:10', Rule::unique('recipient_profiles', 'id_number')],
                 'id_photo_base64' => ['required', 'string', new Base64Image],
                 'income_band' => ['required', 'string', 'in:'.implode(',', RecipientKycDetails::INCOME_BANDS)],
                 'household_size' => ['required', 'integer', 'min:1', 'max:50'],

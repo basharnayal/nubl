@@ -28,9 +28,9 @@
                                 @endforeach
                             </select>
                             <select name="status" class="form-select form-select-lineone w-auto min-w-24">
-                                <option value="">{{ __('All') }}</option>
-                                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>{{ __('Active') }}</option>
-                                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>{{ __('Inactive') }}</option>
+                                <option value="">{{ __('All Access') }}</option>
+                                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>{{ __('Login Enabled') }}</option>
+                                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>{{ __('Login Disabled') }}</option>
                             </select>
                             <button type="submit" class="btn size-9 rounded-full p-0 text-primary hover:bg-primary/10 focus:bg-primary/10 dark:text-accent dark:hover:bg-accent/10 dark:focus:bg-accent/10">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="size-4.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -44,6 +44,16 @@
                     </div>
                 </div>
 
+            @php
+                $activeSort = request('sort');
+                $activeDir  = request('direction', 'asc');
+                $sortHref   = fn(string $col) => request()->fullUrlWithQuery([
+                    'sort'      => $col,
+                    'direction' => ($activeSort === $col && $activeDir === 'asc') ? 'desc' : 'asc',
+                    'page'      => 1,
+                ]);
+            @endphp
+
             <div class="card mt-3">
                 <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
                     <table class="is-hoverable w-full text-left">
@@ -51,10 +61,37 @@
                             <tr>
                                 <th class="whitespace-nowrap rounded-tl-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">#</th>
                                 <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Avatar') }}</th>
-                                <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Name') }}</th>
-                                <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Email') }}</th>
+                                <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
+                                    <a href="{{ $sortHref('name') }}" class="inline-flex items-center gap-1 hover:text-primary dark:hover:text-accent-light transition-colors">
+                                        {{ __('Name') }}
+                                        @if($activeSort === 'name')
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-primary dark:text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $activeDir === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/></svg>
+                                        @else
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 opacity-35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>
+                                        @endif
+                                    </a>
+                                </th>
+                                <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
+                                    <a href="{{ $sortHref('email') }}" class="inline-flex items-center gap-1 hover:text-primary dark:hover:text-accent-light transition-colors">
+                                        {{ __('Email') }}
+                                        @if($activeSort === 'email')
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-primary dark:text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $activeDir === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/></svg>
+                                        @else
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 opacity-35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>
+                                        @endif
+                                    </a>
+                                </th>
                                 <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Role') }}</th>
-                                <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Status') }}</th>
+                                <th class="whitespace-nowrap bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">
+                                    <a href="{{ $sortHref('status') }}" class="inline-flex items-center gap-1 hover:text-primary dark:hover:text-accent-light transition-colors">
+                                        {{ __('Status') }}
+                                        @if($activeSort === 'status')
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 text-primary dark:text-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $activeDir === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}"/></svg>
+                                        @else
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5 opacity-35" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l4-4 4 4M8 15l4 4 4-4"/></svg>
+                                        @endif
+                                    </a>
+                                </th>
                                 <th class="whitespace-nowrap rounded-tr-lg bg-slate-200 px-4 py-3 font-semibold uppercase text-slate-800 dark:bg-navy-800 dark:text-navy-100 lg:px-5">{{ __('Actions') }}</th>
                             </tr>
                         </thead>
@@ -78,16 +115,44 @@
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                         @php
                                             $roleNames = $user->roles->pluck('name');
-                                            $roleClass = $roleNames->contains('admin') ? 'bg-secondary/10 text-secondary dark:bg-secondary-light/15 dark:text-secondary-light' : 'bg-info/10 text-info dark:bg-info/15';
+                                            $roleColorMap = [
+                                                'admin'     => 'bg-secondary/10 text-secondary dark:bg-secondary-light/15 dark:text-secondary-light',
+                                                'donor'     => 'bg-primary/10 text-primary dark:bg-accent/15 dark:text-accent-light',
+                                                'provider'  => 'bg-warning/10 text-warning dark:bg-warning/15',
+                                                'recipient' => 'bg-success/10 text-success dark:bg-success/15',
+                                            ];
                                         @endphp
-                                        <span class="badge rounded-full {{ $roleClass }}">{{ $roleNames->implode(',') ?: '-' }}</span>
+                                        @forelse($roleNames as $roleName)
+                                            <span class="badge rounded-full {{ $roleColorMap[$roleName] ?? 'bg-slate-150 text-slate-500 dark:bg-navy-500 dark:text-navy-300' }}">
+                                                {{ $roleName }}
+                                            </span>
+                                        @empty
+                                            <span class="badge rounded-full bg-slate-150 text-slate-500 dark:bg-navy-500 dark:text-navy-300">-</span>
+                                        @endforelse
                                     </td>
-                                    <td class="whitespace-nowrap px-4 py-3 sm:px-5">
-                                        @if($user->is_active)
-                                            <span class="badge rounded-full bg-success/10 text-success dark:bg-success/15">{{ __('Active') }}</span>
-                                        @else
-                                            <span class="badge rounded-full bg-error/10 text-error dark:bg-error/15">{{ __('Inactive') }}</span>
-                                        @endif
+                                    <td class="px-4 py-3 sm:px-5">
+                                        <div class="flex flex-col gap-1.5">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="text-xs text-slate-400 dark:text-navy-400 shrink-0">{{ __('Access:') }}</span>
+                                                @if($user->is_active)
+                                                    <span class="badge rounded-full bg-info/10 text-info dark:bg-info/15 whitespace-nowrap">{{ __('Login Enabled') }}</span>
+                                                @else
+                                                    <span class="badge rounded-full bg-slate-150 text-slate-500 dark:bg-navy-500 dark:text-navy-300 whitespace-nowrap">{{ __('Login Disabled') }}</span>
+                                                @endif
+                                            </div>
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="text-xs text-slate-400 dark:text-navy-400 shrink-0">{{ __('Approval:') }}</span>
+                                                @php
+                                                    [$approvalClass, $approvalLabel] = match($user->status) {
+                                                        'active'           => ['bg-success/10 text-success dark:bg-success/15', __('Active')],
+                                                        'pending_approval' => ['bg-warning/10 text-warning dark:bg-warning/15', __('Pending Approval')],
+                                                        'rejected'         => ['bg-error/10 text-error dark:bg-error/15', __('Rejected')],
+                                                        default            => ['bg-slate-150 text-slate-500 dark:bg-navy-500 dark:text-navy-300', ucfirst($user->status ?? '-')],
+                                                    };
+                                                @endphp
+                                                <span class="badge rounded-full {{ $approvalClass }} whitespace-nowrap">{{ $approvalLabel }}</span>
+                                            </div>
+                                        </div>
                                     </td>
                                     <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                         <div x-data="usePopper({placement:'bottom-end',offset:4})" @click.outside="if(isShowPopper) isShowPopper = false" class="inline-flex">

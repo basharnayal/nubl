@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Services\Admin\AdminDashboardService;
+use App\Services\Admin\DashboardService;
 use Illuminate\View\View;
 
-class AdminDashboardController extends Controller
+class DashboardController extends Controller
 {
     public function __construct(
-        private readonly AdminDashboardService $dashboardService,
+        private readonly DashboardService $dashboardService,
     ) {}
 
     public function index(): View

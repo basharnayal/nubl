@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\SummaryReport;
-use App\Services\Admin\AdminFinancialService;
+use App\Services\Admin\FinancialService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -22,7 +22,7 @@ class GenerateSummaryReportCommand extends Command
 
     protected $description = 'FR-19.1: Generate and store a weekly or monthly financial summary report.';
 
-    public function handle(AdminFinancialService $financialService): int
+    public function handle(FinancialService $financialService): int
     {
         $type = $this->option('type');
 

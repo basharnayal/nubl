@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Activity;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -60,5 +61,17 @@ class AuditLogController extends Controller
             'registrationCount',
             'logNames',
         ));
+    }
+
+    public function verify(Activity $log): JsonResponse
+    {
+        $computed = Activity::computeHashFor($log);
+        $stored   = $log->sha256_hash;
+
+        return response()->json([
+            'verified' => $computed === $stored,
+            'computed' => $computed,
+            'stored'   => $stored,
+        ]);
     }
 }

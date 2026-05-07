@@ -88,10 +88,27 @@
                             </div>
                         </div>
 
+                        <div class="mt-4">
+                            <label class="flex cursor-pointer items-start gap-3">
+                                <input
+                                    type="checkbox"
+                                    name="is_anonymous"
+                                    value="1"
+                                    {{ old('is_anonymous') ? 'checked' : '' }}
+                                    class="mt-0.5 h-4 w-4 shrink-0 rounded border-slate-300 text-primary focus:ring-primary dark:border-navy-500 dark:bg-navy-700 dark:checked:bg-primary"
+                                >
+                                <span class="text-sm text-slate-700 dark:text-navy-200">
+                                    {{ __('top_donors.checkbox_label') }}
+                                    <span class="mt-0.5 block text-xs text-slate-500 dark:text-navy-300">
+                                        {{ __('top_donors.checkbox_help') }}
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+
                         <div class="mt-6 flex items-center gap-4">
                             <x-lineone-button :href="route('donor.dashboard')" variant="slate" outline>{{ __('Cancel') }}</x-lineone-button>
                             <x-lineone-button type="submit" variant="primary">{{ __('Proceed to Payment') }}</x-lineone-button>
-
                         </div>
                     </form>
                 </div>

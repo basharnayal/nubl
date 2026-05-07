@@ -2,19 +2,59 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
+            <a href="{{ route('admin.users.pending') }}" class="flex size-9 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-700 dark:text-navy-300 dark:hover:bg-navy-600 dark:hover:text-navy-100" title="{{ __('Back to pending') }}">
+                <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                </svg>
+            </a>
             <h2 class="font-semibold text-xl text-gray-800 leading-tight">
                 {{ __('Recipient Application') }} — {{ $user->name }}
             </h2>
-            <a href="{{ route('admin.users.pending') }}" class="text-sm text-primary hover:text-primary-focus dark:text-accent-light dark:hover:text-accent font-medium">{{ __('Back to pending') }}</a>
+            <div class="size-9 shrink-0"></div>
         </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-8">
+    <div class="py-6">
+        <div class="max-w-4xl mx-auto sm:px-6 lg:px-8 space-y-4">
             @php
                 $profile = $user->recipientProfile;
                 $kyc = $user->recipientKycDetails;
             @endphp
+
+            {{-- Registration Device Info (compact bar) --}}
+            @if($registrationLog)
+                @php
+                    $regIp = $registrationLog->properties['ip'] ?? null;
+                    $regUa = $registrationLog->properties['user_agent'] ?? null;
+                    $regDevice = null;
+                    if ($regUa) {
+                        $ua = strtolower($regUa);
+                        if (str_contains($ua, 'mobile') || str_contains($ua, 'android') || str_contains($ua, 'iphone')) {
+                            $regDevice = __('Mobile');
+                        } elseif (str_contains($ua, 'tablet') || str_contains($ua, 'ipad')) {
+                            $regDevice = __('Tablet');
+                        } else {
+                            $regDevice = __('Desktop');
+                        }
+                    }
+                @endphp
+                <div class="flex flex-wrap items-center gap-x-6 gap-y-1 rounded-lg border border-slate-200 bg-slate-50 px-5 py-2.5 text-xs">
+                    <span class="font-semibold text-slate-500">{{ __('Registration Device Info') }}</span>
+                    <span class="text-slate-400">|</span>
+                    <span class="text-slate-500">{{ __('IP Address') }}:</span>
+                    <span class="font-mono text-slate-800">{{ $regIp ?? '—' }}</span>
+                    <span class="text-slate-400">|</span>
+                    <span class="text-slate-500">{{ __('Device') }}:</span>
+                    @if($regDevice)
+                        <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium {{ $regDevice === __('Mobile') ? 'bg-green-100 text-green-700' : ($regDevice === __('Tablet') ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700') }}">{{ $regDevice }}</span>
+                    @else
+                        <span class="text-slate-400">—</span>
+                    @endif
+                    <span class="text-slate-400">|</span>
+                    <span class="text-slate-500">{{ __('Browser') }}:</span>
+                    <span class="text-slate-600 truncate max-w-xs" title="{{ $regUa ?? '' }}">{{ $regUa ? Str::limit($regUa, 60) : '—' }}</span>
+                </div>
+            @endif
 
             {{-- Basic Info --}}
             <section class="rounded-lg border border-slate-200 p-6 bg-white">
@@ -74,6 +114,7 @@
                         </a>
                     </div>
                     @endif
+
                 </div>
             </section>
 

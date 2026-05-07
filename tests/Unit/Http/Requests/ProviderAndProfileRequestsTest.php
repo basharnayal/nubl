@@ -8,11 +8,11 @@ use App\Http\Requests\Provider\RedeemProviderQrRequest;
 use App\Http\Requests\Provider\StoreMenuItemRequest;
 use App\Http\Requests\Provider\StoreProviderProofRequest;
 use App\Http\Requests\Provider\UpdateMenuItemRequest;
+use App\Http\Requests\Provider\UpdateProviderBusinessProfileRequest;
+use App\Http\Requests\Provider\UpdateProviderFinancialProfileRequest;
 use App\Http\Requests\Provider\UpdateProviderProfileRequest;
 use App\Http\Requests\Provider\UpdateProviderRequestActionRequest;
 use App\Http\Requests\Recipient\StoreRecipientRequest;
-use App\Http\Requests\UpdateProviderBusinessProfileRequest;
-use App\Http\Requests\UpdateProviderFinancialProfileRequest;
 use App\Models\MenuItemCategory;
 use App\Models\ProviderFinancialInfo;
 use App\Models\ProviderMenuItem;
@@ -222,6 +222,7 @@ class ProviderAndProfileRequestsTest extends TestCase
 
         $request = $this->makeRequest(UpdateMenuItemRequest::class, [
             'name' => 'Item',
+            'name_ar' => 'عنصر',
             'category_id' => $category->id,
             'price' => 10,
         ], $provider);

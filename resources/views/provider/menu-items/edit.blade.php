@@ -24,12 +24,20 @@
                         @method('PUT')
 
                         <div class="space-y-4">
-                            <div>
-                                <label for="name"
-                                    class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Item Name') }}
-                                    *</label>
-                                <input type="text" id="name" name="name" value="{{ old('name', $menuItem->name) }}"
-                                    required class="form-input form-input-lineone">
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div>
+                                    <label for="name_ar"
+                                        class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Item Name (Arabic)') }} *</label>
+                                    <input type="text" id="name_ar" name="name_ar"
+                                        value="{{ old('name_ar', $menuItem->name_ar) }}" dir="rtl" required
+                                        class="form-input form-input-lineone" autocomplete="off">
+                                </div>
+                                <div>
+                                    <label for="name"
+                                        class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Item Name (English)') }} *</label>
+                                    <input type="text" id="name" name="name" value="{{ old('name', $menuItem->name) }}"
+                                        required class="form-input form-input-lineone" autocomplete="off">
+                                </div>
                             </div>
 
                             <div>
@@ -49,11 +57,19 @@
                                 </p>
                             </div>
 
-                            <div>
-                                <label for="description"
-                                    class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Description') }}</label>
-                                <textarea id="description" name="description" rows="3"
-                                    class="form-textarea form-textarea-lineone">{{ old('description', $menuItem->description) }}</textarea>
+                            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
+                                <div>
+                                    <label for="description_ar"
+                                        class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Description (Arabic)') }}</label>
+                                    <textarea id="description_ar" name="description_ar" rows="3" dir="rtl"
+                                        class="form-textarea form-textarea-lineone">{{ old('description_ar', $menuItem->description_ar) }}</textarea>
+                                </div>
+                                <div>
+                                    <label for="description"
+                                        class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Description (English)') }}</label>
+                                    <textarea id="description" name="description" rows="3"
+                                        class="form-textarea form-textarea-lineone">{{ old('description', $menuItem->description) }}</textarea>
+                                </div>
                             </div>
 
                             <div class="grid grid-cols-2 gap-4">
@@ -70,8 +86,7 @@
                                         class="mb-1 block text-sm font-medium text-slate-700 dark:text-navy-200">{{ __('Category') }}
                                         *</label>
                                     <select id="category_id" name="category_id" required
-                                        class="form-select form-select-lineone w-full ltr:pl-3 ltr:pr-9 rtl:pr-3 rtl:pl-10 rtl:bg-[position:left_0.5rem_center]"
-                                        onfocus="if (!this.tomselect) { var el = this; window.loadTomSelect().then(function(TS) { if (!el.tomselect) new TS(el, {create: false}); }); }">
+                                        class="form-select form-select-lineone w-full ltr:pl-3 ltr:pr-9 rtl:pr-3 rtl:pl-10 rtl:bg-[position:left_0.5rem_center]">
                                         <option value="">{{ __('Select Category') }}</option>
                                         @foreach($categories as $cat)
                                             <option value="{{ $cat->id }}" {{ old('category_id', $menuItem->category_id) == $cat->id ? 'selected' : '' }}>

@@ -25,7 +25,7 @@
                         <dd class="mt-1 font-mono text-sm text-slate-800 dark:text-navy-100">#{{ $wallet->id }}</dd>
                     </div>
                 </dl>
-                <p class="mt-4 text-xs text-slate-500 dark:text-navy-400">{{ __('provider.wallet.balance_hint') }}</p>
+                <!-- <p class="mt-4 text-xs text-slate-500 dark:text-navy-400">{{ __('provider.wallet.balance_hint') }}</p> -->
             </div>
 
             <div class="card mt-6 overflow-x-auto">

@@ -31,6 +31,12 @@ export default defineConfig({
         ...process.env,
         PHONE_VERIFICATION_ENABLED: 'false',
         EMAIL_VERIFICATION_ENABLED: 'false',
+          // E2E runs against http://127.0.0.1:8001, so production cookie
+          // restrictions in .env (HTTPS-only, nublhope.com domain) would prevent
+          // the browser from storing the session cookie. Override for tests.
+          APP_URL: 'http://127.0.0.1:8001',
+          SESSION_SECURE_COOKIE: 'false',
+          SESSION_DOMAIN: '',
       },
       reuseExistingServer: true,
       timeout: 120 * 1000,
@@ -50,7 +56,7 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: { ...devices['Desktop Chrome'], reducedMotion: 'reduce' },
     },
     // Add Firefox or WebKit if desired
   ],

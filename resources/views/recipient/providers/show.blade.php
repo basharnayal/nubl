@@ -223,7 +223,7 @@
                                     class="relative h-28 w-28 shrink-0 overflow-hidden bg-slate-100 sm:h-32 sm:w-32 dark:bg-navy-700">
                                     @if($item->image_url)
                                         <img class="size-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                            src="{{ $item->image_url }}" alt="{{ $item->name }}">
+                                            src="{{ $item->image_url }}" alt="{{ $item->localized_name }}">
                                     @else
                                         <div class="flex size-full items-center justify-center text-slate-400 dark:text-navy-400">
                                             <svg class="size-10 sm:size-12" fill="none" stroke="currentColor"
@@ -241,10 +241,10 @@
                                         <div class="min-w-0 flex-1">
                                             <h5
                                                 class="line-clamp-2 text-base font-bold tracking-tight text-slate-800 dark:text-navy-100 sm:text-lg">
-                                                {{ $item->name }}
+                                                {{ $item->localized_name }}
                                             </h5>
                                             <p class="mt-1 line-clamp-2 text-sm text-slate-600 dark:text-navy-300">
-                                                {{ $item->description }}
+                                                {{ $item->localized_description }}
                                             </p>
                                         </div>
                                         <div class="flex shrink-0 flex-col items-stretch gap-2 sm:items-end">
@@ -264,32 +264,21 @@
                                             data-item-id="{{ $item->id }}"
                                             data-price="{{ $item->price }}"
                                             data-max="{{ $itemMax }}"
-                                            data-item-name="{{ e($item->name) }}"
+                                            data-item-name="{{ e($item->localized_name) }}"
                                             data-capacity-on="{{ $capacityOn ? '1' : '0' }}"
                                             data-item-active="{{ $item->is_active ? '1' : '0' }}"
                                             role="group"
-                                            aria-label="{{ __('Quantity') }} — {{ $item->name }}">
+                                            aria-label="{{ __('Quantity') }} — {{ $item->localized_name }}">
                                             <div class="flex shrink-0 justify-center">
                                                 <button type="button"
-                                                    class="menu-trash hidden flex size-8 items-center justify-center rounded-full text-error hover:bg-error/10 hover:text-error-focus disabled:pointer-events-none disabled:opacity-40"
+                                                    class="menu-trash flex size-8 items-center justify-center rounded-full text-slate-300 disabled:pointer-events-none disabled:cursor-not-allowed dark:text-navy-500"
                                                     onclick="menuRemove({{ $item->id }})"
                                                     aria-label="{{ __('Remove') }}"
-                                                    {{ (!$item->is_active || !$capacityOn) ? 'disabled' : '' }}>
+                                                    disabled>
                                                     <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
                                                         aria-hidden="true">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75"
                                                             d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                                                    </svg>
-                                                </button>
-                                                <button type="button"
-                                                    class="menu-add-first flex size-8 items-center justify-center rounded-full bg-primary/25 text-primary ring-1 ring-primary/20 hover:bg-primary/35 dark:bg-accent/25 dark:text-accent-light dark:ring-accent/30 dark:hover:bg-accent/35"
-                                                    onclick="menuAdjustQty({{ $item->id }}, 1)"
-                                                    aria-label="{{ __('Add to Cart') }}"
-                                                    {{ (!$item->is_active || !$capacityOn) ? 'disabled' : '' }}>
-                                                    <svg class="size-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                                                        aria-hidden="true">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M12 4.5v15m7.5-7.5h-15" />
                                                     </svg>
                                                 </button>
                                             </div>
@@ -484,24 +473,23 @@
                 const totalEl = el.querySelector('.menu-line-total');
                 const qtyEl = el.querySelector('.menu-qty-display');
                 const trash = el.querySelector('.menu-trash');
-                const addFirst = el.querySelector('.menu-add-first');
                 const minus = el.querySelector('.menu-minus');
                 const plus = el.querySelector('.menu-plus');
                 if (totalEl) totalEl.textContent = lineTotal.toFixed(2) + ' ' + sarLabel;
                 if (qtyEl) qtyEl.textContent = String(qty);
-                if (trash && addFirst) {
-                    if (qty > 0) {
-                        trash.classList.remove('hidden');
-                        addFirst.classList.add('hidden');
+                if (trash) {
+                    const canDelete = !locked && qty > 0;
+                    trash.disabled = !canDelete;
+                    if (canDelete) {
+                        trash.classList.remove('text-slate-300', 'dark:text-navy-500');
+                        trash.classList.add('text-error', 'hover:bg-error/10', 'hover:text-error-focus');
                     } else {
-                        trash.classList.add('hidden');
-                        addFirst.classList.remove('hidden');
+                        trash.classList.remove('text-error', 'hover:bg-error/10', 'hover:text-error-focus');
+                        trash.classList.add('text-slate-300', 'dark:text-navy-500');
                     }
                 }
                 if (minus) minus.disabled = locked || qty <= 0;
                 if (plus) plus.disabled = locked || qty >= max;
-                if (trash) trash.disabled = locked;
-                if (addFirst) addFirst.disabled = locked;
             });
         }
 

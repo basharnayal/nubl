@@ -7,7 +7,7 @@ use App\Models\ProviderMenuItem;
 use App\Models\User;
 use Illuminate\Http\Request;
 
-class AdminMenuController extends Controller
+class MenuController extends Controller
 {
     public function index(Request $request)
     {

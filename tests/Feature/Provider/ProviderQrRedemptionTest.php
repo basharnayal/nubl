@@ -492,4 +492,37 @@ class ProviderQrRedemptionTest extends TestCase
             ->assertStatus(429)
             ->assertJsonFragment(['error' => __('Too many attempts, wait 30 seconds.')]);
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // FR-11.2: Admin notification after successful redemption
+    // ─────────────────────────────────────────────────────────────────────────
+
+    #[Test]
+    public function successful_redemption_notifies_admins_fr_11_2(): void
+    {
+        $admin = User::factory()->create([
+            'status' => User::STATUS_ACTIVE,
+            'is_active' => true,
+        ]);
+        $admin->assignRole('admin');
+
+        $request = $this->createRedeemableRequest();
+        $redemption = RedemptionService::generateForRequest($request);
+        $this->assertNotNull($redemption);
+
+        $rawQrToken = Crypt::decryptString($redemption->token_ciphertext);
+
+        $this->actingAs($this->provider)
+            ->postJson(route('provider.qr.redeem'), ['token' => $rawQrToken])
+            ->assertStatus(200);
+
+        $admin->refresh();
+        $notification = $admin->notifications()->first();
+        $this->assertNotNull($notification, 'Admin should receive a notification after successful redemption.');
+        $this->assertSame('redemption_completed', $notification->data['type']);
+        $this->assertSame($redemption->id, $notification->data['redemption_id']);
+        $this->assertSame($request->id, $notification->data['request_id']);
+        $this->assertSame($this->provider->id, $notification->data['provider_id']);
+        $this->assertArrayHasKey('happened_at', $notification->data);
+    }
 }
