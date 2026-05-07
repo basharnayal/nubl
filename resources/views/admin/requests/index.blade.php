@@ -73,8 +73,8 @@
                                             </td>
                                             <td class="whitespace-nowrap px-4 py-3 sm:px-5">
                                                 <button type="button"
-                                                    onclick="openReviewModal({{ json_encode($request) }}, {{ json_encode($request->items) }})"
-                                                    class="btn size-8 rounded-full p-0 text-primary hover:bg-primary/10 focus:bg-primary/10 dark:text-accent dark:hover:bg-accent/10 dark:focus:bg-accent/10">
+                                                    data-request-id="{{ $request->id }}"
+                                                    class="js-review-btn btn size-8 rounded-full p-0 text-primary hover:bg-primary/10 focus:bg-primary/10 dark:text-accent dark:hover:bg-accent/10 dark:focus:bg-accent/10">
                                                     {{ __('Review') }}
                                                 </button>
                                             </td>
@@ -169,31 +169,72 @@
     </div>
 
     <script>
-        function openReviewModal(request, items) {
-            document.getElementById('modal-req-id').textContent = request.id;
+        // Safely encoded request data — Js::from escapes all values for safe JS embedding
+        const _requestsData = {{ Js::from(
+            $requests->getCollection()->mapWithKeys(function ($req) {
+                return [$req->id => [
+                    'id'              => $req->id,
+                    'reserved_amount' => $req->reserved_amount,
+                    'items'           => $req->items->map(fn ($item) => [
+                        'menu_item_id'   => $item->menu_item_id,
+                        'menu_item_name' => $item->menuItem?->name,
+                        'quantity'       => $item->quantity,
+                        'price_snapshot' => $item->price_snapshot,
+                    ]),
+                ]];
+            })
+        ) }};
+
+        const _updateUrlTemplate = @js(route('admin.requests.update', ':id'));
+        const _qtyLabel = @js(__('Qty'));
+
+        // Attach click listeners to all review buttons (no inline onclick)
+        document.querySelectorAll('.js-review-btn').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const reqId = this.getAttribute('data-request-id');
+                const data = _requestsData[reqId];
+                if (data) openReviewModal(data);
+            });
+        });
+
+        function openReviewModal(data) {
+            document.getElementById('modal-req-id').textContent = data.id;
+
             const modalTotal = document.getElementById('modal-total');
             if (modalTotal) {
                 modalTotal.innerHTML = @json(view('components.sar-amount', ['value' => '__VALUE__'])->render());
-                modalTotal.innerHTML = modalTotal.innerHTML.replace('__VALUE__', parseFloat(request.reserved_amount).toFixed(2));
+                modalTotal.innerHTML = modalTotal.innerHTML.replace('__VALUE__', parseFloat(data.reserved_amount).toFixed(2));
             }
 
+            // Build item rows safely using DOM APIs — no innerHTML with user data
             const list = document.getElementById('modal-items-list');
             list.innerHTML = '';
-            items.forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'flex justify-between border-b border-slate-200 pb-2 last:border-0 dark:border-navy-500';
-                const itemName = item.menu_item ? item.menu_item.name : 'Item #' + item.menu_item_id;
-                div.innerHTML = `
-                    <div>
-                        <span class="block font-medium text-slate-700 dark:text-navy-100">${itemName}</span>
-                        <span class="text-xs text-slate-500 dark:text-navy-300">Qty: ${item.quantity}</span>
-                    </div>
-                    <span class="font-bold text-slate-700 dark:text-navy-100">${(item.price_snapshot * item.quantity).toFixed(2)}</span>
-                `;
-                list.appendChild(div);
+            data.items.forEach(function (item) {
+                const row = document.createElement('div');
+                row.className = 'flex justify-between border-b border-slate-200 pb-2 last:border-0 dark:border-navy-500';
+
+                const left = document.createElement('div');
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'block font-medium text-slate-700 dark:text-navy-100';
+                nameSpan.textContent = item.menu_item_name ?? ('Item #' + item.menu_item_id);
+                left.appendChild(nameSpan);
+
+                const qtySpan = document.createElement('span');
+                qtySpan.className = 'text-xs text-slate-500 dark:text-navy-300';
+                qtySpan.textContent = _qtyLabel + ': ' + item.quantity;
+                left.appendChild(qtySpan);
+
+                const totalSpan = document.createElement('span');
+                totalSpan.className = 'font-bold text-slate-700 dark:text-navy-100';
+                totalSpan.textContent = (item.price_snapshot * item.quantity).toFixed(2);
+
+                row.appendChild(left);
+                row.appendChild(totalSpan);
+                list.appendChild(row);
             });
 
-            const url = "{{ route('admin.requests.update', ':id') }}".replace(':id', request.id);
+            const url = _updateUrlTemplate.replace(':id', data.id);
             document.getElementById('approve-form').action = url;
             document.getElementById('reject-form').action = url;
 
