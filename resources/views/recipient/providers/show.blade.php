@@ -50,7 +50,7 @@
                                     {{ $businessTitle }}
                                 </h1>
                                 <p class="truncate text-sm text-slate-600 dark:text-navy-300">
-                                    {{ \App\Support\ProviderDisplay::businessCategoryLine($provider->providerProfile->business_category) ?? __('General Provider') }}
+                                    {{ \App\Support\ProviderDisplay::businessCategoryLine($provider->providerProfile?->business_category) ?? __('General Provider') }}
                                 </p>
                             </div>
                             <div class="shrink-0">
@@ -95,7 +95,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                                 </svg>
-                                <span class="max-w-[14rem] truncate sm:max-w-xs">{{ \App\Support\ProviderDisplay::locationLine($provider->providerProfile) }}</span>
+                                <span class="max-w-[14rem] truncate sm:max-w-xs">{{ $provider->providerProfile ? \App\Support\ProviderDisplay::locationLine($provider->providerProfile) : __('Unknown City') }}</span>
                             </span>
                             @if($today)
                                 <span

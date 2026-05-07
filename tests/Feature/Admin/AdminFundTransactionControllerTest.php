@@ -291,8 +291,8 @@ class AdminFundTransactionControllerTest extends TestCase
             ->get(route('admin.finances.fund-transactions.show', $transaction));
 
         $response->assertOk();
-        $response->assertSee('Guest Donor', false);
-        $response->assertSee('Quick Donation', false);
+        $response->assertSee('متبرع زائر', false);
+        $response->assertSee('تبرع سريع', false);
     }
 
     #[Test]
@@ -321,7 +321,7 @@ class AdminFundTransactionControllerTest extends TestCase
         $csv = $response->streamedContent();
         $this->assertStringContainsString('donor_name', $csv);
         $this->assertStringContainsString((string) $transaction->id, $csv);
-        $this->assertStringContainsString('Guest Donor', $csv);
+        $this->assertStringContainsString('متبرع زائر', $csv);
     }
 
     #[Test]
@@ -350,7 +350,7 @@ class AdminFundTransactionControllerTest extends TestCase
             'generated_at' => now(),
         ])->render();
 
-        $this->assertStringContainsString('Guest Donor', $rendered);
+        $this->assertStringContainsString('متبرع زائر', $rendered);
     }
 
     #[Test]

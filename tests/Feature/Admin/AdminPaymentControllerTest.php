@@ -92,15 +92,15 @@ class AdminPaymentControllerTest extends TestCase
                 'search' => (string) $guestPayment->id,
             ]))
             ->assertOk()
-            ->assertSee('Guest Donor', false)
-            ->assertSee('Quick Donation', false)
+            ->assertSee('متبرع زائر', false)
+            ->assertSee('تبرع سريع', false)
             ->assertSee('GUEST-ADMIN-1', false);
 
         $this->actingAs($this->admin)
             ->get(route('admin.finances.payments.show', $guestPayment))
             ->assertOk()
-            ->assertSee('Guest Donor', false)
-            ->assertSee('Quick Donation', false);
+            ->assertSee('متبرع زائر', false)
+            ->assertSee('تبرع سريع', false);
     }
 
     #[Test]
@@ -183,7 +183,7 @@ class AdminPaymentControllerTest extends TestCase
         $this->assertStringContainsString('external_payment_id', $csv);
         $this->assertStringContainsString((string) $payment->id, $csv);
         $this->assertStringContainsString((string) $guestPayment->id, $csv);
-        $this->assertStringContainsString('Guest Donor', $csv);
+        $this->assertStringContainsString('متبرع زائر', $csv);
         $this->assertStringContainsString('GUEST-CSV-1', $csv);
         $this->assertStringContainsString(Payment::STATUS_SUCCEEDED, $csv);
 
@@ -225,7 +225,7 @@ class AdminPaymentControllerTest extends TestCase
             'payments' => collect([$guestPayment->load('sponsor')]),
             'generated_at' => now(),
         ])->render();
-        $this->assertStringContainsString('Guest Donor', $renderedPdfView);
+        $this->assertStringContainsString('متبرع زائر', $renderedPdfView);
 
         $activity = Activity::query()
             ->where('description', 'finance.payments_exported')
