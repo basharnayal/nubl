@@ -166,25 +166,6 @@
                     <h3 class="mb-4 text-base font-semibold text-slate-800 dark:text-navy-100">{{ __('Actions') }}</h3>
 
                     <div class="space-y-4">
-                        <a href="{{ route('provider.qr.scan', ['request_id' => $request->id]) }}"
-                            class="group flex w-full items-start gap-3 rounded-xl border border-primary/15 bg-primary/[0.04] p-4 transition hover:border-primary/25 hover:bg-primary/[0.07] dark:border-accent/20 dark:bg-accent/10 dark:hover:border-accent/35 dark:hover:bg-accent/15">
-                            <span
-                                class="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary dark:bg-accent/20 dark:text-accent-light">
-                                <i class="fa-solid fa-qrcode text-lg" aria-hidden="true"></i>
-                            </span>
-                            <div class="min-w-0 flex-1">
-                                <div class="flex items-center justify-between gap-2">
-                                    <span class="truncate text-sm font-bold text-slate-800 dark:text-navy-50">
-                                        {{ __('Scan QR Code') }}
-                                    </span>
-                                    <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 transition group-hover:text-slate-600 dark:text-navy-400 dark:group-hover:text-navy-200" aria-hidden="true"></i>
-                                </div>
-                                <p class="mt-1 text-xs leading-snug text-slate-600 dark:text-navy-300" dir="auto">
-                                    {{ __('Open the QR scanner to verify and complete this request.') }}
-                                </p>
-                            </div>
-                        </a>
-
                         @if(in_array($request->status, ['REQUESTED', 'ADMIN_APPROVED']))
                             <form action="{{ route('provider.requests.update', $request->id) }}" method="POST">
                                 @csrf
@@ -261,13 +242,32 @@
                                 <i class="fa-solid fa-camera me-2"></i>
                                 {{ __('Upload fulfillment proof') }}
                             </a>
+                        @elseif(in_array($request->status, ['APPROVED', 'REDEEMABLE']))
+                            <a href="{{ route('provider.qr.scan', ['request_id' => $request->id]) }}"
+                                class="group flex w-full items-start gap-3 rounded-xl border border-primary/15 bg-primary/[0.04] p-4 transition hover:border-primary/25 hover:bg-primary/[0.07] dark:border-accent/20 dark:bg-accent/10 dark:hover:border-accent/35 dark:hover:bg-accent/15">
+                                <span
+                                    class="mt-0.5 flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/15 text-primary dark:bg-accent/20 dark:text-accent-light">
+                                    <i class="fa-solid fa-qrcode text-lg" aria-hidden="true"></i>
+                                </span>
+                                <div class="min-w-0 flex-1">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="truncate text-sm font-bold text-slate-800 dark:text-navy-50">
+                                            {{ __('Scan QR Code') }}
+                                        </span>
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-xs text-slate-400 transition group-hover:text-slate-600 dark:text-navy-400 dark:group-hover:text-navy-200" aria-hidden="true"></i>
+                                    </div>
+                                    <p class="mt-1 text-xs leading-snug text-slate-600 dark:text-navy-300" dir="auto">
+                                        {{ __('Open the QR scanner to verify and complete this request.') }}
+                                    </p>
+                                </div>
+                            </a>
                         @else
-                        <div class="rounded-lg bg-slate-100 p-4 text-center dark:bg-navy-700/50">
-                            <span class="block font-bold text-slate-700 dark:text-navy-100">{{ __('Request') }}
-                                {{ $request->status }}</span>
-                            <span
-                                class="text-sm text-slate-500 dark:text-navy-400">{{ __('No further actions available.') }}</span>
-                        </div>
+                            <div class="rounded-lg bg-slate-100 p-4 text-center dark:bg-navy-700/50">
+                                <span class="block font-bold text-slate-700 dark:text-navy-100">{{ __('Request') }}
+                                    {{ $request->status }}</span>
+                                <span
+                                    class="text-sm text-slate-500 dark:text-navy-400">{{ __('No further actions available.') }}</span>
+                            </div>
                         @endif
                     </div>
                 </div>
