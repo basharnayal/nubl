@@ -23,7 +23,7 @@ class TestingEnvironmentOnly
 {
     public function handle(Request $request, Closure $next): Response
     {
-        // ── Layer 1: environment check ────────────────────────────────────
+        // Layer 1: environment check
         // Routes are only loadable from non-production environments.
         // The RouteServiceProvider also guards this at the routing level,
         // but defence-in-depth means we check here too.
@@ -31,7 +31,7 @@ class TestingEnvironmentOnly
             abort(404);
         }
 
-        // ── Layer 2 (optional): shared-secret token check ─────────────────
+        // Layer 2 (optional): shared-secret token check
         // Configure TESTING_TIME_TOKEN in your .env / CI secrets.
         // If the env var is set, every request must supply a matching
         // X-Testing-Token header; otherwise the request is rejected.

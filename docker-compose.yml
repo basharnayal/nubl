@@ -1,15 +1,13 @@
-# ─────────────────────────────────────────────────────────────────────────────
 # NUBL — Docker Compose (development)
 #
 # Quick start:
 #   docker compose up -d --build
 #   → App:   http://localhost:8000
 #   → Vite:  http://localhost:5173  (when using `docker compose up vite`)
-# ─────────────────────────────────────────────────────────────────────────────
 
 services:
 
-  # ── Laravel application ──────────────────────────────────────────────────
+  # Laravel application
   app:
     build:
       context: .
@@ -43,7 +41,7 @@ services:
     networks:
       - nubl
 
-  # ── Queue worker ─────────────────────────────────────────────────────────
+  # Queue worker
   queue:
     build:
       context: .
@@ -73,7 +71,7 @@ services:
     networks:
       - nubl
 
-  # ── Vite dev server (optional — run with: docker compose up vite) ──────
+  # Vite dev server (optional — run with: docker compose up vite)
   vite:
     build:
       context: .
@@ -91,7 +89,7 @@ services:
     networks:
       - nubl
 
-  # ── MySQL 8 ──────────────────────────────────────────────────────────────
+  # MySQL 8
   mysql:
     image: mysql:8.0
     container_name: nubl-mysql
@@ -113,7 +111,7 @@ services:
     networks:
       - nubl
 
-  # ── Redis 7 ──────────────────────────────────────────────────────────────
+  # Redis 7
   redis:
     image: redis:7-alpine
     container_name: nubl-redis

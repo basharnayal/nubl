@@ -2004,5 +2004,12 @@
     "Anonymous requester": "مقدم طلب مجهول",
     "No personal data is shown.": "لا يتم عرض أي بيانات شخصية.",
     "Request Date": "تاريخ الطلب",
-    "Category": "التصنيف"
+    "Category": "التصنيف",
+    "Account update": "تحديث على الحساب",
+    "Contact support": "تواصل مع الدعم",
+    "Go to dashboard": "الذهاب إلى لوحة التحكم",
+    "You may submit a new application.": "يمكنك تقديم طلب جديد.",
+    "Your account has been approved.": "تمت الموافقة على حسابك.",
+    "Your application was not approved": "لم تتم الموافقة على طلبك",
+    "Your application was not approved.": "لم تتم الموافقة على طلبك."
 }

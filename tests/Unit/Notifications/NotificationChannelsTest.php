@@ -48,7 +48,7 @@ class NotificationChannelsTest extends TestCase
         $mail = $notification->toMail($user);
 
         $this->assertSame(__('Your account has been approved'), $mail->subject);
-        $this->assertSame(__('Go to Dashboard'), $mail->actionText);
+        $this->assertSame(__('Go to dashboard'), $mail->actionText);
         $this->assertSame(route('dashboard'), $mail->actionUrl);
     }
 

@@ -2,7 +2,7 @@ FROM php:8.2-cli
 
 LABEL maintainer="NUBL Team"
 
-# ── System deps ──────────────────────────────────────────────────────────────
+# System deps
 RUN apt-get update && apt-get install -y --no-install-recommends \
         git curl unzip zip \
         libpng-dev libjpeg62-turbo-dev libfreetype6-dev \
@@ -14,15 +14,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && pecl install redis && docker-php-ext-enable redis \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# ── Composer ─────────────────────────────────────────────────────────────────
+# Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# ── Node.js 20 LTS ──────────────────────────────────────────────────────────
+# Node.js 20 LTS
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y --no-install-recommends nodejs \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# ── PHP production-friendly defaults ─────────────────────────────────────────
+# PHP production-friendly defaults
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini" \
     && sed -i 's/memory_limit = .*/memory_limit = 512M/' "$PHP_INI_DIR/php.ini" \
     && sed -i 's/upload_max_filesize = .*/upload_max_filesize = 64M/' "$PHP_INI_DIR/php.ini" \

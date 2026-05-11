@@ -42,7 +42,7 @@ Route::middleware(TestingEnvironmentOnly::class)
         Route::get('/reset', [TimeController::class, 'reset'])->name('reset.get');
     });
 
-// ── System Wallet (City Fund) ──────────────────────────────────────────────
+// System Wallet (City Fund)
 // Testing-only helpers to set/undo the SYSTEM wallet balance.
 // All routes return JSON and require no admin session.
 Route::middleware(TestingEnvironmentOnly::class)
@@ -63,7 +63,7 @@ Route::middleware(TestingEnvironmentOnly::class)
         Route::get('/undo-set-balance', [SystemWalletController::class, 'undoSetBalance'])->name('undo-set-balance.get');
     });
 
-// ── Audit Log ─────────────────────────────────────────────────────────────
+// Audit Log
 // Safe read-only (and flush) access to the activity log for automated tests.
 // All routes return JSON and require no admin session.
 Route::middleware(TestingEnvironmentOnly::class)

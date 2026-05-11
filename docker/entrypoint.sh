@@ -3,7 +3,7 @@ set -e
 
 cd /var/www/html
 
-# ── Create .env from example if missing ──────────────────────────────────────
+# Create .env from example if missing
 if [ ! -f .env ]; then
     echo ">>> Creating .env from .env.example ..."
     cp .env.example .env
@@ -21,31 +21,31 @@ if [ ! -f .env ]; then
     echo ">>> .env created with Docker defaults."
 fi
 
-# ── Install PHP deps if vendor is missing ────────────────────────────────────
+# Install PHP deps if vendor is missing
 if [ ! -f vendor/autoload.php ]; then
     echo ">>> Running composer install ..."
     composer install --no-interaction --optimize-autoloader
 fi
 
-# ── Generate app key if empty ────────────────────────────────────────────────
+# Generate app key if empty
 if grep -q "^APP_KEY=$" .env 2>/dev/null; then
     echo ">>> Generating application key ..."
     php artisan key:generate --force
 fi
 
-# ── Install JS deps if node_modules is missing ──────────────────────────────
+# Install JS deps if node_modules is missing
 if [ ! -f node_modules/.package-lock.json ]; then
     echo ">>> Running npm install ..."
     npm install
 fi
 
-# ── Build frontend assets if public/build is missing ────────────────────────
+# Build frontend assets if public/build is missing
 if [ ! -d public/build ] || [ -z "$(ls -A public/build 2>/dev/null)" ]; then
     echo ">>> Building frontend assets ..."
     npm run build
 fi
 
-# ── Remove stale Vite hot file (leftover from a previously-running dev server) ──
+# Remove stale Vite hot file (leftover from a previously-running dev server)
 # When public/hot exists, Laravel's @vite directive routes asset URLs to the
 # Vite dev server (localhost:5173). If that container isn't running, pages load
 # without CSS/JS. Deleting it forces fallback to the built manifest.
@@ -54,7 +54,7 @@ if [ -f public/hot ]; then
     rm -f public/hot
 fi
 
-# ── Wait for MySQL to be ready ───────────────────────────────────────────────
+# Wait for MySQL to be ready
 echo ">>> Waiting for MySQL ..."
 DB_H="${DB_HOST:-mysql}"
 DB_P="${DB_PORT:-3306}"
@@ -65,7 +65,7 @@ until php -r "try{new PDO('mysql:host='.\$argv[1].';port='.\$argv[2],\$argv[3],\
 done
 echo ">>> MySQL is ready."
 
-# ── Run migrations ───────────────────────────────────────────────────────────
+# Run migrations
 echo ">>> Running migrations ..."
 php artisan migrate --force
 

@@ -23,7 +23,7 @@ class DemoRedemptionSeeder extends Seeder
 
         $systemWallet = Ewallet::where('owner_type', 'SYSTEM')->first();
 
-        // ── Requests that need redemption tokens ────────────────────
+        // Requests that need redemption tokens
         $redeemableRequests = Request::where('invoice_id', 'like', 'DEMO-%')
             ->whereIn('status', ['APPROVED', 'REDEEMABLE', 'FULFILLED'])
             ->get();
@@ -70,7 +70,7 @@ class DemoRedemptionSeeder extends Seeder
             ]);
             $redemptionCount++;
 
-            // ── FULFILLED requests: create proof + fund transactions ─
+            // FULFILLED requests: create proof + fund transactions
             if ($req->status === 'FULFILLED' && $redemptionStatus === 'REDEEMED') {
                 $fulfilledAt = $redemption->updated_at->copy()->addMinutes(rand(5, 60));
 

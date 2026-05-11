@@ -21,7 +21,7 @@ class DonorDashboardController extends Controller
     {
         $sponsorId = auth()->id();
 
-        // ── Donor payment aggregates (3 queries → 1 + pluck) ────────────────
+        // Donor payment aggregates (3 queries → 1 + pluck)
         $donorPaymentBase = Payment::where('sponsor_id', $sponsorId)
             ->where('status', Payment::STATUS_SUCCEEDED);
 
@@ -38,7 +38,7 @@ class DonorDashboardController extends Controller
 
         $donorPaymentIds = (clone $donorPaymentBase)->pluck('id');
 
-        // ── Request payment link aggregates (3 queries → 1 + pluck) ─────────
+        // Request payment link aggregates (3 queries → 1 + pluck)
         $linkAgg = RequestPaymentLink::whereIn('payment_id', $donorPaymentIds)
             ->selectRaw('COUNT(DISTINCT request_id) as funded_count, COALESCE(SUM(amount), 0) as total_allocated')
             ->first();
@@ -59,7 +59,7 @@ class DonorDashboardController extends Controller
         $donorImpactTimeline = $this->donorImpactTimeline($donorPaymentIds);
         $donorChartData = $this->donorImpactChartData($donorPaymentIds);
 
-        // ── Platform need aggregates (4 queries → 2) ────────────────────────
+        // Platform need aggregates (4 queries → 2)
         $platformAgg = RequestModel::whereIn('status', ['REQUESTED', 'APPROVED', 'REDEEMABLE'])
             ->selectRaw('COUNT(*) as cnt, COALESCE(SUM(reserved_amount), 0) as total, COUNT(DISTINCT recipient_id) as waiting')
             ->first();

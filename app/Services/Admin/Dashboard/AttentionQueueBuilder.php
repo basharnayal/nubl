@@ -9,13 +9,6 @@ use App\Models\SystemSetting;
 use App\Models\User;
 use App\Support\WeeklyAllowanceSettings;
 
-/**
- * Builds the severity-sorted action queue for the dashboard.
- * Returns translation keys — all __() calls happen in the view layer.
- *
- * High   — platform-breaking or financial loss risk
- * Medium — pending human decisions
- */
 class AttentionQueueBuilder
 {
     public function build(): array
@@ -39,7 +32,7 @@ class AttentionQueueBuilder
         return array_values($items);
     }
 
-    // ── High severity ──────────────────────────────────────────────────────────
+    // High severity
 
     private function maintenanceModeItem(): ?array
     {
@@ -121,7 +114,7 @@ class AttentionQueueBuilder
         );
     }
 
-    // ── Medium severity ────────────────────────────────────────────────────────
+    // Medium severity
 
     private function pendingApprovalsItem(): ?array
     {
@@ -252,7 +245,7 @@ class AttentionQueueBuilder
         );
     }
 
-    // ── Helper ─────────────────────────────────────────────────────────────────
+    // Helper
 
     private function item(
         string $severity,

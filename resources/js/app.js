@@ -54,7 +54,7 @@ window.SimpleBar = SimpleBar;
 // window.Quill = Quill; // Commented out — unused
 // window.Tom = Tom; // Replaced by lazy loader below
 
-// ── Lazy loaders for page-specific libraries ────────────────────────
+// Lazy loaders for page-specific libraries
 window.loadApexCharts = async () => {
     const module = await import('apexcharts');
     return module.default;

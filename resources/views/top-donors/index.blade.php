@@ -12,7 +12,7 @@
 @vite(['resources/css/welcome-landing.css'])
 
 <style>
-/* ── Top-Donors page-specific overrides ── */
+/* Top-Donors page-specific overrides */
 .td-hero {
   background: var(--color-base, #F5F4F1);
   padding: clamp(5rem, 10vw, 8rem) 1.5rem clamp(3rem, 6vw, 5rem);

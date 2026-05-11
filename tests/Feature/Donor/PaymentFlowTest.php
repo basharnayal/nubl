@@ -26,6 +26,7 @@ class PaymentFlowTest extends TestCase
         parent::setUp();
 
         Role::firstOrCreate(['name' => 'donor', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
 
         $this->donor = User::factory()->create([
             'status' => User::STATUS_ACTIVE,

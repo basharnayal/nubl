@@ -17,7 +17,7 @@ class DemoMiscSeeder extends Seeder
         $this->seedActivityLog();
     }
 
-    // ─── Notifications ───────────────────────────────────────────
+    // Notifications
 
     private function seedNotifications(): void
     {
@@ -141,7 +141,7 @@ class DemoMiscSeeder extends Seeder
         $this->command->info("✓ Seeded {$count} demo notifications");
     }
 
-    // ─── Summary Reports ─────────────────────────────────────────
+    // Summary Reports
 
     private function seedSummaryReports(): void
     {
@@ -204,7 +204,7 @@ class DemoMiscSeeder extends Seeder
         $this->command->info('✓ Seeded '.count($reports).' summary reports (4 weekly + 2 monthly)');
     }
 
-    // ─── Activity Log (20-30 entries) ────────────────────────────
+    // Activity Log (20-30 entries)
 
     private function seedActivityLog(): void
     {
@@ -277,7 +277,7 @@ class DemoMiscSeeder extends Seeder
         $this->command->info('✓ Seeded '.count($entries).' activity log entries');
     }
 
-    // ─── Helpers ───────────────────────────────────────────────────
+    // Helpers
 
     /**
      * Build a payload array matching FinancialService::getRangeSummary() keys.

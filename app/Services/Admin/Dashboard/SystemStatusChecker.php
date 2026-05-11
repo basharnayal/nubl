@@ -6,10 +6,6 @@ use App\Models\SystemSetting;
 use App\Support\QrTtl;
 use App\Support\WeeklyAllowanceSettings;
 
-/**
- * Reads the five operational status indicators shown in the dashboard status strip.
- * Returns translation keys — all __() calls happen in the view layer.
- */
 class SystemStatusChecker
 {
     public function all(): array

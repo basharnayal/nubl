@@ -28,7 +28,7 @@ use Illuminate\Support\Facades\Cache;
  */
 class TimeController extends Controller
 {
-    // ── Helpers ───────────────────────────────────────────────────────────
+    // Helpers
 
     private function storedOffsetSeconds(): ?int
     {
@@ -57,7 +57,7 @@ class TimeController extends Controller
         ];
     }
 
-    // ── Actions ───────────────────────────────────────────────────────────
+    // Actions
 
     /**
      * GET /_testing/time

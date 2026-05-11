@@ -1,5 +1,5 @@
 {{-- Recipients & Providers with status=pending_approval or rejected --}}
-<x-register-layout :title="__('Approval Pending')" :heading="__('Approval Pending')" :subheading="auth()->user()?->status === 'rejected' ? __('Your application was reviewed and was not approved.') : __('Your account is awaiting review by our team.')">
+<x-register-layout :title="__('Approval Pending')" :heading="__('Approval Pending')" :subheading="auth()->user()?->status === 'rejected' ? __('Your application was not approved.') : __('Your account is awaiting review by our team.')">
     <div class="w-full">
         @if (session('success'))
             <div class="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-200">
@@ -27,7 +27,7 @@
                     @if(auth()->user()?->status === 'rejected')
                         <h1 class="text-xl font-semibold text-slate-900 dark:text-navy-100 mb-2">{{ __('Your application was rejected') }}</h1>
                         <p class="text-slate-600 dark:text-navy-300 mb-4">
-                            {{ __('Your account application has been reviewed and was not approved at this time.') }}
+                            {{ __('Your application was not approved.') }}
                         </p>
                         @if(auth()->user()?->rejection_reason)
                             <div class="mb-4 p-4 rounded-lg bg-red-50 border border-red-100">

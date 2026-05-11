@@ -74,9 +74,9 @@ class PerfTestSeeder extends Seeder
         $this->writeCredentialsCsv($credentials, $csvPath);
 
         $this->command->info('');
-        $this->command->info('═══════════════════════════════════════════════════════════════');
+        $this->command->info('');
         $this->command->info(' PerfTestSeeder finished');
-        $this->command->info('═══════════════════════════════════════════════════════════════');
+        $this->command->info('');
         $this->command->info(sprintf(
             ' Seeded: %d donors, %d recipients, %d providers, %d admin',
             self::NUM_DONORS,
@@ -94,7 +94,7 @@ class PerfTestSeeder extends Seeder
         $this->command->info('');
         $this->command->info(' Next step — copy into the k6 data directory:');
         $this->command->info('   cp '.$csvPath.' tests/k6/data/users.csv');
-        $this->command->info('═══════════════════════════════════════════════════════════════');
+        $this->command->info('');
     }
 
     // -----------------------------------------------------------------------

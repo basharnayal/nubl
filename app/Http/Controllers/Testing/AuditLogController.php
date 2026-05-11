@@ -28,7 +28,7 @@ use Illuminate\Http\Request;
  */
 class AuditLogController extends Controller
 {
-    // ── Helpers ───────────────────────────────────────────────────────────
+    // Helpers
 
     /**
      * Apply every supported filter to the given query builder.
@@ -84,7 +84,7 @@ class AuditLogController extends Controller
         ];
     }
 
-    // ── Actions ───────────────────────────────────────────────────────────
+    // Actions
 
     /**
      * GET /_testing/audit-log

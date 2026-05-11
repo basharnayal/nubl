@@ -41,7 +41,7 @@
     --density: 1;
     --max: 1280px;
 
-    /* ── Fluid type scale (clamp: min | fluid | max) ── */
+    /* Fluid type scale (clamp: min | fluid | max) */
     --text-xs:   clamp(0.75rem,  1.5vw,  0.875rem);
     --text-sm:   clamp(0.875rem, 2vw,    1rem);
     --text-base: clamp(1rem,     2.5vw,  1.125rem);
@@ -51,7 +51,7 @@
     --text-3xl:  clamp(2rem,     5vw,    3rem);
     --text-4xl:  clamp(2.5rem,   6vw,    4rem);
 
-    /* ── Spacing scale (8 px base) ── */
+    /* Spacing scale (8 px base) */
     --sp-1:  0.5rem;   /* 8px  */
     --sp-2:  1rem;     /* 16px */
     --sp-3:  1.5rem;   /* 24px */
@@ -62,18 +62,18 @@
     --sp-12: 6rem;     /* 96px */
     --sp-16: 8rem;     /* 128px */
 
-    /* ── Elevation shadows ── */
+    /* Elevation shadows */
     --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
     --shadow-md: 0 4px 12px rgba(0,0,0,.10), 0 2px 4px rgba(0,0,0,.06);
     --shadow-lg: 0 10px 30px rgba(0,0,0,.12), 0 4px 8px rgba(0,0,0,.06);
     --shadow-xl: 0 20px 60px rgba(0,0,0,.15);
 
-    /* ── Transitions ── */
+    /* Transitions */
     --t-fast: 0.15s ease;
     --t-base: 0.25s ease;
     --t-slow: 0.4s ease;
 
-    /* ── Border radius ── */
+    /* Border radius */
     --r-sm:   6px;
     --r-md:   12px;
     --r-lg:   20px;
@@ -92,10 +92,10 @@
 
   html { scroll-behavior: smooth; }
 
-  /* ── Utility: tabular numbers for financial data ── */
+  /* Utility: tabular numbers for financial data */
   .tabular-nums { font-variant-numeric: tabular-nums; }
 
-  /* ── Utility: eyebrow/caption mono text ── */
+  /* Utility: eyebrow/caption mono text */
   .mono-caption {
     font-family: var(--mono);
     font-size: 11px;
@@ -109,7 +109,7 @@
     font-size: 13px;
   }
 
-  /* ── Utility: section heading top margin ── */
+  /* Utility: section heading top margin */
   .mt-section-head { margin-top: 22px; }
   .mt-hero-head    { margin-top: 28px; }
   .mt-flow-head    { margin-top: 20px; }
@@ -194,7 +194,7 @@
     box-shadow: 0 4px 20px rgba(26,29,43,.08);
   }
 
-  /* ── Hamburger / mobile drawer ── */
+  /* Hamburger / mobile drawer */
   .nav-hamburger {
     display: none;
     flex-direction: column;
@@ -1091,7 +1091,7 @@
   .stories-grid .story:nth-child(2) { transition-delay: 0.1s; }
   .stories-grid .story:nth-child(3) { transition-delay: 0.2s; }
 
-  /* ── CSS scroll-snap for stories on mobile ── */
+  /* CSS scroll-snap for stories on mobile */
   @media (max-width: 900px) {
     .stories-grid {
       display: flex;
@@ -1200,7 +1200,7 @@
   html[data-density="compact"] section { padding-top: 60px !important; padding-bottom: 60px !important; }
   html[data-density="airy"] section { padding-top: 160px !important; padding-bottom: 160px !important; }
 
-  /* ── Floating trigger button ── */
+  /* Floating trigger button */
   .qd-fab {
     position: fixed;
     bottom: 28px;
@@ -1228,7 +1228,7 @@
   }
   .qd-fab.hidden { display: none; }
 
-  /* ── Overlay ── */
+  /* Overlay */
   .qd-overlay {
     display: none;
     position: fixed; inset: 0;
@@ -1239,7 +1239,7 @@
   }
   .qd-overlay.on { display: block; opacity: 1; }
 
-  /* ── Panel ── */
+  /* Panel */
   .qd-panel {
     display: none;
     position: fixed;
@@ -1264,7 +1264,7 @@
   }
   .qd-panel.on { display: block; transform: translateY(0); }
 
-  /* ── Panel header ── */
+  /* Panel header */
   .qd-header {
     display: flex; align-items: center; justify-content: space-between;
     padding: 20px 24px 16px;
@@ -1286,7 +1286,7 @@
   }
   .qd-close:hover { color: var(--charcoal); }
 
-  /* ── Panel body ── */
+  /* Panel body */
   .qd-body { padding: 20px 24px 24px; }
 
   .qd-presets { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }

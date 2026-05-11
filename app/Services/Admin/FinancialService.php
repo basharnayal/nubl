@@ -90,7 +90,7 @@ class FinancialService
         $from = $from->copy()->startOfDay();
         $to = $to->copy()->endOfDay();
 
-        // ── Payments (gateway) — 7 queries → 1 ────────────────────────────
+        // Payments (gateway) — 7 queries → 1
         $paymentRows = Payment::query()
             ->whereBetween('created_at', [$from, $to])
             ->select('status', DB::raw('COUNT(*) as cnt'), DB::raw('COALESCE(SUM(amount),0) as total'))
@@ -109,7 +109,7 @@ class FinancialService
             + ($paymentRows->get(Payment::STATUS_PROCESSING)?->cnt ?? 0)
         );
 
-        // ── Fund ledger — 4 queries → 1 ────────────────────────────────────
+        // Fund ledger — 4 queries → 1
         $systemWallet = Ewallet::where('owner_type', 'SYSTEM')->first();
         $systemWalletId = $systemWallet?->id;
 
@@ -133,7 +133,7 @@ class FinancialService
         $ledgerCnt = (int) ($ledgerStats->entries_count ?? 0);
         $payoutsToProviders = (float) ($ledgerStats->provider_payouts ?? 0);
 
-        // ── Requests — 7 queries → 1 ───────────────────────────────────────
+        // Requests — 7 queries → 1
         $requestStats = RequestModel::query()
             ->whereBetween('created_at', [$from, $to])
             ->selectRaw(
@@ -152,7 +152,7 @@ class FinancialService
             )
             ->first();
 
-        // ── QR Redemptions — 4 queries → 1 ─────────────────────────────────
+        // QR Redemptions — 4 queries → 1
         $redemptionStats = OrderRedemption::query()
             ->whereBetween('created_at', [$from, $to])
             ->selectRaw(
@@ -163,7 +163,7 @@ class FinancialService
             )
             ->first();
 
-        // ── Active providers (not date-bound) ───────────────────────────────
+        // Active providers (not date-bound)
         $activeProviders = (int) User::query()
             ->where('membership_type', User::MEMBERSHIP_PROVIDER)
             ->where('status', User::STATUS_ACTIVE)

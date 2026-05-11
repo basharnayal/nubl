@@ -1,9 +1,7 @@
 <x-app-layout :title="__('dashboard.title')" is-header-blur="true">
     <div class="space-y-6 pt-4 pb-8">
 
-        {{-- ══════════════════════════════════════════════════════════════════
-             PAGE HEADER
-        ══════════════════════════════════════════════════════════════════ --}}
+        {{-- PAGE HEADER --}}
         <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center gap-4">
                 <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-accent/10 dark:text-accent-light">
@@ -33,14 +31,10 @@
             </div>
         </div>
 
-        {{-- ══════════════════════════════════════════════════════════════════
-             1. SYSTEM STATUS STRIP
-        ══════════════════════════════════════════════════════════════════ --}}
+        {{-- 1. SYSTEM STATUS STRIP --}}
         @include('admin.dashboard._status-strip', ['statuses' => $overview['system_status']])
 
-        {{-- ══════════════════════════════════════════════════════════════════
-             2. NEEDS YOUR ATTENTION  +  KPI CARDS  (2/3 + 1/3)
-        ══════════════════════════════════════════════════════════════════ --}}
+        {{-- 2. NEEDS YOUR ATTENTION + KPI CARDS (2/3 + 1/3) --}}
         <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
 
             <div class="xl:col-span-2">
@@ -52,14 +46,10 @@
             </div>
         </div>
 
-        {{-- ══════════════════════════════════════════════════════════════════
-             3. FINANCIAL SNAPSHOT
-        ══════════════════════════════════════════════════════════════════ --}}
+        {{-- 3. FINANCIAL SNAPSHOT --}}
         @include('admin.dashboard._financial-snapshot', ['financial' => $overview['financial']])
 
-        {{-- ══════════════════════════════════════════════════════════════════
-             4. PLATFORM SNAPSHOT  +  RECENT AUDIT  (1/2 + 1/2)
-        ══════════════════════════════════════════════════════════════════ --}}
+        {{-- 4. PLATFORM SNAPSHOT + RECENT AUDIT (1/2 + 1/2) --}}
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
             @include('admin.dashboard._platform-snapshot', ['platform' => $overview['platform']])
             @include('admin.dashboard._recent-audit',      ['activities' => $overview['recent_activity']])

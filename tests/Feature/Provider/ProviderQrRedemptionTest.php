@@ -52,9 +52,7 @@ class ProviderQrRedemptionTest extends TestCase
         parent::tearDown();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Helper: build the minimal DB state required for a redeemable request.
-    // ─────────────────────────────────────────────────────────────────────────
 
     private function createRedeemableRequest(): RequestModel
     {
@@ -133,9 +131,7 @@ class ProviderQrRedemptionTest extends TestCase
         return $request;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // FR-9.1: Valid token → 200, status changes, audit logged
-    // ─────────────────────────────────────────────────────────────────────────
 
     #[Test]
     public function generated_redemption_tokens_store_raw_and_short_token_contracts(): void
@@ -277,9 +273,7 @@ class ProviderQrRedemptionTest extends TestCase
         $this->assertSame(1, RequestPaymentLink::where('request_id', $request->id)->count());
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // FR-9.1: Second redemption of the same token → 409 Conflict
-    // ─────────────────────────────────────────────────────────────────────────
 
     #[Test]
     public function token_for_another_provider_returns_403_without_ledger_side_effects(): void
@@ -453,9 +447,7 @@ class ProviderQrRedemptionTest extends TestCase
         $response->assertJsonFragment(['error' => __('This code has already been used.')]);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // FR-9.2 / FR-9.3 (existing tests)
-    // ─────────────────────────────────────────────────────────────────────────
 
     #[Test]
     public function invalid_token_returns_404_within_one_second_fr_9_2(): void
@@ -493,9 +485,7 @@ class ProviderQrRedemptionTest extends TestCase
             ->assertJsonFragment(['error' => __('Too many attempts, wait 30 seconds.')]);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // FR-11.2: Admin notification after successful redemption
-    // ─────────────────────────────────────────────────────────────────────────
 
     #[Test]
     public function successful_redemption_notifies_admins_fr_11_2(): void

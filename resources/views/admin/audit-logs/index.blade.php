@@ -1,7 +1,7 @@
 <x-app-layout :title="__('audit_logs.page.title')" is-header-blur="true">
     <div class="pt-4" x-data="{ open: false, selected: null, activeTab: 'overview', hashStatus: null }">
 
-        {{-- ── Header ── --}}
+        {{-- Header --}}
         <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div class="flex items-center gap-3">
                 <div class="flex size-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary dark:bg-accent/10 dark:text-accent-light">
@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        {{-- ── Summary Cards ── --}}
+        {{-- Summary Cards --}}
         <div class="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-5">
 
             <div class="card flex items-center gap-3 p-4">
@@ -93,7 +93,7 @@
 
         </div>
 
-        {{-- ── Filters ── --}}
+        {{-- Filters --}}
         <form method="GET" action="{{ route('admin.audit-logs.index') }}" class="card mt-4 p-4">
             <h3 class="mb-3 text-sm font-semibold text-slate-700 dark:text-navy-100">{{ __('audit_logs.filters.title') }}</h3>
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -155,7 +155,7 @@
             </div>
         </form>
 
-        {{-- ── Table ── --}}
+        {{-- Table --}}
         <div class="card mt-4">
             <div class="is-scrollbar-hidden min-w-full overflow-x-auto">
                 <table class="is-hoverable w-full text-left">
@@ -376,14 +376,14 @@
             </div>
         </div>
 
-        {{-- ── Pagination ── --}}
+        {{-- Pagination --}}
         @if($logs->hasPages())
             <div class="mt-4 flex justify-center">
                 {{ $logs->links() }}
             </div>
         @endif
 
-        {{-- ── Details Modal ── --}}
+        {{-- Details Modal --}}
         <template x-teleport="body">
             <div
                 x-show="open"
@@ -458,7 +458,7 @@
                     {{-- Scrollable Modal Body --}}
                     <div class="flex-1 overflow-y-auto p-6">
 
-                        {{-- ══ Overview Tab ══ --}}
+                        {{-- Overview Tab --}}
                         <div x-show="activeTab === 'overview'" class="space-y-4">
 
                             {{-- Event + Category --}}
@@ -522,7 +522,7 @@
 
                         </div>{{-- /overview --}}
 
-                        {{-- ══ Technical Details Tab ══ --}}
+                        {{-- Technical Details Tab --}}
                         <div x-show="activeTab === 'technical'" class="space-y-4">
 
                             {{-- Log ID + Log Name --}}

@@ -31,13 +31,13 @@ class ApplyMockedTime
 
     public function handle(Request $request, Closure $next): Response
     {
-        // ── Hard production guard ─────────────────────────────────────────
+        // Hard production guard
         // Never apply mocked time in production or PHPUnit tests, no matter what is in cache.
         if (app()->environment(['production', 'testing'])) {
             return $next($request);
         }
 
-        // ── Rehydrate mocked time offset from cache ───────────────────────
+        // Rehydrate mocked time offset from cache
         // We store an offset in seconds rather than a frozen timestamp, so
         // the clock ticks normally but is always shifted by that amount.
         $offsetSeconds = Cache::get(self::CACHE_KEY);

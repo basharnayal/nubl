@@ -25,7 +25,7 @@ class TopDonorsPageTest extends TestCase
         Cache::flush();
     }
 
-    // ── Routing ────────────────────────────────────────────────────────
+    // Routing
 
     #[Test]
     public function top_donors_page_is_publicly_accessible(): void
@@ -44,7 +44,7 @@ class TopDonorsPageTest extends TestCase
         $response->assertStatus(200);
     }
 
-    // ── Empty state ────────────────────────────────────────────────────
+    // Empty state
 
     #[Test]
     public function empty_state_shown_when_no_donors(): void
@@ -54,7 +54,7 @@ class TopDonorsPageTest extends TestCase
         $response->assertViewHas('donors', []);
     }
 
-    // ── Named donors ───────────────────────────────────────────────────
+    // Named donors
 
     #[Test]
     public function named_donor_with_succeeded_payment_appears_in_list(): void
@@ -92,7 +92,7 @@ class TopDonorsPageTest extends TestCase
         $this->assertEquals(300.00, array_values($named)[0]['total']);
     }
 
-    // ── Anonymous donors ───────────────────────────────────────────────
+    // Anonymous donors
 
     #[Test]
     public function anonymous_registered_donor_appears_as_faeel_khayr(): void
@@ -157,7 +157,7 @@ class TopDonorsPageTest extends TestCase
         $this->assertEquals(150.00, $anon[0]['total']);
     }
 
-    // ── Non-succeeded payments excluded ────────────────────────────────
+    // Non-succeeded payments excluded
 
     #[Test]
     public function failed_payment_is_excluded_from_list(): void
@@ -189,7 +189,7 @@ class TopDonorsPageTest extends TestCase
         $this->assertEmpty(array_filter($donors, fn ($d) => ! $d['is_anonymous']));
     }
 
-    // ── Ordering ───────────────────────────────────────────────────────
+    // Ordering
 
     #[Test]
     public function donors_are_ordered_by_total_descending(): void
@@ -208,7 +208,7 @@ class TopDonorsPageTest extends TestCase
         $this->assertEquals('المتبرع الصغير', $named[1]['name']);
     }
 
-    // ── Cache ──────────────────────────────────────────────────────────
+    // Cache
 
     #[Test]
     public function top_donors_list_is_cached(): void
@@ -271,7 +271,7 @@ class TopDonorsPageTest extends TestCase
         $this->assertEquals(600.00, $named[0]['total']);
     }
 
-    // ── is_anonymous checkbox stored correctly ─────────────────────────
+    // is_anonymous checkbox stored correctly
 
     #[Test]
     public function donation_form_stores_is_anonymous_false_by_default(): void

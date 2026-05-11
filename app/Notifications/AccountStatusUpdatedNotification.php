@@ -33,24 +33,21 @@ class AccountStatusUpdatedNotification extends Notification implements ShouldQue
         if ($this->isApproved) {
             return (new MailMessage)
                 ->subject(__('Your account has been approved'))
-                ->greeting(__('Hello!'))
-                ->line(__('Great news! Your account is now approved and active.'))
-                ->action(__('Go to Dashboard'), route('dashboard'))
-                ->line(__('Thank you for using NUBL.'));
+                ->line(__('Your account has been approved.'))
+                ->action(__('Go to dashboard'), route('dashboard'));
         }
 
         $mail = (new MailMessage)
-            ->subject(__('Your account application was rejected'))
-            ->greeting(__('Hello!'))
-            ->line(__('Your account application was reviewed and rejected at this time.'));
+            ->subject(__('Your application was not approved'))
+            ->line(__('Your application was not approved.'));
 
         if (! empty($this->rejectionReason)) {
             $mail->line(__('Reason').': '.$this->rejectionReason);
         }
 
         return $mail
-            ->action(__('Contact Support'), url('/'))
-            ->line(__('You can review your application details and apply again later.'));
+            ->line(__('You may submit a new application.'))
+            ->action(__('Contact support'), url('/'));
     }
 
     public function toArray(object $notifiable): array
@@ -58,16 +55,16 @@ class AccountStatusUpdatedNotification extends Notification implements ShouldQue
         if ($this->isApproved) {
             return [
                 'type' => 'account_approved',
-                'message' => __('Your account has been approved and is now active.'),
-                'subtitle' => __('Account approval update'),
+                'message' => __('Your account has been approved.'),
+                'subtitle' => __('Account update'),
                 'url' => route('dashboard'),
             ];
         }
 
         return [
             'type' => 'account_rejected',
-            'message' => __('Your account application was rejected.'),
-            'subtitle' => __('Account approval update'),
+            'message' => __('Your application was not approved.'),
+            'subtitle' => __('Account update'),
             'reason' => $this->rejectionReason,
             'url' => route('approval.pending'),
         ];

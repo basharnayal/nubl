@@ -33,9 +33,7 @@ class CrossRoleAccessMatrixTest extends TestCase
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Data Providers
-    // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * Routes protected by `role:admin`.
@@ -97,9 +95,7 @@ class CrossRoleAccessMatrixTest extends TestCase
         ];
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Tests: Admin routes blocked for non-admin roles
-    // ─────────────────────────────────────────────────────────────────────────
 
     #[Test]
     #[DataProvider('adminRoutes')]
@@ -134,9 +130,7 @@ class CrossRoleAccessMatrixTest extends TestCase
             ->assertForbidden();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Tests: Donor routes blocked for non-donor roles
-    // ─────────────────────────────────────────────────────────────────────────
 
     #[Test]
     #[DataProvider('donorRoutes')]
@@ -171,9 +165,7 @@ class CrossRoleAccessMatrixTest extends TestCase
             ->assertForbidden();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Tests: Provider routes blocked for non-provider roles
-    // ─────────────────────────────────────────────────────────────────────────
 
     #[Test]
     #[DataProvider('providerRoutes')]
@@ -208,9 +200,7 @@ class CrossRoleAccessMatrixTest extends TestCase
             ->assertForbidden();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Tests: Recipient routes blocked for non-recipient roles
-    // ─────────────────────────────────────────────────────────────────────────
 
     #[Test]
     #[DataProvider('recipientRoutes')]
@@ -245,9 +235,7 @@ class CrossRoleAccessMatrixTest extends TestCase
             ->assertForbidden();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Tests: Guests blocked from all protected routes
-    // ─────────────────────────────────────────────────────────────────────────
 
     #[Test]
     #[DataProvider('adminRoutes')]
@@ -281,9 +269,7 @@ class CrossRoleAccessMatrixTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Tests: Correct role CAN access their own routes (sanity check)
-    // ─────────────────────────────────────────────────────────────────────────
 
     #[Test]
     public function admin_can_access_admin_dashboard(): void
@@ -317,9 +303,7 @@ class CrossRoleAccessMatrixTest extends TestCase
             ->assertOk();
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Helpers
-    // ─────────────────────────────────────────────────────────────────────────
 
     private function makeUser(string $role): User
     {

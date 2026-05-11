@@ -18,7 +18,7 @@ class SummaryReportExportService
     // Set once per build() call; read by all private helpers
     private bool $isAr = false;
 
-    // ── NUBL brand palette (from resources/css/app.css) ──────────────────────
+    // NUBL brand palette (from resources/css/app.css)
     private const CLR_TITLE_BG = '1E293B'; // --color-nubl-dark
 
     private const CLR_TITLE_FG = 'FFFFFF';
@@ -58,7 +58,7 @@ class SummaryReportExportService
 
     private const CLR_TEAL_FG = '134E4A';
 
-    // ── Public API ────────────────────────────────────────────────────────────
+    // Public API
 
     public function filename(SummaryReport $report): string
     {
@@ -100,7 +100,7 @@ class SummaryReportExportService
         return $spreadsheet;
     }
 
-    // ── Section writers ───────────────────────────────────────────────────────
+    // Section writers
 
     private function writeTitleBar(Worksheet $sheet, int $row, callable $t, SummaryReport $report): int
     {
@@ -369,7 +369,7 @@ class SummaryReportExportService
         return $row + 2;
     }
 
-    // ── Primitive helpers ─────────────────────────────────────────────────────
+    // Primitive helpers
 
     /**
      * Write a full-width blue section heading row. Returns the next row number.

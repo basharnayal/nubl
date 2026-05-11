@@ -78,9 +78,7 @@ class LandingPageStatsService
         ];
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Hero stats
-    // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * Total SAR delivered: sum of PAYOUT IN fund transactions.
@@ -163,9 +161,7 @@ class LandingPageStatsService
         return $query->where('membership_type', User::MEMBERSHIP_PROVIDER);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Hero live feed (cycling ticker)
-    // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * Build up to 5 privacy-safe live-feed entries from the most recently
@@ -224,9 +220,7 @@ class LandingPageStatsService
         return "{$ref} · {$city} · {$when}";
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Trust / Transparency section ledger
-    // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * Returns up to 5 privacy-safe trust-ledger rows from the last 24 hours.
@@ -341,9 +335,7 @@ class LandingPageStatsService
         ];
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
     // Shared helpers
-    // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * Resolve a provider's business_category array to a `feed_live.*` translation

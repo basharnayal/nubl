@@ -211,7 +211,7 @@ class PaymentService
      */
     private function processCallbackPaymentState(string $invoiceId, string $gatewayStatus): RedirectResponse
     {
-        // ── 1. Locate the payment ──────────────────────────────────────────
+        // 1. Locate the payment
         $payment = Payment::where('external_payment_id', $invoiceId)->first();
 
         if (! $payment) {
@@ -226,12 +226,12 @@ class PaymentService
             return $this->redirectDonorFailed(null, 'payment_not_found', true);
         }
 
-        // ── 2. Quick idempotency check (no lock needed — read-only fast path) ─
+        // 2. Quick idempotency check (no lock needed — read-only fast path)
         if ($payment->status === Payment::STATUS_SUCCEEDED) {
             return $this->redirectPaymentSuccess($payment);
         }
 
-        // ── 3. Gateway says "Paid" → credit funds inside a locked transaction ─
+        // 3. Gateway says "Paid" → credit funds inside a locked transaction
         $status = $gatewayStatus;
 
         if (in_array($status, ['Paid', 'DuplicatePayment'], true)) {
@@ -280,7 +280,7 @@ class PaymentService
             });
         }
 
-        // ── 4. Gateway returned a non-success status ─────────────────────
+        // 4. Gateway returned a non-success status
         $payment->update([
             'status' => Payment::STATUS_FAILED,
             'notes' => array_merge($payment->notes ?? [], ['callback_status' => $status]),

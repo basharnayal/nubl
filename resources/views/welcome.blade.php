@@ -862,9 +862,7 @@
   updateTweakUI();
 </script>
 
-{{-- ═══════════════════════════════════════════════════════════════════════════
-     Quick Donation Floating Widget
-     ═══════════════════════════════════════════════════════════════════════════ --}}
+{{-- Quick Donation Floating Widget --}}
 
 {{-- Floating button --}}
 <button class="qd-fab" id="qdFab" aria-label="{{ __('Quick Donation') }}">

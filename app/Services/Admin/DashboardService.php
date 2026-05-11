@@ -8,17 +8,6 @@ use App\Services\Admin\Dashboard\AttentionQueueBuilder;
 use App\Services\Admin\Dashboard\SystemStatusChecker;
 use Spatie\Activitylog\Models\Activity;
 
-/**
- * Orchestrates all data required by the Admin Command Center dashboard.
- *
- * Delegates to:
- *  - SystemStatusChecker   → status strip pills
- *  - AttentionQueueBuilder → action queue (sorted by severity)
- *  - FinancialService      → financial snapshot (reused — no duplication)
- *
- * Privacy rule: this service MUST NOT return individual recipient names,
- * identity numbers, documents, or any PII. Aggregate counts only.
- */
 class DashboardService
 {
     public function __construct(
@@ -42,7 +31,7 @@ class DashboardService
         ];
     }
 
-    // ── KPI cards ─────────────────────────────────────────────────────────────
+    // KPI cards
 
     private function buildKpis(array $financial): array
     {
@@ -131,7 +120,7 @@ class DashboardService
         ];
     }
 
-    // ── Platform snapshot (privacy-safe aggregates only) ──────────────────────
+    // Platform snapshot (privacy-safe aggregates only)
 
     private function buildPlatformSnapshot(): array
     {
@@ -176,7 +165,7 @@ class DashboardService
         ];
     }
 
-    // ── Recent audit activity ─────────────────────────────────────────────────
+    // Recent audit activity
 
     private function buildRecentActivity(): array
     {

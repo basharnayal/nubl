@@ -28,7 +28,7 @@ class DemoUsersSeeder extends Seeder
         $this->seedProviders();
     }
 
-    // ─── Admins ──────────────────────────────────────────────────
+    // Admins
 
     private function seedAdmins(): void
     {
@@ -65,7 +65,7 @@ class DemoUsersSeeder extends Seeder
         $this->command->info('✓ Seeded '.count($admins).' additional admin(s)');
     }
 
-    // ─── Donors ──────────────────────────────────────────────────
+    // Donors
 
     private function seedDonors(): void
     {
@@ -117,7 +117,7 @@ class DemoUsersSeeder extends Seeder
         $this->command->info('✓ Seeded '.count($donors).' demo donors');
     }
 
-    // ─── Recipients ──────────────────────────────────────────────
+    // Recipients
 
     private function seedRecipients(): void
     {
@@ -225,7 +225,7 @@ class DemoUsersSeeder extends Seeder
         $this->command->info('✓ Seeded '.count($recipients).' demo recipients (15 active, 3 pending, 2 rejected)');
     }
 
-    // ─── Providers (additional pending/rejected) ──────────────────
+    // Providers (additional pending/rejected)
 
     private function seedProviders(): void
     {

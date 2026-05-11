@@ -61,7 +61,7 @@ class AllocationPauseTest extends TestCase
         ]);
     }
 
-    // ─── FR-24.1 Global ────────────────────────────────────────────────────────
+    // FR-24.1 Global
 
     #[Test]
     public function admin_can_pause_allocation_engine_globally(): void
@@ -106,7 +106,7 @@ class AllocationPauseTest extends TestCase
         $this->assertSame(route('provider.dashboard'), $payload['url']);
     }
 
-    // ─── FR-24.1 Per-provider ──────────────────────────────────────────────────
+    // FR-24.1 Per-provider
 
     #[Test]
     public function admin_can_pause_allocation_for_specific_provider(): void
@@ -144,7 +144,7 @@ class AllocationPauseTest extends TestCase
         $this->assertFalse((bool) $this->provider->allocation_paused);
     }
 
-    // ─── FR-24.2 Queue state ───────────────────────────────────────────────────
+    // FR-24.2 Queue state
 
     #[Test]
     public function allocation_is_queued_when_engine_is_globally_paused(): void

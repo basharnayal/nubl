@@ -93,7 +93,7 @@ abstract class AbstractAccountRegistrar implements AccountRegistrar
         ]);
     }
 
-    // ── Mandatory hooks ─────────────────────────────────────────────────────
+    // Mandatory hooks
 
     abstract protected function membershipType(): string;
 
@@ -101,7 +101,7 @@ abstract class AbstractAccountRegistrar implements AccountRegistrar
 
     abstract protected function roleName(): string;
 
-    // ── Optional hooks (default: no-op / empty) ──────────────────────────────
+    // Optional hooks (default: no-op / empty)
 
     /**
      * Upload files / decode base64 images before the transaction begins.

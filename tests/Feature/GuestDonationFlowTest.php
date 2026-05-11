@@ -21,6 +21,8 @@ class GuestDonationFlowTest extends TestCase
     {
         parent::setUp();
 
+        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+
         Ewallet::create([
             'owner_type' => 'SYSTEM',
             'owner_id' => null,
@@ -29,7 +31,7 @@ class GuestDonationFlowTest extends TestCase
         ]);
     }
 
-    // ── Validation ─────────────────────────────────────────────────────
+    // Validation
 
     #[Test]
     public function guest_initiate_validates_required_amount(): void
@@ -59,7 +61,7 @@ class GuestDonationFlowTest extends TestCase
         $response->assertSessionHasErrors('amount');
     }
 
-    // ── Initiation ─────────────────────────────────────────────────────
+    // Initiation
 
     #[Test]
     public function guest_initiate_creates_payment_and_redirects_to_gateway(): void
@@ -109,7 +111,7 @@ class GuestDonationFlowTest extends TestCase
         $response->assertRedirect(route('guest.donation.failed', ['token' => $payment->idempotency_key]));
     }
 
-    // ── Success callback ───────────────────────────────────────────────
+    // Success callback
 
     #[Test]
     public function guest_payment_success_flow_creates_fund_transaction(): void
@@ -188,7 +190,7 @@ class GuestDonationFlowTest extends TestCase
         $this->assertSame(Payment::STATUS_SUCCEEDED, $payment->fresh()->status);
     }
 
-    // ── Failed callback ────────────────────────────────────────────────
+    // Failed callback
 
     #[Test]
     public function guest_payment_failed_flow_redirects_to_guest_failed(): void
@@ -224,7 +226,7 @@ class GuestDonationFlowTest extends TestCase
         );
     }
 
-    // ── Idempotency ────────────────────────────────────────────────────
+    // Idempotency
 
     #[Test]
     public function guest_callback_idempotency_does_not_duplicate_fund_transactions(): void
@@ -254,7 +256,7 @@ class GuestDonationFlowTest extends TestCase
         $this->assertSame(1, $count, 'Only one FundTransaction should exist despite double callback');
     }
 
-    // ── Success/Failed pages ───────────────────────────────────────────
+    // Success/Failed pages
 
     #[Test]
     public function guest_success_page_loads_for_guest_payment(): void
@@ -360,7 +362,7 @@ class GuestDonationFlowTest extends TestCase
         $response->assertViewIs('guest-donation.failed');
     }
 
-    // ── Existing donor flow is unchanged ───────────────────────────────
+    // Existing donor flow is unchanged
 
     #[Test]
     public function authenticated_donor_payment_still_redirects_to_donor_success(): void
