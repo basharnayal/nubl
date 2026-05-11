@@ -1,0 +1,15 @@
+role,email,password
+donor,perf+donor+01@nubl.test,PerfTest!2026
+donor,perf+donor+02@nubl.test,PerfTest!2026
+donor,perf+donor+03@nubl.test,PerfTest!2026
+donor,perf+donor+04@nubl.test,PerfTest!2026
+donor,perf+donor+05@nubl.test,PerfTest!2026
+recipient,perf+recipient+01@nubl.test,PerfTest!2026
+recipient,perf+recipient+02@nubl.test,PerfTest!2026
+recipient,perf+recipient+03@nubl.test,PerfTest!2026
+recipient,perf+recipient+04@nubl.test,PerfTest!2026
+recipient,perf+recipient+05@nubl.test,PerfTest!2026
+provider,perf+provider+01@nubl.test,PerfTest!2026
+provider,perf+provider+02@nubl.test,PerfTest!2026
+provider,perf+provider+03@nubl.test,PerfTest!2026
+admin,perf+admin+01@nubl.test,PerfTest!2026
