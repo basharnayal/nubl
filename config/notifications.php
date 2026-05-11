@@ -82,6 +82,11 @@ return [
             'icon_svg' => 'check-circle',
             'subtitle' => 'notifications.provider_payout_transferred_subtitle',
         ],
+        'donation_success_admin' => [
+            'icon' => 'success',
+            'icon_svg' => 'check-circle',
+            'subtitle' => 'Donation completed successfully',
+        ],
     ],
 
     /*

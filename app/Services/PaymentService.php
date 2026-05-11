@@ -268,6 +268,8 @@ class PaymentService
                     $this->notificationService->sendDonationReceipt($locked);
                 }
 
+                $this->notificationService->sendDonationSuccessToAdmins($locked);
+
                 $this->auditService->log('payment', 'succeeded', [
                     'payment_id' => $locked->id,
                     'amount' => $locked->amount,

@@ -10,6 +10,7 @@ use App\Notifications\AccountApprovalPendingNotification;
 use App\Notifications\AccountStatusUpdatedNotification;
 use App\Notifications\DocumentsResubmittedForReviewNotification;
 use App\Notifications\DonationReceiptNotification;
+use App\Notifications\DonationSuccessAdminNotification;
 use App\Notifications\NewUserRegisteredNotification;
 use App\Notifications\ProviderNewRequestNotification;
 use App\Notifications\ProviderRequestStatusChangedNotification;
@@ -112,5 +113,12 @@ class NotificationService implements NotificationServiceInterface
     {
         $admins = User::role('admin')->get();
         $admins->each(fn ($admin) => $this->safeNotify($admin, new \App\Notifications\NewPendingAdminRequestNotification($request)));
+    }
+
+    public function sendDonationSuccessToAdmins(Payment $payment): void
+    {
+        User::role('admin')->get()->each(
+            fn ($admin) => $this->safeNotify($admin, new DonationSuccessAdminNotification($payment))
+        );
     }
 }
