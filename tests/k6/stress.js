@@ -43,28 +43,3 @@ export const options = {
   summaryTrendStats: ['avg', 'min', 'med', 'max', 'p(90)', 'p(95)', 'p(99)'],
 };
 
-// Print stage-by-stage breakdown so we can pick the breaking point manually.
-// (k6's JSON output also has per-second granularity if needed.)
-export function handleSummary(data) {
-  const lines = [
-    '',
-    '=== NUBL Stress Test — Final Summary ===',
-    `Total requests: ${data.metrics.http_reqs?.values?.count ?? 'n/a'}`,
-    `Overall failed: ${(data.metrics.http_req_failed?.values?.rate * 100).toFixed(2)} %`,
-    `Read p95:       ${pct(data, 'http_req_duration{type:read}',  'p(95)')} ms`,
-    `Read p99:       ${pct(data, 'http_req_duration{type:read}',  'p(99)')} ms`,
-    `Write p95:      ${pct(data, 'http_req_duration{type:write}', 'p(95)')} ms`,
-    `Write p99:      ${pct(data, 'http_req_duration{type:write}', 'p(99)')} ms`,
-    'Use per-second JSON output to identify the stage where p95 first breached 2000 ms.',
-    '',
-  ];
-  return {
-    'stdout': lines.join('\n'),
-    'reports/stress-summary.json': JSON.stringify(data, null, 2),
-  };
-}
-
-function pct(data, metric, p) {
-  const v = data.metrics?.[metric]?.values?.[p];
-  return v === undefined ? 'n/a' : v.toFixed(0);
-}
