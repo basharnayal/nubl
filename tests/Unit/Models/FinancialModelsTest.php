@@ -126,6 +126,39 @@ class FinancialModelsTest extends TestCase
     }
 
     #[Test]
+    public function payment_persists_is_guest_and_is_anonymous_flags_via_mass_assignment(): void
+    {
+        // Regression: is_guest and is_anonymous must be in $fillable so they are not
+        // silently dropped by mass-assignment, which would break guest redirect logic
+        // and expose "anonymous" donors on the top-donors page.
+        $guest = Payment::create([
+            'sponsor_id' => null,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'status' => Payment::STATUS_INITIATED,
+            'amount' => 50.00,
+            'is_guest' => true,
+            'is_anonymous' => true,
+        ])->fresh();
+
+        $this->assertTrue($guest->is_guest, 'is_guest must persist — guest redirect depends on it');
+        $this->assertTrue($guest->is_anonymous, 'is_anonymous must persist — privacy feature depends on it');
+
+        $donor = User::factory()->create();
+
+        $anonymous = Payment::create([
+            'sponsor_id' => $donor->id,
+            'gateway' => Payment::GATEWAY_MYFATOORAH,
+            'status' => Payment::STATUS_INITIATED,
+            'amount' => 100.00,
+            'is_guest' => false,
+            'is_anonymous' => true,
+        ])->fresh();
+
+        $this->assertFalse($anonymous->is_guest);
+        $this->assertTrue($anonymous->is_anonymous, 'Anonymous sponsor flag must persist to honour privacy preference');
+    }
+
+    #[Test]
     public function request_payment_link_model_casts_amount_and_resolves_payment_and_request_relations(): void
     {
         $provider = User::factory()->create();
