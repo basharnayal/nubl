@@ -37,3 +37,8 @@ test_output.txt
 /test-results/
 /blob-report/
 
+# k6 performance testing
+.env.k6
+/reports/
+/tests/k6/data/users.csv
+
