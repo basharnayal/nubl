@@ -45,6 +45,15 @@ if [ ! -d public/build ] || [ -z "$(ls -A public/build 2>/dev/null)" ]; then
     npm run build
 fi
 
+# ── Remove stale Vite hot file (leftover from a previously-running dev server) ──
+# When public/hot exists, Laravel's @vite directive routes asset URLs to the
+# Vite dev server (localhost:5173). If that container isn't running, pages load
+# without CSS/JS. Deleting it forces fallback to the built manifest.
+if [ -f public/hot ]; then
+    echo ">>> Removing stale public/hot file ..."
+    rm -f public/hot
+fi
+
 # ── Wait for MySQL to be ready ───────────────────────────────────────────────
 echo ">>> Waiting for MySQL ..."
 DB_H="${DB_HOST:-mysql}"

@@ -258,6 +258,8 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
     });
 
     // Audit Logs
+    Route::get('/audit-logs/export', [AuditLogController::class, 'export'])->name('audit-logs.export');
+    Route::get('/audit-logs/export-pdf', [AuditLogController::class, 'exportPdf'])->name('audit-logs.export-pdf');
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
     Route::get('/audit-logs/{log}/verify', [AuditLogController::class, 'verify'])->name('audit-logs.verify');
 

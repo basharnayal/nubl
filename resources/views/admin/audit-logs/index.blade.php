@@ -14,6 +14,18 @@
                     <p class="mt-0.5 text-xs text-slate-500 dark:text-navy-300">{{ __('audit_logs.page.subtitle') }}</p>
                 </div>
             </div>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('admin.audit-logs.export', request()->query()) }}"
+                   class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-navy-600 dark:bg-navy-800 dark:text-navy-100 dark:hover:border-navy-500 dark:hover:bg-navy-700">
+                    <i class="fa-solid fa-file-csv text-emerald-600 dark:text-emerald-400" aria-hidden="true"></i>
+                    CSV
+                </a>
+                <a href="{{ route('admin.audit-logs.export-pdf', request()->query()) }}"
+                   class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 dark:border-navy-600 dark:bg-navy-800 dark:text-navy-100 dark:hover:border-navy-500 dark:hover:bg-navy-700">
+                    <i class="fa-solid fa-file-pdf text-rose-600 dark:text-rose-400" aria-hidden="true"></i>
+                    PDF
+                </a>
+            </div>
         </div>
 
         {{-- ── Summary Cards ── --}}
