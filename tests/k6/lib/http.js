@@ -6,11 +6,18 @@
 //   - exposes a single `safeRequest` for tagged GET/POST with retries off
 // ---------------------------------------------------------------------------
 
-import http from 'k6/http';
+import http, { setResponseCallback, expectedStatuses } from 'k6/http';
 import { Counter } from 'k6/metrics';
 
 // Custom counter referenced by config/thresholds.js (`http_429_unexpected`).
 export const unexpected429 = new Counter('http_429_unexpected');
+
+// Treat ONLY 5xx as real failures. 4xx are expected client errors
+// (e.g., provider_redeem flow sends random fake QR tokens that legitimately
+// return 404/422; recipient_request with stale menu item ids returns 422).
+// Standard SRE practice: server failures = 5xx; 4xx is "the client did
+// something wrong" and is not a defect of the server.
+setResponseCallback(expectedStatuses({ min: 200, max: 499 }));
 
 const DEFAULT_HEADERS = {
   Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',

@@ -30,13 +30,17 @@ import papaparse from 'https://jslib.k6.io/papaparse/5.1.1/index.js';
 import {
   BASE_URL,
   PAYMENT_CALLBACK_PATH,
-  USERS_CSV_PATH,
   THINK_MIN,
   THINK_MAX,
   DONATION_MIN,
   DONATION_MAX,
   NO_SLEEP,
 } from '../config/env.js';
+
+// k6's open() resolves paths RELATIVE TO THIS SCRIPT FILE, not the cwd.
+// From tests/k6/lib/personas.js, the data dir is at ../data/.
+// Override with -e NUBL_USERS_CSV=<path-relative-to-this-file> if needed.
+const USERS_CSV_PATH = __ENV.NUBL_USERS_CSV || '../data/users.csv';
 import { get, getJson, postForm } from './http.js';
 import { extractCsrfFast } from './csrf.js';
 import { login } from './auth.js';
@@ -47,18 +51,23 @@ import { pickWeightedPersona } from './workload.js';
 // missing, every flow that needs creds will fail fast in setup().
 
 const users = new SharedArray('nubl_seed_users', () => {
-  const raw = openCsv(USERS_CSV_PATH);
-  if (!raw) return [];
-  return papaparse.parse(raw, { header: true, skipEmptyLines: true }).data;
-});
-
-function openCsv(path) {
+  let raw;
   try {
-    return open(path);
-  } catch (_e) {
-    return null;
+    raw = open(USERS_CSV_PATH);
+  } catch (e) {
+    throw new Error(
+      `Failed to open seed-users CSV at "${USERS_CSV_PATH}" ` +
+      `(path is relative to tests/k6/lib/personas.js). ` +
+      `Run PerfTestSeeder on the server and scp the CSV to tests/k6/data/users.csv. ` +
+      `Underlying error: ${e}`
+    );
   }
-}
+  const parsed = papaparse.parse(raw, { header: true, skipEmptyLines: true }).data;
+  if (!parsed.length) {
+    throw new Error(`users.csv parsed to 0 rows — check file contents.`);
+  }
+  return parsed;
+});
 
 function pickByRole(role) {
   const pool = users.filter((u) => u.role === role);
