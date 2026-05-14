@@ -14,6 +14,7 @@ Donors fund a shared pool, recipients submit assistance requests that are alloca
 | Frontend | Blade templates + Tailwind CSS v4 + Alpine.js (Lineone theme) |
 | Build | Vite |
 | Database | MySQL (SQLite used for local tests) |
+| Cache / Session / Queue | `database` drivers by default; Redis (predis client) in the Docker stack |
 | Auth | Laravel Sanctum |
 | Authorization | Spatie Laravel Permission (roles **and** granular permissions) |
 | Audit | Spatie Laravel Activity Log |
@@ -27,6 +28,37 @@ Donors fund a shared pool, recipients submit assistance requests that are alloca
 
 ## Setup
 
+### Option 1 — Docker (recommended)
+
+Docker provides the app, MySQL, and Redis in one stack — no local services needed. **Stop Laragon (or any local MySQL/Redis) first** to avoid port conflicts.
+
+```bash
+cp .env.example .env            # Windows: copy .env.example .env
+docker compose up -d --build
+```
+
+The container configures itself on first boot (composer install, npm install, build, key generation, **migrations**) — first run takes ~2 minutes, after that it's instant. The app is then available at **http://localhost:8000**.
+
+Migrations run automatically, but seeders do not — seed the database once after the first start:
+
+```bash
+docker compose exec app php artisan db:seed
+```
+
+| Task | Command |
+|------|---------|
+| Start | `docker compose up -d --build` |
+| Stop | `docker compose down` |
+| Reset (drop all data) | `docker compose down -v` |
+| Logs | `docker compose logs app --tail 50 -f` |
+| Artisan / Tinker | `docker compose exec app php artisan <cmd>` |
+| Run tests | `docker compose exec app php artisan test` |
+| Vite dev server (frontend work) | `docker compose --profile dev up vite` |
+
+Cache, session, and queue run on Redis inside the stack. Full details, the reference `.env`, and the Redis rationale are in [docs/DOCKER.md](docs/DOCKER.md).
+
+### Option 2 — Manual / local
+
 **Prerequisites:** PHP 8.2+, Composer, Node.js 20.19+ (or 22.12+), MySQL.
 
 ```bash
@@ -37,16 +69,14 @@ cp .env.example .env            # Windows: copy .env.example .env
 php artisan key:generate
 # edit .env: DB credentials, MyFatoorah keys, Taqnyat SMS, mail
 
-php artisan migrate
-php artisan db:seed --class=PermissionSeeder   # permissions first
-php artisan db:seed --class=RoleSeeder         # then roles
+php artisan migrate --seed       # DatabaseSeeder: permissions, roles, core users, providers, menu items
 php artisan storage:link
 
 npm run build                   # or: npm run dev (during development)
 php artisan serve
 ```
 
-> `php artisan db:seed` (the full `DatabaseSeeder`) also creates demo users, providers, and sample requests — useful for local exploration, not for production.
+> `migrate --seed` runs `DatabaseSeeder`, which creates base data plus an `admin@nubl.com` / `password` login. For the larger demo dataset (sample donations, requests, payouts), run `php artisan db:seed --class=DemoDataSeeder`. Full seed reference and test accounts: [docs/SEEDING.md](docs/SEEDING.md).
 
 For full local dev (server + queue worker + logs + Vite in one process): `composer run dev`.
 
@@ -158,9 +188,31 @@ Project-specific tunables (clear cache with `php artisan optimize:clear` after c
 |---------|-------|---------|
 | Recipient weekly allowance limit (SAR) | `config/provider.php` → `recipient.weekly_allowance_limit` | `600` |
 | QR redemption window (minutes) | `config/qr.php` → `ttl_minutes` (env `QR_TTL_MINUTES`) | `180` |
-| Phone/OTP verification step | `config/app.php` → `phone_verification_enabled` | `true` |
+| Phone / OTP verification step | `config/app.php` → `phone_verification_enabled` (env `PHONE_VERIFICATION_ENABLED`) | `true` |
+| Email verification step | `config/app.php` → `email_verification_enabled` (env `EMAIL_VERIFICATION_ENABLED`) | `true` |
+| HTTP rate limiting | `config/rate_limiting.php` (env `RATE_LIMITING_ENABLED`) | `true` |
 
 Admin-overridable values (weekly allowance, QR TTL, maintenance mode) are stored in the `system_settings` table and take precedence over the config defaults.
+
+---
+
+## Documentation
+
+Detailed guides live in the `docs/` folder. Start with [docs/README_DEV.md](docs/README_DEV.md) — the central developer reference (commit conventions, role/permission usage, Lineone UI components).
+
+| Topic | Document |
+|-------|----------|
+| Docker environment | [DOCKER.md](docs/DOCKER.md) |
+| Seed data & test accounts | [SEEDING.md](docs/SEEDING.md) |
+| Roles & permissions (RBAC) | [PERMISSIONS_AND_RBAC_AR.md](docs/PERMISSIONS_AND_RBAC_AR.md) |
+| Deployment | [DEPLOYMENT.md](docs/DEPLOYMENT.md) |
+| Payments & MyFatoorah | [PAYMENT_REFERENCE.md](docs/PAYMENT_REFERENCE.md) |
+| QR redemption flow | [QR_CODE_REDEMPTION.md](docs/QR_CODE_REDEMPTION.md) |
+| Recipient weekly allowance | [RECIPIENT_WEEKLY_ALLOWANCE.md](docs/RECIPIENT_WEEKLY_ALLOWANCE.md) |
+| Request lifecycle & statuses | [REQUEST_STATUSES.md](docs/REQUEST_STATUSES.md) |
+| Audit logging | [AUDIT_LOG_GUIDE_AR.md](docs/AUDIT_LOG_GUIDE_AR.md) |
+| HTTP rate limiting | [RATE_LIMITING.md](docs/RATE_LIMITING.md) |
+| Notifications | [NOTIFICATIONS.md](docs/NOTIFICATIONS.md) |
 
 ---
 
