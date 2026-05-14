@@ -45,6 +45,7 @@ class RequestController extends Controller
         ]);
 
         if ($validated['action'] === 'approve') {
+            abort_unless(auth()->user()->can('requests.approve'), 403);
             $allocationService = app(\App\Services\AllocationService::class);
             if (! $allocationService->canCoverRequestAmount((float) $requestModel->reserved_amount)) {
                 return back()->with('error', 'Insufficient overall city fund allocation to approve this request.');
@@ -70,6 +71,7 @@ class RequestController extends Controller
                 'status' => 'ADMIN_APPROVED',
             ], auth()->id());
         } elseif ($validated['action'] === 'reject') {
+            abort_unless(auth()->user()->can('requests.reject'), 403);
             $requestModel->update([
                 'status' => 'ADMIN_REJECTED',
                 'rejection_reason_code' => $validated['rejection_reason_code'],

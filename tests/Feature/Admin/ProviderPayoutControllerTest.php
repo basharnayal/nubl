@@ -11,7 +11,8 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
-use Spatie\Permission\Models\Role;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Tests\TestCase;
 
 class ProviderPayoutControllerTest extends TestCase
@@ -29,8 +30,8 @@ class ProviderPayoutControllerTest extends TestCase
         parent::setUp();
 
         Storage::fake('local');
-        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'provider', 'guard_name' => 'web']);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         $this->admin = User::factory()->create([
             'status' => User::STATUS_ACTIVE,

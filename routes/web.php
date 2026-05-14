@@ -144,8 +144,8 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Account approval flow (pending users awaiting admin review)
-    Route::controller(AccountApprovalController::class)->group(function () {
+    // Account approval flow (pending users awaiting admin review) — gated by accounts.approve
+    Route::middleware('permission:accounts.approve')->controller(AccountApprovalController::class)->group(function () {
         Route::get('/users/pending', 'index')->name('users.pending');
         Route::post('/users/{user}/approve', 'approve')->whereNumber('user')->name('users.approve');
         Route::get('/users/{user}/reject', 'showRejectForm')->whereNumber('user')->name('users.reject.form');
@@ -159,19 +159,29 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
 
     // User Management (CRUD + deactivate/reactivate) — separate from approval flow
     Route::controller(UserManagementController::class)->prefix('manage/users')->name('manage.users.')->group(function () {
-        Route::get('/', 'index')->name('index');
-        Route::get('/create', 'create')->name('create');
-        Route::post('/', 'store')->name('store');
-        Route::get('/{user}', 'show')->whereNumber('user')->name('show');
-        Route::get('/{user}/edit', 'edit')->whereNumber('user')->name('edit');
-        Route::put('/{user}', 'update')->whereNumber('user')->name('update');
-        Route::delete('/{user}', 'destroy')->whereNumber('user')->name('destroy');
-        Route::post('/{user}/deactivate', 'deactivate')->whereNumber('user')->name('deactivate');
-        Route::post('/{user}/reactivate', 'reactivate')->whereNumber('user')->name('reactivate');
+        Route::middleware('permission:users.read')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/{user}', 'show')->whereNumber('user')->name('show');
+        });
+        Route::middleware('permission:users.create')->group(function () {
+            Route::get('/create', 'create')->name('create');
+            Route::post('/', 'store')->name('store');
+        });
+        Route::middleware('permission:users.update')->group(function () {
+            Route::get('/{user}/edit', 'edit')->whereNumber('user')->name('edit');
+            Route::put('/{user}', 'update')->whereNumber('user')->name('update');
+        });
+        Route::delete('/{user}', 'destroy')->whereNumber('user')->name('destroy')
+            ->middleware('permission:users.delete');
+        Route::post('/{user}/deactivate', 'deactivate')->whereNumber('user')->name('deactivate')
+            ->middleware('permission:users.deactivate');
+        Route::post('/{user}/reactivate', 'reactivate')->whereNumber('user')->name('reactivate')
+            ->middleware('permission:users.reactivate');
     });
 
-    // Roles & permissions (Spatie)
-    Route::controller(RoleController::class)->prefix('roles')->name('roles.')->group(function () {
+    // Roles & permissions (Spatie) — gated by the roles.manage permission on top of role:admin (defense in depth)
+    Route::middleware('permission:roles.manage')
+        ->controller(RoleController::class)->prefix('roles')->name('roles.')->group(function () {
         Route::get('/', 'index')->name('index');
         Route::get('/create', 'create')->name('create');
         Route::post('/', 'store')->name('store');
@@ -182,7 +192,7 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
 
     // Admin Request Management (ECS-63)
     Route::controller(RequestController::class)->prefix('requests')->name('requests.')->group(function () {
-        Route::get('/', 'index')->name('index');
+        Route::get('/', 'index')->name('index')->middleware('permission:requests.review');
         Route::put('/{request}', 'update')->whereNumber('request')->name('update');
     });
 
@@ -199,7 +209,8 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
     });
 
     // Laravel built-in maintenance (artisan down / up + secret bypass)
-    Route::controller(MaintenanceSettingsController::class)->prefix('settings/maintenance')->name('settings.maintenance.')->group(function () {
+    Route::middleware('permission:maintenance.manage')
+        ->controller(MaintenanceSettingsController::class)->prefix('settings/maintenance')->name('settings.maintenance.')->group(function () {
         Route::get('/', 'edit')->name('edit');
         Route::post('/enable', 'enable')->middleware('throttle:6,1')->name('enable');
         Route::post('/disable', 'disable')->middleware('throttle:6,1')->name('disable');
@@ -208,26 +219,28 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
     // FR-24.1: Allocation engine pause/resume (global + per-provider)
     Route::controller(AllocationController::class)->prefix('allocation')->name('allocation.')->group(function () {
         Route::get('/status', 'status')->name('status');
-        Route::post('/pause', 'pauseGlobal')->name('pause');
-        Route::post('/resume', 'resumeGlobal')->name('resume');
-        Route::post('/providers/{provider}/pause', 'pauseProvider')->whereNumber('provider')->name('provider.pause');
-        Route::post('/providers/{provider}/resume', 'resumeProvider')->whereNumber('provider')->name('provider.resume');
+        Route::post('/pause', 'pauseGlobal')->name('pause')->middleware('permission:allocation.pause_global');
+        Route::post('/resume', 'resumeGlobal')->name('resume')->middleware('permission:allocation.pause_global');
+        Route::post('/providers/{provider}/pause', 'pauseProvider')->whereNumber('provider')->name('provider.pause')
+            ->middleware('permission:allocation.pause_per_provider');
+        Route::post('/providers/{provider}/resume', 'resumeProvider')->whereNumber('provider')->name('provider.resume')
+            ->middleware('permission:allocation.pause_per_provider');
     });
 
     // Fund management & payment monitoring (gateway vs internal ledger)
-    Route::prefix('finances')->name('finances.')->group(function () {
+    Route::middleware('permission:finance.manage')->prefix('finances')->name('finances.')->group(function () {
         Route::get('/', [FinancialOverviewController::class, 'index'])->name('overview');
 
         Route::controller(PaymentController::class)->prefix('payments')->name('payments.')->group(function () {
-            Route::get('/export', 'export')->name('export');
-            Route::get('/export-pdf', 'exportPdf')->name('export-pdf');
+            Route::get('/export', 'export')->name('export')->middleware('permission:reports.export_csv');
+            Route::get('/export-pdf', 'exportPdf')->name('export-pdf')->middleware('permission:reports.export_pdf');
             Route::get('/', 'index')->name('index');
             Route::get('/{payment}', 'show')->whereNumber('payment')->name('show');
         });
 
         Route::controller(FundTransactionController::class)->prefix('fund-transactions')->name('fund-transactions.')->group(function () {
-            Route::get('/export', 'export')->name('export');
-            Route::get('/export-pdf', 'exportPdf')->name('export-pdf');
+            Route::get('/export', 'export')->name('export')->middleware('permission:reports.export_csv');
+            Route::get('/export-pdf', 'exportPdf')->name('export-pdf')->middleware('permission:reports.export_pdf');
             Route::get('/', 'index')->name('index');
             Route::get('/{fund_transaction}', 'show')->whereNumber('fund_transaction')->name('show');
         });
@@ -258,10 +271,14 @@ Route::middleware($adminMiddleware)->prefix('admin')->name('admin.')->group(func
     });
 
     // Audit Logs
-    Route::get('/audit-logs/export', [AuditLogController::class, 'export'])->name('audit-logs.export');
-    Route::get('/audit-logs/export-pdf', [AuditLogController::class, 'exportPdf'])->name('audit-logs.export-pdf');
-    Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
-    Route::get('/audit-logs/{log}/verify', [AuditLogController::class, 'verify'])->name('audit-logs.verify');
+    Route::middleware('permission:audit_logs.view')->group(function () {
+        Route::get('/audit-logs/export', [AuditLogController::class, 'export'])
+            ->middleware('permission:reports.export_csv')->name('audit-logs.export');
+        Route::get('/audit-logs/export-pdf', [AuditLogController::class, 'exportPdf'])
+            ->middleware('permission:reports.export_pdf')->name('audit-logs.export-pdf');
+        Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit-logs.index');
+        Route::get('/audit-logs/{log}/verify', [AuditLogController::class, 'verify'])->name('audit-logs.verify');
+    });
 
     // Admin Menu Management
     Route::controller(MenuController::class)->prefix('menus')->name('menus.')->group(function () {

@@ -79,6 +79,7 @@
                                                                 <li>
                                                                     <a href="{{ route('admin.users.application', $user) }}" class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('View') }}</a>
                                                                 </li>
+                                                                @can('accounts.approve')
                                                                 <li>
                                                                     <form method="POST" action="{{ route('admin.users.approve', $user) }}" class="block">
                                                                         @csrf
@@ -90,6 +91,7 @@
                                                                         <a href="{{ route('admin.users.reject.form', $user) }}" class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100 text-error">{{ __('Reject') }}</a>
                                                                     </li>
                                                                 @endif
+                                                                @endcan
                                                             </ul>
                                                         </div>
                                                     </div>

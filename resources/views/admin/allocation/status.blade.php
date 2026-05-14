@@ -54,6 +54,7 @@
                     @endif
                 </div>
 
+                @can('allocation.pause_global')
                 <div class="flex gap-3">
                     @if ($globallyPaused)
                         <form method="POST" action="{{ route('admin.allocation.resume') }}">
@@ -73,9 +74,11 @@
                         </button>
                     @endif
                 </div>
+                @endcan
             </div>
         </div>
 
+        @can('allocation.pause_global')
         <x-lineone-modal id="pause-all-allocation" title="{{ __('Pause all allocations globally?') }}" size="md">
             <p class="mb-6 text-sm leading-relaxed text-slate-600 dark:text-navy-300">
                 {{ __('This pauses fund allocation for every provider until you resume globally.') }}
@@ -93,6 +96,7 @@
                 </button>
             </form>
         </x-lineone-modal>
+        @endcan
 
         {{-- Per-provider table --}}
         <div class="card rounded-xl border border-slate-200 bg-white shadow-sm dark:border-navy-600 dark:bg-navy-800">
@@ -125,6 +129,7 @@
                         </p>
                     </div>
 
+                    @can('allocation.pause_per_provider')
                     <div>
                         @if ($globallyPaused)
                             <span class="inline-flex min-h-[2.25rem] items-center text-xs font-medium text-slate-400 dark:text-navy-500"
@@ -149,6 +154,7 @@
                             </form>
                         @endif
                     </div>
+                    @endcan
                 </div>
             @empty
                 <p class="px-6 py-8 text-center text-sm text-slate-500 dark:text-navy-400">

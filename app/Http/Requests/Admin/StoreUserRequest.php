@@ -15,7 +15,15 @@ class StoreUserRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()?->hasRole('admin') ?? false;
+        $user = $this->user();
+        if (! $user?->hasRole('admin')) {
+            return false;
+        }
+        if ($this->has('roles') && ! $user->can('users.assign.roles')) {
+            return false;
+        }
+
+        return true;
     }
 
     public function rules(): array

@@ -38,9 +38,11 @@
                                 </svg>
                             </button>
                         </form>
+                        @can('users.create')
                         <x-lineone-button :href="route('admin.manage.users.create')" variant="primary" size="sm">
                             {{ __('Create User') }}
                         </x-lineone-button>
+                        @endcan
                     </div>
                 </div>
 
@@ -168,25 +170,32 @@
                                                         <li>
                                                             <a href="{{ route('admin.manage.users.show', $user) }}" class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('View') }}</a>
                                                         </li>
+                                                        @can('users.update')
                                                         <li>
                                                             <a href="{{ route('admin.manage.users.edit', $user) }}" class="flex h-8 items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100">{{ __('Edit') }}</a>
                                                         </li>
+                                                        @endcan
                                                         @if($user->is_active)
+                                                            @can('users.deactivate')
                                                             <li>
                                                                 <form method="POST" action="{{ route('admin.manage.users.deactivate', $user) }}" class="block" onsubmit="return confirm('{{ __('Deactivate this user? They will not be able to log in.') }}')">
                                                                     @csrf
                                                                     <button type="submit" class="flex h-8 w-full items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100 text-left">{{ __('Deactivate') }}</button>
                                                                 </form>
                                                             </li>
+                                                            @endcan
                                                         @else
+                                                            @can('users.reactivate')
                                                             <li>
                                                                 <form method="POST" action="{{ route('admin.manage.users.reactivate', $user) }}" class="block">
                                                                     @csrf
                                                                     <button type="submit" class="flex h-8 w-full items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100 text-left">{{ __('Reactivate') }}</button>
                                                                 </form>
                                                             </li>
+                                                            @endcan
                                                         @endif
                                                         @if($user->id !== auth()->id())
+                                                            @can('users.delete')
                                                             <li>
                                                                 <form method="POST" action="{{ route('admin.manage.users.destroy', $user) }}" class="block" onsubmit="return confirm('{{ __('Permanently delete this user?') }}')">
                                                                     @csrf
@@ -194,6 +203,7 @@
                                                                     <button type="submit" class="flex h-8 w-full items-center px-3 pr-8 font-medium tracking-wide outline-hidden transition-all hover:bg-slate-100 hover:text-slate-800 focus:bg-slate-100 focus:text-slate-800 dark:hover:bg-navy-600 dark:hover:text-navy-100 dark:focus:bg-navy-600 dark:focus:text-navy-100 text-left text-error">{{ __('Delete') }}</button>
                                                                 </form>
                                                             </li>
+                                                            @endcan
                                                         @endif
                                                     </ul>
                                                 </div>

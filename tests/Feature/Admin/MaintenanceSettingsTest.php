@@ -9,7 +9,8 @@ use Illuminate\Foundation\Http\Middleware\PreventRequestsDuringMaintenance;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use PHPUnit\Framework\Attributes\Test;
-use Spatie\Permission\Models\Role;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Tests\TestCase;
 
 class MaintenanceSettingsTest extends TestCase
@@ -19,6 +20,9 @@ class MaintenanceSettingsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         if (file_exists(storage_path('framework/maintenance.php'))) {
             Artisan::call('up');
@@ -36,7 +40,6 @@ class MaintenanceSettingsTest extends TestCase
     #[Test]
     public function admin_can_view_maintenance_settings_page(): void
     {
-        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $admin = User::factory()->create(['status' => User::STATUS_ACTIVE, 'is_active' => true]);
         $admin->assignRole('admin');
 
@@ -52,7 +55,6 @@ class MaintenanceSettingsTest extends TestCase
         // Allow POST /disable while the app is in maintenance (tests have no bypass cookie).
         $this->withoutMiddleware(PreventRequestsDuringMaintenance::class);
 
-        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $admin = User::factory()->create(['status' => User::STATUS_ACTIVE, 'is_active' => true]);
         $admin->assignRole('admin');
 
@@ -82,7 +84,6 @@ class MaintenanceSettingsTest extends TestCase
     {
         $this->withoutMiddleware(PreventRequestsDuringMaintenance::class);
 
-        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $admin = User::factory()->create(['status' => User::STATUS_ACTIVE, 'is_active' => true]);
         $admin->assignRole('admin');
 
@@ -97,7 +98,6 @@ class MaintenanceSettingsTest extends TestCase
     #[Test]
     public function disable_returns_info_when_maintenance_is_already_off(): void
     {
-        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $admin = User::factory()->create(['status' => User::STATUS_ACTIVE, 'is_active' => true]);
         $admin->assignRole('admin');
 
@@ -114,7 +114,6 @@ class MaintenanceSettingsTest extends TestCase
     {
         $this->withoutMiddleware(PreventRequestsDuringMaintenance::class);
 
-        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
         $admin = User::factory()->create(['status' => User::STATUS_ACTIVE, 'is_active' => true]);
         $admin->assignRole('admin');
 

@@ -124,6 +124,7 @@
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
+                        @can('requests.approve')
                         <form id="approve-form" method="POST">
                             @csrf
                             @method('PUT')
@@ -133,13 +134,17 @@
                                 {{ __('Approve (City Fund)') }}
                             </button>
                         </form>
+                        @endcan
 
+                        @can('requests.reject')
                         <button type="button" onclick="toggleRejectForm()"
                             class="btn w-full bg-error text-white hover:bg-error-focus focus:bg-error-focus active:bg-error-focus/90 dark:bg-error dark:hover:bg-error-focus dark:focus:bg-error-focus">
                             {{ __('Reject') }}
                         </button>
+                        @endcan
                     </div>
 
+                    @can('requests.reject')
                     <form id="reject-form" method="POST"
                         class="hidden mt-4 rounded-lg border border-error/30 bg-error/10 p-4 dark:bg-error/15 dark:border-error/20">
                         @csrf
@@ -163,6 +168,7 @@
                             {{ __('Confirm Rejection') }}
                         </button>
                     </form>
+                    @endcan
                 </div>
             </div>
         </div>

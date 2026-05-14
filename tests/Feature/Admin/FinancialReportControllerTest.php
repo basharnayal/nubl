@@ -8,7 +8,8 @@ use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use PHPUnit\Framework\Attributes\Test;
-use Spatie\Permission\Models\Role;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Tests\TestCase;
 
 class FinancialReportControllerTest extends TestCase
@@ -18,7 +19,8 @@ class FinancialReportControllerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
     }
 
     #[Test]

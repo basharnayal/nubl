@@ -10,11 +10,12 @@ use App\Models\ProviderProfile;
 use App\Models\RecipientKycDetails;
 use App\Models\RecipientProfile;
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\Activitylog\Models\Activity;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class AccountApprovalTest extends TestCase
@@ -27,10 +28,8 @@ class AccountApprovalTest extends TestCase
     {
         parent::setUp();
 
-        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'provider', 'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'recipient', 'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'donor', 'guard_name' => 'web']);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         $this->admin = User::factory()->create();
         $this->admin->assignRole('admin');

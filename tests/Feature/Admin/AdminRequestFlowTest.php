@@ -7,10 +7,11 @@ use App\Models\Payment;
 use App\Models\ProviderMenuItem;
 use App\Models\Request as RequestModel;
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\Activitylog\Models\Activity;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class AdminRequestFlowTest extends TestCase
@@ -29,10 +30,8 @@ class AdminRequestFlowTest extends TestCase
     {
         parent::setUp();
 
-        // Roles
-        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'provider', 'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'recipient', 'guard_name' => 'web']);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         // Users
         $this->admin = User::factory()->create();

@@ -24,6 +24,25 @@ class SidebarComposer
 
         $actor = $this->resolveActor();
         $sidebarMenu = SidebarPanel::forActor($actor);
+
+        // Hide admin sidebar links when the user lacks the matching permission (defense-in-depth UX).
+        if ($actor === 'admin') {
+            $user = auth()->user();
+
+            if (! $user->can('roles.manage')) {
+                unset($sidebarMenu['items'][0]['admin_users']['submenu']['admin_roles_permissions']);
+            }
+            if (! $user->can('maintenance.manage')) {
+                unset($sidebarMenu['items'][0]['admin_settings']['submenu']['admin_settings_maintenance']);
+            }
+            if (! $user->can('audit_logs.view')) {
+                unset($sidebarMenu['items'][0]['admin_audit_logs']);
+            }
+            if (! $user->can('finance.manage')) {
+                unset($sidebarMenu['items'][0]['admin_finances']);
+            }
+        }
+
         $dashboardUrl = match ($actor) {
             'admin' => route('admin.dashboard'),
             'provider' => route('provider.dashboard'),

@@ -11,7 +11,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\Activitylog\Models\Activity;
-use Spatie\Permission\Models\Role;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Tests\TestCase;
 
 class AdminFundTransactionControllerTest extends TestCase
@@ -26,9 +27,8 @@ class AdminFundTransactionControllerTest extends TestCase
     {
         parent::setUp();
 
-        foreach (['admin', 'donor', 'provider', 'recipient'] as $roleName) {
-            Role::firstOrCreate(['name' => $roleName, 'guard_name' => 'web']);
-        }
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         $this->admin = User::factory()->create([
             'status' => User::STATUS_ACTIVE,

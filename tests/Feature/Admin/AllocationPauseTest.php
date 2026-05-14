@@ -8,10 +8,11 @@ use App\Models\SystemSetting;
 use App\Models\User;
 use App\Notifications\AllocationEngineStatusChangedNotification;
 use App\Services\AllocationService;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\Activitylog\Models\Activity;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class AllocationPauseTest extends TestCase
@@ -30,12 +31,8 @@ class AllocationPauseTest extends TestCase
     {
         parent::setUp();
 
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
-
-        Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'provider', 'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'recipient', 'guard_name' => 'web']);
-        Role::firstOrCreate(['name' => 'donor', 'guard_name' => 'web']);
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         $this->admin = User::factory()->create(['status' => User::STATUS_ACTIVE, 'is_active' => true]);
         $this->admin->assignRole('admin');

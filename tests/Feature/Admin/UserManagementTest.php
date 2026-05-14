@@ -3,9 +3,10 @@
 namespace Tests\Feature\Admin;
 
 use App\Models\User;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Spatie\Activitylog\Models\Activity;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class UserManagementTest extends TestCase
@@ -15,11 +16,8 @@ class UserManagementTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        foreach (['admin', 'donor', 'recipient', 'provider'] as $name) {
-            Role::firstOrCreate(
-                ['name' => $name, 'guard_name' => 'web'],
-            );
-        }
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
     }
 
     protected function createAdmin(): User

@@ -127,6 +127,7 @@
             @endif
 
             {{-- Actions --}}
+            @can('accounts.approve')
             @if(in_array($user->status, [\App\Models\User::STATUS_PENDING_APPROVAL, \App\Models\User::STATUS_REJECTED]))
             <div class="flex gap-3">
                 <form method="POST" action="{{ route('admin.users.approve', $user) }}">
@@ -138,6 +139,7 @@
                 @endif
             </div>
             @endif
+            @endcan
         </div>
     </div>
 </x-app-layout>

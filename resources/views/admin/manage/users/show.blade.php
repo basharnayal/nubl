@@ -5,7 +5,9 @@
                 {{ __('User') }}: {{ $user->name }}
             </h2>
             <div class="flex gap-2">
+                @can('users.update')
                 <x-lineone-button :href="route('admin.manage.users.edit', $user)" variant="primary" size="sm">{{ __('Edit') }}</x-lineone-button>
+                @endcan
                 <a href="{{ route('admin.manage.users.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium text-sm">{{ __('Back') }}</a>
             </div>
         </div>
@@ -210,22 +212,28 @@
             {{-- Actions --}}
             <div class="flex gap-3">
                 @if($user->is_active)
+                    @can('users.deactivate')
                     <form method="POST" action="{{ route('admin.manage.users.deactivate', $user) }}" onsubmit="return confirm('{{ __('Deactivate this user?') }}')">
                         @csrf
                         <x-lineone-button type="submit" variant="warning">{{ __('Deactivate') }}</x-lineone-button>
                     </form>
+                    @endcan
                 @else
+                    @can('users.reactivate')
                     <form method="POST" action="{{ route('admin.manage.users.reactivate', $user) }}">
                         @csrf
                         <x-lineone-button type="submit" variant="success">{{ __('Reactivate') }}</x-lineone-button>
                     </form>
+                    @endcan
                 @endif
                 @if($user->id !== auth()->id())
+                    @can('users.delete')
                     <form method="POST" action="{{ route('admin.manage.users.destroy', $user) }}" onsubmit="return confirm('{{ __('Permanently delete this user?') }}')">
                         @csrf
                         @method('DELETE')
                         <x-lineone-button type="submit" variant="danger">{{ __('Delete') }}</x-lineone-button>
                     </form>
+                    @endcan
                 @endif
             </div>
         </div>

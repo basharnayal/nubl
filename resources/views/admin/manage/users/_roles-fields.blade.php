@@ -3,6 +3,7 @@
     'selected' => [],
 ])
 
+@can('users.assign.roles')
 <div class="space-y-2">
     <div>
         <x-input-label :value="__('Roles')" />
@@ -22,3 +23,4 @@
         <p class="mt-1 text-sm text-error">{{ $errors->first('roles') ?: $errors->first('roles.0') }}</p>
     @endif
 </div>
+@endcan

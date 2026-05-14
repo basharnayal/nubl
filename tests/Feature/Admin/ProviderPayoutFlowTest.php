@@ -22,7 +22,8 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\Test;
 use Spatie\Activitylog\Models\Activity;
-use Spatie\Permission\Models\Role;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
 use Tests\TestCase;
 
 class ProviderPayoutFlowTest extends TestCase
@@ -41,9 +42,8 @@ class ProviderPayoutFlowTest extends TestCase
 
         Storage::fake('local');
 
-        foreach (['admin', 'provider'] as $role) {
-            Role::firstOrCreate(['name' => $role, 'guard_name' => 'web']);
-        }
+        $this->seed(PermissionSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         $this->admin = User::factory()->create(['status' => User::STATUS_ACTIVE, 'is_active' => true]);
         $this->admin->assignRole('admin');
