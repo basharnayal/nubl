@@ -82,27 +82,27 @@ function pickByRole(role) {
 // ---- Tag helpers ----------------------------------------------------------
 // Tag iterations by where they fall in the scenario timeline:
 //   - Spike: `phase: surge | post_surge` (post_surge starts at progress > 0.65)
-//   - Soak:  `window: early | mid | late` (early = first 25%, late = last 25%)
+//   - Endurance: `window: early | mid | late` (early = first 25%, late = last 25%)
 
 function spikePhase() {
   const p = exec.scenario.progress;
   return p > 0.65 ? 'post_surge' : 'surge';
 }
 
-function soakWindow() {
+function enduranceWindow() {
   const p = exec.scenario.progress;
   if (p <= 0.25) return 'early';
   if (p >= 0.75) return 'late';
   return 'mid';
 }
 
-/** Build a tag bag for a given flow step. Includes spike/soak tags if relevant. */
+/** Build a tag bag for a given flow step. Includes spike/endurance tags if relevant. */
 function tag(persona, type, step, extra = {}) {
   const t = { persona, type, step, ...extra };
   // Inexpensive — these always evaluate but only matter for the test that
   // tags on them.
-  if (__ENV.NUBL_TAG_SPIKE === 'true') t.phase = spikePhase();
-  if (__ENV.NUBL_TAG_SOAK === 'true') t.window = soakWindow();
+  if (__ENV.NUBL_TAG_SPIKE      === 'true') t.phase  = spikePhase();
+  if (__ENV.NUBL_TAG_ENDURANCE  === 'true') t.window = enduranceWindow();
   return t;
 }
 

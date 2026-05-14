@@ -7,7 +7,7 @@ return [
     ],
 
     'recipient' => [
-        'weekly_allowance_limit' => 400,
+        'weekly_allowance_limit' => 600,
         /** FR-17.1: bounds for admin-configured weekly limit (SAR) */
         'weekly_allowance_limit_min' => 1,
         'weekly_allowance_limit_max' => 100_000,

@@ -3,8 +3,8 @@
 // SPIKE TEST — perf_test_plan.md §7 / §9.2
 //
 // Goal: validate sudden-surge survivability.
-// Profile: ramping-vus from 20 → 500 in 30s, hold 1m at 500, then recover
-//          back to 20 for 2m30s. Total ~6m30s.
+// Profile: ramping-vus from 5 → 80 in 30s, hold 1m at 80, then recover
+//          back to 5 for 2m30s. Total ~6m30s.
 // Tags: requests in the post-surge window are tagged `phase:post_surge` so
 //       the recovery latency can be validated separately.
 //
@@ -29,13 +29,13 @@ export const options = {
   scenarios: {
     flash_crowd: {
       executor: 'ramping-vus',
-      startVUs: 20,
+      startVUs: 5,
       stages: [
-        { duration: '2m',    target: 20  },  // baseline
-        { duration: '30s',   target: 500 },  // surge up
-        { duration: '1m',    target: 500 },  // sustained peak
-        { duration: '30s',   target: 20  },  // drop back
-        { duration: '2m30s', target: 20  },  // confirm recovered
+        { duration: '2m',    target: 5   },  // baseline (2 vCPU / 4 GB droplet)
+        { duration: '30s',   target: 80  },  // surge up
+        { duration: '1m',    target: 80  },  // sustained peak
+        { duration: '30s',   target: 5   },  // drop back
+        { duration: '2m30s', target: 5   },  // confirm recovered
       ],
       exec: 'weightedJourney',
       gracefulRampDown: '30s',

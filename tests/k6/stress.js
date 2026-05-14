@@ -4,9 +4,9 @@
 //
 // Goal: find the BREAKING POINT (the VU level at which p95 first exceeds 2s
 //       OR error rate first exceeds 5%).
-// Profile: stepped ramp 50 → 100 → 200 → 300 → 500 VUs, 2 min per step.
-// Thresholds: relaxed — we want the test to run all stages so post-run
-//             analysis can identify the breaking step.
+// Profile: stepped ramp 10 → 20 → 40 → 60 → 80 VUs, 2 min per step,
+//          Thresholds relaxed — we want the test to run all stages so
+//          post-run analysis can identify the breaking step.
 //
 // Usage:
 //   k6 run --out json=reports/stress.json tests/k6/stress.js
@@ -22,12 +22,11 @@ export const options = {
       executor: 'ramping-vus',
       startVUs: 0,
       stages: [
-        { duration: '2m', target: 50  },
-        { duration: '2m', target: 100 },
-        { duration: '2m', target: 200 },
-        { duration: '2m', target: 300 },
-        { duration: '2m', target: 500 },
-        { duration: '1m', target: 0   },
+        { duration: '2m', target: 10  },  // warm up (2 vCPU / 4 GB droplet)
+        { duration: '2m', target: 20  },
+        { duration: '2m', target: 40  },
+        { duration: '2m', target: 60  },
+        { duration: '2m', target: 80  },  // likely breaking point for this spec
       ],
       exec: 'weightedJourney',
       gracefulRampDown: '30s',
