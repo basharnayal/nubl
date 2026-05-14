@@ -29,13 +29,14 @@ export const baseThresholds = {
 
 // ---- Stress overrides — we deliberately want the test to keep running ----
 // past breaches so we can identify the breaking point.
+// Tuned for a 2 vCPU / 4 GB droplet — breaking point expected ~60-80 VUs.
 export const stressOverrides = {
   // Drop abortOnFail and relax the rate to 10%.
   'http_req_failed': ['rate<0.10'],
   // Latency expectations are LOOSENED for stress — we're not gating on SLO
   // here, we're mapping the degradation curve.
-  'http_req_duration{type:read}':  ['p(95)<5000'],
-  'http_req_duration{type:write}': ['p(95)<8000'],
+  'http_req_duration{type:read}':  ['p(95)<4000'],
+  'http_req_duration{type:write}': ['p(95)<6000'],
   // The 429 guard stays at 0 — config drift is still a defect under stress.
   'http_429_unexpected': ['count<10'],
 };
@@ -59,10 +60,10 @@ export const spikeThresholds = {
   'http_429_unexpected': ['count==0'],
 };
 
-// ---- Soak thresholds — adds drift detection over the test duration -------
+// ---- Endurance thresholds — adds drift detection over the test duration -------
 // `window:early` / `window:late` tags are stamped inside lib/personas.js
 // (first 15 min vs last 15 min of the run).
-export const soakThresholds = {
+export const enduranceThresholds = {
   ...baseThresholds,
   'http_req_duration{window:early,type:read}':  ['p(95)<1000'],
   'http_req_duration{window:late,type:read}':   ['p(95)<1200'], // <20% drift

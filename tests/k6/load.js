@@ -3,8 +3,9 @@
 // LOAD TEST — perf_test_plan.md §7 / §9.1
 //
 // Goal: validate SLOs (perf_test_plan.md §5) at expected peak.
-// Profile: constant-arrival-rate, anchor = NUBL_LOAD_RPM (default 1000 RPM),
+// Profile: constant-arrival-rate, anchor = NUBL_LOAD_RPM (default 250 RPM),
 //          distributed across 11 personas by the workload weights.
+//          10-min gap between tests is handled by the run command.
 //
 // Usage:
 //   k6 run \
@@ -36,8 +37,8 @@ export {
 export const options = {
   scenarios: buildArrivalScenarios(LOAD_ANCHOR_RPM, {
     duration: '15m',
-    preAllocatedVUs: 100,
-    maxVUs: 250,
+    preAllocatedVUs: 30,
+    maxVUs: 80,
   }),
   thresholds: baseThresholds,
   noConnectionReuse: false,

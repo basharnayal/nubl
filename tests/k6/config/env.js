@@ -16,8 +16,9 @@ export const PAYMENT_CALLBACK_PATH = '/payments/callback';
 
 // Anchor request-per-minute for the Load test. Scaled per-scenario by the
 // workload weights in lib/workload.js.
-export const LOAD_ANCHOR_RPM = Number(env('NUBL_LOAD_RPM', 1000));
-export const SOAK_ANCHOR_RPM = Number(env('NUBL_SOAK_RPM', 600));
+// Defaults tuned for a DigitalOcean 2 vCPU / 4 GB droplet.
+export const LOAD_ANCHOR_RPM      = Number(env('NUBL_LOAD_RPM',      250));
+export const ENDURANCE_ANCHOR_RPM = Number(env('NUBL_ENDURANCE_RPM', 150));
 
 // Default sleep / think-time (seconds). Randomized inside helpers.
 export const THINK_MIN = Number(env('NUBL_THINK_MIN', 1));
@@ -40,6 +41,6 @@ export const NO_SLEEP = env('NUBL_NO_SLEEP', 'false') === 'true';
 export const USERS_CSV_PATH = env('NUBL_USERS_CSV', 'tests/k6/data/users.csv');
 
 // Maximum donation amount used in donor + guest flows (SAR).
-// Kept small to avoid blowing the recipient weekly allowance during soak.
+// Kept small to avoid blowing the recipient weekly allowance during endurance.
 export const DONATION_MIN = Number(env('NUBL_DONATION_MIN', 1));
 export const DONATION_MAX = Number(env('NUBL_DONATION_MAX', 25));
