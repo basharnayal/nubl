@@ -146,6 +146,7 @@ class RecipientRequestSubmissionTest extends TestCase
     #[Test]
     public function weekly_allowance_exceeded_prompts_for_admin_review_without_creating_request()
     {
+        config(['recipient.weekly_allowance_limit' => 400]);
         Queue::fake();
 
         Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00')); // Wednesday
@@ -183,6 +184,7 @@ class RecipientRequestSubmissionTest extends TestCase
     #[Test]
     public function exceeds_allowance_displays_user_friendly_message_fr_6_3(): void
     {
+        config(['recipient.weekly_allowance_limit' => 400]);
         Queue::fake();
         Carbon::setTestNow(Carbon::parse('2024-01-10 12:00:00'));
 
@@ -209,7 +211,7 @@ class RecipientRequestSubmissionTest extends TestCase
                 ],
             ]);
 
-        $response->assertSee(__('Your request exceeds your available allowance for this period.'));
+        $response->assertSee(__('Your request amount exceeds the available weekly allowance. You can cancel to reconsider, or send the request for manual admin review.'));
 
         Carbon::setTestNow();
     }
@@ -217,6 +219,7 @@ class RecipientRequestSubmissionTest extends TestCase
     #[Test]
     public function allowance_prompt_does_not_start_submit_cooldown(): void
     {
+        config(['recipient.weekly_allowance_limit' => 400]);
         config(['recipient.allowance_retry_delay_seconds' => 2]);
         config(['recipient.fund_retry_delay_seconds' => 2]);
         Queue::fake();
