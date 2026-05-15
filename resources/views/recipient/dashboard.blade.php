@@ -140,39 +140,11 @@
                             $reqProvider = $req->provider;
                             $reqProviderTitle = \App\Support\ProviderDisplay::businessTitle($reqProvider->providerProfile, $reqProvider->name);
 
-                            $statusCard = \App\Support\RecipientRequestStatusPresenter::card($req, false);
-                            $steps = array_slice($statusCard['steps'] ?? [], 0, 4);
-                            $doneCount = collect($steps)->filter(fn ($s) => ($s['state'] ?? 'pending') === 'done')->count();
-                            $currentIndex = collect($steps)->search(fn ($s) => ($s['state'] ?? 'pending') === 'current');
-                            $currentIndex = $currentIndex === false ? null : (int) $currentIndex;
-                            $totalSteps = max(1, count($steps));
-                            $progressIndex = $currentIndex ?? $doneCount;
-                            $progressPct = $totalSteps <= 1 ? 0 : (int) round(($progressIndex / ($totalSteps - 1)) * 100);
-
-                            $barColorClass = match ($req->status) {
-                                'FULFILLED' => 'bg-success',
-                                'REDEEMABLE', 'APPROVED', 'ADMIN_APPROVED' => 'bg-info',
-                                'CANCELLED', 'CANCELED', 'REJECTED', 'ADMIN_REJECTED' => 'bg-amber-500',
-                                default => 'bg-amber-500',
-                            };
-
                             $statusTextClass = match ($req->status) {
                                 'FULFILLED' => 'text-success',
                                 'REDEEMABLE', 'APPROVED', 'ADMIN_APPROVED' => 'text-info',
                                 'CANCELLED', 'CANCELED', 'REJECTED', 'ADMIN_REJECTED' => 'text-amber-600 dark:text-amber-400',
                                 default => 'text-amber-600 dark:text-amber-400',
-                            };
-
-                            $iconBgClass = match ($req->status) {
-                                'FULFILLED' => 'bg-success/10',
-                                'REDEEMABLE', 'APPROVED', 'ADMIN_APPROVED' => 'bg-info/10',
-                                default => 'bg-amber-100 dark:bg-amber-500/15',
-                            };
-
-                            $iconTextClass = match ($req->status) {
-                                'FULFILLED' => 'text-success',
-                                'REDEEMABLE', 'APPROVED', 'ADMIN_APPROVED' => 'text-info',
-                                default => 'text-amber-600 dark:text-amber-300',
                             };
                         @endphp
                         <a href="{{ route('recipient.requests.show', $req->id) }}" class="card block p-3 hover:bg-slate-50 dark:hover:bg-navy-600/50 transition-colors">
