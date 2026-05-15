@@ -190,40 +190,7 @@
                                 </div>
                                 <p class="max-w-[42%] shrink-0 text-end text-xs leading-snug font-medium sm:max-w-[36%] {{ $statusTextClass }}">{{ $statusLabels[$req->status] ?? str_replace('_', ' ', $req->status) }}</p>
                             </div>
-                            @php
-                                // Render the same "connector line" logic as the hero (solid when left is done and right is done/current).
-                                $lineStatic = in_array($req->status, ['FULFILLED', 'CANCELLED', 'CANCELED'], true);
-                                $solidShimmerClass = $lineStatic ? '' : 'animate-[recipient-step-line-shimmer_1.65s_linear_infinite]';
-                                $dashFlowClass = $lineStatic ? '' : 'animate-[recipient-step-dash-flow_0.95s_linear_infinite]';
-                                $isCancelled = in_array($req->status, ['CANCELLED', 'CANCELED'], true);
-                                $segSolid = [];
-                                for ($i = 1; $i < count($steps); $i++) {
-                                    $left = $steps[$i - 1]['state'] ?? 'pending';
-                                    $right = $steps[$i]['state'] ?? 'pending';
-                                    $segSolid[$i] = $left === 'done' && in_array($right, ['done', 'current'], true);
-                                }
-                            @endphp
-                            @if($isCancelled)
-                                <div class="mt-2 flex items-center">
-                                    <div class="flex size-6 items-center justify-center rounded-full bg-slate-200/80 text-slate-600 dark:bg-navy-500 dark:text-navy-200">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M18.364 5.636 5.636 18.364M5.636 5.636l12.728 12.728" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            @else
-                                <div class="mt-2 grid grid-cols-3 gap-x-2">
-                                    @for($i = 1; $i < 4; $i++)
-                                        @if(($segSolid[$i] ?? false) === true)
-                                            <div class="relative h-1 w-full overflow-hidden rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] {{ $barColorClass }}">
-                                                <span class="pointer-events-none absolute inset-y-0 left-0 w-[min(72%,11rem)] -translate-x-full bg-gradient-to-r from-transparent via-white/95 to-transparent motion-reduce:animate-none dark:via-white/50 dark:from-transparent dark:to-transparent {{ $solidShimmerClass }} [mask-image:linear-gradient(90deg,transparent_0%,black_18%,black_82%,transparent_100%)]"></span>
-                                            </div>
-                                        @else
-                                            <div class="h-1 w-full rounded-full bg-[repeating-linear-gradient(90deg,rgb(148_163_184)_0px,rgb(148_163_184)_6px,transparent_6px,transparent_14px)] bg-[length:24px_100%] shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] motion-reduce:animate-none {{ $dashFlowClass }} dark:bg-[repeating-linear-gradient(90deg,rgb(173_181_189)_0px,rgb(173_181_189)_6px,transparent_6px,transparent_14px)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"></div>
-                                        @endif
-                                    @endfor
-                                </div>
-                            @endif
+
                         </a>
                         @empty
                         <div class="card p-3 text-center text-slate-500 dark:text-navy-400">
@@ -342,14 +309,14 @@
                         <div class="space-y-1 text-center font-inter text-xs-plus">
                             <div class="flex items-center justify-between px-2 pb-4">
                                 <p class="font-medium text-slate-700 dark:text-navy-100">{{ now()->locale(app()->getLocale())->translatedFormat('F Y') }}</p>
-                                <div class="-mr-1.5 flex space-x-2">
+                                <div class="-mr-1.5 rtl:-ml-1.5 rtl:-mr-0 flex space-x-2 rtl:space-x-reverse">
                                     <button class="btn size-7 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7" />
                                         </svg>
                                     </button>
                                     <button class="btn size-7 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7" />
                                         </svg>
                                     </button>
