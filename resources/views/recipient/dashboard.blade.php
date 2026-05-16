@@ -399,15 +399,23 @@
                                         const dateStr = `${year}-${month}-${day}`;
 
                                         const response = await fetch(`{{ route('recipient.chart-data.api') }}?date=${dateStr}`);
-                                        const data = await response.json();
+                                        if (!response.ok) {
+                                            throw new Error(`Failed to load chart data: ${response.status}`);
+                                        }
 
-                                        this.rangeText = data.rangeText;
+                                        const data = await response.json();
+                                        if (!Array.isArray(data?.series) || !Array.isArray(data?.categories)) {
+                                            throw new Error('Invalid chart data payload.');
+                                        }
+
+                                        const selectedIndex = Number.isInteger(data.selectedIndex) ? data.selectedIndex : -1;
+                                        this.rangeText = typeof data.rangeText === 'string' ? data.rangeText : this.rangeText;
 
                                         const chartEl = document.getElementById('activity-chart');
                                         if (chartEl && chartEl._x_chart) {
                                             const baseColor = '#5e5ae2';
                                             const highlightColor = '#3b82f6';
-                                            const newColors = data.series.map((_, i) => i === data.selectedIndex ? highlightColor : baseColor);
+                                            const newColors = data.series.map((_, i) => i === selectedIndex ? highlightColor : baseColor);
 
                                             chartEl._x_chart.updateOptions({
                                                 xaxis: { categories: data.categories },
