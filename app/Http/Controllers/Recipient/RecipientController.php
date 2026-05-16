@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Recipient;
 
 use App\Http\Controllers\Controller;
-use App\Models\Request as RequestModel;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class RecipientController extends Controller
@@ -25,7 +23,19 @@ class RecipientController extends Controller
 
     public function chartDataApi(Request $request): \Illuminate\Http\JsonResponse
     {
-        $date = $request->query('date') ? Carbon::parse($request->query('date')) : Carbon::now();
+        $validator = validator($request->query(), [
+            'date' => ['nullable', 'date'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'The given data was invalid.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        $dateValue = $validator->validated()['date'] ?? null;
+        $date = $dateValue ? Carbon::parse($dateValue) : Carbon::now();
         $recipientId = $request->user()->id;
 
         $data = $this->dashboardService->activityChartData($recipientId, $date);

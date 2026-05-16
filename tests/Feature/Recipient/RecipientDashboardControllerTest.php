@@ -206,6 +206,22 @@ class RecipientDashboardControllerTest extends TestCase
         $response->assertDontSee('Inactive Meal');
     }
 
+    #[Test]
+    public function chart_data_api_rejects_invalid_date_query(): void
+    {
+        $recipient = User::factory()->create([
+            'membership_type' => User::MEMBERSHIP_RECIPIENT,
+            'status' => User::STATUS_ACTIVE,
+            'is_active' => true,
+        ]);
+        $recipient->assignRole('recipient');
+
+        $this->actingAs($recipient)
+            ->get(route('recipient.chart-data.api', ['date' => 'abc']))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['date']);
+    }
+
     private function createProvider(string $email, string $businessName): User
     {
         $provider = User::factory()->create([
