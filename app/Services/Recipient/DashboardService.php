@@ -137,7 +137,7 @@ class DashboardService
         if (app()->getLocale() === 'ar') {
             $categories = array_reverse($categories);
             $series = array_reverse($series);
-            $selectedIndex = 6 - $selectedIndex;
+            $selectedIndex = $selectedIndex >= 0 ? 6 - $selectedIndex : -1;
         }
 
         return [
