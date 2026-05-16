@@ -29,7 +29,7 @@ class RecipientController extends Controller
 
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'The given data was invalid.',
+                'message' => 'Invalid date format provided.',
                 'errors' => $validator->errors(),
             ], 422);
         }
