@@ -332,114 +332,6 @@
                             </div>
                         </div>
                     </div>
-                    <script>
-                        function recipientDashboard() {
-                            return {
-                                selectedDate: new Date(),
-                                currentMonth: new Date().getMonth(),
-                                currentYear: new Date().getFullYear(),
-                                rangeText: '{{ $activityChartData["rangeText"] ?? "" }}',
-                                isLoading: false,
-                                days: [],
-                                blankDays: [],
-
-                                init() {
-                                    this.generateCalendar();
-                                },
-
-                                generateCalendar() {
-                                    const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
-                                    const firstDayOfMonth = new Date(this.currentYear, this.currentMonth, 1).getDay();
-
-                                    this.blankDays = Array.from({ length: firstDayOfMonth }, (_, i) => i);
-                                    this.days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
-                                },
-
-                                prevMonth() {
-                                    if (this.currentMonth === 0) {
-                                        this.currentMonth = 11;
-                                        this.currentYear--;
-                                    } else {
-                                        this.currentMonth--;
-                                    }
-                                    this.generateCalendar();
-                                },
-
-                                nextMonth() {
-                                    if (this.currentMonth === 11) {
-                                        this.currentMonth = 0;
-                                        this.currentYear++;
-                                    } else {
-                                        this.currentMonth++;
-                                    }
-                                    this.generateCalendar();
-                                },
-
-                                isSelected(day) {
-                                    const d = new Date(this.currentYear, this.currentMonth, day);
-                                    return d.toDateString() === this.selectedDate.toDateString();
-                                },
-
-                                isToday(day) {
-                                    const d = new Date(this.currentYear, this.currentMonth, day);
-                                    return d.toDateString() === new Date().toDateString();
-                                },
-
-                                async selectDay(day) {
-                                    this.selectedDate = new Date(this.currentYear, this.currentMonth, day);
-                                    await this.updateChart();
-                                },
-
-                                async updateChart() {
-                                    this.isLoading = true;
-                                    try {
-                                        const year = this.selectedDate.getFullYear();
-                                        const month = String(this.selectedDate.getMonth() + 1).padStart(2, '0');
-                                        const day = String(this.selectedDate.getDate()).padStart(2, '0');
-                                        const dateStr = `${year}-${month}-${day}`;
-
-                                        const response = await fetch(`{{ route('recipient.chart-data.api') }}?date=${dateStr}`);
-                                        if (!response.ok) {
-                                            throw new Error(`Failed to load chart data: ${response.status}`);
-                                        }
-
-                                        const data = await response.json();
-                                        if (!Array.isArray(data?.series) || !Array.isArray(data?.categories)) {
-                                            throw new Error('Invalid chart data payload.');
-                                        }
-
-                                        const parsedSelectedIndex = Number(data.selectedIndex);
-                                        const selectedIndex = Number.isInteger(parsedSelectedIndex) ? parsedSelectedIndex : -1;
-                                        this.rangeText = typeof data.rangeText === 'string' ? data.rangeText : this.rangeText;
-
-                                        const chartEl = document.getElementById('activity-chart');
-                                        if (chartEl && chartEl._x_chart) {
-                                            const baseColor = '#5e5ae2';
-                                            const highlightColor = '#3b82f6';
-                                            const newColors = data.series.map((_, i) => i === selectedIndex ? highlightColor : baseColor);
-
-                                            chartEl._x_chart.updateOptions({
-                                                xaxis: { categories: data.categories },
-                                                colors: newColors
-                                            });
-                                            chartEl._x_chart.updateSeries([{
-                                                name: '{{ __("Amount Spent") }}',
-                                                data: data.series
-                                            }]);
-                                        }
-                                    } catch (e) {
-                                        console.error(e);
-                                    } finally {
-                                        this.isLoading = false;
-                                    }
-                                },
-
-                                getMonthName() {
-                                    return new Intl.DateTimeFormat('{{ app()->getLocale() }}', { month: 'long', year: 'numeric' }).format(new Date(this.currentYear, this.currentMonth));
-                                }
-                            }
-                        }
-                    </script>
                     <div class="card">
                         <div class="p-4 sm:p-5">
                             <div class="flex items-center justify-between">
@@ -480,4 +372,114 @@
                 </div>
             </div>
         </div>
+    @once
+        <script>
+            function recipientDashboard() {
+                return {
+                    selectedDate: new Date(),
+                    currentMonth: new Date().getMonth(),
+                    currentYear: new Date().getFullYear(),
+                    rangeText: '{{ $activityChartData["rangeText"] ?? "" }}',
+                    isLoading: false,
+                    days: [],
+                    blankDays: [],
+
+                    init() {
+                        this.generateCalendar();
+                    },
+
+                    generateCalendar() {
+                        const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
+                        const firstDayOfMonth = new Date(this.currentYear, this.currentMonth, 1).getDay();
+
+                        this.blankDays = Array.from({ length: firstDayOfMonth }, (_, i) => i);
+                        this.days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+                    },
+
+                    prevMonth() {
+                        if (this.currentMonth === 0) {
+                            this.currentMonth = 11;
+                            this.currentYear--;
+                        } else {
+                            this.currentMonth--;
+                        }
+                        this.generateCalendar();
+                    },
+
+                    nextMonth() {
+                        if (this.currentMonth === 11) {
+                            this.currentMonth = 0;
+                            this.currentYear++;
+                        } else {
+                            this.currentMonth++;
+                        }
+                        this.generateCalendar();
+                    },
+
+                    isSelected(day) {
+                        const d = new Date(this.currentYear, this.currentMonth, day);
+                        return d.toDateString() === this.selectedDate.toDateString();
+                    },
+
+                    isToday(day) {
+                        const d = new Date(this.currentYear, this.currentMonth, day);
+                        return d.toDateString() === new Date().toDateString();
+                    },
+
+                    async selectDay(day) {
+                        this.selectedDate = new Date(this.currentYear, this.currentMonth, day);
+                        await this.updateChart();
+                    },
+
+                    async updateChart() {
+                        this.isLoading = true;
+                        try {
+                            const year = this.selectedDate.getFullYear();
+                            const month = String(this.selectedDate.getMonth() + 1).padStart(2, '0');
+                            const day = String(this.selectedDate.getDate()).padStart(2, '0');
+                            const dateStr = `${year}-${month}-${day}`;
+
+                            const response = await fetch(`{{ route('recipient.chart-data.api') }}?date=${dateStr}`);
+                            if (!response.ok) {
+                                throw new Error(`Failed to load chart data: ${response.status}`);
+                            }
+
+                            const data = await response.json();
+                            if (!Array.isArray(data?.series) || !Array.isArray(data?.categories)) {
+                                throw new Error('Invalid chart data payload.');
+                            }
+
+                            const parsedSelectedIndex = Number(data.selectedIndex);
+                            const selectedIndex = Number.isInteger(parsedSelectedIndex) ? parsedSelectedIndex : -1;
+                            this.rangeText = typeof data.rangeText === 'string' ? data.rangeText : this.rangeText;
+
+                            const chartEl = document.getElementById('activity-chart');
+                            if (chartEl && chartEl._x_chart) {
+                                const baseColor = '#5e5ae2';
+                                const highlightColor = '#3b82f6';
+                                const newColors = data.series.map((_, i) => i === selectedIndex ? highlightColor : baseColor);
+
+                                chartEl._x_chart.updateOptions({
+                                    xaxis: { categories: data.categories },
+                                    colors: newColors
+                                });
+                                chartEl._x_chart.updateSeries([{
+                                    name: '{{ __("Amount Spent") }}',
+                                    data: data.series
+                                }]);
+                            }
+                        } catch (e) {
+                            console.error(e);
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    },
+
+                    getMonthName() {
+                        return new Intl.DateTimeFormat('{{ app()->getLocale() }}', { month: 'long', year: 'numeric' }).format(new Date(this.currentYear, this.currentMonth));
+                    }
+                }
+            }
+        </script>
+    @endonce
 </x-app-layout>
