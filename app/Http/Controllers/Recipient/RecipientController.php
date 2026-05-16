@@ -102,12 +102,26 @@ class RecipientController extends Controller
         ]);
     }
 
-    /**
-     * Build chart data for Activity Overview: amount spent (fulfilled) per day for the last 7 days.
-     */
-    private function activityChartData(int $recipientId): array
+    public function chartDataApi(Request $request): \Illuminate\Http\JsonResponse
     {
-        $startDate = Carbon::now()->subDays(6)->startOfDay();
+        $date = $request->query('date') ? Carbon::parse($request->query('date')) : Carbon::now();
+        $recipientId = $request->user()->id;
+
+        $data = $this->activityChartData($recipientId, $date);
+
+        return response()->json($data);
+    }
+
+    /**
+     * Build chart data for Activity Overview: amount spent (fulfilled) per day for the week containing the given date.
+     */
+    private function activityChartData(int $recipientId, ?Carbon $selectedDate = null): array
+    {
+        $selectedDate = $selectedDate ?? Carbon::now();
+        // Fixed week: Sunday to Saturday
+        $startDate = (clone $selectedDate)->startOfWeek(Carbon::SUNDAY);
+        $endDate = (clone $selectedDate)->endOfWeek(Carbon::SATURDAY);
+
         $dayExpression = DB::connection()->getDriverName() === 'sqlite'
             ? "strftime('%Y-%m-%d', created_at)"
             : 'DATE(created_at)';
@@ -115,22 +129,37 @@ class RecipientController extends Controller
         $daily = RequestModel::forRecipient($recipientId)
             ->where('status', 'FULFILLED')
             ->where('created_at', '>=', $startDate)
+            ->where('created_at', '<=', $endDate)
             ->selectRaw("{$dayExpression} as day, COALESCE(SUM(reserved_amount), 0) as total")
             ->groupByRaw($dayExpression)
             ->pluck('total', 'day');
 
         $categories = [];
         $series = [];
+        $selectedIndex = -1;
 
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i);
+        for ($i = 0; $i < 7; $i++) {
+            $date = (clone $startDate)->addDays($i);
             $categories[] = $date->translatedFormat('D');
             $series[] = (float) ($daily[$date->format('Y-m-d')] ?? 0);
+            
+            if ($date->isSameDay($selectedDate)) {
+                $selectedIndex = $i;
+            }
+        }
+
+        // Handle RTL manually by reversing data for Arabic
+        if (app()->getLocale() === 'ar') {
+            $categories = array_reverse($categories);
+            $series = array_reverse($series);
+            $selectedIndex = 6 - $selectedIndex;
         }
 
         return [
             'categories' => $categories,
             'series' => $series,
+            'selectedIndex' => $selectedIndex,
+            'rangeText' => $startDate->translatedFormat('d M') . ' - ' . $endDate->translatedFormat('d M, Y'),
         ];
     }
 
