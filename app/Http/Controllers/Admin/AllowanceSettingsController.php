@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SystemSetting;
 use App\Services\AuditService;
-use App\Services\RecipientAllowanceService;
+use App\Services\Recipient\AllowanceService;
 use App\Support\WeeklyAllowanceSettings;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,7 +26,7 @@ class AllowanceSettingsController extends Controller
 
         return view(
             'admin.settings.allowance',
-            RecipientAllowanceService::adminAllowanceSettingsPageData()
+            AllowanceService::adminAllowanceSettingsPageData()
         );
     }
 
@@ -41,7 +41,7 @@ class AllowanceSettingsController extends Controller
             'weekly_allowance_sar' => ['required', 'numeric', 'min:'.$min, 'max:'.$max],
         ]);
 
-        RecipientAllowanceService::schedulePendingWeeklyAllowanceChange(
+        AllowanceService::schedulePendingWeeklyAllowanceChange(
             (float) $validated['weekly_allowance_sar'],
             $request->user()
         );

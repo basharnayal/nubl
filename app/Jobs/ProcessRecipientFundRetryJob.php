@@ -5,8 +5,8 @@ namespace App\Jobs;
 use App\Models\User;
 use App\Services\AllocationService;
 use App\Services\AuditService;
-use App\Services\RecipientAllowanceService;
-use App\Services\RecipientRequestSubmissionService;
+use App\Services\Recipient\AllowanceService;
+use App\Services\Recipient\RequestSubmissionService;
 use App\Support\RecipientFundRetryCache;
 use App\Support\RecipientRequestSubmitCooldown;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -26,7 +26,7 @@ class ProcessRecipientFundRetryJob implements ShouldQueue
     ) {}
 
     public function handle(
-        RecipientRequestSubmissionService $submissionService,
+        RequestSubmissionService $submissionService,
         AllocationService $allocationService,
         AuditService $auditService
     ): void {
@@ -67,7 +67,7 @@ class ProcessRecipientFundRetryJob implements ShouldQueue
 
         $totalAmount = $computed['total'];
 
-        if (RecipientAllowanceService::wouldExceedAllowance($this->userId, $totalAmount)) {
+        if (AllowanceService::wouldExceedAllowance($this->userId, $totalAmount)) {
             $auditService->log('request', 'fund_retry_skipped_allowance', [
                 'recipient_id' => $this->userId,
                 'amount' => $totalAmount,

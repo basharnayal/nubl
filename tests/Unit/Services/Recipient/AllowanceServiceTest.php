@@ -1,17 +1,17 @@
 <?php
 
-namespace Tests\Unit\Services;
+namespace Tests\Unit\Services\Recipient;
 
 use App\Models\ProviderMenuItem;
 use App\Models\Request as RequestModel;
 use App\Models\User;
-use App\Services\RecipientAllowanceService;
+use App\Services\Recipient\AllowanceService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-class RecipientAllowanceServiceTest extends TestCase
+class AllowanceServiceTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -50,7 +50,7 @@ class RecipientAllowanceServiceTest extends TestCase
             'price_snapshot' => 25.00,
         ]);
 
-        $this->assertSame(100.0, RecipientAllowanceService::getWeeklyUsed($recipient->id));
+        $this->assertSame(100.0, AllowanceService::getWeeklyUsed($recipient->id));
     }
 
     #[Test]
@@ -80,7 +80,7 @@ class RecipientAllowanceServiceTest extends TestCase
             'price_snapshot' => 200.00,
         ]);
 
-        $this->assertSame(0.0, RecipientAllowanceService::getWeeklyUsed($recipient->id));
+        $this->assertSame(0.0, AllowanceService::getWeeklyUsed($recipient->id));
     }
 
     #[Test]
@@ -111,7 +111,7 @@ class RecipientAllowanceServiceTest extends TestCase
             'price_snapshot' => 150.00,
         ]);
 
-        $this->assertSame(0.0, RecipientAllowanceService::getRemainingLimit($recipient->id));
+        $this->assertSame(0.0, AllowanceService::getRemainingLimit($recipient->id));
     }
 
     #[Test]
@@ -142,7 +142,7 @@ class RecipientAllowanceServiceTest extends TestCase
             'price_snapshot' => 200.00,
         ]);
 
-        $this->assertSame(0.0, RecipientAllowanceService::getWeeklyUsed($recipient->id));
+        $this->assertSame(0.0, AllowanceService::getWeeklyUsed($recipient->id));
     }
 
     #[Test]
@@ -173,7 +173,7 @@ class RecipientAllowanceServiceTest extends TestCase
             'price_snapshot' => 300.00,
         ]);
 
-        $this->assertFalse(RecipientAllowanceService::wouldExceedAllowance($recipient->id, 50.0));
-        $this->assertTrue(RecipientAllowanceService::wouldExceedAllowance($recipient->id, 150.0));
+        $this->assertFalse(AllowanceService::wouldExceedAllowance($recipient->id, 50.0));
+        $this->assertTrue(AllowanceService::wouldExceedAllowance($recipient->id, 150.0));
     }
 }
