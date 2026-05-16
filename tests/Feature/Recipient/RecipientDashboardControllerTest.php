@@ -132,6 +132,7 @@ class RecipientDashboardControllerTest extends TestCase
         // Activity chart: one bucket per day for the last 7 days (today + 6 prior).
         $this->assertCount(7, $chart['categories']);
         $this->assertCount(7, $chart['series']);
+        $this->assertSame(6, $chart['selectedIndex']);
     }
 
     #[Test]
@@ -204,6 +205,22 @@ class RecipientDashboardControllerTest extends TestCase
         $response->assertViewIs('recipient.provider-menu');
         $response->assertSee('Active Meal');
         $response->assertDontSee('Inactive Meal');
+    }
+
+    #[Test]
+    public function chart_data_api_rejects_invalid_date_query(): void
+    {
+        $recipient = User::factory()->create([
+            'membership_type' => User::MEMBERSHIP_RECIPIENT,
+            'status' => User::STATUS_ACTIVE,
+            'is_active' => true,
+        ]);
+        $recipient->assignRole('recipient');
+
+        $this->actingAs($recipient)
+            ->get(route('recipient.chart-data.api', ['date' => 'abc']))
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['date']);
     }
 
     private function createProvider(string $email, string $businessName): User

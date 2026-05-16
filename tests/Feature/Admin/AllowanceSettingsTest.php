@@ -5,7 +5,7 @@ namespace Tests\Feature\Admin;
 use App\Models\SystemSetting;
 use App\Models\User;
 use App\Notifications\WeeklyAllowanceNotification;
-use App\Services\RecipientAllowanceService;
+use App\Services\Recipient\AllowanceService;
 use App\Support\WeeklyAllowanceSettings;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -147,10 +147,10 @@ class AllowanceSettingsTest extends TestCase
             Carbon::parse('2026-04-12 00:00:00', 'UTC')->toIso8601String()
         );
 
-        $this->assertSame(400.0, RecipientAllowanceService::weeklyLimit());
+        $this->assertSame(400.0, AllowanceService::weeklyLimit());
 
         Carbon::setTestNow(Carbon::parse('2026-04-12 00:00:01', 'UTC'));
-        $this->assertSame(300.0, RecipientAllowanceService::weeklyLimit());
+        $this->assertSame(300.0, AllowanceService::weeklyLimit());
         $this->assertSame('300.00', SystemSetting::getValue(WeeklyAllowanceSettings::KEY_ACTIVE));
         $this->assertNull(SystemSetting::getValue(WeeklyAllowanceSettings::KEY_PENDING_VALUE));
 

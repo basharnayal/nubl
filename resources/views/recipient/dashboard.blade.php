@@ -246,48 +246,63 @@
                 </div>
             </div>
             {{-- Sidebar --}}
-            <div class="col-span-12 lg:col-span-4">
+            <div class="col-span-12 lg:col-span-4" x-data="recipientDashboard()">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-1 lg:gap-6">
                     <div class="card">
-                        <div class="mt-3 flex h-8 items-center justify-between px-4 sm:px-5">
+                        <div class="mt-3 flex items-center justify-between px-4 sm:px-5">
                             <h2 class="font-medium tracking-wide text-slate-700 line-clamp-1 dark:text-navy-100">
                                 {{ __('Activity Overview') }}
                             </h2>
+                            <div class="text-xs text-slate-400 dark:text-navy-300" x-text="rangeText">
+                                {{ $activityChartData['rangeText'] ?? '' }}
+                            </div>
                         </div>
-                        <div class="ax-transparent-gridline pr-2 min-h-[250px]"
+                        <div id="activity-chart" class="ax-transparent-gridline pr-2 min-h-[250px]"
+                             :class="isLoading && 'opacity-50 pointer-events-none'"
                              data-chart-series="{{ json_encode($activityChartData['series'] ?? []) }}"
                              data-chart-categories="{{ json_encode($activityChartData['categories'] ?? []) }}"
+                             data-chart-selected-index="{{ $activityChartData['selectedIndex'] ?? -1 }}"
                              data-chart-label="{{ json_encode(__('Amount Spent')) }}"
-                             x-data="{
-                                async init() {
-                                    await $nextTick();
-                                    if (this.$el._x_chart) return;
-                                    const ApexCharts = await window.loadApexCharts();
-                                    const config = { ...pages.charts.incomePersonal };
-                                    const series = JSON.parse(this.$el.dataset.chartSeries);
-                                    const categories = JSON.parse(this.$el.dataset.chartCategories);
-                                    const label = JSON.parse(this.$el.dataset.chartLabel);
-                                    config.series = [{ name: label, data: series }];
-                                    config.xaxis = { ...config.xaxis, categories };
-                                    if (series.every(v => v === 0)) {
-                                        config.yaxis = { ...config.yaxis, min: 0, max: 5, forceNiceScale: true };
-                                    }
-                                    this.$el._x_chart = new ApexCharts(this.$el, config);
-                                    this.$el._x_chart.render();
-                                }
+                             x-init="async () => {
+                                 const ApexCharts = await window.loadApexCharts();
+                                 const config = { ...pages.charts.incomePersonal };
+                                 const series = JSON.parse($el.dataset.chartSeries);
+                                 const categories = JSON.parse($el.dataset.chartCategories);
+                                 const selectedIndex = parseInt($el.dataset.chartSelectedIndex);
+                                 const label = JSON.parse($el.dataset.chartLabel);
+                                 
+                                 config.series = [{ name: label, data: series }];
+                                 config.xaxis = { ...config.xaxis, categories };
+                                 
+                                 // Define colors: highlight the selected index
+                                 const baseColor = '#5e5ae2'; // Default blue-ish
+                                 const highlightColor = '#3b82f6'; // Brighter blue for highlight
+                                 
+                                 config.colors = series.map((_, i) => i === selectedIndex ? highlightColor : baseColor);
+                                 config.plotOptions = {
+                                     ...config.plotOptions,
+                                     bar: { ...config.plotOptions?.bar, distributed: true }
+                                 };
+                                 config.legend = { ...config.legend, show: false };
+
+                                 if (series.every(v => v === 0)) {
+                                     config.yaxis = { ...config.yaxis, min: 0, max: 5, forceNiceScale: true };
+                                 }
+                                 $el._x_chart = new ApexCharts($el, config);
+                                 $el._x_chart.render();
                              }"></div>
                     </div>
                     <div class="card p-4">
                         <div class="space-y-1 text-center font-inter text-xs-plus">
                             <div class="flex items-center justify-between px-2 pb-4">
-                                <p class="font-medium text-slate-700 dark:text-navy-100">{{ now()->locale(app()->getLocale())->translatedFormat('F Y') }}</p>
+                                <p class="font-medium text-slate-700 dark:text-navy-100" x-text="getMonthName()"></p>
                                 <div class="-mr-1.5 rtl:-ml-1.5 rtl:-mr-0 flex space-x-2 rtl:space-x-reverse">
-                                    <button class="btn size-7 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
+                                    <button @click="prevMonth()" class="btn size-7 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="size-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7" />
                                         </svg>
                                     </button>
-                                    <button class="btn size-7 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
+                                    <button @click="nextMonth()" class="btn size-7 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="size-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7" />
                                         </svg>
@@ -300,12 +315,21 @@
                                 @endforeach
                             </div>
                             <div class="grid grid-cols-7 place-items-center">
-                                @php $today = (int)now()->format('d'); @endphp
-                                @foreach(range(1, 31) as $day)
-                                <button class="flex h-7 w-9 items-center justify-center rounded-xl text-slate-900 hover:bg-primary/10 hover:text-primary dark:text-navy-100 dark:hover:bg-accent-light/10 dark:hover:text-accent-light {{ $day === $today ? 'font-medium text-primary dark:text-accent-light bg-primary/10 dark:bg-accent-light/10' : '' }}">
-                                    {{ $day }}
-                                </button>
-                                @endforeach
+                                <template x-for="blank in blankDays">
+                                    <div :key="`blank-${blank}`" class="flex h-7 w-9 items-center justify-center"></div>
+                                </template>
+                                <template x-for="day in days">
+                                    <button
+                                        :key="`day-${day}`"
+                                        @click="selectDay(day)"
+                                        class="flex h-7 w-9 items-center justify-center rounded-xl text-slate-900 transition-colors hover:bg-primary/10 hover:text-primary dark:text-navy-100 dark:hover:bg-accent-light/10 dark:hover:text-accent-light"
+                                        :class="{
+                                            'font-medium text-primary dark:text-accent-light bg-primary/10 dark:bg-accent-light/10': isSelected(day),
+                                            'border border-primary/30 dark:border-accent-light/30': isToday(day) && !isSelected(day)
+                                        }"
+                                        x-text="day"
+                                    ></button>
+                                </template>
                             </div>
                         </div>
                     </div>
@@ -349,4 +373,114 @@
                 </div>
             </div>
         </div>
+    @once
+        <script>
+            function recipientDashboard() {
+                return {
+                    selectedDate: new Date(),
+                    currentMonth: new Date().getMonth(),
+                    currentYear: new Date().getFullYear(),
+                    rangeText: '{{ $activityChartData["rangeText"] ?? "" }}',
+                    isLoading: false,
+                    days: [],
+                    blankDays: [],
+
+                    init() {
+                        this.generateCalendar();
+                    },
+
+                    generateCalendar() {
+                        const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
+                        const firstDayOfMonth = new Date(this.currentYear, this.currentMonth, 1).getDay();
+
+                        this.blankDays = Array.from({ length: firstDayOfMonth }, (_, i) => i);
+                        this.days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+                    },
+
+                    prevMonth() {
+                        if (this.currentMonth === 0) {
+                            this.currentMonth = 11;
+                            this.currentYear--;
+                        } else {
+                            this.currentMonth--;
+                        }
+                        this.generateCalendar();
+                    },
+
+                    nextMonth() {
+                        if (this.currentMonth === 11) {
+                            this.currentMonth = 0;
+                            this.currentYear++;
+                        } else {
+                            this.currentMonth++;
+                        }
+                        this.generateCalendar();
+                    },
+
+                    isSelected(day) {
+                        const d = new Date(this.currentYear, this.currentMonth, day);
+                        return d.toDateString() === this.selectedDate.toDateString();
+                    },
+
+                    isToday(day) {
+                        const d = new Date(this.currentYear, this.currentMonth, day);
+                        return d.toDateString() === new Date().toDateString();
+                    },
+
+                    async selectDay(day) {
+                        this.selectedDate = new Date(this.currentYear, this.currentMonth, day);
+                        await this.updateChart();
+                    },
+
+                    async updateChart() {
+                        this.isLoading = true;
+                        try {
+                            const year = this.selectedDate.getFullYear();
+                            const month = String(this.selectedDate.getMonth() + 1).padStart(2, '0');
+                            const day = String(this.selectedDate.getDate()).padStart(2, '0');
+                            const dateStr = `${year}-${month}-${day}`;
+
+                            const response = await fetch(`{{ route('recipient.chart-data.api') }}?date=${dateStr}`);
+                            if (!response.ok) {
+                                throw new Error(`Failed to load chart data: ${response.status}`);
+                            }
+
+                            const data = await response.json();
+                            if (!Array.isArray(data?.series) || !Array.isArray(data?.categories)) {
+                                throw new Error('Invalid chart data payload.');
+                            }
+
+                            const parsedSelectedIndex = Number(data.selectedIndex);
+                            const selectedIndex = Number.isInteger(parsedSelectedIndex) ? parsedSelectedIndex : -1;
+                            this.rangeText = typeof data.rangeText === 'string' ? data.rangeText : this.rangeText;
+
+                            const chartEl = document.getElementById('activity-chart');
+                            if (chartEl && chartEl._x_chart) {
+                                const baseColor = '#5e5ae2';
+                                const highlightColor = '#3b82f6';
+                                const newColors = data.series.map((_, i) => i === selectedIndex ? highlightColor : baseColor);
+
+                                chartEl._x_chart.updateOptions({
+                                    xaxis: { categories: data.categories },
+                                    colors: newColors
+                                });
+                                chartEl._x_chart.updateSeries([{
+                                    name: '{{ __("Amount Spent") }}',
+                                    data: data.series
+                                }]);
+                            }
+                        } catch (e) {
+                            console.error(e);
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    },
+
+                    getMonthName() {
+                        return new Intl.DateTimeFormat('{{ app()->getLocale() }}', { month: 'long', year: 'numeric' }).format(new Date(this.currentYear, this.currentMonth));
+                    }
+                }
+            }
+        </script>
+    @endonce
 </x-app-layout>

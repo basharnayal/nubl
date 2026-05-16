@@ -3,135 +3,44 @@
 namespace App\Http\Controllers\Recipient;
 
 use App\Http\Controllers\Controller;
-use App\Models\Request as RequestModel;
 use App\Models\User;
-use App\Services\RecipientAllowanceService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class RecipientController extends Controller
 {
+    public function __construct(
+        private \App\Services\Recipient\DashboardService $dashboardService
+    ) {}
+
     public function dashboard(Request $request): View
     {
-        $user = $request->user();
-        $remainingLimit = RecipientAllowanceService::getRemainingLimit($user->id);
-        $weeklyLimit = RecipientAllowanceService::weeklyLimit();
+        $data = $this->dashboardService->getDashboardData($request->user());
 
-        $activeStatuses = ['REQUESTED', 'APPROVED', 'REDEEMABLE']; // APPROVED = provider adopted, REDEEMABLE = accepted with City Fund
-        $pendingStatuses = ['REQUESTED', 'APPROVED'];
-
-        $activeRequestsCount = RequestModel::forRecipient($user->id)
-            ->whereIn('status', $activeStatuses)
-            ->count();
-
-        $pendingCount = RequestModel::forRecipient($user->id)
-            ->whereIn('status', $pendingStatuses)
-            ->count();
-
-        $completedOrdersCount = RequestModel::forRecipient($user->id)
-            ->where('status', 'FULFILLED')
-            ->count();
-
-        $providersCount = User::query()
-            ->where('membership_type', User::MEMBERSHIP_PROVIDER)
-            ->where('status', User::STATUS_ACTIVE)
-            ->has('providerProfile')
-            ->count();
-
-        $recentRequests = RequestModel::forRecipient($user->id)
-            ->with(['provider.providerProfile', 'items.menuItem'])
-            ->latest()
-            ->take(5)
-            ->get();
-
-        // Dashboard "My Requests": keep only statuses the recipient still cares about (pending + redeemable groups).
-        $dashboardMyRequests = RequestModel::forRecipient($user->id)
-            ->with(['provider.providerProfile', 'items.menuItem'])
-            ->whereIn('status', [
-                // pending group
-                'REQUESTED',
-                'ADMIN_PENDING',
-                // redeemable group
-                'APPROVED',
-                'ADMIN_APPROVED',
-                'REDEEMABLE',
-            ])
-            ->latest()
-            ->take(5)
-            ->get();
-
-        $providers = User::query()
-            ->where('membership_type', User::MEMBERSHIP_PROVIDER)
-            ->where('status', User::STATUS_ACTIVE)
-            ->has('providerProfile')
-            ->with('providerProfile')
-            ->orderBy('name')
-            ->take(5)
-            ->get();
-
-        $activityChartData = $this->activityChartData($user->id);
-
-        $latestProvider = User::query()
-            ->where('membership_type', User::MEMBERSHIP_PROVIDER)
-            ->where('status', User::STATUS_ACTIVE)
-            ->has('providerProfile')
-            ->with('providerProfile')
-            ->latest()
-            ->first();
-
-        $communityFulfilledThisWeek = RequestModel::query()
-            ->where('status', 'FULFILLED')
-            ->where('created_at', '>=', Carbon::now()->subDays(6)->startOfDay())
-            ->count();
-
-        return view('recipient.dashboard', [
-            'remainingLimit' => $remainingLimit,
-            'weeklyLimit' => $weeklyLimit,
-            'activeRequestsCount' => $activeRequestsCount,
-            'pendingCount' => $pendingCount,
-            'completedOrdersCount' => $completedOrdersCount,
-            'providersCount' => $providersCount,
-            'recentRequests' => $recentRequests,
-            'dashboardMyRequests' => $dashboardMyRequests,
-            'providers' => $providers,
-            'activityChartData' => $activityChartData,
-            'latestProvider' => $latestProvider,
-            'communityFulfilledThisWeek' => $communityFulfilledThisWeek,
-        ]);
+        return view('recipient.dashboard', $data);
     }
 
-    /**
-     * Build chart data for Activity Overview: amount spent (fulfilled) per day for the last 7 days.
-     */
-    private function activityChartData(int $recipientId): array
+    public function chartDataApi(Request $request): \Illuminate\Http\JsonResponse
     {
-        $startDate = Carbon::now()->subDays(6)->startOfDay();
-        $dayExpression = DB::connection()->getDriverName() === 'sqlite'
-            ? "strftime('%Y-%m-%d', created_at)"
-            : 'DATE(created_at)';
+        $validator = validator($request->query(), [
+            'date' => ['nullable', 'date'],
+        ]);
 
-        $daily = RequestModel::forRecipient($recipientId)
-            ->where('status', 'FULFILLED')
-            ->where('created_at', '>=', $startDate)
-            ->selectRaw("{$dayExpression} as day, COALESCE(SUM(reserved_amount), 0) as total")
-            ->groupByRaw($dayExpression)
-            ->pluck('total', 'day');
-
-        $categories = [];
-        $series = [];
-
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i);
-            $categories[] = $date->translatedFormat('D');
-            $series[] = (float) ($daily[$date->format('Y-m-d')] ?? 0);
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Invalid date format provided.',
+                'errors' => $validator->errors(),
+            ], 422);
         }
 
-        return [
-            'categories' => $categories,
-            'series' => $series,
-        ];
+        $dateValue = $validator->validated()['date'] ?? null;
+        $date = $dateValue ? Carbon::parse($dateValue) : null;
+        $recipientId = $request->user()->id;
+
+        $data = $this->dashboardService->activityChartData($recipientId, $date);
+
+        return response()->json($data);
     }
 
     public function providersList(): View
