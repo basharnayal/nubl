@@ -408,7 +408,8 @@
                                             throw new Error('Invalid chart data payload.');
                                         }
 
-                                        const selectedIndex = Number.isInteger(data.selectedIndex) ? data.selectedIndex : -1;
+                                        const parsedSelectedIndex = Number(data.selectedIndex);
+                                        const selectedIndex = Number.isInteger(parsedSelectedIndex) ? parsedSelectedIndex : -1;
                                         this.rangeText = typeof data.rangeText === 'string' ? data.rangeText : this.rangeText;
 
                                         const chartEl = document.getElementById('activity-chart');
