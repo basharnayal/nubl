@@ -316,10 +316,11 @@
                             </div>
                             <div class="grid grid-cols-7 place-items-center">
                                 <template x-for="blank in blankDays">
-                                    <div class="flex h-7 w-9 items-center justify-center"></div>
+                                    <div :key="`blank-${blank}`" class="flex h-7 w-9 items-center justify-center"></div>
                                 </template>
                                 <template x-for="day in days">
                                     <button
+                                        :key="`day-${day}`"
                                         @click="selectDay(day)"
                                         class="flex h-7 w-9 items-center justify-center rounded-xl text-slate-900 transition-colors hover:bg-primary/10 hover:text-primary dark:text-navy-100 dark:hover:bg-accent-light/10 dark:hover:text-accent-light"
                                         :class="{

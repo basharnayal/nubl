@@ -132,6 +132,7 @@ class RecipientDashboardControllerTest extends TestCase
         // Activity chart: one bucket per day for the last 7 days (today + 6 prior).
         $this->assertCount(7, $chart['categories']);
         $this->assertCount(7, $chart['series']);
+        $this->assertSame(6, $chart['selectedIndex']);
     }
 
     #[Test]

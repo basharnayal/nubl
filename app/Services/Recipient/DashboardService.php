@@ -102,10 +102,14 @@ class DashboardService
      */
     public function activityChartData(int $recipientId, ?Carbon $selectedDate = null): array
     {
+        $hasSelectedDate = $selectedDate !== null;
         $selectedDate = $selectedDate ?? Carbon::now();
-        // Fixed week: Sunday to Saturday
-        $startDate = (clone $selectedDate)->startOfWeek(Carbon::SUNDAY);
-        $endDate = (clone $selectedDate)->endOfWeek(Carbon::SATURDAY);
+        $startDate = $hasSelectedDate
+            ? (clone $selectedDate)->startOfWeek(Carbon::SUNDAY)
+            : (clone $selectedDate)->subDays(6)->startOfDay();
+        $endDate = $hasSelectedDate
+            ? (clone $selectedDate)->endOfWeek(Carbon::SATURDAY)
+            : (clone $selectedDate)->endOfDay();
 
         $dayExpression = DB::connection()->getDriverName() === 'sqlite'
             ? "strftime('%Y-%m-%d', created_at)"

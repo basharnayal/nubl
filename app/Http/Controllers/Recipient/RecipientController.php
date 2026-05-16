@@ -35,7 +35,7 @@ class RecipientController extends Controller
         }
 
         $dateValue = $validator->validated()['date'] ?? null;
-        $date = $dateValue ? Carbon::parse($dateValue) : Carbon::now();
+        $date = $dateValue ? Carbon::parse($dateValue) : null;
         $recipientId = $request->user()->id;
 
         $data = $this->dashboardService->activityChartData($recipientId, $date);
