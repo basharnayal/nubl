@@ -127,17 +127,10 @@ class DashboardService
             $date = (clone $startDate)->addDays($i);
             $categories[] = $date->translatedFormat('D');
             $series[] = (float) ($daily[$date->format('Y-m-d')] ?? 0);
-            
+
             if ($date->isSameDay($selectedDate)) {
                 $selectedIndex = $i;
             }
-        }
-
-        // Handle RTL manually by reversing data for Arabic
-        if (app()->getLocale() === 'ar') {
-            $categories = array_reverse($categories);
-            $series = array_reverse($series);
-            $selectedIndex = $selectedIndex >= 0 ? 6 - $selectedIndex : -1;
         }
 
         return [
