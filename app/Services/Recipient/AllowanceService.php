@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Recipient;
 
 use App\Models\SystemSetting;
 use App\Models\User;
@@ -11,7 +11,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 
-class RecipientAllowanceService
+class AllowanceService
 {
     /**
      * FR-17.1: Active weekly limit from system_settings when set; scheduled pending

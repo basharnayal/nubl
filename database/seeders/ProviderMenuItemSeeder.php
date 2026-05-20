@@ -262,6 +262,7 @@ class ProviderMenuItemSeeder extends Seeder
         $lower = mb_strtolower($normalized);
 
         $exact = [
+            // provider@nubl.com
             'family meal package' => 'باقة وجبة عائلية',
             'complete meal for 4-6 people' => 'وجبة كاملة تكفي 4-6 أشخاص',
             'daily support order' => 'طلب دعم يومي',
@@ -272,6 +273,7 @@ class ProviderMenuItemSeeder extends Seeder
             'fresh vegetable soup' => 'شوربة خضار طازجة',
             'fresh bread basket' => 'سلة خبز طازج',
             'assorted fresh bread' => 'تشكيلة خبز طازج',
+            // community@nubl.com
             'weekly assistance' => 'مساعدة أسبوعية',
             'weekly meal package' => 'باقة وجبات أسبوعية',
             'lunch box' => 'وجبة غداء',
@@ -280,6 +282,112 @@ class ProviderMenuItemSeeder extends Seeder
             'morning breakfast essentials' => 'أساسيات إفطار الصباح',
             'pastry set' => 'تشكيلة معجنات',
             'assorted pastries' => 'معجنات متنوعة',
+            // panda@nubl.com — Pasta & Rice
+            'premium sella basmati rice with long, fluffy grains and a rich aroma, perfect for traditional dishes' => 'أرز بسمتي سيلا فاخر بحبوب طويلة وهشة وأريج غني، مثالي للأطباق التقليدية',
+            'abukass sella basmati rice, 5kg.' => 'أرز بسمتي سيلا أبو كاس، 5 كجم',
+            'premium sella basmati rice for traditional dishes.' => 'أرز بسمتي سيلا فاخر للأطباق التقليدية',
+            'calrose rice 10kg premium quality.' => 'أرز كالروز 10 كجم جودة عالية',
+            'features the finest quality whole grains hygienically packed for safe consumption packed with nutrients to ensure good health polished well to ensure quality and freshness ideal for use in a variety of dishes' => 'يتميز بأجود حبوب القمح الكاملة، معبأ بطريقة صحية وآمنة للاستهلاك، غني بالمغذيات لضمان صحة جيدة، مصقول جيدًا للحفاظ على الجودة والنضارة، ومثالي للاستخدام في مجموعة متنوعة من الأطباق',
+            // panda@nubl.com — Sweets & Chocolate
+            'fine sugar bag perfect for everyday sweetening and cooking.' => 'كيس سكر ناعم مثالي للتحلية اليومية والطهي',
+            'packaged white sugar from panda.' => 'سكر أبيض معبأ من بنده',
+            'brown sugar 1kg rich and sweet flavor.' => 'سكر بني 1 كجم بنكهة غنية وحلوة',
+            'steviana low calorie sweetener, 125g.' => 'ستيفيانا مُحلّي قليل السعرات الحرارية، 125 جم',
+            'al osra fine sugar, 2kg.' => 'سكر الأسرة الناعم، 2 كجم',
+            // panda@nubl.com — Oils & Ghee
+            'afia corn oil 4l pack, a healthy and light choice for everyday cooking and frying.' => 'زيت ذرة عافية عبوة 4 لتر، خيار صحي وخفيف للطهي والقلي اليومي',
+            'miza sunflower oil 2x1.5l' => 'زيت دوار الشمس ميزة 2×1.5 لتر',
+            'culina vegetable ghee 1kg' => 'سمن نباتي كولينا 1 كجم',
+            'baya organic olive oil 500ml' => 'زيت زيتون عضوي بايا 500 مل',
+            'gold branch pomace olive oil 1l' => 'زيت زيتون بوماس جولد برانش 1 لتر',
+            // danube@nubl.com — Personal Care
+            'conditioner for long-lasting black shine.' => 'بلسم للبريق الأسود طويل الأمد',
+            'intensive repair shampoo with amino acids.' => 'شامبو عناية مكثفة بالأحماض الأمينية',
+            'anti-dandruff shampoo — hair fall defense.' => 'شامبو مضاد للقشرة — للحماية من تساقط الشعر',
+            'invisible dry anti-perspirant deodorant.' => 'مزيل عرق لا أثر له على الملابس',
+            'deodorant body spray — black night.' => 'بخاخ مزيل عرق — بلاك نايت',
+            '48h antiperspirant stick — xtra cool.' => 'عصا مضاد للتعرق 48 ساعة — اكسترا كول',
+            'triple fresh gel toothpaste — cool breeze.' => 'معجون أسنان جل ثلاثي الانتعاش — نسيم بارد',
+            'fluoride toothpaste — cavity fighter.' => 'معجون أسنان بالفلورايد — مكافح للتسوس',
+            'triple fresh gel toothpaste — menthol fresh.' => 'معجون أسنان جل ثلاثي الانتعاش — نعناع طازج',
+            'perfumed body wash — soft rose.' => 'غسول جسم معطر — وردة ناعمة',
+            'beauty cream soap bar with moisturising cream.' => 'صابون كريم تجميلي مع ربع كريم مرطب',
+            'antibacterial body wash — mild care.' => 'غسول جسم مضاد للبكتيريا — عناية لطيفة',
+            'intensive care body lotion — cocoa radiant.' => 'لوشن مكثف للجسم — كوكو راديانت',
+            'multi-vitamin face cream.' => 'كريم للوجه متعدد الفيتامينات',
+            'lip therapy — mint.' => 'علاج الشفاه — نعناع',
+            // danube@nubl.com — Cleaning
+            'antibacterial liquid hand wash.' => 'غسول يدين سائل مضاد للبكتيريا',
+            'antibacterial hand wash — mild care.' => 'غسول يدين مضاد للبكتيريا — عناية لطيفة',
+            'antibacterial hand wash — cool fresh.' => 'غسول يدين مضاد للبكتيريا — انتعاش بارد',
+            'perfumed liquid hand wash — soft rose.' => 'غسول يدين سائل معطر — وردة ناعمة',
+            // danube@nubl.com — Baby
+            'baby jelly — gentle skin protection.' => 'جيلي أطفال — حماية لطيفة للبشرة',
+            // carrefour@nubl.com — Dairy
+            'fresh full-fat cow milk.' => 'حليب بقري طازج كامل الدسم',
+            'fresh full-fat laban (drinking yogurt).' => 'لبن طازج كامل الدسم',
+            'creamy strained yogurt — labneh.' => 'لبنة كريمية مصفاة',
+            'six cups plain full-fat yogurt.' => 'ست أكواب زبادي سادة كامل الدسم',
+            'shredded mozzarella for baking and pizza.' => 'موزاريلا مبشورة للخبز والبيتزا',
+            // carrefour@nubl.com — Eggs
+            'large white eggs — tray of 30.' => 'بيض أبيض كبير — طبق 30 بيضة',
+            'large fresh white eggs — 30 pack.' => 'بيض أبيض طازج كبير — عبوة 30 بيضة',
+            'large white eggs — 30 pieces.' => 'بيض أبيض كبير — 30 بيضة',
+            // carrefour@nubl.com — Breakfast
+            'sweet spread for breakfast.' => 'مربى حلوة للإفطار',
+            'lite breakfast cream spread.' => 'كريمة إفطار خفيفة',
+            'greek-style plain yogurt multipack offer.' => 'عرض زبادي يوناني سادة متعدد العبوات',
+            'family-size plain full-fat yogurt.' => 'زبادي سادة كامل الدسم حجم عائلي',
+            // carrefour@nubl.com — Snacks
+            'classic chickpea hummus.' => 'حمص كلاسيكي بالحمص',
+            'hummus with lemon.' => 'حمص بالليمون',
+            'mini cheddar snack cheese portions.' => 'قطع جبن شيدر صغيرة للوجبات الخفيفة',
+            // shawarmahouse@nubl.com — Rice Dishes
+            'grilled chicken marinated in authentic bukhari spices, served with fluffy bukhari rice.' => 'دجاج مشوي متبل بتوابل البخاري الأصيلة، يقدم مع أرز البخاري الهش',
+            'half a chicken grilled over charcoal with kabsa rice.' => 'نصف دجاجة مشوية على الفحم مع أرز الكبسة',
+            'rice plate with grilled boneless chicken, tomatoes, onions and hot sauce.' => 'طبق أرز مع دجاج مشوي بدون عظم، طماطم وبصل وصلصة حارة',
+            'chicken on the grill with orange rice — arabic-style plate.' => 'دجاج شواية مع أرز برتقالي — طبق عربي',
+            'strips, rice, lettuce, cucumber, tomato, jalapeño, tahini and spicy salad sauce.' => 'شرائح، أرز، خس، خيار، طماطم، هالبينيو، طحينة وصلصة سلطة حارة',
+            // shawarmahouse@nubl.com — Grills
+            'half grilled chicken with fries, grilled vegetables, garlic and spicy sauce, pickles.' => 'نصف دجاجة مشوية مع بطاطس مقلية وخضار مشوية وثوم وصلصة حارة ومخللات',
+            'fresh chicken grilled over charcoal with a light smoky flavor.' => 'دجاج طازج مشوي على الفحم بنكهة دخانية خفيفة',
+            '12 mixed grill skewers, ribs, kebab, 4 mini arayes.' => '12 سيخ مشاوي مشكلة، أضلاع، كباب، 4 عرايس صغيرة',
+            'hamour fillet with grilled vegetables, garlic sauce and hot sauce.' => 'فيليه هامور مع خضار مشوية وصلصة ثوم وصلصة حارة',
+            'chicken wings with grilled peppers, onions, tomatoes, garlic and spicy sauce.' => 'أجنحة دجاج مع فلفل مشوي وبصل وطماطم وثوم وصلصة حارة',
+            // shawarmahouse@nubl.com — Sandwiches
+            'arabic-style chicken shawarma with saj bread, fries, strips and sauces.' => 'شاورما دجاج عربية مع خبز صاج، بطاطس مقلية، شرائح وصلصات',
+            'mega chicken shawarma sandwich with cheese, fries, buffalo chicken and dips.' => 'ساندويش شاورما دجاج ميجا مع جبن، بطاطس مقلية، دجاج بفالو وصلصات',
+            'chicken or beef shawarma with melted cheese, fries, buffalo chicken and dips.' => 'شاورما دجاج أو لحم مع جبن ذائب، بطاطس مقلية، دجاج بفالو وصلصات',
+            'saj bread with chicken shawarma, garlic sauce, pickles, cabbage and fries.' => 'خبز صاج مع شاورما دجاج، صلصة ثوم، مخللات، ملفوف وبطاطس مقلية',
+            'chicken or beef shawarma in tortilla with sauces and fresh fries.' => 'شاورما دجاج أو لحم في تورتيلا مع صلصات وبطاطس مقلية طازجة',
+            // mcdonalds@nubl.com
+            'dilmah black tea' => 'شاي أسود دلمه',
+            'large sprite' => 'سبرايت كبير',
+            'large fanta orange' => 'فانتا برتقال كبير',
+            'large orange juice' => 'عصير برتقال كبير',
+            'medium coca cola' => 'كوكاكولا وسط',
+            'large coca cola zero' => 'كوكاكولا زيرو كبير',
+            'medium sprite' => 'سبرايت وسط',
+            'large big mac meal' => 'وجبة بيج ماك كبيرة',
+            'large mcchicken meal' => 'وجبة ماك تشيكن كبيرة',
+            'large 9 pcs nuggets meal' => 'وجبة ناجتس 9 قطع كبيرة',
+            'medium big mac meal' => 'وجبة بيج ماك متوسطة',
+            'medium chicken mac meal' => 'وجبة تشيكن ماك متوسطة',
+            'large mcarabia meal' => 'وجبة ماك عربية كبيرة',
+            'big mac' => 'بيج ماك',
+            'mcchicken' => 'ماك تشيكن',
+            'mcroyale' => 'ماك رويال',
+            'quarter pounder with cheese' => 'كوارتر باوندر بالجبن',
+            '6 pcs mcnuggets' => 'ناجتس 6 قطع',
+            'large french fries' => 'بطاطس مقلية كبيرة',
+            'mcwings 3 pcs' => 'ماك وينجز 3 قطع',
+            'chicken caesar salad' => 'سلطة سيزر بالدجاج',
+            'spicy mcnuggets 6 pcs' => 'ناجتس حارة 6 قطع',
+            'boston donuts' => 'دونات بوسطن',
+            'cheese croissant' => 'كرواسون بالجبن',
+            'chocolate marble cake' => 'كيك مارمر بالشوكولاتة',
+            'choco mix' => 'شوكو ميكس',
+            'chocolate croissant' => 'كرواسون بالشوكولاتة',
         ];
 
         if (isset($exact[$lower])) {

@@ -365,6 +365,8 @@ Route::middleware($recipientMiddleware)->prefix('recipient')->name('recipient.')
     Route::post('requests/{id}/cancel', [RecipientRequestController::class, 'cancel'])
         ->whereNumber('id')
         ->name('requests.cancel');
+
+    Route::get('/chart-data', [RecipientController::class, 'chartDataApi'])->name('chart-data.api');
 });
 
 /*

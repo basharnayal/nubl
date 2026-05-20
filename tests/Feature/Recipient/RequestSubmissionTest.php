@@ -9,6 +9,7 @@ use App\Models\ProviderMenuItem;
 use App\Models\ProviderOperatingInfo;
 use App\Models\Request as RequestModel;
 use App\Models\User;
+use App\Services\Recipient\AllowanceService;
 use App\Support\RecipientAllowanceRetryCache;
 use App\Support\RecipientFundRetryCache;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -18,7 +19,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
-class RecipientRequestSubmissionTest extends TestCase
+class RequestSubmissionTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -324,7 +325,7 @@ class RecipientRequestSubmissionTest extends TestCase
 
         $job = new ProcessRecipientFundRetryJob($this->recipient->id);
         $job->handle(
-            app(\App\Services\RecipientRequestSubmissionService::class),
+            app(\App\Services\Recipient\RequestSubmissionService::class),
             app(\App\Services\AllocationService::class),
             app(\App\Services\AuditService::class)
         );
@@ -375,7 +376,7 @@ class RecipientRequestSubmissionTest extends TestCase
 
         $job = new ProcessRecipientAllowanceRetryJob($this->recipient->id);
         $job->handle(
-            app(\App\Services\RecipientRequestSubmissionService::class),
+            app(\App\Services\Recipient\RequestSubmissionService::class),
             app(\App\Services\AllocationService::class),
             app(\App\Services\AuditService::class)
         );

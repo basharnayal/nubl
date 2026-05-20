@@ -140,39 +140,11 @@
                             $reqProvider = $req->provider;
                             $reqProviderTitle = \App\Support\ProviderDisplay::businessTitle($reqProvider->providerProfile, $reqProvider->name);
 
-                            $statusCard = \App\Support\RecipientRequestStatusPresenter::card($req, false);
-                            $steps = array_slice($statusCard['steps'] ?? [], 0, 4);
-                            $doneCount = collect($steps)->filter(fn ($s) => ($s['state'] ?? 'pending') === 'done')->count();
-                            $currentIndex = collect($steps)->search(fn ($s) => ($s['state'] ?? 'pending') === 'current');
-                            $currentIndex = $currentIndex === false ? null : (int) $currentIndex;
-                            $totalSteps = max(1, count($steps));
-                            $progressIndex = $currentIndex ?? $doneCount;
-                            $progressPct = $totalSteps <= 1 ? 0 : (int) round(($progressIndex / ($totalSteps - 1)) * 100);
-
-                            $barColorClass = match ($req->status) {
-                                'FULFILLED' => 'bg-success',
-                                'REDEEMABLE', 'APPROVED', 'ADMIN_APPROVED' => 'bg-info',
-                                'CANCELLED', 'CANCELED', 'REJECTED', 'ADMIN_REJECTED' => 'bg-amber-500',
-                                default => 'bg-amber-500',
-                            };
-
                             $statusTextClass = match ($req->status) {
                                 'FULFILLED' => 'text-success',
                                 'REDEEMABLE', 'APPROVED', 'ADMIN_APPROVED' => 'text-info',
                                 'CANCELLED', 'CANCELED', 'REJECTED', 'ADMIN_REJECTED' => 'text-amber-600 dark:text-amber-400',
                                 default => 'text-amber-600 dark:text-amber-400',
-                            };
-
-                            $iconBgClass = match ($req->status) {
-                                'FULFILLED' => 'bg-success/10',
-                                'REDEEMABLE', 'APPROVED', 'ADMIN_APPROVED' => 'bg-info/10',
-                                default => 'bg-amber-100 dark:bg-amber-500/15',
-                            };
-
-                            $iconTextClass = match ($req->status) {
-                                'FULFILLED' => 'text-success',
-                                'REDEEMABLE', 'APPROVED', 'ADMIN_APPROVED' => 'text-info',
-                                default => 'text-amber-600 dark:text-amber-300',
                             };
                         @endphp
                         <a href="{{ route('recipient.requests.show', $req->id) }}" class="card block p-3 hover:bg-slate-50 dark:hover:bg-navy-600/50 transition-colors">
@@ -190,40 +162,7 @@
                                 </div>
                                 <p class="max-w-[42%] shrink-0 text-end text-xs leading-snug font-medium sm:max-w-[36%] {{ $statusTextClass }}">{{ $statusLabels[$req->status] ?? str_replace('_', ' ', $req->status) }}</p>
                             </div>
-                            @php
-                                // Render the same "connector line" logic as the hero (solid when left is done and right is done/current).
-                                $lineStatic = in_array($req->status, ['FULFILLED', 'CANCELLED', 'CANCELED'], true);
-                                $solidShimmerClass = $lineStatic ? '' : 'animate-[recipient-step-line-shimmer_1.65s_linear_infinite]';
-                                $dashFlowClass = $lineStatic ? '' : 'animate-[recipient-step-dash-flow_0.95s_linear_infinite]';
-                                $isCancelled = in_array($req->status, ['CANCELLED', 'CANCELED'], true);
-                                $segSolid = [];
-                                for ($i = 1; $i < count($steps); $i++) {
-                                    $left = $steps[$i - 1]['state'] ?? 'pending';
-                                    $right = $steps[$i]['state'] ?? 'pending';
-                                    $segSolid[$i] = $left === 'done' && in_array($right, ['done', 'current'], true);
-                                }
-                            @endphp
-                            @if($isCancelled)
-                                <div class="mt-2 flex items-center">
-                                    <div class="flex size-6 items-center justify-center rounded-full bg-slate-200/80 text-slate-600 dark:bg-navy-500 dark:text-navy-200">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M18.364 5.636 5.636 18.364M5.636 5.636l12.728 12.728" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            @else
-                                <div class="mt-2 grid grid-cols-3 gap-x-2">
-                                    @for($i = 1; $i < 4; $i++)
-                                        @if(($segSolid[$i] ?? false) === true)
-                                            <div class="relative h-1 w-full overflow-hidden rounded-full shadow-[inset_0_1px_0_rgba(255,255,255,0.35)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] {{ $barColorClass }}">
-                                                <span class="pointer-events-none absolute inset-y-0 left-0 w-[min(72%,11rem)] -translate-x-full bg-gradient-to-r from-transparent via-white/95 to-transparent motion-reduce:animate-none dark:via-white/50 dark:from-transparent dark:to-transparent {{ $solidShimmerClass }} [mask-image:linear-gradient(90deg,transparent_0%,black_18%,black_82%,transparent_100%)]"></span>
-                                            </div>
-                                        @else
-                                            <div class="h-1 w-full rounded-full bg-[repeating-linear-gradient(90deg,rgb(148_163_184)_0px,rgb(148_163_184)_6px,transparent_6px,transparent_14px)] bg-[length:24px_100%] shadow-[inset_0_1px_0_rgba(255,255,255,0.25)] motion-reduce:animate-none {{ $dashFlowClass }} dark:bg-[repeating-linear-gradient(90deg,rgb(173_181_189)_0px,rgb(173_181_189)_6px,transparent_6px,transparent_14px)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"></div>
-                                        @endif
-                                    @endfor
-                                </div>
-                            @endif
+
                         </a>
                         @empty
                         <div class="card p-3 text-center text-slate-500 dark:text-navy-400">
@@ -307,49 +246,64 @@
                 </div>
             </div>
             {{-- Sidebar --}}
-            <div class="col-span-12 lg:col-span-4">
+            <div class="col-span-12 lg:col-span-4" x-data="recipientDashboard()">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-1 lg:gap-6">
                     <div class="card">
-                        <div class="mt-3 flex h-8 items-center justify-between px-4 sm:px-5">
+                        <div class="mt-3 flex items-center justify-between px-4 sm:px-5">
                             <h2 class="font-medium tracking-wide text-slate-700 line-clamp-1 dark:text-navy-100">
                                 {{ __('Activity Overview') }}
                             </h2>
+                            <div class="text-xs text-slate-400 dark:text-navy-300" x-text="rangeText">
+                                {{ $activityChartData['rangeText'] ?? '' }}
+                            </div>
                         </div>
-                        <div class="ax-transparent-gridline pr-2 min-h-[250px]"
+                        <div id="activity-chart" class="ax-transparent-gridline pr-2 min-h-[250px]"
+                             :class="isLoading && 'opacity-50 pointer-events-none'"
                              data-chart-series="{{ json_encode($activityChartData['series'] ?? []) }}"
                              data-chart-categories="{{ json_encode($activityChartData['categories'] ?? []) }}"
+                             data-chart-selected-index="{{ $activityChartData['selectedIndex'] ?? -1 }}"
                              data-chart-label="{{ json_encode(__('Amount Spent')) }}"
-                             x-data="{
-                                async init() {
-                                    await $nextTick();
-                                    if (this.$el._x_chart) return;
-                                    const ApexCharts = await window.loadApexCharts();
-                                    const config = { ...pages.charts.incomePersonal };
-                                    const series = JSON.parse(this.$el.dataset.chartSeries);
-                                    const categories = JSON.parse(this.$el.dataset.chartCategories);
-                                    const label = JSON.parse(this.$el.dataset.chartLabel);
-                                    config.series = [{ name: label, data: series }];
-                                    config.xaxis = { ...config.xaxis, categories };
-                                    if (series.every(v => v === 0)) {
-                                        config.yaxis = { ...config.yaxis, min: 0, max: 5, forceNiceScale: true };
-                                    }
-                                    this.$el._x_chart = new ApexCharts(this.$el, config);
-                                    this.$el._x_chart.render();
-                                }
+                             x-init="async () => {
+                                 const ApexCharts = await window.loadApexCharts();
+                                 const config = { ...pages.charts.incomePersonal };
+                                 const series = JSON.parse($el.dataset.chartSeries);
+                                 const categories = JSON.parse($el.dataset.chartCategories);
+                                 const selectedIndex = parseInt($el.dataset.chartSelectedIndex);
+                                 const label = JSON.parse($el.dataset.chartLabel);
+                                 
+                                 config.series = [{ name: label, data: series }];
+                                 config.xaxis = { ...config.xaxis, categories };
+                                 
+                                 // Define colors: highlight the selected index
+                                 const baseColor = '#5e5ae2'; // Default blue-ish
+                                 const highlightColor = '#3b82f6'; // Brighter blue for highlight
+                                 
+                                 config.colors = series.map((_, i) => i === selectedIndex ? highlightColor : baseColor);
+                                 config.plotOptions = {
+                                     ...config.plotOptions,
+                                     bar: { ...config.plotOptions?.bar, distributed: true }
+                                 };
+                                 config.legend = { ...config.legend, show: false };
+
+                                 if (series.every(v => v === 0)) {
+                                     config.yaxis = { ...config.yaxis, min: 0, max: 5, forceNiceScale: true };
+                                 }
+                                 $el._x_chart = new ApexCharts($el, config);
+                                 $el._x_chart.render();
                              }"></div>
                     </div>
                     <div class="card p-4">
                         <div class="space-y-1 text-center font-inter text-xs-plus">
                             <div class="flex items-center justify-between px-2 pb-4">
-                                <p class="font-medium text-slate-700 dark:text-navy-100">{{ now()->locale(app()->getLocale())->translatedFormat('F Y') }}</p>
-                                <div class="-mr-1.5 flex space-x-2">
-                                    <button class="btn size-7 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <p class="font-medium text-slate-700 dark:text-navy-100" x-text="getMonthName()"></p>
+                                <div class="-mr-1.5 rtl:-ml-1.5 rtl:-mr-0 flex space-x-2 rtl:space-x-reverse">
+                                    <button @click="prevMonth()" class="btn size-7 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7" />
                                         </svg>
                                     </button>
-                                    <button class="btn size-7 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <button @click="nextMonth()" class="btn size-7 rounded-full p-0 hover:bg-slate-300/20 dark:hover:bg-navy-300/20">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="size-5 rtl:rotate-180" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7" />
                                         </svg>
                                     </button>
@@ -361,12 +315,21 @@
                                 @endforeach
                             </div>
                             <div class="grid grid-cols-7 place-items-center">
-                                @php $today = (int)now()->format('d'); @endphp
-                                @foreach(range(1, 31) as $day)
-                                <button class="flex h-7 w-9 items-center justify-center rounded-xl text-slate-900 hover:bg-primary/10 hover:text-primary dark:text-navy-100 dark:hover:bg-accent-light/10 dark:hover:text-accent-light {{ $day === $today ? 'font-medium text-primary dark:text-accent-light bg-primary/10 dark:bg-accent-light/10' : '' }}">
-                                    {{ $day }}
-                                </button>
-                                @endforeach
+                                <template x-for="blank in blankDays">
+                                    <div :key="`blank-${blank}`" class="flex h-7 w-9 items-center justify-center"></div>
+                                </template>
+                                <template x-for="day in days">
+                                    <button
+                                        :key="`day-${day}`"
+                                        @click="selectDay(day)"
+                                        class="flex h-7 w-9 items-center justify-center rounded-xl text-slate-900 transition-colors hover:bg-primary/10 hover:text-primary dark:text-navy-100 dark:hover:bg-accent-light/10 dark:hover:text-accent-light"
+                                        :class="{
+                                            'font-medium text-primary dark:text-accent-light bg-primary/10 dark:bg-accent-light/10': isSelected(day),
+                                            'border border-primary/30 dark:border-accent-light/30': isToday(day) && !isSelected(day)
+                                        }"
+                                        x-text="day"
+                                    ></button>
+                                </template>
                             </div>
                         </div>
                     </div>
@@ -410,4 +373,114 @@
                 </div>
             </div>
         </div>
+    @once
+        <script>
+            function recipientDashboard() {
+                return {
+                    selectedDate: new Date(),
+                    currentMonth: new Date().getMonth(),
+                    currentYear: new Date().getFullYear(),
+                    rangeText: '{{ $activityChartData["rangeText"] ?? "" }}',
+                    isLoading: false,
+                    days: [],
+                    blankDays: [],
+
+                    init() {
+                        this.generateCalendar();
+                    },
+
+                    generateCalendar() {
+                        const daysInMonth = new Date(this.currentYear, this.currentMonth + 1, 0).getDate();
+                        const firstDayOfMonth = new Date(this.currentYear, this.currentMonth, 1).getDay();
+
+                        this.blankDays = Array.from({ length: firstDayOfMonth }, (_, i) => i);
+                        this.days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+                    },
+
+                    prevMonth() {
+                        if (this.currentMonth === 0) {
+                            this.currentMonth = 11;
+                            this.currentYear--;
+                        } else {
+                            this.currentMonth--;
+                        }
+                        this.generateCalendar();
+                    },
+
+                    nextMonth() {
+                        if (this.currentMonth === 11) {
+                            this.currentMonth = 0;
+                            this.currentYear++;
+                        } else {
+                            this.currentMonth++;
+                        }
+                        this.generateCalendar();
+                    },
+
+                    isSelected(day) {
+                        const d = new Date(this.currentYear, this.currentMonth, day);
+                        return d.toDateString() === this.selectedDate.toDateString();
+                    },
+
+                    isToday(day) {
+                        const d = new Date(this.currentYear, this.currentMonth, day);
+                        return d.toDateString() === new Date().toDateString();
+                    },
+
+                    async selectDay(day) {
+                        this.selectedDate = new Date(this.currentYear, this.currentMonth, day);
+                        await this.updateChart();
+                    },
+
+                    async updateChart() {
+                        this.isLoading = true;
+                        try {
+                            const year = this.selectedDate.getFullYear();
+                            const month = String(this.selectedDate.getMonth() + 1).padStart(2, '0');
+                            const day = String(this.selectedDate.getDate()).padStart(2, '0');
+                            const dateStr = `${year}-${month}-${day}`;
+
+                            const response = await fetch(`{{ route('recipient.chart-data.api') }}?date=${dateStr}`);
+                            if (!response.ok) {
+                                throw new Error(`Failed to load chart data: ${response.status}`);
+                            }
+
+                            const data = await response.json();
+                            if (!Array.isArray(data?.series) || !Array.isArray(data?.categories)) {
+                                throw new Error('Invalid chart data payload.');
+                            }
+
+                            const parsedSelectedIndex = Number(data.selectedIndex);
+                            const selectedIndex = Number.isInteger(parsedSelectedIndex) ? parsedSelectedIndex : -1;
+                            this.rangeText = typeof data.rangeText === 'string' ? data.rangeText : this.rangeText;
+
+                            const chartEl = document.getElementById('activity-chart');
+                            if (chartEl && chartEl._x_chart) {
+                                const baseColor = '#5e5ae2';
+                                const highlightColor = '#3b82f6';
+                                const newColors = data.series.map((_, i) => i === selectedIndex ? highlightColor : baseColor);
+
+                                chartEl._x_chart.updateOptions({
+                                    xaxis: { categories: data.categories },
+                                    colors: newColors
+                                });
+                                chartEl._x_chart.updateSeries([{
+                                    name: '{{ __("Amount Spent") }}',
+                                    data: data.series
+                                }]);
+                            }
+                        } catch (e) {
+                            console.error(e);
+                        } finally {
+                            this.isLoading = false;
+                        }
+                    },
+
+                    getMonthName() {
+                        return new Intl.DateTimeFormat('{{ app()->getLocale() }}', { month: 'long', year: 'numeric' }).format(new Date(this.currentYear, this.currentMonth));
+                    }
+                }
+            }
+        </script>
+    @endonce
 </x-app-layout>

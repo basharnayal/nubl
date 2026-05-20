@@ -7,7 +7,8 @@ use App\Jobs\ProcessRecipientFundRetryJob;
 use App\Models\User;
 use App\Services\AllocationService;
 use App\Services\AuditService;
-use App\Services\RecipientRequestSubmissionService;
+use App\Services\Recipient\AllowanceService;
+use App\Services\Recipient\RequestSubmissionService;
 use App\Support\RecipientAllowanceRetryCache;
 use App\Support\RecipientFundRetryCache;
 use App\Support\RecipientRequestSubmitCooldown;
@@ -35,7 +36,7 @@ class ProcessRecipientAllowanceRetryJobTest extends TestCase
         RecipientAllowanceRetryCache::clear($user->id);
         RecipientRequestSubmitCooldown::clear($user->id);
 
-        $submissionService = Mockery::mock(RecipientRequestSubmissionService::class);
+        $submissionService = Mockery::mock(RequestSubmissionService::class);
         $submissionService->shouldNotReceive('computeLineItems');
         $submissionService->shouldNotReceive('createRequest');
 
@@ -62,7 +63,7 @@ class ProcessRecipientAllowanceRetryJobTest extends TestCase
         RecipientRequestSubmitCooldown::start($userId, 60);
         RecipientAllowanceRetryCache::tryScheduleJobLock($userId, 60);
 
-        $submissionService = Mockery::mock(RecipientRequestSubmissionService::class);
+        $submissionService = Mockery::mock(RequestSubmissionService::class);
         $submissionService->shouldNotReceive('computeLineItems');
 
         $allocationService = Mockery::mock(AllocationService::class);
@@ -90,7 +91,7 @@ class ProcessRecipientAllowanceRetryJobTest extends TestCase
         RecipientAllowanceRetryCache::tryScheduleJobLock($recipient->id, 60);
         Log::spy();
 
-        $submissionService = Mockery::mock(RecipientRequestSubmissionService::class);
+        $submissionService = Mockery::mock(RequestSubmissionService::class);
         $submissionService->shouldReceive('computeLineItems')
             ->once()
             ->with(77, $payload['items'])
@@ -137,7 +138,7 @@ class ProcessRecipientAllowanceRetryJobTest extends TestCase
         RecipientAllowanceRetryCache::storePayload($recipient->id, $payload);
         RecipientRequestSubmitCooldown::start($recipient->id, 60);
 
-        $submissionService = Mockery::mock(RecipientRequestSubmissionService::class);
+        $submissionService = Mockery::mock(RequestSubmissionService::class);
         $submissionService->shouldReceive('computeLineItems')
             ->once()
             ->with(77, $payload['items'])
@@ -182,7 +183,7 @@ class ProcessRecipientAllowanceRetryJobTest extends TestCase
         RecipientFundRetryCache::clear($recipient->id);
         RecipientRequestSubmitCooldown::clear($recipient->id);
 
-        $submissionService = Mockery::mock(RecipientRequestSubmissionService::class);
+        $submissionService = Mockery::mock(RequestSubmissionService::class);
         $submissionService->shouldReceive('computeLineItems')
             ->once()
             ->with(77, $payload['items'])
@@ -232,7 +233,7 @@ class ProcessRecipientAllowanceRetryJobTest extends TestCase
         RecipientRequestSubmitCooldown::clear($recipient->id);
         $this->assertTrue(RecipientFundRetryCache::tryScheduleJobLock($recipient->id, 120));
 
-        $submissionService = Mockery::mock(RecipientRequestSubmissionService::class);
+        $submissionService = Mockery::mock(RequestSubmissionService::class);
         $submissionService->shouldReceive('computeLineItems')
             ->once()
             ->with(77, $payload['items'])
@@ -278,7 +279,7 @@ class ProcessRecipientAllowanceRetryJobTest extends TestCase
         RecipientAllowanceRetryCache::storePayload($recipient->id, $payload);
         RecipientRequestSubmitCooldown::start($recipient->id, 20);
 
-        $submissionService = Mockery::mock(RecipientRequestSubmissionService::class);
+        $submissionService = Mockery::mock(RequestSubmissionService::class);
         $submissionService->shouldReceive('computeLineItems')
             ->once()
             ->with(77, $payload['items'])

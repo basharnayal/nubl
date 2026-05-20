@@ -1,8 +1,8 @@
 <?php
 
-namespace Tests\Unit\Services;
+namespace Tests\Unit\Services\Recipient;
 
-use App\Services\RecipientAllowanceService;
+use App\Services\Recipient\AllowanceService;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\Test;
@@ -11,7 +11,7 @@ use Tests\TestCase;
 /**
  * Config and date math; RefreshDatabase needed because weeklyLimit() reads system_settings.
  */
-class RecipientAllowanceServiceConfigTest extends TestCase
+class AllowanceServiceConfigTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -26,7 +26,7 @@ class RecipientAllowanceServiceConfigTest extends TestCase
     {
         config(['recipient.weekly_allowance_limit' => 350]);
 
-        $this->assertSame(350.0, RecipientAllowanceService::weeklyLimit());
+        $this->assertSame(350.0, AllowanceService::weeklyLimit());
     }
 
     #[Test]
@@ -34,7 +34,7 @@ class RecipientAllowanceServiceConfigTest extends TestCase
     {
         Carbon::setTestNow(Carbon::parse('2026-01-07 12:00:00', 'UTC'));
 
-        [$start, $end] = RecipientAllowanceService::getCurrentWeekBounds();
+        [$start, $end] = AllowanceService::getCurrentWeekBounds();
 
         $this->assertSame(Carbon::SUNDAY, $start->dayOfWeek);
         $this->assertSame(Carbon::SATURDAY, $end->dayOfWeek);

@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Recipient;
 
 use App\Contracts\NotificationServiceInterface;
 use App\Models\ProviderMenuItem;
 use App\Models\Request as RequestModel;
 use App\Models\User;
+use App\Services\AuditService;
 use RuntimeException;
 
-class RecipientRequestSubmissionService
+class RequestSubmissionService
 {
     public function __construct(
         private AuditService $auditService,

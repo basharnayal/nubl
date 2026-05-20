@@ -9,8 +9,9 @@ use App\Jobs\ProcessRecipientFundRetryJob;
 use App\Models\Request as RequestModel;
 use App\Services\AllocationService;
 use App\Services\AuditService;
-use App\Services\RecipientAllowanceService;
-use App\Services\RecipientRequestSubmissionService;
+use App\Services\Recipient\AllowanceService;
+use App\Services\Recipient\RequestService;
+use App\Services\Recipient\RequestSubmissionService;
 use App\Support\RecipientAllowanceRetryCache;
 use App\Support\RecipientFundRetryCache;
 use App\Support\RecipientRequestSubmitCooldown;
@@ -22,7 +23,8 @@ class RecipientRequestController extends Controller
     public function __construct(
         private AllocationService $allocationService,
         private AuditService $auditService,
-        private RecipientRequestSubmissionService $submissionService,
+        private RequestSubmissionService $submissionService,
+        private RequestService $requestService,
         private NotificationServiceInterface $notificationService
     ) {}
 
@@ -60,7 +62,7 @@ class RecipientRequestController extends Controller
 
         // --- Weekly allowance check ---
         // If over limit and no force_admin_review flag, prompt user to decide
-        if (RecipientAllowanceService::wouldExceedAllowance($user->id, $totalAmount)) {
+        if (AllowanceService::wouldExceedAllowance($user->id, $totalAmount)) {
             return back()->with('exceeds_allowance', true)->withInput();
         }
 
@@ -107,43 +109,7 @@ class RecipientRequestController extends Controller
      */
     public function index(Request $request)
     {
-        $query = RequestModel::with(['provider.providerProfile', 'items.menuItem', 'redemption'])
-            ->where('recipient_id', auth()->id());
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('id', 'like', "%{$search}%")
-                    ->orWhereHas('provider', function ($pq) use ($search) {
-                        $pq->where('name', 'like', "%{$search}%")
-                            ->orWhereHas('providerProfile', function ($ppq) use ($search) {
-                                $ppq->where('business_name_en', 'like', "%{$search}%")
-                                    ->orWhere('business_name_ar', 'like', "%{$search}%");
-                            });
-                    });
-            });
-        }
-
-        if ($request->filled('status')) {
-            $status = (string) $request->status;
-
-            // UI-friendly status groups for recipient orders page
-            if ($status === 'pending') {
-                $query->whereIn('status', ['REQUESTED', 'ADMIN_PENDING']);
-            } elseif ($status === 'redeemable') {
-                // Ready for QR / pickup (approved or redeemable)
-                $query->whereIn('status', ['APPROVED', 'ADMIN_APPROVED', 'REDEEMABLE']);
-            } elseif ($status === 'fulfilled') {
-                $query->where('status', 'FULFILLED');
-            } elseif ($status === 'cancelled') {
-                $query->where('status', 'CANCELLED');
-            } else {
-                // Backward-compat for direct status values
-                $query->where('status', $status);
-            }
-        }
-
-        $requests = $query->latest()->paginate(10);
+        $requests = $this->requestService->listRequests($request->user(), $request);
 
         return view('recipient.requests.index', compact('requests'));
     }
@@ -153,15 +119,7 @@ class RecipientRequestController extends Controller
      */
     public function show($id)
     {
-        $request = RequestModel::with(['provider.providerProfile', 'items.menuItem', 'redemption'])
-            ->where('recipient_id', auth()->id())
-            ->findOrFail($id);
-
-        // Ensure redemption token exists for APPROVED/REDEEMABLE (e.g. legacy APPROVED orders)
-        if (in_array($request->status, ['APPROVED', 'REDEEMABLE']) && ! $request->redemption) {
-            \App\Services\RedemptionService::generateForRequest($request);
-            $request->load('redemption');
-        }
+        $request = $this->requestService->getRequestDetails(auth()->user(), (int) $id);
 
         return view('recipient.requests.show', compact('request'));
     }
@@ -172,32 +130,11 @@ class RecipientRequestController extends Controller
      */
     public function cancel(Request $request, int $id): RedirectResponse
     {
-        $requestModel = RequestModel::with('redemption')
-            ->where('recipient_id', auth()->id())
-            ->findOrFail($id);
+        $success = $this->requestService->cancelRequest($request->user(), $id);
 
-        if (! $requestModel->isCancellableByRecipient()) {
+        if (! $success) {
             return back()->with('error', __('This request cannot be cancelled.'));
         }
-
-        $requestModel->update(['status' => 'CANCELLED']);
-
-        $this->auditService->log('request', 'cancelled_by_recipient', [
-            'request_id' => $requestModel->id,
-            'recipient_id' => auth()->id(),
-        ]);
-
-        $this->notificationService->sendRequestStatusChangedToProvider(
-            $requestModel->load('provider'),
-            'CANCELLED'
-        );
-
-        $this->auditService->log('notification', 'sent', [
-            'type' => 'request_status_changed',
-            'provider_user_id' => $requestModel->provider_id,
-            'request_id' => $requestModel->id,
-            'status' => 'CANCELLED',
-        ]);
 
         return back()->with('success', __('Request cancelled successfully.'));
     }
