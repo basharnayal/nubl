@@ -186,7 +186,7 @@ Project-specific tunables (clear cache with `php artisan optimize:clear` after c
 
 | Setting | Where | Default |
 |---------|-------|---------|
-| Recipient weekly allowance limit (SAR) | `config/provider.php` → `recipient.weekly_allowance_limit` | `600` |
+| Recipient weekly allowance limit (SAR) | `config/provider.php` → `recipient.weekly_allowance_limit` | `400` |
 | QR redemption window (minutes) | `config/qr.php` → `ttl_minutes` (env `QR_TTL_MINUTES`) | `180` |
 | Phone / OTP verification step | `config/app.php` → `phone_verification_enabled` (env `PHONE_VERIFICATION_ENABLED`) | `true` |
 | Email verification step | `config/app.php` → `email_verification_enabled` (env `EMAIL_VERIFICATION_ENABLED`) | `true` |
