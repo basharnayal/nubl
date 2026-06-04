@@ -278,15 +278,15 @@
         </div>
         <div class="id-row id-row--first">
           <span class="k">{{ __('welcome.privacy.id_name') }}</span>
-          <span class="v redacted">Fatima Al-Hashimi</span>
+          <span class="v redacted"></span>
         </div>
         <div class="id-row">
           <span class="k">{{ __('welcome.privacy.id_area') }}</span>
-          <span class="v redacted">Ras Beirut — Block 04</span>
+          <span class="v redacted"></span>
         </div>
         <div class="id-row">
           <span class="k">{{ __('welcome.privacy.id_family') }}</span>
-          <span class="v redacted">4 adults, 2 children</span>
+          <span class="v redacted"></span>
         </div>
         <div class="id-row">
           <span class="k">{{ __('welcome.privacy.id_status') }}</span>
@@ -419,7 +419,7 @@
         <p>{{ __('welcome.providers.prov4_p') }}</p>
         <div class="cnt"><b data-counter-inline="{{ $heroStats['providerCounts']['restaurant'] }}">{{ $heroStats['providerCounts']['restaurant'] }}</b><span>{{ __('welcome.providers.prov4_cnt') }}</span></div>
       </div>
-      
+
       <div class="provider-cell reveal">
         <div class="glyph">
           <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
@@ -433,7 +433,7 @@
       </div>
 
 
-      
+
       <div class="provider-cell reveal">
         <div class="glyph">
           <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
@@ -447,7 +447,7 @@
         <div class="cnt"><b data-counter-inline="{{ $heroStats['providerCounts']['bakery'] }}">{{ $heroStats['providerCounts']['bakery'] }}</b><span>{{ __('welcome.providers.prov3_cnt') }}</span></div>
       </div>
 
-   
+
     </div>
 
     <div class="provider-strip">
