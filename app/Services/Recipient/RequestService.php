@@ -55,7 +55,9 @@ class RequestService
             }
         }
 
-        return $query->latest()->paginate(10);
+        return $query->orderByRaw("CASE WHEN status IN ('FULFILLED', 'REJECTED', 'ADMIN_REJECTED', 'CANCELLED') THEN 1 ELSE 0 END ASC")
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
     }
 
     /**
