@@ -115,7 +115,7 @@ class RecipientRequestSubmissionTest extends TestCase
         $this->assertDatabaseHas('requests', [
             'recipient_id' => $this->recipient->id,
             'provider_id' => $this->provider->id,
-            'reserved_amount' => 100.00, // (50*2) + (20*1)
+            'reserved_amount' => 120.00, // (50*2) + (20*1)
             'status' => 'REQUESTED',
         ]);
 
@@ -321,7 +321,7 @@ class RecipientRequestSubmissionTest extends TestCase
 
         $job = new ProcessRecipientFundRetryJob($this->recipient->id);
         $job->handle(
-            app(\App\Services\RecipientRequestSubmissionService::class),
+            app(\App\Services\Recipient\RequestSubmissionService::class),
             app(\App\Services\AllocationService::class),
             app(\App\Services\AuditService::class)
         );
@@ -372,7 +372,7 @@ class RecipientRequestSubmissionTest extends TestCase
 
         $job = new ProcessRecipientAllowanceRetryJob($this->recipient->id);
         $job->handle(
-            app(\App\Services\RecipientRequestSubmissionService::class),
+            app(\App\Services\Recipient\RequestSubmissionService::class),
             app(\App\Services\AllocationService::class),
             app(\App\Services\AuditService::class)
         );
