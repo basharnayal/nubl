@@ -268,9 +268,16 @@
                             @endforeach
                         </div>
 
-                        <div class="mt-4 px-4 sm:px-5">
-                            {{ $requests->withQueryString()->links() }}
-                        </div>
+                        @if($requests->hasPages())
+                            <div class="flex flex-col justify-between space-y-4 border-t border-slate-200 px-4 py-4 dark:border-navy-500 sm:flex-row sm:items-center sm:space-y-0 sm:px-5">
+                                <div class="text-xs-plus text-slate-500 dark:text-navy-300">
+                                    {{ __('Showing') }} {{ $requests->firstItem() ?? 0 }} - {{ $requests->lastItem() ?? 0 }} {{ __('of') }} {{ $requests->total() }} {{ __('entries') }}
+                                </div>
+                                <div class="[&_.pagination]:flex [&_.pagination]:gap-1 [&_.pagination]:flex-wrap [&_.pagination_li]:rounded-lg [&_.pagination_li]:bg-slate-150 [&_.pagination_li]:dark:bg-navy-500 [&_.pagination_a]:flex [&_.pagination_a]:h-8 [&_.pagination_a]:min-w-[2rem] [&_.pagination_a]:items-center [&_.pagination_a]:justify-center [&_.pagination_a]:rounded-lg [&_.pagination_a]:px-3 [&_.pagination_a]:leading-tight [&_.pagination_a]:transition-colors [&_.pagination_a:hover]:bg-slate-300 [&_.pagination_a]:dark:hover:bg-navy-450 [&_.pagination_.active_a]:bg-primary [&_.pagination_.active_a]:text-white [&_.pagination_.active_a]:dark:bg-accent [&_.pagination_.disabled]:opacity-50">
+                                    {{ $requests->withQueryString()->links() }}
+                                </div>
+                            </div>
+                        @endif
                     @endif
         </div>
     </div>
