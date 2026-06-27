@@ -900,6 +900,8 @@
     "audit_logs.modal.ip": "IP Address",
     "audit_logs.modal.device": "Device Type",
     "audit_logs.modal.user_agent": "User Agent",
+    "audit_logs.modal.previous_hash": "Previous Entry Hash",
+    "audit_logs.modal.previous_hash_note": "Links this entry to the previous audit record — part of the tamper-evident hash chain.",
     "audit_logs.modal.batch_uuid": "Batch UUID",
     "audit_logs.modal.created_at": "Timestamp",
     "audit_logs.modal.updated_at": "Updated At",

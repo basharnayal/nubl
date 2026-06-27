@@ -252,6 +252,11 @@ class DemoMiscSeeder extends Seeder
             ['log' => 'qr',              'event' => 'redeemed',                     'desc' => 'QR code redeemed by provider'],
         ];
 
+        // Chain tip to continue from (seeders run under WithoutModelEvents, so the
+        // Activity::creating hook does NOT fire — we set previous_hash + sha256_hash
+        // manually to keep the hash chain valid and verifiable).
+        $previousHash = Activity::orderByDesc('id')->value('sha256_hash') ?? Activity::GENESIS_HASH;
+
         foreach ($entries as $i => $entry) {
             $causerId = $allUsers[array_rand($allUsers)];
             $createdAt = now()->subWeeks(rand(0, 7))->subDays(rand(0, 6))->subHours(rand(0, 23));
@@ -269,9 +274,12 @@ class DemoMiscSeeder extends Seeder
                 'created_at' => $createdAt,
                 'updated_at' => $createdAt,
             ]);
-            // WithoutModelEvents suppresses booted() hook; compute hash manually
+            // WithoutModelEvents suppresses booted() hook; set chain fields + hash manually.
+            $activity->previous_hash = $previousHash;
             $activity->sha256_hash = Activity::computeHashFor($activity);
             $activity->save();
+
+            $previousHash = $activity->sha256_hash;
         }
 
         $this->command->info('✓ Seeded '.count($entries).' activity log entries');

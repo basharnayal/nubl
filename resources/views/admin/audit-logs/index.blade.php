@@ -276,6 +276,7 @@
                                                                 : (array) $log->properties,
                                     'readable_props'      => $readableProps,
                                     'entry_hash'          => $log->sha256_hash,
+                                    'previous_hash'       => $log->previous_hash,
                                     'ip'                  => $logIp,
                                     'user_agent'          => $logUserAgent,
                                     'device'              => $logDevice,
@@ -691,6 +692,16 @@
                                         {{ __('audit_logs.modal.hash_error') }}
                                     </div>
                                 </div>
+                            </div>
+
+                            {{-- Previous Hash (chain link) --}}
+                            <div>
+                                <p class="mb-1.5 text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-navy-400">{{ __('audit_logs.modal.previous_hash') }}</p>
+                                <div
+                                    class="break-all rounded-xl border border-slate-200 bg-slate-50 px-4 py-2.5 font-mono text-xs text-slate-500 dark:border-navy-500 dark:bg-navy-800 dark:text-navy-300"
+                                    dir="ltr"
+                                    x-text="selected?.previous_hash ?? '—'"></div>
+                                <p class="mt-1 text-xs text-slate-400 dark:text-navy-500">{{ __('audit_logs.modal.previous_hash_note') }}</p>
                             </div>
 
                             {{-- Batch UUID --}}

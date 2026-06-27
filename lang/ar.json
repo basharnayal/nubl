@@ -1863,6 +1863,8 @@
     "audit_logs.modal.ip": "عنوان IP",
     "audit_logs.modal.device": "نوع الجهاز",
     "audit_logs.modal.user_agent": "معلومات المتصفح",
+    "audit_logs.modal.previous_hash": "رمز السجل السابق",
+    "audit_logs.modal.previous_hash_note": "يربط هذا السجل بالسجل السابق في سلسلة تحقق مقاومة للتلاعب.",
     "audit_logs.modal.batch_uuid": "معرّف الدفعة",
     "audit_logs.modal.created_at": "التوقيت",
     "audit_logs.modal.updated_at": "تاريخ التحديث",

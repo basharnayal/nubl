@@ -73,6 +73,7 @@ class AuditLogController extends Controller
                 'causer_email',
                 'ip',
                 'user_agent',
+                'previous_hash',
                 'sha256_hash',
                 'created_at',
             ]);
@@ -89,6 +90,7 @@ class AuditLogController extends Controller
                         $log->causer?->email,
                         $log->properties['ip'] ?? '',
                         $log->properties['user_agent'] ?? '',
+                        $log->previous_hash,
                         $log->sha256_hash,
                         $log->created_at?->toIso8601String(),
                     ]);
@@ -129,13 +131,25 @@ class AuditLogController extends Controller
 
     public function verify(Activity $log): JsonResponse
     {
-        $computed = Activity::computeHashFor($log);
-        $stored   = $log->sha256_hash;
+        // 1. Content integrity — does the row's hash match its fields?
+        $computed       = Activity::computeHashFor($log);
+        $stored         = (string) $log->sha256_hash;
+        $contentVerified = hash_equals($computed, $stored);
+
+        // 2. Chain linkage — does previous_hash equal the preceding row's sha256_hash?
+        $preceding            = Activity::where('id', '<', $log->id)->orderByDesc('id')->first();
+        $expectedPreviousHash = $preceding?->sha256_hash ?? Activity::GENESIS_HASH;
+        $storedPreviousHash   = (string) ($log->previous_hash ?? '');
+        $chainVerified        = $storedPreviousHash !== '' && hash_equals($storedPreviousHash, $expectedPreviousHash);
 
         return response()->json([
-            'verified' => $computed === $stored,
-            'computed' => $computed,
-            'stored'   => $stored,
+            'verified'              => $contentVerified && $chainVerified,
+            'content_verified'      => $contentVerified,
+            'chain_verified'        => $chainVerified,
+            'computed'              => $computed,
+            'stored'                => $stored,
+            'previous_hash'         => $storedPreviousHash ?: null,
+            'expected_previous_hash' => $expectedPreviousHash,
         ]);
     }
 
